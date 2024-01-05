@@ -184,7 +184,7 @@ HWND CursorInVisMenuWnd (POINT pt)
 
 	if (hWndPZR)
 	{
-		GetWindowRect (hWndPZR,&rect);
+		GetWindowRect(hWndPZR,&rect);
 		if (PtInRect (&rect,pt))
 		{
 			rtn = hWndPZR;
@@ -199,7 +199,7 @@ HWND CursorInVisMenuWnd (POINT pt)
 		{
 			LPWINDOWMENUHEADER pWMH = GlobalLock (hWMH);
 
-			GetWindowRect (pWMH->hWndDisplay,&rect);
+			GetWindowRect(pWMH->hWndDisplay,&rect);
 			if (PtInRect (&rect,pt))
 				rtn = pWMH->hWndDisplay;
 			GlobalUnlock (hWMH);
@@ -219,7 +219,7 @@ void DisplayAllToolbarControls (int ToolbarID)
 		HWND hWnd = GetDlgItem (ToolbarWindow[ToolbarID],pTBInfo->CntlID);
 		RECT	rect;
 
-		GetWindowRect (hWnd,&rect);
+		GetWindowRect(hWnd,&rect);
 		ScreenRectToClientRect (ToolbarWindow[ToolbarID],&rect);
 		MoveWindow (hWnd,rect.left,rect.top,RECTWIDTH(&rect),RECTHEIGHT(&rect),TRUE);
 	}
@@ -237,7 +237,7 @@ void SaveToolbarImage (int ToolbarID)
 	if (ToolbarType[ToolbarID] == TBT_ZOOMPAN || ToolbarType[ToolbarID] == TBT_VISMENU)
 		return;
 	hDC = GetWindowDC (ToolbarWindow[ToolbarID]);
-	GetWindowRect (ToolbarWindow[ToolbarID],&rect);
+	GetWindowRect(ToolbarWindow[ToolbarID],&rect);
 	w = RECTWIDTH(&rect);
 	h = RECTHEIGHT(&rect);
 	rect.left = rect.top = 0;
@@ -265,7 +265,7 @@ void DisplayDimmedMenu (int ToolbarID)
 		RECT	MenuRectInMain, rect;
 		int		xoff,yoff, widthMenu, heightMenu;
 
-		GetWindowRect (ToolbarWindow[ToolbarID],&rect);
+		GetWindowRect(ToolbarWindow[ToolbarID],&rect);
 		MenuRectInMain = rect;
 		ScreenRectToClientRect (hWndMain,&MenuRectInMain);
 		xoff = MenuRectInMain.left;
@@ -314,7 +314,7 @@ HWND CreateTrackingToolTip(int toolID, HWND hDlg, LPSTR pText)
     toolItem[toolID].lpszText = LPSTR_TEXTCALLBACK;
     toolItem[toolID].uId      = (UINT_PTR)hDlg;
     
-    GetClientRect (hDlg, &toolItem[toolID].rect);
+    GetClientRect(hDlg, &toolItem[toolID].rect);
 
     // Associate the tooltip with the tool window.
     
@@ -351,7 +351,7 @@ void PZStartMove (int ToolbarID)
 		return;
 	PZEndMove (ToolbarID);
 	ShowWindow (ToolbarWindow[ToolbarID],FALSE);
-	GetClientRect (hWndDT,&rect);
+	GetClientRect(hWndDT,&rect);
 	w=RECTWIDTH(&rect);
 	h=RECTHEIGHT(&rect);
     
@@ -386,7 +386,7 @@ void SetPZMaskBytes (HWND hWnd,HDC hDC2)
 	HDC hDC=GetDC (hWnd);
 	RECT	rect;
 
-	GetClientRect (hWnd,&rect);
+	GetClientRect(hWnd,&rect);
 	{
 		int	w=RECTWIDTH(&rect),h=RECTHEIGHT(&rect);
 		HDC		hDCMem=CreateCompatibleDC (hDC);
@@ -719,7 +719,7 @@ int TestFillTBRows (int nr,int ntb)
 	RECT	MainRect;
 	int		i,j,icfg,jcfg;
 
-	GetClientRect (hWndMain,&MainRect);
+	GetClientRect(hWndMain,&MainRect);
 	if (!IsRectEmpty (&PromptRect))
 		MainRect.bottom = PromptRect.top - 1;
 
@@ -959,12 +959,12 @@ BOOL SeeIfToolbarShouldBeDocked (HWND hWnd,LPPOINT pPos)
 
 	if (!GetGlobalBVal2 ("[%ALLOWTOOLBARDOCKING]",TRUE))
 		return FALSE;
-	GetClientRect (hWndMain,&mainRect);
+	GetClientRect(hWndMain,&mainRect);
 
 	rtn = RemoveDockedToolbar (ToolbarID);
 	if (ToolbarID >= 0)
 	{
-		GetWindowRect (hWnd,&rect);
+		GetWindowRect(hWnd,&rect);
 		if (rect.left >= 5000)
 		{
 			int	w=RECTWIDTH(&rect),h=RECTHEIGHT(&rect);
@@ -1133,7 +1133,7 @@ BOOL AdjustToolbarPositions (void)
 		return FALSE;
 	ClientToScreen (hWndMain,&pt);
 
-	GetClientRect (hWndMain,&MainRect);
+	GetClientRect(hWndMain,&MainRect);
 	if (!IsRectEmpty (&PromptRect))
 		MainRect.bottom = PromptRect.top - 1;
 
@@ -1562,7 +1562,7 @@ BOOL AdjustToolbarPositions (void)
 					HWND	SaveToolbarWindow = ToolbarWindow[ToolbarID];
 					int	h,w;
 
-					GetWindowRect (ToolbarWindow[ToolbarID],&rect);
+					GetWindowRect(ToolbarWindow[ToolbarID],&rect);
 					DisplayToolbars = FALSE;
 					ToolbarWindow[ToolbarID] = 0;
 					DestroyWindow(SaveToolbarWindow);
@@ -1626,7 +1626,7 @@ BOOL AdjustToolbarPositions (void)
  		SetSysMess ("");
 		hDCMem = CreateCompatibleDC (hDCMain);
 		SetConfigDisplayRect ();
-		GetClientRect (hWndMain,&mainRect);
+		GetClientRect(hWndMain,&mainRect);
 		mainArea =  RectArea (&mainRect);
 		mainW = RECTWIDTH(&mainRect);
 		mainH = RECTHEIGHT(&mainRect);
@@ -1924,7 +1924,7 @@ void DisplayPZIcons (HWND hWnd,HDC hDC)
 	strcpy (FileName,"[%DL]icons\\zoomwin_tp.bmp");
 	if ((hDib32 = LoadDIB32 (FileName,24, 0)))
 	{
-		GetClientRect (hWnd,&rect);
+		GetClientRect(hWnd,&rect);
 		//rect.right--;
 		//rect.bottom--;
 		rect.left = rect.right -w;
@@ -1939,7 +1939,7 @@ void DisplayPZIcons (HWND hWnd,HDC hDC)
 		strcpy (FileName,"[%DL]icons\\pan.bmp");
 	if ((hDib32 = LoadDIB32 (FileName,24, 0)))
 	{
-		GetClientRect (hWnd,&rect);
+		GetClientRect(hWnd,&rect);
 		//rect.left++;
 		//rect.bottom--;
 		rect.right = rect.left +w;
@@ -1951,7 +1951,7 @@ void DisplayPZIcons (HWND hWnd,HDC hDC)
 	strcpy (FileName,"[%DL]icons\\cancelnew_tp.bmp");
 	if ((hDib32 = LoadDIB32 (FileName,24, 0)))
 	{
-		GetClientRect (hWnd,&rect);
+		GetClientRect(hWnd,&rect);
 		//rect.right--;
 		//rect.top++;
 		rect.left = rect.right -w;
@@ -1963,7 +1963,7 @@ void DisplayPZIcons (HWND hWnd,HDC hDC)
 	strcpy (FileName,"[%DL]icons\\list_tp.bmp");
 	if ((hDib32 = LoadDIB32 (FileName,24,0)))
 	{
-		GetClientRect (hWnd,&rect);
+		GetClientRect(hWnd,&rect);
 		//rect.left++;
 		//rect.top++;
 		rect.right = rect.left +w;
@@ -2023,7 +2023,7 @@ void DisplayPanZoomRot (HWND hWnd,HDC hDC,LPRECT pRect)
 	if (pRect)
 		rect = *pRect;
 	else
-		GetClientRect (hWnd,&rect);
+		GetClientRect(hWnd,&rect);
 
 	SaveDC (hDC);
 	//SetDCBrushColor (hDC,RGB(0,255,0));
@@ -2082,7 +2082,7 @@ void DisplayPanZoomRot (HWND hWnd,HDC hDC,LPRECT pRect)
 		int	w;
 		POINT	bpt,ept,cenpt;
 
-		GetClientRect (hWnd,&rect);
+		GetClientRect(hWnd,&rect);
 		cenpt = RectMid (&rect);
 		w = RECTWIDTH(&rect)/2;
 		bpt = newpt (cenpt,60*RADDEG,w);
@@ -2149,13 +2149,13 @@ void DisplayPanZoomRot (HWND hWnd,HDC hDC,LPRECT pRect)
 		RECT rect;
 
 		DestroySavedScreen (&hSavePZRScreenNoIcons,0);
-		GetClientRect (hWnd,&rect);
+		GetClientRect(hWnd,&rect);
 		hSavePZRScreenNoIcons = SaveScreen2 ((HWND)-1,hDC,rect,0,0);
 	}
 	SetPZMaskBytes (hWnd,hDC);
 	DestroySavedScreen (&hSavePZRScreen,0);
 	DestroySavedScreen (&hSavePZRScreen2,0);
-	GetClientRect (hWnd,&rect);
+	GetClientRect(hWnd,&rect);
 	hSavePZRScreen = SaveScreen2 ((HWND)-1,hDC,rect,0,0);
 	
 	SelectClipRgn (hDC,hRgnJoyStick);
@@ -2198,11 +2198,11 @@ static	int ii=0;
 		return;
 
 	ToolbarID = GetToolbarIDFromWnd (hWndPZR);
-	GetWindowRect (hWndMain,&MainRect);
-	GetClientRect (hWndMain,&MainClientRect);
-	GetWindowRect (hWndPZR,&PZRectInMain);
+	GetWindowRect(hWndMain,&MainRect);
+	GetClientRect(hWndMain,&MainClientRect);
+	GetWindowRect(hWndPZR,&PZRectInMain);
 	GetCursorPos (&pt);
-	GetClientRect (hWndPZR,&PZClientRect);
+	GetClientRect(hWndPZR,&PZClientRect);
 	w = RECTWIDTH(&PZClientRect);
 	h = RECTHEIGHT(&PZClientRect);
 	if (w <= 0 || h <= 0)
@@ -2260,7 +2260,7 @@ extern	BOOL	InDebug;
 		ScreenRectToClientRect (hWndMain,&PZRectInMain);
 		if (hDCPZMoveImage)
 		{
-			GetWindowRect (hWndPZR,&PZRectInMain);
+			GetWindowRect(hWndPZR,&PZRectInMain);
 			ScreenRectToClientRect (hWndDT,&PZRectInMain);
 			xoff = PZRectInMain.left;
 			yoff = PZRectInMain.top;
@@ -2476,7 +2476,7 @@ HRGN	hRgn;
 			DPolyToPPoly (&nPnts, hCoords,0);
 			Points = (HPDPOINT)GlobalLock (hCoords);
 			GSSiGlobFree (&hCoords);*/
-			GetClientRect (hWnd,&Rect);
+			GetClientRect(hWnd,&Rect);
 			PZRMidPoint = RectMid (&Rect);
 			JoyStickRect.left = PZRMidPoint.x-15;
 			JoyStickRect.right = PZRMidPoint.x+15;
@@ -2488,7 +2488,7 @@ HRGN	hRgn;
 //SetWindowRgn(hWnd,hRgn,FALSE);
 			HaveTrackMouseEvent = FALSE;
 			Rotation = CurView->Rotation;
-			GetWindowRect (hWnd,&Rect);
+			GetWindowRect(hWnd,&Rect);
 			CurView->PanZoomControlPoint = RectMid (&Rect);
 			CurView->UsePanZoomControl = TRUE;
 			hWndPZR = hWnd;
@@ -2734,12 +2734,12 @@ HRGN	hRgn;
 			if (ToolbarID < 0)
 				break;
 			ClientToScreen (hWndMain,(LPPOINT)&pt);
-			GetWindowRect (hWnd,&rect);
+			GetWindowRect(hWnd,&rect);
 //			MoveWindow(hWnd,pt.x,pt.y,
 //							rect.right-rect.left,rect.bottom-rect.top,TRUE);
 			SetWindowPos (hWnd,0,pt.x,pt.y,
 							abs(rect.right-rect.left),abs(rect.bottom-rect.top),SWP_NOZORDER|SWP_NOOWNERZORDER|SWP_SHOWWINDOW);
-			GetWindowRect (hWnd,&ToolbarRect[ToolbarID]);
+			GetWindowRect(hWnd,&ToolbarRect[ToolbarID]);
 			CurView->PanZoomControlPoint = RectMid (&rect);
 			break;
 		}
@@ -2816,7 +2816,7 @@ CursorMove:
 				ClientToScreen(hWnd, &pt);
 				//SendMessage(g_hwndTrackingTT, TTM_TRACKPOSITION, 0, (LPARAM)MAKELONG(pt.x + 10, pt.y - 20));
 			}
-			GetClientRect (hWnd,&rect);
+			GetClientRect(hWnd,&rect);
 			PZRMidPoint = RectMid (&rect);
 			dist = idist (CursorPoint,PZRMidPoint);
 			az = getaz (PZRMidPoint,CursorPoint);
@@ -2826,7 +2826,7 @@ CursorMove:
 /*			if (Message != WM_LBUTTONDOWN && wParam == MK_RBUTTON)
 			{
 				POINT	LMP = LastMovePoint;
-				GetWindowRect (hWnd,&rect);
+				GetWindowRect(hWnd,&rect);
 				ClientToScreen (hWnd,(LPPOINT)&CursorPoint);
 				LastMovePoint = CursorPoint;
 				MoveWindow(hWnd,rect.left+(CursorPoint.x-LMP.x),
@@ -2835,7 +2835,7 @@ CursorMove:
 				ToolbarID = GetToolbarIDFromWnd (hWnd);
 				if (ToolbarID < 0)
 					break;
-				GetWindowRect (hWnd,&ToolbarRect[ToolbarID]);
+				GetWindowRect(hWnd,&ToolbarRect[ToolbarID]);
 				CurView->PanZoomControlPoint = RectMid (&rect);
 				break;
 			}*/
@@ -3440,7 +3440,7 @@ int SetButtonSizetoBitmap (int ToolbarID,HWND hWndBtn,HBITMAP *hBM,int ix,int ir
 	else
 		*hBM = PadBitmapToConsistentSize (hWndBtn,*hBM,MaxButtonBitmapWidth[ToolbarID]+4,MaxButtonBitmapHeight[ToolbarID]+4,FALSE);
 	GetObject(*hBM, sizeof(bm), (LPSTR)&bm);
-	GetWindowRect (hWndBtn,&Rect);
+	GetWindowRect(hWndBtn,&Rect);
 	if (!irow)
 	{
 		FirstButtonBitmapHeight[ToolbarID] = bm.bmHeight;
@@ -3795,7 +3795,7 @@ BOOL RestoreToolbarImage (int ToolbarID)
 		RECT	rect;
 		int	w,h;
 
-		GetWindowRect (ToolbarWindow[ToolbarID],&rect);
+		GetWindowRect(ToolbarWindow[ToolbarID],&rect);
 		w = RECTWIDTH(&rect);
 		h = RECTHEIGHT(&rect);
 		rect.left = rect.top = 0;
@@ -4031,8 +4031,8 @@ FromNotify:
 		//if (!DestroyToolbar (hWndDlg))
 		nWidth = LOWORD(lParam);
 		nHeight = HIWORD(lParam); 
-		GetWindowRect (hWndDlg,&rect);
-		GetClientRect (hWndDlg,&rect);
+		GetWindowRect(hWndDlg,&rect);
+		GetClientRect(hWndDlg,&rect);
 		break;
 	case WM_SIZING:
 		fwSide = wParam;
@@ -4068,7 +4068,7 @@ FromNotify:
 				int height = ToolbarHeight[ToolbarID];
 				nPerRow = nToolbarRows[ToolbarID];
 				strcpy (Pathname,ToolbarPath[ToolbarID]);
-				GetWindowRect (hWndDlg,&ToolbarRect[ToolbarID]);
+				GetWindowRect(hWndDlg,&ToolbarRect[ToolbarID]);
 				DestroyWindow (hWndDlg);
 				LoadToolbar (hWndMain,Pathname,"DOCK",height,nPerRow,"",TRUE,FALSE,&ToolbarDPoint[ToolbarID],ToolbarReZoomScale[ToolbarID],ToolbarVPID[ToolbarID]);
 			}
@@ -4077,7 +4077,7 @@ FromNotify:
 				POINT	pt;
 
 				GetCursorPos (&pt);
-				GetWindowRect (hWndDlg,&ToolbarRect[ToolbarID]);
+				GetWindowRect(hWndDlg,&ToolbarRect[ToolbarID]);
 				SeeIfToolbarShouldBeDocked (hWndDlg,&pt);
 			}
 		}
@@ -4147,7 +4147,7 @@ FromNotify:
 			CreateConfigs[ToolbarID] = FALSE;
 		}
 NextConfig:
-		GetClientRect (hWndDlg,&rect);
+		GetClientRect(hWndDlg,&rect);
 		//ShowWindow (hWndDlg,SW_HIDE);
 		MaxControlsInRow = ToolbarConfigNumPerRow[ToolbarID][iConfig];
 		//if (ToolbarFloating[ToolbarID])
@@ -4167,7 +4167,7 @@ TryAgain:
 		if (FirstToolbarPass)
 			nToolbarControls[ToolbarID] = 0;
 		LoadGFFile (hWndDlg,ToolbarPath[ToolbarID],3,ToolbarFloating[ToolbarID]);
-		GetWindowRect (hWndDlg,&WindRect);
+		GetWindowRect(hWndDlg,&WindRect);
 		winc = (WindRect.right - WindRect.left) - (rect.right - rect.left);
 		hinc = (WindRect.bottom - WindRect.top) - (rect.bottom - rect.top);
 		MaxControlsInRow = max (1,min (MaxControlsInRow,nToolbarControls[ToolbarID]));
@@ -4180,7 +4180,7 @@ TryAgain:
 			if (!FirstToolbarPass)
 				MaxControlsInRow --;
 			pTBInfo += MaxControlsInRow;
-			GetWindowRect (hWndDlg,&rect);
+			GetWindowRect(hWndDlg,&rect);
 			pTBInfo->w = RECTWIDTH (&rect);
 			pTBInfo->h = RECTHEIGHT (&rect);
 			GlobalUnlock (ToolbarHandle[ToolbarID]);
@@ -4254,12 +4254,12 @@ TryAgain:
 			EndDeferWindowPos(hWDP);
 			if (DisplayToolbars)
 			{
-				GetWindowRect (hWndDlg,&ToolbarRect[ToolbarID]);
+				GetWindowRect(hWndDlg,&ToolbarRect[ToolbarID]);
 				ShowWindow (hWndDlg,SW_SHOW);
 			}
 			else
 			{
-				GetWindowRect (hWndDlg,&ToolbarRect[ToolbarID]);
+				GetWindowRect(hWndDlg,&ToolbarRect[ToolbarID]);
 				//MoveWindow (hWndDlg,5000,5000,RECTWIDTH(&ToolbarRect[ToolbarID]),RECTHEIGHT(&ToolbarRect[ToolbarID]),FALSE);
 				SetWindowPos (hWndDlg,0,5000,5000,RECTWIDTH(&ToolbarRect[ToolbarID]),RECTHEIGHT(&ToolbarRect[ToolbarID]),SWP_NOZORDER|SWP_NOOWNERZORDER);
 			}
@@ -4344,11 +4344,11 @@ int LoadToolbar (HWND hWnd,LPSTR Pathname,LPSTR TypeIn,int Height,int nPerRow,LP
 		if (!stricmp (Type,"DOCK"))
 			strcpy (Type,"FLOAT");
 	}
-	GetWindowRect (hWndMain,&MainRect);
+	GetWindowRect(hWndMain,&MainRect);
 
 	if (!stricmp (Type,"VIS"))
 	{
-		GetWindowRect (hWnd,&rect);
+		GetWindowRect(hWnd,&rect);
 		Height = RECTHEIGHT (&rect);
 	}
 	else if (Height <= 0)
@@ -4387,7 +4387,7 @@ int LoadToolbar (HWND hWnd,LPSTR Pathname,LPSTR TypeIn,int Height,int nPerRow,LP
 	{
 		ToolbarType[ToolbarID] = TBT_ZOOMPAN;
 		nToolbarConfigs[ToolbarID] = 1;
-		GetWindowRect (hWnd,&ToolbarRect[ToolbarID]);
+		GetWindowRect(hWnd,&ToolbarRect[ToolbarID]);
 		ToolbarFloating[ToolbarID] = Float;
 		ToolbarWindow[ToolbarID] = hWnd;
 		ToolbarConfigs[ToolbarID][0].cx = RECTWIDTH (&ToolbarRect[ToolbarID]);
@@ -4399,7 +4399,7 @@ int LoadToolbar (HWND hWnd,LPSTR Pathname,LPSTR TypeIn,int Height,int nPerRow,LP
 
 		ToolbarType[ToolbarID] = TBT_VISMENU;
 		nToolbarConfigs[ToolbarID] = 1;
-		GetWindowRect (hWnd,&rect);
+		GetWindowRect(hWnd,&rect);
 		ToolbarFloating[ToolbarID] = Float;
 		ToolbarConfigs[ToolbarID][0].cx = RECTWIDTH (&rect);
 		ToolbarConfigs[ToolbarID][0].cy = RECTHEIGHT (&rect);
@@ -4437,7 +4437,7 @@ int LoadToolbar (HWND hWnd,LPSTR Pathname,LPSTR TypeIn,int Height,int nPerRow,LP
 		DisplayMenuStatus[ToolbarID] = DMS_NOTDISPLAYED;
 		ToolbarIDCur = ToolbarID;
 		ToolbarWindow[ToolbarID] = CreateDialog(hInst, "TOOLBAR_FLOAT", hWnd, (DLGPROC)TOOLBARMsgProc);
-		GetWindowRect (ToolbarWindow[ToolbarID],&rect);
+		GetWindowRect(ToolbarWindow[ToolbarID],&rect);
 		mp = RectMid (&rect);
 		SetCursorPos (mp.x,mp.y);
 		DoCreateDialogTooltip(ToolbarID); 
@@ -4602,7 +4602,7 @@ void DrawBtnFocusRect (HWND BtnWnd)
 	RECT	Rect;
 	static	int		iStyle=1;
 
-	GetClientRect (BtnWnd,&Rect);
+	GetClientRect(BtnWnd,&Rect);
 	//InflateRect (&Rect,-2,-2);
 //	DrawFocusRect(hDC, &Rect);
 	FrameRect(hDC, &Rect,GetStockObject (BLACK_BRUSH));
@@ -4730,7 +4730,7 @@ LRESULT CALLBACK GetTBMoveMsgProc(int nCode, WPARAM wParam, LPARAM lParam)
 					return 0;
 				}
 
-				GetClientRect (lpmsg->hwnd,&rect);
+				GetClientRect(lpmsg->hwnd,&rect);
 
 			//ToolbarBeginMove[ToolbarID] = POINTStoPOINT(MAKEPOINTS(lpmsg->lParam));
 			//ClientToScreen (lpmsg->hwnd,&ToolbarBeginMove[ToolbarID]);
@@ -4766,7 +4766,7 @@ LRESULT CALLBACK GetTBMoveMsgProc(int nCode, WPARAM wParam, LPARAM lParam)
 				}
 //				if (nMM++ % 2)
 //					break;
-				GetWindowRect (ToolbarWindow[ToolbarID],&rect);
+				GetWindowRect(ToolbarWindow[ToolbarID],&rect);
 				{
 					int		iwidth  = RECTWIDTH (&rect);
 					int		iheight = RECTHEIGHT (&rect);
@@ -4813,7 +4813,7 @@ LRESULT CALLBACK GetTBMoveMsgProc(int nCode, WPARAM wParam, LPARAM lParam)
 					HaveCapture = 0;
 					ClientToScreen (lpmsg->hwnd,&pt);
 					DisplayMenuStatus[ToolbarID] = DMS_NORMAL;
-					GetWindowRect (ToolbarWindow[ToolbarID],&ToolbarRect[ToolbarID]);
+					GetWindowRect(ToolbarWindow[ToolbarID],&ToolbarRect[ToolbarID]);
 					SeeIfToolbarShouldBeDocked (ToolbarWindow[ToolbarID],&pt);
 					PZEndMove (ToolbarID);
 					return 0;
@@ -4876,7 +4876,7 @@ Exit:
 		ti.uId = 1;
 		ti.hinst = hInst;
 		ti.uFlags = TTF_SUBCLASS;// | TTF_TRACK;
-		GetClientRect (ToolbarWindow[ToolbarID],&ti.rect);
+		GetClientRect(ToolbarWindow[ToolbarID],&ti.rect);
 		ti.lpszText = LPSTR_TEXTCALLBACK; 
 		toolItem[ToolbarID] = ti;
 		ii=SendMessage(ToolbarTTWindow[ToolbarID], TTM_ADDTOOL, 0, 
@@ -5102,10 +5102,10 @@ static	int	nxw, nxh, nxlft, nxbot, prvlft, prvbot,DisplayHeight,ImageWidth,Image
 			break;
 		}
 	case WM_EXITSIZEMOVE:
-		GetClientRect (hWndDlg,&WindRect);
+		GetClientRect(hWndDlg,&WindRect);
 		hWndPict = GetDlgItem (hWndDlg,IDC_IMAGE);
 		hDC = GetDC (hWndPict);
-		GetClientRect (hWndPict,&rect);
+		GetClientRect(hWndPict,&rect);
 		FillRect (hDC,&rect,GetStockObject(DC_BRUSH));
 		SetWindowPos(GetDlgItem (hWndDlg,IDC_IMAGE),HWND_TOP,imagelft,imagetop,
 			abs(WindRect.right-WindRect.left-imagergt),
@@ -5114,7 +5114,7 @@ static	int	nxw, nxh, nxlft, nxbot, prvlft, prvbot,DisplayHeight,ImageWidth,Image
 									   nxw,nxh,SWP_NOZORDER|SWP_SHOWWINDOW);
 		SetWindowPos(GetDlgItem (hWndDlg,IDC_PREVPICT),HWND_TOP,WindRect.left+prvlft,WindRect.bottom-prvbot,
 									   nxw,nxh,SWP_NOZORDER|SWP_SHOWWINDOW);
-		GetClientRect (hWndPict,&rect);
+		GetClientRect(hWndPict,&rect);
 		FillRect (hDC,&rect,GetStockObject(DC_BRUSH));
 		if (hDib32)
 		{
@@ -5188,19 +5188,19 @@ static	int	nxw, nxh, nxlft, nxbot, prvlft, prvbot,DisplayHeight,ImageWidth,Image
 		pBS = strrchr (PictViewerDir,'\\');
 		SetWindowText (hWndDlg,pBS+1);
         cwCenter(hWndDlg, 0);
-		GetClientRect (hWndDlg,&WindRect);
+		GetClientRect(hWndDlg,&WindRect);
 		ClientRectToScreenRect (hWndDlg,&WindRect);
-		GetWindowRect (GetDlgItem (hWndDlg,IDC_IMAGE),&rect);
+		GetWindowRect(GetDlgItem (hWndDlg,IDC_IMAGE),&rect);
 		imagetop = rect.top - WindRect.top;
 		imagebot = (WindRect.bottom - WindRect.top) - (rect.bottom - rect.top);
 		imagergt = (WindRect.right - WindRect.left) - (rect.right - rect.left);
 		imagelft = rect.left - WindRect.left;
-		GetWindowRect (GetDlgItem (hWndDlg,IDC_NEXTPICT),&rect);
+		GetWindowRect(GetDlgItem (hWndDlg,IDC_NEXTPICT),&rect);
 		nxw = abs(rect.right - rect.left);
 		nxh = abs(rect.bottom - rect.top);
 		nxlft = WindRect.right - rect.left;
 		nxbot = WindRect.bottom - rect.top;
-		GetWindowRect (GetDlgItem (hWndDlg,IDC_PREVPICT),&rect);
+		GetWindowRect(GetDlgItem (hWndDlg,IDC_PREVPICT),&rect);
 		prvlft = rect.left - WindRect.left;
 		prvbot = WindRect.bottom - rect.top;
     case GSSI_REINITDIALOG:
@@ -5288,7 +5288,7 @@ static	int	nxw, nxh, nxlft, nxbot, prvlft, prvbot,DisplayHeight,ImageWidth,Image
 				 {
 					 if (!*FileName)
 						 break;
-					 GetClientRect (GetDlgItem (hWndDlg,IDC_IMAGE),&rect);
+					 GetClientRect(GetDlgItem (hWndDlg,IDC_IMAGE),&rect);
 				 	 SetViewport(*pCommandViewport);
 					 sprintf (str,"%s(%f,%f)",FileName,(float)((DisplayHeight*((double)ImageWidth/ImageHeight))*CurView->BaseUnitsPerPixel),
 														(float)(DisplayHeight*CurView->BaseUnitsPerPixel)),
@@ -5369,7 +5369,7 @@ static	int	nxw, nxh, nxlft, nxbot, prvlft, prvbot,DisplayHeight,ImageWidth,Image
 						{
 							hWndPict = GetDlgItem (hWndDlg,IDC_IMAGE);
 							hDC = GetDC (hWndPict);
-							GetClientRect (hWndPict,&rect);
+							GetClientRect(hWndPict,&rect);
 							rect.right++;
 							rect.bottom++;
 							FillRect (hDC,&rect,GetStockObject(DC_BRUSH));
@@ -5411,7 +5411,7 @@ BOOL SetToolbarConfig (int ToolbarID,int ConfigNum)
 
 	if (ToolbarID < 0)
 		return FALSE;
-	if (!GetWindowRect (ToolbarWindow[ToolbarID],&rect))
+	if (!GetWindowRect(ToolbarWindow[ToolbarID],&rect))
 		return FALSE;
 	ToolbarRect[ToolbarID] = rect;
 	ToolbarConfigs[ToolbarID][ConfigNum].cx = RECTWIDTH (&rect);
@@ -5429,10 +5429,10 @@ BOOL AdjustToolbarWindowRect (HWND hWnd)
 
 	if (ToolbarID < 0)
 		return FALSE;
-	GetWindowRect (hWnd,&rect);
+	GetWindowRect(hWnd,&rect);
 	w = RECTWIDTH(&rect);
 	h = RECTHEIGHT(&rect);
-	GetClientRect (hWndMain,&mainRect);
+	GetClientRect(hWndMain,&mainRect);
 	if (w > RECTWIDTH(&mainRect))
 	{
 		w = RECTWIDTH(&mainRect);

@@ -5011,20 +5011,20 @@ GSSiExitProg (533);
 				strcpy (OutStr,"No io");
         	break;
         case 275:
-			GetClientRect (GetDesktopWindow(),&Rect);
-        	ltoa (Rect.right-Rect.left,OutStr,10);
+			GetClientRect(GetDesktopWindow(),&Rect);
+        	ltoa (RECTWIDTH(&Rect),OutStr,10);
         	break;
         case 276:
-			GetClientRect (GetDesktopWindow(),&Rect);
-        	ltoa (Rect.bottom-Rect.top,OutStr,10);
+			GetClientRect(GetDesktopWindow(),&Rect);
+        	ltoa (RECTHEIGHT(&Rect),OutStr,10);
         	break;
         case 277:
-			GetClientRect (hWndMain,&Rect);
-        	ltoa (Rect.right-Rect.left,OutStr,10);
+			GetClientRect(hWndMain,&Rect);
+        	ltoa (RECTWIDTH(&Rect),OutStr,10);
         	break;
         case 278:
-			GetClientRect (hWndMain,&Rect);
-        	ltoa (Rect.bottom-Rect.top,OutStr,10);
+			GetClientRect(hWndMain,&Rect);
+        	ltoa (RECTHEIGHT(&Rect),OutStr,10);
         	break;
  		case 279:
 			ltoa (AutoOrthoColor,OutStr,10);

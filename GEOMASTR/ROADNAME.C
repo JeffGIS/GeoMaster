@@ -702,7 +702,7 @@ BOOL DisplayStreetCenterlines (void)
 				GSSiDeleteObject(&CurView->hRgn);
 				CurView->hRgn = CreateVPRgn(FALSE,FALSE);
 				SelectClipRgn (CurView->hDC,CurView->hRgn);
-				GetClientRect (CurView->hWnd,&FullWindowRect);
+				GetClientRect(CurView->hWnd,&FullWindowRect);
 				hDC = CreateCompatibleDC(CurView->hDC); 
 				Height = RECTHEIGHT (&FullWindowRect);
 				Width = RECTWIDTH (&FullWindowRect);

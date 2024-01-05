@@ -462,7 +462,7 @@ void GMEditDisplayTextBetweenLocs (HWND hWnd,HANDLE hFile,HFONT hFont,int icBeg,
 			icBeg = icEnd;
 			icEnd = i;
 		}
-		GetClientRect (hWnd,&rcPaint);
+		GetClientRect(hWnd,&rcPaint);
 		if (highlight)
 		{
 			textColor = RGB (255,255,255);
@@ -503,7 +503,7 @@ int GetInsertLocFromPoint (HWND hWnd,HANDLE hFile,HFONT hFont,LPPOINT pcursorLoc
 	HFONT hOldFont;
 	HDC hdc=GetDC (hWnd);
  
-	GetClientRect (hWnd,&rcPaint);
+	GetClientRect(hWnd,&rcPaint);
 	// Get vertical scroll bar position.
     si.cbSize = sizeof (si);
     si.fMask  = SIF_PAGE|SIF_POS|SIF_RANGE|SIF_TRACKPOS;
@@ -830,7 +830,7 @@ int GetInsertPointFromLoc (HWND hWnd,HANDLE hFile,HFONT hFont,LPPOINT pcursorLoc
 	HFONT hOldFont;
 	HDC hdc=GetDC (hWnd);
  
-	GetClientRect (hWnd,&rcPaint);
+	GetClientRect(hWnd,&rcPaint);
 	// Get vertical scroll bar position.
 	siV.cbSize = sizeof (siV);
 	siV.fMask = SIF_PAGE | SIF_POS | SIF_RANGE | SIF_TRACKPOS;
@@ -966,7 +966,7 @@ BOOL setScroll (HWND hWnd)
 	int yClient, xClient;
 	int xPos, yPos;
 
-	GetClientRect (hWnd,&rect);
+	GetClientRect(hWnd,&rect);
     // Retrieve the dimensions of the client area. 
     yClient = RECTHEIGHT (&rect); 
     xClient = RECTWIDTH (&rect); 
@@ -1620,7 +1620,7 @@ LRESULT CALLBACK WndProcGMEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 		AutoInsertOpen ();
 		if (!SavePosition)
 			MoveToMonitor(iMonitor,-1,hWnd);
-		GetWindowRect (hWnd,&rect);
+		GetWindowRect(hWnd,&rect);
 		if (FindBreakpoint (currentBreakpoint,&loc))
 		{
 			 setScroll(hWnd);
@@ -1791,7 +1791,7 @@ LRESULT CALLBACK WndProcGMEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 		case VK_RETURN:
 			insertLoc = InsertCharAtLoc (hWnd,'\r',insertLoc,&insertLoc2,hFile);
 			insertLoc = InsertCharAtLoc (hWnd,'\n',insertLoc,&insertLoc2,hFile);
-			GetClientRect (hWnd,&rect);
+			GetClientRect(hWnd,&rect);
 			GetInsertPointFromLoc (hWnd,hFile,hFont,&insertPoint,insertLoc,0);
 			SetCaretPos(insertPoint.x, insertPoint.y); 
 			if (!putInsertPointOnScreen (hWnd))

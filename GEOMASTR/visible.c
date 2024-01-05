@@ -1927,7 +1927,7 @@ BOOL CursorOnExpandButton (HWND hWndDlg,WORD LBCntl)
 	RECT	Rect; 
 	POINT	pnt;
 	
-	GetWindowRect (GetDlgItem (hWndDlg,LBCntl),&Rect);
+	GetWindowRect(GetDlgItem (hWndDlg,LBCntl),&Rect);
 	GetCursorPos (&pnt);
 	if (abs (pnt.x-Rect.left) < 20)
 		return TRUE;

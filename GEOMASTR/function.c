@@ -1557,7 +1557,7 @@ SetVis:
 					{
 						POINT	MidPt;
 
-						GetWindowRect (CurView->hWnd,&Rect);
+						GetWindowRect(CurView->hWnd,&Rect);
 						MidPt = RectMid (&Rect);
 						Rect.left = MidPt.x - Point16.x/2;
 						Rect.right = MidPt.x + Point16.x/2;
@@ -3491,7 +3491,7 @@ SetVis:
 				RECT	Rect;
 				int		icmd;
 
-				GetClientRect (hWndMain,&Rect);
+				GetClientRect(hWndMain,&Rect);
 				hScreen = SaveScreen2 (hWndMain,hDC,Rect,0,0);
             	MenuDisplayed = TRUE;
 			   	GetCursorPos (&position);

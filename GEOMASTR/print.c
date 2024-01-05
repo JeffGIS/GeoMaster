@@ -372,7 +372,7 @@ int GSSiEndPage (HDC hPr,HDC PrinterDC,BOOL IsVirtPrinter,HDC mfDC)
 			HDC	hDC = GetDC (hWndMain);
 			SetDisplayMode (hDC,GF_TEXTMODE);
 			SelectClipRgn (hDC,0);
-			GetClientRect (hWndMain,&WindowRect);
+			GetClientRect(hWndMain,&WindowRect);
 			f1 = (double)RECTWIDTH (&WindowRect) / (double)RECTWIDTH (&MainRect);
 			f2 = (double)RECTHEIGHT (&WindowRect) / (double)RECTHEIGHT (&MainRect);
 			f = min (f1,f2);
@@ -3661,7 +3661,7 @@ BOOL ClipMap (HWND hWnd, LPSTR Name,short SizeOpt,short FormatOpt)
     if (!GetFormatRect (&ShapeRect))
     {
     	if (IsRectEmpty (&ConfigDisplayRect))
-    		GetClientRect (hWnd,&ShapeRect);
+    		GetClientRect(hWnd,&ShapeRect);
     	else
     		ShapeRect = ConfigDisplayRect;
     } 
@@ -3701,7 +3701,7 @@ temp:
 	hcurSave = GSSiSetCursor(LoadCursor(0, IDC_WAIT)); 
 	setDoPaint( TRUE);	
     SaveViewports (0);
-	GetClientRect (hWndMain,&CRect);
+	GetClientRect(hWndMain,&CRect);
 	DeviceToScreenFactorMemMap = (double)MemMapWidth / (CRect.right - CRect.left);
 	SaveSFS = pViewportsD[0]->ShowFullScreen;
 	pViewportsD[0]->ShowFullScreen = 0;

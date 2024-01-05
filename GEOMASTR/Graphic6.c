@@ -385,7 +385,7 @@ void AdjustWBoundsToTile (void)
 		if (!CurrentConfig || !InPlotView || !FormatWidth)
 			return;  
 		if (IsRectEmpty (&ConfigDisplayRect))
-			GetClientRect (CurView->hWnd,&ClientRect);
+			GetClientRect(CurView->hWnd,&ClientRect);
 		else
 			ClientRect = ConfigDisplayRect; 
 	}
@@ -653,7 +653,7 @@ void SetMainRect (HWND hWnd, HDC hDC, LPRECT RectIn,int From)
 	    		/*RECT	WindRect;  
 				double fach, facw,sw = GetGlobalDVal2 ("[%SCREENWIDTH]",(double)GetDeviceCaps(hDC, HORZSIZE) * MFT/100);
 					    		
-	    		GetClientRect (GetDesktopWindow(),&WindRect);  
+	    		GetClientRect(GetDesktopWindow(),&WindRect);  
 				if (!IsRectEmpty(&ConfigDisplayRect))
 					WindRect = ConfigDisplayRect;
 				facw = (double)(pViewportsD[0]->Rect.right - pViewportsD[0]->Rect.left) / (double)(WindRect.right - WindRect.left);

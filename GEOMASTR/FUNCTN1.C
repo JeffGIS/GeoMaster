@@ -1161,13 +1161,13 @@ GSSiExitProg (1348);
 				}
 				else if (!_fstricmp (Arg[3],"PWIDTH"))
 				{
-					GetClientRect (hWndMain,&Rect);
+					GetClientRect(hWndMain,&Rect);
 					CurView->Width = (100 * (atof (Arg[4])-1)) / RECTWIDTH(&Rect);
 					goto RtnTrue; 
 				}
 				else if (!_fstricmp (Arg[3],"PHEIGHT"))
 				{
-					GetClientRect (hWndMain,&Rect);
+					GetClientRect(hWndMain,&Rect);
 					CurView->Height = (100 * (atof (Arg[4])-1)) /RECTHEIGHT(&Rect);
 					goto RtnTrue; 
 				}
@@ -1451,7 +1451,7 @@ GSSiExitProg (1348);
 				if (Err)
 					goto RtnFalse;
 				if (!CurView->Parent)
-					GetClientRect (CurView->hWnd,&ParentRect);
+					GetClientRect(CurView->hWnd,&ParentRect);
 				else
 					ParentRect = pViewports[CurView->Parent - 1]->DrawRect;
 				

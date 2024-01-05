@@ -925,12 +925,12 @@ UINT_PTR CALLBACK OFNHookProcOldStyle(HWND hDlg, UINT message,
 	   curpos = 0;
 	   //MessageBox (0,"Hi",0,MB_OK);
 	   *RestartDir = 0;
-//	   GetWindowRect (hDlg,&Rect);
+//	   GetWindowRect(hDlg,&Rect);
 //		ScreenRectToClientRect (hDlg,&ListRect);
 /*			SetWindowPos (GetDlgItem(hDlg,1120),HWND_TOP,ListRect.left,ListRect.top,
 									   ListRect.right-ListRect.left,
 									   ListRect.bottom-ListRect.top,SWP_NOZORDER);*/
-		GetClientRect (GetDlgItem(hDlg,1120),&ListRect);
+		GetClientRect(GetDlgItem(hDlg,1120),&ListRect);
 //    	SendDlgItemMessage (hDlg,1120,LB_SETITEMHEIGHT,(WPARAM)0,(LPARAM) (ListRect.bottom - ListRect.top)/3); 
 		SendDlgItemMessage (hDlg,IDC_STARTINNEWSESSION,BM_SETCHECK,StartInNewSession,0L); 
 		SendDlgItemMessage (hDlg,IDC_RETAINZOOM,BM_SETCHECK,RetainZoom,0L); 
@@ -949,7 +949,7 @@ UINT_PTR CALLBACK OFNHookProcOldStyle(HWND hDlg, UINT message,
 			lpmis = (LPMEASUREITEMSTRUCT) lParam; 
  
         /* Set the height of the list box items. */ 
-			GetClientRect (GetDlgItem(hDlg,1120),&ListRect);
+			GetClientRect(GetDlgItem(hDlg,1120),&ListRect);
 			w = ListRect.right - ListRect.left;
 			h = ListRect.bottom - ListRect.top;
 //			sprintf (str,"%i %i %i %i",Rect.left,Rect.right,Rect.top,Rect.bottom);
@@ -1021,10 +1021,10 @@ UINT_PTR CALLBACK OFNHookProcOldStyle(HWND hDlg, UINT message,
 				RECT	ImageRect, TextRect;
 				
 				GetDlgItemText (hDlg,1088,str,256);
-				GetClientRect (GetDlgItem (hDlg,IDC_PREVGMC),&ImageRect); 
+				GetClientRect(GetDlgItem (hDlg,IDC_PREVGMC),&ImageRect); 
 				InflateRect (&ImageRect,-1,-1);
 //				ScreenRectToClientRect (hDlg,&ImageRect);
-				GetWindowRect (GetDlgItem (hDlg,IDC_CFGDESC),&TextRect);
+				GetWindowRect(GetDlgItem (hDlg,IDC_CFGDESC),&TextRect);
 				ScreenRectToClientRect (hDlg,&TextRect);
 				InflateRect (&TextRect,-4,-4);
 				DisplayConfigPreview (hDlg,lpdis->hDC,str,&ImageRect,IDC_CFGDESC2);

@@ -1943,7 +1943,7 @@ void CompareViewportsThemeLegend (short From,short FromVPID)
 			ClearCompareDC (CurTheme,TRUE);
 			if (CurTheme->CompareAttributes)
 			{
-				GetWindowRect (CurView->hWnd,&WindowRect);
+				GetWindowRect(CurView->hWnd,&WindowRect);
 				CurTheme->CompareDC = CreateCompatibleDC(CurView->hDC); 
 				curProgID = 10030;
 				CurTheme->CompareBitmap = CreateCompatibleBitmap (CurView->hDC,WindowRect.right-WindowRect.left+1,WindowRect.bottom-WindowRect.top-1);
@@ -2006,7 +2006,7 @@ void CompareViewportsThemeLegend (short From,short FromVPID)
 					SetPixel (CurView->hDC,Rect1.left,Rect1.top,DeleteColor);
 					SetPixel (CurView->hDC,Rect1.left+1,Rect1.top,AddColor);
 					SetPixel (CurView->hDC,Rect1.left+2,Rect1.top,CurView->BackGroundColor);
-					GetWindowRect (CurView->hWnd,&WindowRect);
+					GetWindowRect(CurView->hWnd,&WindowRect);
 					hDCMem = CreateCompatibleDC(CurView->hDC); 
 					curProgID = 10031;
 					hBitmapTemp = CreateCompatibleBitmap (CurView->hDC,WindowRect.right-WindowRect.left+1,WindowRect.bottom-WindowRect.top-1);

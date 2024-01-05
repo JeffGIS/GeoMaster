@@ -1005,18 +1005,18 @@ void DisplayFloatMenu (BOOL CheckCursorPos)
     SetWindowExtEx  ( hDC, 1024, 1024,0 ); 
 	SetViewportExtEx( hDC, 1024, 1024,0 );  
 	SelectClipRgn ( hDC,0);
-	GetClientRect (pWMH->hWndDisplay,&MenuClientRect);
-	GetWindowRect (pWMH->hWndMenu,&MenuWindowRect);
+	GetClientRect(pWMH->hWndDisplay,&MenuClientRect);
+	GetWindowRect(pWMH->hWndMenu,&MenuWindowRect);
 	RestoreScreen2 (hDC, pWMH->hSaveScreen,0,FALSE);
-	GetWindowRect (hWndMain,&MainRect);
+	GetWindowRect(hWndMain,&MainRect);
 	GetCursorPos (&pt);
 //	ScreenToClient (pWMH->hWndDisplay,&pt);
 	if (!PtInRect (&MenuWindowRect,pt))
 		pWMH->HaveTrackMouseEvent = FALSE;
 	if (!CheckCursorPos || !PtInRect (&MenuWindowRect,pt))
 	{
-		GetWindowRect (pWMH->hWndDisplay,&MenuRectInMain);
-//		GetWindowRect (pWMH->hWndMenu,&MenuRectInMain);
+		GetWindowRect(pWMH->hWndDisplay,&MenuRectInMain);
+//		GetWindowRect(pWMH->hWndMenu,&MenuRectInMain);
 		ScreenRectToClientRect (hWndMain,&MenuRectInMain);
 		xoff = MenuRectInMain.left;
 		yoff = MenuRectInMain.top;
@@ -1069,7 +1069,7 @@ extern POINT	ToolBarStartPoint;
 				break;
 			ClientToScreen (hWndMain,(LPPOINT)&pt);
 //			ScreenToClient (hWndMain,(LPPOINT)&pt);
-/*			GetWindowRect (hWnd,&rect);
+/*			GetWindowRect(hWnd,&rect);
 			ii = MoveWindow(hWnd,pt.x,pt.y,
 							rect.right-rect.left,rect.bottom-rect.top,TRUE);
 			SetToolbarConfig (ToolbarID,0);*/
@@ -1096,7 +1096,7 @@ extern POINT	ToolBarStartPoint;
 			HWND	hwndScrollBar = (HWND) lParam;       // handle to scroll bar 
 			RECT	rect;
 
-			GetClientRect (hWnd,&rect);
+			GetClientRect(hWnd,&rect);
 			nPos = GetScrollPos (hWnd,SB_HORZ);
 
 			switch (nScrollCode)
@@ -1137,7 +1137,7 @@ extern POINT	ToolBarStartPoint;
 			RECT	rect;
 			int		minx, maxx;
 
-			GetClientRect (hWnd,&rect);
+			GetClientRect(hWnd,&rect);
 			nPos = GetScrollPos (hWnd,SB_VERT);
 			GetScrollRange (hWnd,SB_VERT,&minx,&maxx);
 
@@ -1315,7 +1315,7 @@ extern POINT	ToolBarStartPoint;
 					HDC	hDC = GetWindowDC (hWnd);
 					int	w,h;
 
-					GetWindowRect (hWnd,&rect);
+					GetWindowRect(hWnd,&rect);
 					w = RECTWIDTH (&rect);
 					h = RECTHEIGHT (&rect);
 					rect.left = rect.top = 0;
@@ -1330,7 +1330,7 @@ extern POINT	ToolBarStartPoint;
 					RECT	Rect;
 					HDC	hDC = GetDC (hWnd);
 
-					GetClientRect (hWnd,&Rect);
+					GetClientRect(hWnd,&Rect);
 					FillRectPoly (hDC,&Rect,RGB(255,255,255));
 					ReleaseDC (hWnd,hDC);
 				}
@@ -1357,7 +1357,7 @@ extern POINT	ToolBarStartPoint;
 					if (wParam)
 					{
 						strcpy (VPConfigAndName,"%RECT%");
-						GetWindowRect (pWMH->hWndMenu,&rect);
+						GetWindowRect(pWMH->hWndMenu,&rect);
 						if (wParam == 1)
 							rect.right = max (rect.right,rect.left+GetMaxRectRight ()+32);
 					}
@@ -1571,7 +1571,7 @@ extern POINT	ToolBarStartPoint;
 					 {
 						 RECT	rect;
 						
-						 GetClientRect (pWMH->hWndMenu,&rect);
+						 GetClientRect(pWMH->hWndMenu,&rect);
 						 SendMessage (pWMH->hWndTab,WM_SETFONT,(WPARAM)pWMH->hFontTab,MAKELPARAM(TRUE, 0));    
 						 TabCtrl_AdjustRect(pWMH->hWndTab, FALSE, &rect); 
 					     SetWindowPos(pWMH->hWndDisplay, HWND_TOP, rect.left, rect.top, 
@@ -1713,7 +1713,7 @@ if (Message == WM_LBUTTONDOWN)
 		HDC		hDC = GetDC (pWMH->hWndDisplay);
 
 		DestroySavedScreen (&pWMH->hSaveScreen,0);
-		if (GetClientRect (pWMH->hWndDisplay,&rect))
+		if (GetClientRect(pWMH->hWndDisplay,&rect))
 			pWMH->hSaveScreen = SaveScreen2 ((HWND)-1,hDC,rect,0,0);
 		ReleaseDC (hWnd,hDC);
 	}
@@ -1853,7 +1853,7 @@ LONG FAR PASCAL AutoVisMenuWndProc(HWND hWnd, UINT Message, WPARAM wParam, LONG 
 				ii=1;
 			else if (wParam)
 			{
-				GetWindowRect (pWMH->hWndMenu,&rect);
+				GetWindowRect(pWMH->hWndMenu,&rect);
 				rect.right = max (rect.right,rect.left+GetMaxRectRight ()+32);
 			}
 			else
@@ -2036,7 +2036,7 @@ SingleClick:
 			RECT	Rect;
 
 			hDC = GetDC (hWnd);
-			GetClientRect (hWnd,&Rect);
+			GetClientRect(hWnd,&Rect);
 			FillRectPoly (hDC,&Rect,RGB(255,255,255));
 			ReleaseDC (hWnd,hDC);
 		}
@@ -2049,7 +2049,7 @@ SingleClick:
 			HWND	hwndScrollBar = (HWND) lParam;       // handle to scroll bar 
 			RECT	rect;
 
-			GetClientRect (hWnd,&rect);
+			GetClientRect(hWnd,&rect);
 			nPos = GetScrollPos (hWnd,SB_HORZ);
 
 			switch (nScrollCode)
@@ -2097,7 +2097,7 @@ SingleClick:
 			HWND	hwndScrollBar = (HWND) lParam;       // handle to scroll bar 
 			RECT	rect;
 
-			GetClientRect (hWnd,&rect);
+			GetClientRect(hWnd,&rect);
 			nPos = GetScrollPos (hWnd,SB_VERT);
 
 			switch (nScrollCode)
@@ -2144,7 +2144,7 @@ SingleClick:
 
 			if (hWnd != pWMH->hWndDisplay || !pAVHeader)
 				goto ExitDefault;
-			GetClientRect (hWnd,&clientrect);
+			GetClientRect(hWnd,&clientrect);
 
 			memset(&ps, 0x00, sizeof(PAINTSTRUCT));
 			hDC = BeginPaint(hWnd, &ps);
@@ -2316,7 +2316,7 @@ LONG FAR PASCAL CMDMenuWndProc(HWND hWnd, UINT Message, WPARAM wParam, LONG lPar
 				ii=1;
 			else if (wParam)
 			{
-				GetWindowRect (hWnd,&rect);
+				GetWindowRect(hWnd,&rect);
 				rect.right = max (rect.right,rect.left+GetMaxRectRight ()+32);
 			}
 			else
@@ -2483,7 +2483,7 @@ SingleClick:
 			RECT	Rect;
 
 			hDC = GetDC (hWnd);
-			GetClientRect (hWnd,&Rect);
+			GetClientRect(hWnd,&Rect);
 			FillRectPoly (hDC,&Rect,RGB(255,255,255));
 			ReleaseDC (hWnd,hDC);
 		}
@@ -2506,7 +2506,7 @@ SingleClick:
 			if (hWnd != pWMH->hWndDisplay || !pCMDHeader)
 				goto ReturnDefault;
 			ShowScrollBar (hWnd,SB_VERT,pCMDHeader->VScrollIsVis);
-			GetClientRect (hWnd,&clientrect);
+			GetClientRect(hWnd,&clientrect);
 			w = RECTWIDTH (&clientrect)-4;
 			memset(&ps, 0x00, sizeof(PAINTSTRUCT));
 			hDC = BeginPaint(hWnd, &ps);
@@ -2549,7 +2549,7 @@ SingleClick:
 				RECT	winRect;
 				int		w;
 
-				GetWindowRect (pWMH->hWndMenu,&winRect);
+				GetWindowRect(pWMH->hWndMenu,&winRect);
 				w = RECTWIDTH(&winRect)+(GetMaxRectRight()-clientrect.right);
 				if (pCMDHeader->VScrollIsVis) w += 32;
 				SetWindowPos(pWMH->hWndMenu, 0, winRect.left,winRect.top,w,RECTHEIGHT(&winRect),
@@ -3347,7 +3347,7 @@ SkipUnlock:;
 			RECT	Rect;
 
 			hDC = GetDC (hWnd);
-			GetClientRect (hWnd,&Rect);
+			GetClientRect(hWnd,&Rect);
 			FillRectPoly (hDC,&Rect,pWMH->BackgroundColor);
 			ReleaseDC (hWnd,hDC);
 		}
@@ -3384,7 +3384,7 @@ SkipUnlock:;
 
 			if (hWnd != pWMH->hWndDisplay || !pVCHeader)
 				goto ExitDefault;
-			GetClientRect (hWnd,&clientrect);
+			GetClientRect(hWnd,&clientrect);
 
 			memset(&ps, 0x00, sizeof(PAINTSTRUCT));
 			hDC = BeginPaint(hWnd, &ps);
@@ -3403,7 +3403,7 @@ SkipUnlock:;
 				SetScrollRange (hWnd,SB_VERT,0,size.cy,TRUE);
 				GetCursorPos (&Point);
 				SetCursorPos (Point.x,Point.y);
-				GetClientRect (hWnd,&clientrect);
+				GetClientRect(hWnd,&clientrect);
 				x=y=3;
 				DrawCmdButton (hDC,"Options",3,&x,&y,clientrect.right);
 				//if (!pVCHeader->AutoRedraw)
@@ -3427,12 +3427,12 @@ SkipUnlock:;
 				}
 			}
 			EndPaint(hWnd, &ps);
-			GetClientRect (hWnd,&clientrect);
+			GetClientRect(hWnd,&clientrect);
 			if (!fromScroll && DidDisplay && pWMH->Float && abs (clientrect.right - maxrectright) > 32)
 			{
 				RECT	winRect;
 
-				GetWindowRect (pWMH->hWndMenu,&winRect);
+				GetWindowRect(pWMH->hWndMenu,&winRect);
 				SetWindowPos(pWMH->hWndMenu, 0, winRect.left,winRect.top,RECTWIDTH(&winRect)+(maxrectright-clientrect.right),RECTHEIGHT(&winRect),
 					SWP_DRAWFRAME|SWP_NOZORDER|SWP_SHOWWINDOW);
 				SendMessage (pWMH->hWndMenu,WM_CLOSE,2,(LPARAM)hWMH);
@@ -4125,7 +4125,7 @@ HWND VisibilityControl (HWND hWnd,HINSTANCE hInst,LPSTR ConnectToVP,LPRECT pRect
 	buttonheight = ButtonHeight * pWMH->Factor;
 	buttonwidth  = ButtonWidth  * pWMH->Factor;
 	indent = Indent * pWMH->Factor;
-	GetClientRect (hWndMenu,&rect);
+	GetClientRect(hWndMenu,&rect);
 	hWndTab = DoCreateTabControl(hWndMenu,pWMH->nMenus,(LPSTR)pWMH->menuTitle,32,&rect,pWMH->Verticle,pWMH->Flat,pWMH->xpad,pWMH->ypad);
 	if (!pWMH->hFontTab)
 	{

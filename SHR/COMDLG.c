@@ -488,7 +488,7 @@ LRESULT CALLBACK NewColorEditProc (HWND hwnd, UINT message,
 			char	str[32];
 			
 			icolor = row * nPerRow + col;
-			GetClientRect (GetDlgItem (hWndCFP,IDC_SHOWCOLOR),&Rect);
+			GetClientRect(GetDlgItem (hWndCFP,IDC_SHOWCOLOR),&Rect);
 			hDC = GetDC (GetDlgItem (hWndCFP,IDC_SHOWCOLOR));
 			color = COLORREFFromRGBTRIPLE (*(pColorPalette+icolor));
 			FillRectColor (hDC,&Rect,color);
@@ -1741,7 +1741,7 @@ BOOL CALLBACK EnumChildProc2(HWND hCtrl,LONG lParam)
 	UINT	CntlID;
     
     GetWindowText (hCtrl,str,200);  
-    GetWindowRect (hCtrl,&Rect);
+    GetWindowRect(hCtrl,&Rect);
     //if (((Rect.right - Rect.left) < 60) && ((Rect.bottom - Rect.top) < 30))
 	GetWindowPlacement(hCtrl,&wp);
 	CntlID = GetDlgCtrlID(hCtrl);
@@ -1855,7 +1855,7 @@ UINT CALLBACK  FileOpenHook (HWND hDlg, UINT message, WPARAM wParam, LPARAM
     			
      			GetCursorPos (&Point); 
 	  			SetFocus (OpenWnd);  
-    			GetWindowRect (OpenWnd,&Rect);
+    			GetWindowRect(OpenWnd,&Rect);
     			Loc = RectMid (&Rect);   
     			SetCursorPos (Loc.x,Loc.y); 
     			Loc.x = (Rect.right-Rect.left)/2;
@@ -2431,14 +2431,14 @@ UINT CALLBACK  ColorHook (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
     if (hwndCC)
     {
 SetCurColor:
-    	GetWindowRect (hwndCC,&Rect);
+    	GetWindowRect(hwndCC,&Rect);
     	CPnt.x = (Rect.right - Rect.left)/2;
     	CPnt.y = (Rect.bottom - Rect.top)/2;
    		hDC = GetDC (hwndCC); 
     	CurColor = GetPixel (hDC,CPnt.x,CPnt.y);
    		ReleaseDC (hwndCC,hDC);
    		hwndOC = GetDlgItem (hDlg,IDC_OUTCOLOR);
-   		GetWindowRect (hwndOC,&Rect);   
+   		GetWindowRect(hwndOC,&Rect);   
    		Rect.right = Rect.right - Rect.left - 1;
    		Rect.left = 1;
    		Rect.bottom = Rect.bottom - Rect.top - 1;
@@ -2668,7 +2668,7 @@ UINT CALLBACK  PrintDlgProc (HWND hDlg, UINT message, WPARAM wParam, LPARAM
    		RECT	Rect;
    		HDC		hDC;
    		
-   		GetClientRect (hDlg,&Rect);
+   		GetClientRect(hDlg,&Rect);
    		hDC = GetDC (hDlg);
         DisplayBMFileInRect (hDC,"c:\\gmavl\\ambulance.bmp",Rect,FALSE);
    		ReleaseDC (hDlg,hDC);
@@ -2707,7 +2707,7 @@ UINT CALLBACK  PrintDlgProc (HWND hDlg, UINT message, WPARAM wParam, LPARAM
    		RECT	Rect;
    		HDC		hDC;
    		
-/*   		GetClientRect (hDlg,&Rect);
+/*   		GetClientRect(hDlg,&Rect);
    		hDC = GetDC (hDlg);
         DisplayBMFileInRect (hDC,"c:\\gmavl\\ambulance.bmp",Rect,FALSE);
    		ReleaseDC (hDlg,hDC);*/

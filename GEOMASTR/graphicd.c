@@ -1015,7 +1015,7 @@ BOOL UseFullScreen (HWND hWnd,LPRECT pRect)
 		{
 			w = GetGlobalDVal2 ("[%SCREENWIDTH]",hsize); 
 			if (IsRectEmpty (&ConfigDisplayRect))
-				GetClientRect (hWnd,&Rect);
+				GetClientRect(hWnd,&Rect);
 			else 
 				Rect =  ConfigDisplayRect; 
 			w *= (Rect.right - Rect.left) / (double)hres;   
@@ -2865,7 +2865,7 @@ Exit:
         SetWindowPos (hWndMain,HWND_TOP,0,0,0,0,SWP_NOMOVE|SWP_NOSIZE|SWP_SHOWWINDOW);
         hDC  = GetDC (hWndMain);
 		SetDisplayMode (hDC, GF_SCREENMODE); 
-	    GetClientRect (hWndMain,&Rect);
+	    GetClientRect(hWndMain,&Rect);
 	  	SelectClipRgn ( hDC,0);
         ii=BitBlt(hDC, 0, 0, Rect.right-Rect.left+1,
                              Rect.bottom-Rect.top+1,

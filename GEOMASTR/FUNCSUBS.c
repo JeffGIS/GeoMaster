@@ -2205,7 +2205,7 @@ BOOL MultiZoomBegin (int UpLevels,int DownLevels,double OverlapFactor)
 //	Bounds = FactorBounds (&CurView->WBounds,pow(2,UpLevels));  
 	//MemMap = TRUE;
 	hdcMemMap = CreateCompatibleDC(CurView->hDC);  
-	GetClientRect (hWndMain,&Rect);
+	GetClientRect(hWndMain,&Rect);
 	MemMapWidth = OverlapFactor * (Rect.right - Rect.left + 1);
 	MemMapHeight = OverlapFactor * (Rect.bottom - Rect.top + 1);  
 	curProgID = 10003;
@@ -3896,7 +3896,7 @@ BOOL FontDisplay (LPSTR FontName)
 	HRGN	hRgn;
 	HBRUSH	FillBrush; 
 
-	GetClientRect (hWndMain,&Rect); 
+	GetClientRect(hWndMain,&Rect); 
 	hRgn = CreateRectRgn(Rect.left,Rect.top,Rect.right,Rect.bottom);
   	SelectClipRgn (hDC,hRgn);
   	DeleteObject(hRgn);
@@ -5064,11 +5064,11 @@ BOOL CALLBACK EnumChildProc(HWND hCtrl,LONG lParam)
     RECT	Rect;
     
     GetWindowText (hCtrl,str,200);  
-    GetWindowRect (hCtrl,&Rect);
+    GetWindowRect(hCtrl,&Rect);
     if (!_fstricmp (str,"OK"))
     {   
     	SetFocus (hCtrl);  
-    	GetWindowRect (hCtrl,&Rect);
+    	GetWindowRect(hCtrl,&Rect);
     	Loc = RectMid (&Rect);   
     	SetCursorPos (Loc.x,Loc.y); 
     	Loc.x = (Rect.right-Rect.left)/2;
@@ -6051,14 +6051,14 @@ BOOL FAR PASCAL MESSAGE_INCOMINGMsgProc(HWND hWndDlg, UINT Message, WPARAM wPara
    switch (Message)
       {
    case WM_INITDIALOG: 
-	    GetWindowRect (hWndDlg,&rect1);
-	    GetWindowRect (GetDlgItem (hWndDlg,IDC_MESSAGEREPLY),&rect2);
+	    GetWindowRect(hWndDlg,&rect1);
+	    GetWindowRect(GetDlgItem (hWndDlg,IDC_MESSAGEREPLY),&rect2);
 		pt.x = rect2.left;
 		pt.y = rect2.top;
 		ScreenToClient (hWndDlg,&pt);  
 		SetWindowPos(hWndDlg, HWND_TOP,0, 0, RECTWIDTH(&rect1),abs(rect2.top-rect1.top), SWP_NOMOVE);
         cwCenter(hWndDlg,0);
-	    GetWindowRect (GetDlgItem (hWndDlg,IDC_REPLY),&rect2);
+	    GetWindowRect(GetDlgItem (hWndDlg,IDC_REPLY),&rect2);
      	SetCursorPos (rect2.left,rect2.top);
 
 		break;
@@ -6127,7 +6127,7 @@ BOOL FAR PASCAL MESSAGE_OUTGOINGMsgProc(HWND hWndDlg, UINT Message, WPARAM wPara
    case WM_INITDIALOG: 
         cwCenter(hWndDlg,0);
 	    SetFocus (GetDlgItem(hWndDlg,IDC_MESSAGE));
-	    GetWindowRect (GetDlgItem (hWndDlg,IDC_MESSAGE),&rect2);
+	    GetWindowRect(GetDlgItem (hWndDlg,IDC_MESSAGE),&rect2);
      	SetCursorPos (rect2.left,rect2.top);
 		return FALSE;
 		break;
@@ -6903,8 +6903,8 @@ LONG FAR PASCAL BGUpdateWndProc(HWND hWnd, UINT Message, WPARAM wParam, LONG lPa
 				}
 				else
 				{
-					GetWindowRect (GetDesktopWindow(),&screenrect);
-					GetWindowRect (hWndMain,&rect);
+					GetWindowRect(GetDesktopWindow(),&screenrect);
+					GetWindowRect(hWndMain,&rect);
 					rect.right = min (screenrect.right,rect.right);
 					rect.bottom = min (screenrect.bottom,rect.bottom);
 					rect.bottom -= 2;
@@ -6932,7 +6932,7 @@ LONG FAR PASCAL BGUpdateWndProc(HWND hWnd, UINT Message, WPARAM wParam, LONG lPa
 					char	str[1024];
 					int FontSize;
 
-					GetClientRect (hWnd,&rect);
+					GetClientRect(hWnd,&rect);
 					FontSize =RECTHEIGHT (&rect);
   					SelectClipRgn (hDC,0);   
   					SetTextColor (hDC,0); 
@@ -6962,7 +6962,7 @@ LONG FAR PASCAL BGUpdateWndProc(HWND hWnd, UINT Message, WPARAM wParam, LONG lPa
 			{
 				HDC hDC=GetDC (hWnd);
 
-				GetClientRect (hWnd,&rect);
+				GetClientRect(hWnd,&rect);
 				FillRect(hDC, &rect, GetStockObject(WHITE_BRUSH));//(LTGRAY_BRUSH));
 				ReleaseDC (hWnd,hDC);
 			}
@@ -7041,7 +7041,7 @@ void BackgroundUpdateMessage (LPSTR mess)
 		int x=100,y=100,w=400,h=18;
 
 		*lastMess = 0;
-		GetWindowRect (hWndMain,&rect);
+		GetWindowRect(hWndMain,&rect);
 		y = rect.bottom - h*2;
 		x = rect.right - w*2;
 			RegisterBgUpdateClass (FALSE);
@@ -7143,8 +7143,8 @@ void SetImageZoomOffset (void)
 		RECT	wRect,mRect;
 		POINT	cPt,midPt;
 
-		GetWindowRect (hWndImageZoom,&wRect);
-		GetWindowRect (hWndMain,&mRect);
+		GetWindowRect(hWndImageZoom,&wRect);
+		GetWindowRect(hWndMain,&mRect);
 		GetCursorPos (&cPt);
 		midPt = RectMid (&mRect);
 		if (ImageZoomShape == 1)
@@ -7174,8 +7174,8 @@ void DisplayImageZoom (HWND hWnd,HDC hDC,int From)
 	int		w,h;
 	static	RECT	LastImageZoomRect={0};
 
-	GetWindowRect (hWnd,&wRect);
-	GetClientRect (hWnd,&cRect);
+	GetWindowRect(hWnd,&wRect);
+	GetClientRect(hWnd,&cRect);
 	if (From == 1 && ImageZoomSavedScreen && LastImageZoomRect.left != LastImageZoomRect.right)
 	{
 		DPOINT	wPoint, fPoint;
@@ -7245,7 +7245,7 @@ void SetImageZoomSize (HWND hWnd,int size)
 
 	w = ImageZoomSize;
 	h = ImageZoomSize;
-	GetWindowRect (hWnd,&wRect);
+	GetWindowRect(hWnd,&wRect);
 	pt = RectMid (&wRect);
 	x = pt.x - w/2;
 	y = pt.y - h/2;
@@ -7291,7 +7291,7 @@ LONG FAR PASCAL ImageZoomWndProc(HWND hWnd, UINT Message, WPARAM wParam, LONG lP
 				HDC hDC = GetDC (0);
 				RECT	wRect;
 
-				GetClientRect (GetDesktopWindow(),&wRect);
+				GetClientRect(GetDesktopWindow(),&wRect);
 				ImageZoomSavedScreen = SaveScreen (hDC, wRect);
 				hDCImageZoom = CreateCompatibleDC (CurView->hDC);
 				hOldBMImageZoom = SelectObject (hDCImageZoom,ImageZoomSavedScreen);
@@ -7403,7 +7403,7 @@ LONG FAR PASCAL ImageZoomWndProc(HWND hWnd, UINT Message, WPARAM wParam, LONG lP
 			{
 				HDC		hDC = GetDC (hWnd);
 
-				GetWindowRect (hWnd,&oldRect);
+				GetWindowRect(hWnd,&oldRect);
 				DisplayImageZoom (hWnd,hDC,1);
 				ReleaseDC (hWnd,hDC);
 			}
@@ -7414,7 +7414,7 @@ LONG FAR PASCAL ImageZoomWndProc(HWND hWnd, UINT Message, WPARAM wParam, LONG lP
 				HDC		hDC = GetDC (hWnd);
 				static	n=0;
 
-				GetWindowRect (hWnd,&newRect);
+				GetWindowRect(hWnd,&newRect);
 				if (n++ == 100)
 					n = 0;
 				DisplayImageZoom (hWnd,hDC,imageZoomFrom);
@@ -7438,7 +7438,7 @@ LONG FAR PASCAL ImageZoomWndProc(HWND hWnd, UINT Message, WPARAM wParam, LONG lP
 				if (PtInRect (&CurView->ScreenRect,mainClientPoint))
 				{
 					ShowWindow (hWnd,SW_SHOW);
-					GetWindowRect (hWnd,&wRect);
+					GetWindowRect(hWnd,&wRect);
 					w = RECTWIDTH (&wRect);
 					h = RECTHEIGHT (&wRect);
 					x = (screenPoint.x + ImageZoomXoff) - w/2;
@@ -7458,7 +7458,7 @@ LONG FAR PASCAL ImageZoomWndProc(HWND hWnd, UINT Message, WPARAM wParam, LONG lP
 			{
 				HDC hDC=GetDC (hWnd);
 
-				GetClientRect (hWnd,&rect);
+				GetClientRect(hWnd,&rect);
 				SetViewport (ImageZoomVP);
 				FillRectPoly (hDC,&rect,CurView->BackGroundColor);
 				ReleaseDC (hWnd,hDC);
@@ -7615,7 +7615,7 @@ BOOL ImageZoom (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 			int	x,y,w,h;
 
 			ClientToScreen (hWnd,&screenPoint);
-			GetWindowRect (hWndImageZoom,&wRect);
+			GetWindowRect(hWndImageZoom,&wRect);
 			w = RECTWIDTH (&wRect);
 			h = RECTHEIGHT (&wRect);
 			SetImageZoomOffset ();

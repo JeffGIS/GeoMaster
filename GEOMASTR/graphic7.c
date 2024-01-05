@@ -574,7 +574,7 @@ BOOL CALLBACK GSWWEnumWndProc(HWND hWnd,LONG lParam)
 	{
 		RECT rect, intRect;
 
-		GetWindowRect (hWnd,&rect);
+		GetWindowRect(hWnd,&rect);
 		if (IntersectRect (&intRect,&rect,&pGSWWStruct->InRect))
 			pGSWWStruct->hWindows[pGSWWStruct->nWin++] = hWnd;
 	}
@@ -602,7 +602,7 @@ HDC GetScreenWithoutWindow (HWND hWnd,LPRECT pRect,HBITMAP *phBMOld)
 		int	destx, desty, srcx, srcy;
 		RECT	rect, intRect;
 
-		GetWindowRect (GSWWStruct.hWindows[GSWWStruct.nWin],&rect);
+		GetWindowRect(GSWWStruct.hWindows[GSWWStruct.nWin],&rect);
 		IntersectRect (&intRect,&rect,pRect);
 
 		destx = max (0,intRect.left - pRect->left);
@@ -676,7 +676,7 @@ LONG FAR PASCAL PromptWndProc(HWND hWnd, UINT Message, WPARAM wParam, LONG lPara
 					HBITMAP	hBMOld, hBM;
 					int	ii;
 
-					GetWindowRect (hWnd,&rect);
+					GetWindowRect(hWnd,&rect);
 					rectM = rect;
 					hDCScreen = GetScreenWithoutWindow (hWnd,&rect,&hBMOld);
 					ScreenRectToClientRect (hWndMain,&rectM);
@@ -705,7 +705,7 @@ LONG FAR PASCAL PromptWndProc(HWND hWnd, UINT Message, WPARAM wParam, LONG lPara
 				HFONT	hOldFont = SelectObject (hDC,GetStockObject (ANSI_VAR_FONT));
 
 				GetWindowText (hWnd,str,1023);
-				GetClientRect (hWnd,&rect);
+				GetClientRect(hWnd,&rect);
 				FillRect (hDC,&rect,GetStockObject (WHITE_BRUSH));
 				InflateRect (&rect,-1,-1);
 				DrawText (hDC,str,strlen(str),&rect,DT_LEFT);
@@ -720,7 +720,7 @@ LONG FAR PASCAL PromptWndProc(HWND hWnd, UINT Message, WPARAM wParam, LONG lPara
 			{
 				HDC hDC=GetDC (hWnd);
 
-				GetClientRect (hWnd,&rect);
+				GetClientRect(hWnd,&rect);
 				FillRect (hDC,&rect,GetStockObject (WHITE_BRUSH));
 				ReleaseDC (hWnd,hDC);
 			}
@@ -772,7 +772,7 @@ void MovePromptWindow (HWND hWnd,LPARAM lParam,int w, int h)
 	RECT	rectW;
 	POINT	midpt, pt;
 
-	GetWindowRect (GetDesktopWindow(),&rectW);
+	GetWindowRect(GetDesktopWindow(),&rectW);
 	midpt = RectMid (&rectW);
 	if (lParam < INT_MAX)
 	{
@@ -872,7 +872,7 @@ void MovePromptMessage (HWND hWnd,LPARAM lParam)
 	{
 		RECT	rectP;
 
-		GetWindowRect (hWndPrompt,&rectP);
+		GetWindowRect(hWndPrompt,&rectP);
 		MovePromptWindow (hWnd,lParam,RECTWIDTH(&rectP),RECTHEIGHT(&rectP));
 		if (HavePromptText && !InFade)
 		{
@@ -4505,7 +4505,7 @@ GetNextLine:;
 	   		if (!HaveCancel)
 	   			AppendMenu (PickMenu,MF_ENABLED|MF_STRING,0,"Cancel");
 	   		setDoPaint( FALSE);
-			GetClientRect (hWnd,&Rect);
+			GetClientRect(hWnd,&Rect);
 			hScreen = SaveScreen2 (hWnd,hDC,Rect,0,0);
 	  		TrackPopupMenu (PickMenu,TPM_CENTERALIGN|TPM_VCENTERALIGN,position.x,position.y,0,hWnd,0);
 	    	RestoreScreen2 (hDC, hScreen,0,FALSE);
@@ -5646,7 +5646,7 @@ BOOL DisplayTransparency (void)
 		else
 		{
 			RECT	rect, intRect;
-			GetClientRect (CurView->hWnd,&rect);
+			GetClientRect(CurView->hWnd,&rect);
 			IntersectRect (&intRect,&rect,&CurView->DrawRect);
 			w = RECTWIDTH (&intRect);
 			h = RECTHEIGHT (&intRect);
@@ -5712,7 +5712,7 @@ BOOL SetTransparency (int tranValue)
 
 		if (hDC)
 		{
-			GetClientRect (CurView->hWnd,&rect);  
+			GetClientRect(CurView->hWnd,&rect);  
 			curProgID = 10013;
 			CurView->transparencyBitmapWidth = RECTWIDTH(&rect);
 			CurView->transparencyBitmapHeight = RECTHEIGHT(&rect);

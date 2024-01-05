@@ -198,7 +198,7 @@ void SetDBChildWindowParms(HWND hWndDlg)
 
 	for (i = 0; i < NUM_DB_CHILDWND; i++)
 	{
-		GetWindowRect (GetDlgItem (hWndDlg,childWndID[i]), &rect);
+		GetWindowRect(GetDlgItem (hWndDlg,childWndID[i]), &rect);
 		ScreenRectToClientRect(hWndDlg, &rect);
 		if (!i)
 			childWndBorder = rect.left;
@@ -326,7 +326,7 @@ BOOL FAR PASCAL DEBUGGERMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARA
 		 if (!firstPaint)
 			 return FALSE;
 		 firstPaint = FALSE;
-		 GetWindowRect (GetDlgItem (hWndDlg,IDC_FILEVIEW),&rect);
+		 GetWindowRect(GetDlgItem (hWndDlg,IDC_FILEVIEW),&rect);
 		 //ClientRectToScreenRect (hWndDlg,&rect);
 		 hDBWnd = CreateDebugFileDisplayWindow (hWndDlg,&rect);
  		 ii=SetTimer (hDBWnd,1,300,0);
@@ -349,7 +349,7 @@ BOOL FAR PASCAL DEBUGGERMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARA
 			 RECT wRect;
 			 AdjustDBChildWindows(hWndDlg);
 			 GetWindowRect(hWndDlg, &wRect);
-			 GetWindowRect (GetDlgItem (hWndDlg,IDC_FILEVIEW),&rect);
+			 GetWindowRect(GetDlgItem (hWndDlg,IDC_FILEVIEW),&rect);
 			 //ScreenRectToClientRect (hWndDlg,&rect);
 
 			 //ShowWindow(hDBWnd,SW_SHOW);

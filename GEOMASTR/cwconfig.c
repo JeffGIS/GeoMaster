@@ -165,7 +165,7 @@ BOOL DoSaveConfig (HWND hWnd,BOOL AutoSave)
 	 HaltPaint = TRUE;
 	 GMDestroyDIB32 (hWindowDib32);
 	 hWindowDib32 = 0;
-	 GetClientRect (hWndMain,&WindowRect);   
+	 GetClientRect(hWndMain,&WindowRect);   
 	 ClientRectToScreenRect (hWnd,&WindowRect);
 	 hWindowDib32 = CopyScreenToDIB32 (&WindowRect); 
 	 SaveFullWindowBitmap(hWndMain);
@@ -2171,7 +2171,7 @@ else
 
    {
 
-	   GetWindowRect (hWndMain,&rect);
+	   GetWindowRect(hWndMain,&rect);
 	   rect.left = 0;
    }
    if (!NoAccel)
@@ -2409,7 +2409,7 @@ nMess = -1;
 		if (!CurrentConfig)
 			SetConfig (1);
 		GetCursorPos (&CPoint); 
-		GetWindowRect (InFocus,&Rect);
+		GetWindowRect(InFocus,&Rect);
 		if (!PtInRect (&Rect,CPoint))
 		{
 			ScreenToClient (CurView->hWnd,&CPoint);   
@@ -2774,7 +2774,7 @@ if (HaveBlockingWindow && Message == WM_PAINT)
 {
 	hDC = GetDC (hWndMain);
 					
-	GetWindowRect (hWndMain,&Rect);
+	GetWindowRect(hWndMain,&Rect);
     SelectClipRgn (hDC,0);
 	RestoreScreen (hDC,hFullWindowBitMap,FullWindowBitMapRect);	     
 	ReleaseDC (hWndMain,hDC);  
@@ -5406,7 +5406,7 @@ DisplayParcel:
 	case WM_ENTERSIZEMOVE:
 	{
 		hDC = GetDC (hWnd);
-		GetClientRect (hWnd,&MoveStartRect);
+		GetClientRect(hWnd,&MoveStartRect);
 		setDoPaint( FALSE);
 		hBMMove = SaveScreen (hDC,MoveStartRect);
 		ReleaseDC (hWnd,hDC);
@@ -5417,7 +5417,7 @@ DisplayParcel:
 	case WM_EXITSIZEMOVE:
 		setDoPaint( TRUE);
 		GSSiDeleteObject (&hBMMove);
-		GetClientRect (hWnd,&MoveEndRect);
+		GetClientRect(hWnd,&MoveEndRect);
 		AdjustToolbarPositions ();
 		DisplayAllToolbars (3);
 		if ((MoveStartRect.right - MoveStartRect.left) != (MoveEndRect.right - MoveEndRect.left) ||
@@ -5629,7 +5629,7 @@ DisplayParcel:
 				HaltMapDisplay(FALSE, TRUE);
 				hDC = GetDC (hWnd);
 				HavePaint = SaveHavePaint;		
-				GetClientRect (hWndMain,&WindowRect); 
+				GetClientRect(hWndMain,&WindowRect); 
 				NormalRect (&WindowRect);  
 				//RestoreScreenRect (hDC,hBMMove,MoveStartRect,WindowRect);
 				RestoreFullWindowBitmap();
@@ -6249,7 +6249,7 @@ GSSiExitProg (438);
 		 {    
 			RECT	WindowRect;
 					
-			GetClientRect (hWndMain,&WindowRect);
+			GetClientRect(hWndMain,&WindowRect);
 			NormalRect (&WindowRect);
 //			NormalRect (&FullWindowBitMapRect);   
 			if (EqualRect (&FullWindowBitMapRect,&WindowRect))
@@ -6279,7 +6279,7 @@ GSSiExitProg (438);
             	RECT	rect;
             	char	ImageFile[]="[%DL]geomaster.bmp";
             	
-            	GetClientRect (hWnd,&Rect);
+            	GetClientRect(hWnd,&Rect);
 				FillRectPoly (hDC,&Rect,RGB(255,255,255));  
 				if (ExistFile (ImageFile))
             		DisplayBMFileInRect (hDC,ImageFile,Rect,TRUE);

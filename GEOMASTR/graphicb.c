@@ -1542,8 +1542,8 @@ GSSiExitProg (1157);
 	else if (!WindowIsCovered (hWnd,1))
 	{    
 		HDC	hDC = GetDC (hWnd);
-		//GetWindowRect (hWnd,&FullWindowBitMapRect);
-		GetClientRect (hWnd,&FullWindowBitMapRect);
+		//GetWindowRect(hWnd,&FullWindowBitMapRect);
+		GetClientRect(hWnd,&FullWindowBitMapRect);
 		NormalRect (&FullWindowBitMapRect); 
 		hFullWindowBitMap = SaveScreen (hDC, FullWindowBitMapRect);
 		ReleaseDC(hWnd, hDC);

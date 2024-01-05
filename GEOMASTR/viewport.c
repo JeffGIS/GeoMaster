@@ -929,7 +929,7 @@ BOOL LoadMenuConfig (LPSTR Name, long Offset,HFILE OpenFid,short Version)
  	 		pViewports[iview] = (LPVIEWPORT)GlobalLock (hViewports[iview]);  
  	 	*pNumViewports = nvp;
  	    DetermineVPDisplaySequence ();
- 	    GetClientRect (hWndMain,&Rect);
+ 	    GetClientRect(hWndMain,&Rect);
  	    hDC = GetDC (hWndMain);
 	    SetupViewports (hWndMain,hDC,0,Rect,0);
 	    ReleaseDC (hWndMain,hDC);
@@ -1196,7 +1196,7 @@ void SaveWindowPos (HFILE Fid)
  	short	Length, Version=1, id=OB_SAVESIZEPOS; 
     RECT	Rect;
     
-    GetWindowRect (hWndMain,&Rect);
+    GetWindowRect(hWndMain,&Rect);
  	BigWrite (Fid,(HPSTR)&id,2,-1);  
  	BigWrite (Fid,(HPSTR)&Version,2,-1);
  	BigWrite (Fid,(HPSTR)&Version,2,-1); 
@@ -1648,7 +1648,7 @@ void SetConfigDisplayRect (void)
 	}
 	else
 	{
-		GetClientRect (hWndMain,&ConfigDisplayRect);
+		GetClientRect(hWndMain,&ConfigDisplayRect);
 		if (DoScreenPrompt)
 		{   
 	        int	PRHeight = GetGlobalLVal2 ("[%PROMPTHEIGHT]",14); 

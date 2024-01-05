@@ -1634,7 +1634,7 @@ GotCloseFilehSQL:
 					SetDisplayMode (hDC, GF_SCREENMODE); 
 					WindowRect = atorect(Arg[4], &Err);
 					if (Err)
-						GetWindowRect (hWndMain,&WindowRect);
+						GetWindowRect(hWndMain,&WindowRect);
 					if (atob (Arg[3]))
 					{
 						hBM = SaveScreen (hDC, WindowRect);
@@ -3944,7 +3944,7 @@ GotCloseFilehSQL:
 	    		goto RtnTrue; 
 	    	if (!_fstricmp (Arg[1],"%SCREEN"))
 	    	{
-	    	    GetClientRect (hWndMain,&Rect);
+	    	    GetClientRect(hWndMain,&Rect);
 	        	MemMapWidth = Rect.right-Rect.left+1;
 	            MemMapHeight = Rect.bottom-Rect.top+1;
             }
@@ -4568,7 +4568,7 @@ GotCloseFilehSQL:
 				{
 					HDIB32 hDib32;
 
-					GetWindowRect (hWndMain,&Rect); 
+					GetWindowRect(hWndMain,&Rect); 
 					hDib32 = CopyScreenToDIB32 (&Rect); 
 					SaveDIB32 (hDib32,Arg[2],FIF_TIFF,TIFF_ADOBE_DEFLATE);
 					GMDestroyDIB32 (hDib32); 
@@ -4580,7 +4580,7 @@ GotCloseFilehSQL:
 					{
 						n--;
 						GSSiDeleteObject (&hScreenBM[n]);
-						GetWindowRect (hWndMain,&Rect);
+						GetWindowRect(hWndMain,&Rect);
 						hDC = GetDC (CurView->hWnd);
 						hScreenBM[n] = SaveScreen (hDC,Rect); 
 						ReleaseDC (CurView->hWnd,hDC);
@@ -4590,7 +4590,7 @@ GotCloseFilehSQL:
 			}
 			else if (!stricmp (Arg[1],"RESTORE"))
 			{
-				GetWindowRect (hWndMain,&Rect);
+				GetWindowRect(hWndMain,&Rect);
 				hDC = GetDC (CurView->hWnd);
 				SetDisplayMode (hDC, GF_SCREENMODE); 
 				SelectClipRgn (hDC,0);

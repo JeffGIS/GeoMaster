@@ -200,7 +200,7 @@ void LogServerActivity (LPSTR Mess)
 		AppendFile2 (ServerLogFile,Mess);
 	}
 	hDCScreen = GetDC (hWndMain);
-	GetClientRect (hWndMain,&rect);
+	GetClientRect(hWndMain,&rect);
 	PaintServerInfo (hDCScreen,&rect);
 	ReleaseDC (hWndMain,hDCScreen);
 //	InvalidateRect (hWndMain,0,TRUE);
@@ -336,7 +336,7 @@ BOOL FAR PASCAL VEHICLE_TIMEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, L
 			lastCurReplayPos = 0;
 			ShowWindow (hWndVehHist,SW_HIDE);
 			SetDlgItemInt (hWndDlg,IDC_REPLAYDELAY,(1000-ReplayDelay)/10,FALSE);
-			GetWindowRect (hWndDlg,&Rect);
+			GetWindowRect(hWndDlg,&Rect);
 			MidPoint = RectMid (&CurView->ScreenRect);
 			top = MidPoint.y - RECTHEIGHT(&Rect)/2;
 			left = MidPoint.x - RECTWIDTH(&Rect)/2;

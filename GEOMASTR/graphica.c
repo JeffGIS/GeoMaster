@@ -1575,7 +1575,7 @@ BOOL CreateGoogleMapTiles (LPSTR InFile,int MaxZoom,LPMNMXCORD pBounds)
 	SetCurView (pViewports[*pCommandViewport-1]);
 	SaveDC (CurView->hDC);
 	SetDisplayMode (CurView->hDC, GF_TEXTMODE);
-	GetClientRect (CurView->hWnd,&ScreenRect);
+	GetClientRect(CurView->hWnd,&ScreenRect);
 	hBitmap = SaveScreen (CurView->hDC,ScreenRect);
 	hDib32 = BitmapToDIB32 (hBitmap);  
 	DeleteObject (hBitmap);
@@ -1846,7 +1846,7 @@ BOOL CreateAreaGridFromGrid (LPSTR InFile,LPSTR SymName,LPSTR Prefix,int MaxZoom
 
 		SaveDC (CurView->hDC);
 		SetDisplayMode (CurView->hDC, GF_TEXTMODE);
-		GetClientRect (CurView->hWnd,&ScreenRect);
+		GetClientRect(CurView->hWnd,&ScreenRect);
 		hBitmap = SaveScreen (CurView->hDC,ScreenRect);
 		hDib32 = BitmapToDIB32 (hBitmap);  
 		DeleteObject (hBitmap);

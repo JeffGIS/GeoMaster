@@ -3963,7 +3963,7 @@ GSSiExitProg (101);
 	 	BigWrite (FidConfig,(HPSTR)&CfgImageFormat,2,-1); 
 	 	if (!hWindowDib32)
 	 	{ 
-			//GetClientRect (hWndMain,&WindowRect);
+			//GetClientRect(hWndMain,&WindowRect);
 			WindowRect = MainRect;   
 			ClientRectToScreenRect (hWndMain,&WindowRect);
 			hWindowDib32 = CopyScreenToDIB32 (&WindowRect); 

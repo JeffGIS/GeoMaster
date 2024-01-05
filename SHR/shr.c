@@ -5940,7 +5940,7 @@ short FillList (HWND hWndDlg,UINT Control,LPSTR file, LPSTR DefaultVal,LPRECT pR
 		else
 			GetWindowRect(GetDesktopWindow(), &mainRect);
 		totHeight = min(totHeight, RECTHEIGHT(&mainRect)*0.75);
-    	GetWindowRect (GetDlgItem (hWndDlg,Control),pRect);
+    	GetWindowRect(GetDlgItem (hWndDlg,Control),pRect);
     	ScreenRectToClientRect (hWndDlg,pRect);
 		GetTextMetrics (hDC,&TextMet);
 		cw = LOWORD(GetDialogBaseUnits());
@@ -8906,7 +8906,7 @@ GSSiExitProg (387);
  SetWindowOrgEx  ( hDC, 0,0, 0 );
  SetViewportOrgEx( hDC, 0, 0, 0 );
  SelectClipRgn (hDC,0);
- GetClientRect (hWnd,&Rect); 
+ GetClientRect(hWnd,&Rect); 
  Rect2 = Rect;  
  Rect3 = Rect;
  //InflateRect(&Rect3,1,1);
@@ -13337,8 +13337,8 @@ BOOL MinimizeWindowIfOverMain (HWND hWnd)
 {   
 	RECT	WindRect, MainRect, IntRect;
 	
-	GetWindowRect (hWnd,&WindRect);
-	GetWindowRect (hWndMain,&MainRect);  
+	GetWindowRect(hWnd,&WindRect);
+	GetWindowRect(hWndMain,&MainRect);  
 	if (IntersectRect (&IntRect,&WindRect,&MainRect))
 		ShowWindow (hWnd,SW_MINIMIZE);
 	else
@@ -13579,7 +13579,7 @@ BOOL WindowIsCovered (HWND hWnd,short opt)
 	//	if (verinfo.dwMajorVersion > 5) //dont care if covered if Vista or higher
 		if (isWOW64)
 			return FALSE;
-		GetClientRect (hWnd,&rMyRect); 
+		GetClientRect(hWnd,&rMyRect); 
 		Point1.x = rMyRect.left;
 		Point1.y = rMyRect.top;
 		Point2.x = rMyRect.right;

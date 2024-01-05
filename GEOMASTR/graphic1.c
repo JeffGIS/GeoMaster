@@ -3989,7 +3989,7 @@ BOOL SetFileBounds ()
 //		SetViewport (CurView->Parent);
 
      if (CurView->hWnd && !IsIconic (CurView->hWnd) && !FileMode)
-        GetClientRect (CurView->hWnd,&WinRect);
+        GetClientRect(CurView->hWnd,&WinRect);
 /*	 else if (InVirtualPrint)
 	 {  
 		WinRect.left = WinRect.top = 0;
@@ -4749,7 +4749,7 @@ GSSiExitProg (54);
 #endif
     	return;
 }   
-	GetClientRect (hWndMain,&ClientRect);
+	GetClientRect(hWndMain,&ClientRect);
 	if (IsRectEmpty (&ClientRectStart))
 		ClientRectStart = ClientRect;
 
@@ -4872,7 +4872,7 @@ Top:
 	    	LPBITMAPINFOHEADER pDibInfo = (LPBITMAPINFOHEADER)GlobalLock (hCfgImage); 
 	    	RECT	WindowRect;
 	    	
-	    	GetClientRect (hWndMain,&WindowRect);  
+	    	GetClientRect(hWndMain,&WindowRect);  
 	    	if (pDibInfo->biWidth != WindowRect.right - WindowRect.left ||
 	    		pDibInfo->biHeight != WindowRect.bottom - WindowRect.top)
 	    		GSSiGlobUlFree (&hCfgImage);
@@ -4891,7 +4891,7 @@ Top:
 			    
 				SetDisplayMode (hDC, GF_SCREENMODE); 
 		        SelectClipRgn (hDC,0);
-	   			GetClientRect (hWnd,&Rect);
+	   			GetClientRect(hWnd,&Rect);
 				if (hCfgImage)
 					DisplayBMInRect32(hDC, hCfgImage, MainRect, FALSE);
 				else if (NumSavedImages)

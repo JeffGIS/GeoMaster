@@ -263,7 +263,7 @@ void Draw3DFrame(HWND hWnd, int iStyle)
     RECT        r;
 
     hDC = GetWindowDC (hWnd);
-    GetWindowRect (hWnd, &r);
+    GetWindowRect(hWnd, &r);
     Draw3DBorder (hDC,&r,iStyle,FALSE);
     ReleaseDC (hWnd, hDC);
     }
@@ -657,7 +657,7 @@ BOOL SizeDlgToRect (HWND hWndDlg,LPRECT pRect)
 {   
 	int	w,h; 
 	
-	GetWindowRect (hWndDlg,&OldRect);
+	GetWindowRect(hWndDlg,&OldRect);
 	w = pRect->right - pRect->left;
 	h = pRect->bottom - pRect->top;  
     wfactor = ((double)(pRect->right - pRect->left))/(OldRect.right - OldRect.left);

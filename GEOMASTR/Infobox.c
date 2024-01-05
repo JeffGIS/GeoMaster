@@ -217,7 +217,7 @@ HANDLE YellowTextBox (HWND hWnd, LPSTR instr, POINT WinPoint,LPRECT pRect,LPRECT
 			TAGBox.rect = *DisplayInRect;
 		else if (!DoNotMove)
 		{
-			GetClientRect (hWnd,&WRect);
+			GetClientRect(hWnd,&WRect);
 			if (TAGBox.rect.left < WRect.left)
 			{
 				TAGBox.rect.right += WRect.left - TAGBox.rect.left;

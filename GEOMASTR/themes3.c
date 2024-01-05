@@ -2190,9 +2190,9 @@ GSSiExitProg (620);
 						int     TabStops[2]={150,500}; 
 
 						FirstShow = FALSE;
-						GetWindowRect (hWndDlg,&Rect);
+						GetWindowRect(hWndDlg,&Rect);
 				   		MoveWindow(hWndDlg, Rect.left,Rect.top, 2*(Rect.right-Rect.left), Rect.bottom-Rect.top, TRUE);
-						GetWindowRect (GetDlgItem(hWndDlg,IDC_FIELDS),&Rect);
+						GetWindowRect(GetDlgItem(hWndDlg,IDC_FIELDS),&Rect);
 						ScreenRectToClientRect (hWndDlg,&Rect);
 				   		MoveWindow(GetDlgItem(hWndDlg,IDC_FIELDS), Rect.left,Rect.top, 2*(Rect.right-Rect.left), Rect.bottom-Rect.top, TRUE);
          				SendDlgItemMessage (hWndDlg,IDC_FIELDS,LB_SETTABSTOPS,2,(LPARAM)&TabStops);

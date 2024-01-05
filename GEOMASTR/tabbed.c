@@ -32,7 +32,7 @@ HWND WINAPI DoCreateDisplayWindow(HWND hwndParent)
 	RECT	parClientRect;
 	HWND	hwndStatic;
 
-	GetClientRect (hwndParent,&parClientRect);
+	GetClientRect(hwndParent,&parClientRect);
     hwndStatic = CreateWindow(TEXT("STATIC"), TEXT(""), 
         WS_CHILD | WS_VISIBLE | WS_BORDER, 
 		100,100,100,100,

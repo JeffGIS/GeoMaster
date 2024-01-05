@@ -2960,7 +2960,7 @@ NextPickItem:
 						if (PickList[NumPicked-1].Type == 1 || PickList[NumPicked-1].Type == 4)
 							pt=BasePtToScreenPt (&PickList[NumPicked-1].BeginPoint);
 						BoundsToScreenRect (&PickList[NumPicked-1].Rect,&SelectedItemRect);
-						//GetClientRect (hWnd,&ClientRect);
+						//GetClientRect(hWnd,&ClientRect);
 						//MidPt = RectMid (&ClientRect);
 						MidPt = RectMid (&CurView->ScreenRect);
 						if (!strncmp (pTxt,"|VM|",4))
@@ -2977,7 +2977,7 @@ NextPickItem:
 							RECT	ScreenRect;
 							HDC		hDC;
 
-							GetWindowRect (hWndMain,&ScreenRect);
+							GetWindowRect(hWndMain,&ScreenRect);
 							YellowTextBox(hWnd, pTxt, pt, &LastBoxRect, (LPRECT)1, FALSE, 0);
 							IntersectRect (&SelectedItemRect,&SelectedItemRect,&LastBoxRect);
 							w = LastBoxRect.right - LastBoxRect.left;
@@ -12676,7 +12676,7 @@ BOOL FAR PASCAL ADJUSTBITMAPCOLORSMsgProc(HWND hWndDlg, UINT Message, WPARAM wPa
 					MaxVal = max (MaxVal,Dist[i]); 
 				hWnd = GetDlgItem(hWndDlg,IDC_DISTRIBUTION);
 				hDC = GetDC (hWnd);  
-				GetClientRect (hWnd,&Rect);
+				GetClientRect(hWnd,&Rect);
 				height = Rect.bottom - Rect.top + 1;
 				width = Rect.right - Rect.left + 1;
 				Factor = (double)width / (double) MaxVal;    

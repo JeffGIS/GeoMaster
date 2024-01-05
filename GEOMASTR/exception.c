@@ -56,8 +56,8 @@ void AbendWriter (LPSTR Message,LPSTR Title,long at,int type)
 	strcpy (DateTime,ctime(&systime));
 	*strchr(DateTime,'\n') = 0;   
 	seconds = (GetTickCount64()-SysStartTime)/1000;
-	GetWindowRect (hWndMain,&WindRect);
-	GetClientRect (hWndMain,&ClientRect);
+	GetWindowRect(hWndMain,&WindRect);
+	GetClientRect(hWndMain,&ClientRect);
 	ShareEnabled = TRUE;
 	sprintf (msg,"\r\n\r\n%s\t%s\t%s\t%ld\t%ld\t%s\t%ld\t%lli\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i",
         DateTime,UserName,NodeName,seconds,NumScreensDisplayed,GMVersion,nTempFilesCleared,totAllocatedMem,

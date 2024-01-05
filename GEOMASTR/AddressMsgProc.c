@@ -1433,7 +1433,7 @@ ShowList1:
 			     EnableWindow (GetDlgItem(hWndDlg,IDC_SETTOUNMATCHABLE),FALSE);
 				 break;
            case IDCANCEL:      
-				 GetWindowRect (hWndDlg,&WindRect);
+				 GetWindowRect(hWndDlg,&WindRect);
                  DestroyWindow (hWndDlg);
 				 hWndAddEditHelper=0;
 				 ClearFullWindowBitmap (0);
@@ -3856,7 +3856,7 @@ BOOL FAR PASCAL INTERSECT_MATCH_EDITMsgProc(HWND hWndDlg, UINT Message, WPARAM w
                  /* and dismiss the dialog window returning FALSE       */
 				 CloseStreetNameTable();
 				 CloseNetIntersect (Opened);
-				 GetWindowRect (hWndDlg,&WindRect); 
+				 GetWindowRect(hWndDlg,&WindRect); 
 				 SetGlobalValueRect ("%INTMATCHEDITRECT",WindRect);
 				 DestroyWindow (hWndDlg);
 //                 EndDialog(hWndDlg, TRUE); 
@@ -4527,7 +4527,7 @@ BOOL FAR PASCAL ADD_MATCH_EDITMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam,
     	TotRecs = -1; 
 		NextMatchCode=0;
 		ShowWindow (hWndHidden,SW_HIDE);   
-		GetWindowRect (hWndDlg,&WindRect);
+		GetWindowRect(hWndDlg,&WindRect);
 		width = WindRect.right - WindRect.left;
 		height = WindRect.bottom - WindRect.top;
 		WindRect = GetGlobalRectVal ("[%ADDMATCHEDITRECT]",NULL); 
@@ -4582,7 +4582,7 @@ BOOL FAR PASCAL ADD_MATCH_EDITMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam,
 		 CloseNetIntersect (Opened); 
 		 CloseStreetPolys (OpenedSP);
 		 CloseZIPBounds (OpenedZB);   
-		 GetWindowRect (hWndDlg,&WindRect); 
+		 GetWindowRect(hWndDlg,&WindRect); 
 		 SetGlobalValueRect ("%ADDMATCHEDITRECT",WindRect);
 		 DestroySavedScreen (&hSaveVPScreen,SaveVPID);
     	 ClearSpecial ();
@@ -5949,7 +5949,7 @@ BOOL FAR PASCAL LOC_STREETMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPA
             case IDCANCEL:
 				 CloseStreetNameTable (); 
 				 ClearSpecial();
-				 GetWindowRect (hWndDlg,&WindRect);
+				 GetWindowRect(hWndDlg,&WindRect);
                  DestroyWindow (hWndDlg);
 				 hWndLocStreet=0;
                  break;

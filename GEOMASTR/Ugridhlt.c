@@ -92,7 +92,7 @@ int  TB_RedrawTable(HWND hWnd)
 	int	index = SendMessage (hWndList,LB_GETTOPINDEX,0,0);
 	RECT	Rect;
 
-	GetClientRect (hWnd,&Rect);
+	GetClientRect(hWnd,&Rect);
 	if (Rect.right <= Rect.left || Rect.bottom <= Rect.top)
 		return FALSE;
 	shrink = ((double)(Rect.right-Rect.left))/OriginalWidth;
@@ -116,7 +116,7 @@ void SetColPcts (BOOL Force)
 		HavePct = FALSE;
 	if (HavePct)
 		return;
-	GetClientRect (hWndList,&Rect);
+	GetClientRect(hWndList,&Rect);
 	listwidth = Rect.right - Rect.left;
 	for (i=0;i<ncols;i++)
 		colpct[i] = ((double)colw[i])/listwidth;
@@ -233,7 +233,7 @@ int TB_Subclass (HWND hWndDlg,UINT message,WPARAM wParam,LPARAM lParam)
 						hDC = GetDC (hWndSlider);
 						//SelectClipRgn (hDC,0);
 					    //SetDisplayMode (hDC, GF_TEXTMODE);
-						ii=GetClientRect (hWndSlider,&SliderRect);
+						ii=GetClientRect(hWndSlider,&SliderRect);
 						FontSize = (SliderRect.bottom-SliderRect.top)/2;
 						hFont = CreateFont(FontSize, 0, 0, 0, FW_NORMAL, 
     							0, 0, 0, 0, 0, 0, 0, 0,"Arial");   
@@ -278,7 +278,7 @@ int TB_Subclass (HWND hWndDlg,UINT message,WPARAM wParam,LPARAM lParam)
 						hDC = GetDC (hWndTotals);
 						//SelectClipRgn (hDC,0);
 					    //SetDisplayMode (hDC, GF_TEXTMODE);
-						ii=GetClientRect (hWndTotals,&TotalsRect);
+						ii=GetClientRect(hWndTotals,&TotalsRect);
 						InflateRect (&TotalsRect,0,-1);
 						FontSize = (TotalsRect.bottom-TotalsRect.top);
 						hFont = CreateFont(FontSize, 0, 0, 0, FW_NORMAL, 
@@ -938,7 +938,7 @@ RedrawTable:
 			//close the dialog  
 			Dock = 0;
 			if (!isMinMax)
-				GetWindowRect (hwnd,&WindRect);
+				GetWindowRect(hwnd,&WindRect);
 			if (IsDocked)
 			{
 				SetViewport(*pCommandViewport);

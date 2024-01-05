@@ -70,7 +70,7 @@ BOOL FAR PASCAL LOADWAYPOINTSMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, 
     case WM_TIMER: 
        	 KillTimer (hWndDlg,100);
     	 FirstPaint = FALSE;  
-       	 GetClientRect (GetDlgItem(hWndDlg,IDC_SHOWCOLOR),&Rect);
+       	 GetClientRect(GetDlgItem(hWndDlg,IDC_SHOWCOLOR),&Rect);
        	 hDC = GetDC (GetDlgItem(hWndDlg,IDC_SHOWCOLOR));
        	 FillRectPoly (hDC, &Rect,Color);
        	 ReleaseDC (GetDlgItem(hWndDlg,IDC_SHOWCOLOR),hDC);
@@ -102,7 +102,7 @@ BOOL FAR PASCAL LOADWAYPOINTSMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, 
          		COLORREF	NewColor=Color;
 			    if(GetColor(hWndDlg,&NewColor)) 
 			    	Color = NewColor; 
-				GetClientRect (GetDlgItem(hWndDlg,IDC_SHOWCOLOR),&Rect);
+				GetClientRect(GetDlgItem(hWndDlg,IDC_SHOWCOLOR),&Rect);
 				hDC = GetDC (GetDlgItem(hWndDlg,IDC_SHOWCOLOR));
 				FillRectPoly (hDC, &Rect,Color);
 				ReleaseDC (GetDlgItem(hWndDlg,IDC_SHOWCOLOR),hDC);
@@ -523,7 +523,7 @@ BOOL FAR PASCAL ADDWAYPOINTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LP
 				    	 CloseGWDatabase (hDBWP); 
 					 }  
 				 }
-				 GetWindowRect (hWndDlg,&WindRect);
+				 GetWindowRect(hWndDlg,&WindRect);
                  GSSiEndDialog(hWndDlg, TRUE,hSaveBM);
             	 break;
             
@@ -559,7 +559,7 @@ BOOL FAR PASCAL ADDWAYPOINTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LP
             	break;
             
             case IDCANCEL:
-				 GetWindowRect (hWndDlg,&WindRect);
+				 GetWindowRect(hWndDlg,&WindRect);
 //                 DestroyWindow (hWndDlg);
 				 hWndAddWaypoint=0;
 //				 FreeProcInstance((DLGPROC)ADDWAYPOINTMsgProc);

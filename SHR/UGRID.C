@@ -240,7 +240,7 @@ BOOL FAR PASCAL GMNGRID1DlgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARA
 				GMGridRect = ((LPVIEWPORT)lParam)->ScreenRect;
 			if (IsRectEmpty(&GMGridRect))
 			{
-				GetWindowRect (hWndDlg,&ParentRect);
+				GetWindowRect(hWndDlg,&ParentRect);
 				SetWindowPos(hWndDlg,HWND_TOP,Rect.left,Rect.top,
 					abs((tot-nCol*8)*2+4+windoff),
 					abs(ParentRect.bottom-ParentRect.top),0);
@@ -252,12 +252,12 @@ BOOL FAR PASCAL GMNGRID1DlgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARA
 					abs(ParentRect.right-ParentRect.left),
 						abs(ParentRect.bottom-ParentRect.top),0);
 			}
-			GetWindowRect (GetDlgItem (hWndDlg,IDC_HEADINGS),&Rect);
+			GetWindowRect(GetDlgItem (hWndDlg,IDC_HEADINGS),&Rect);
 			ScreenRectToClientRect (hWndDlg,&Rect);
 			SetWindowPos(GetDlgItem (hWndDlg,IDC_HEADINGS),HWND_TOP,Rect.left,Rect.top,
 				abs(ParentRect.right-ParentRect.left-windoff*2),
 				abs(Rect.bottom-Rect.top),0);
-			GetWindowRect (GetDlgItem (hWndDlg,IDC_RECORDLIST),&Rect);
+			GetWindowRect(GetDlgItem (hWndDlg,IDC_RECORDLIST),&Rect);
 			ScreenRectToClientRect (hWndDlg,&Rect);
 			SetWindowPos(GetDlgItem (hWndDlg,IDC_RECORDLIST),HWND_TOP,Rect.left,Rect.top,
 				abs(ParentRect.right - ParentRect.left - windoff*2),
@@ -553,7 +553,7 @@ NoSize:
 			//close the dialog
 //			EndDialog(hwnd,0);     
 			GSSiGlobFree (&hDLT);
-			GetWindowRect (hwnd,&WindRect);
+			GetWindowRect(hwnd,&WindRect);
 			DestroyWindow (hwnd);
 			return 0;
 		}

@@ -3778,7 +3778,7 @@ GetR:
 					MaxVal = max (MaxVal,Dist[i]); 
 				hWnd = GetDlgItem(hWndDlg,IDC_DISTRIBUTION);
 				hDC = GetDC (hWnd);  
-				GetClientRect (hWnd,&Rect);
+				GetClientRect(hWnd,&Rect);
 				height = Rect.bottom - Rect.top + 1;
 				width = Rect.right - Rect.left + 1;
 				Factor = (double)width / (double) MaxVal;    
@@ -7627,7 +7627,7 @@ GSSiExitProg (447);
 			HDC	hDC = GetDC (hWndMain);
 			RECT	WindowRect;
 					
-			GetWindowRect (hWndMain,&WindowRect);
+			GetWindowRect(hWndMain,&WindowRect);
 	        SelectClipRgn (hDC,0);
 			RestoreScreen (hDC,hFullWindowBitMap,WindowRect);	     
 			ReleaseDC (hWndMain,hDC);  
@@ -8464,7 +8464,7 @@ BOOL FAR PASCAL GET_POINTSYMMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, L
             		ltoa (Color,CurSymColor,10);
             		SetDlgItemText (hWndDlg,IDC_SYMCOLOR,CurSymColor);
 			    	PostMessage(hWndDlg, WM_COMMAND, IDC_SHOWSYM, 0L);
-			    	GetClientRect (hWnd,&Rect);
+			    	GetClientRect(hWnd,&Rect);
     				FillRectPoly (hDC,&Rect,Color); 
     				ReleaseDC (hWnd,hDC); 
             	}
@@ -8595,7 +8595,7 @@ BOOL FAR PASCAL GET_POINTSYMMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, L
 		            		
 		            		ltoa (Color,CurSymColor,10);
 					    	PostMessage(hWndDlg, WM_COMMAND, IDC_SHOWSYM, 0L);
-					    	GetClientRect (hWnd,&Rect);
+					    	GetClientRect(hWnd,&Rect);
 		    				FillRectPoly (hDC,&Rect,Color); 
 		    				ReleaseDC (hWnd,hDC); 
 		            	}
@@ -12622,7 +12622,7 @@ BOOL FAR PASCAL TAGEDITMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM
 		 SetDlgItemText(hWndDlg,IDC_SQL,(LPSTR)TAGBox.SQL);  
     	 SetDlgItemText(hWndDlg,TAG_TEXT,(LPSTR)TAGBox.text);
 		 SetDlgItemText(hWndDlg,IDC_PMFILE,(LPSTR)TAGBox.PickMacroFile);  
-   	 	 GetClientRect (CurView->hWnd,&Rect); 
+   	 	 GetClientRect(CurView->hWnd,&Rect); 
          SendDlgItemMessage (hWndDlg,IDC_TAGNAME,CB_RESETCONTENT,0,0);  
 		 ListTAGs(hWndDlg,IDC_TAGNAME);
    	 	 SetDlgItemText (hWndDlg,IDC_TAGNAME,TAGBox.Desc);
@@ -13248,7 +13248,7 @@ GSSiExitProg (1069);
 	         	 GSSiGlobFree (&hBMP);
 				 //sndPlaySound(0,SND_ASYNC);
              
-            	 GetClientRect (hWndDlg,&Rect);
+            	 GetClientRect(hWndDlg,&Rect);
             	 hDC = GetDC (hWndDlg);
 		         _fstrupr (FullBM);
 		         if (_fstrstr(FullBM,"INFOBOX")) 
@@ -13352,7 +13352,7 @@ GSSiExitProg (1069);
      			 if (!hBMP)
      			 	break;
 				 pbmi = (LPBITMAPINFO)GlobalLock (hBMP);
-            	 GetClientRect (hWndDlg,&Rect);
+            	 GetClientRect(hWndDlg,&Rect);
             	 if (Scale) 
             	 {
             	 	xrange = max(0,(pbmi->bmiHeader.biWidth/Scale - Rect.right)*Scale);
@@ -13368,7 +13368,7 @@ GSSiExitProg (1069);
                  break;
                  
             case IDC_DISPLAY:
-            	 GetClientRect (hWndDlg,&Rect);
+            	 GetClientRect(hWndDlg,&Rect);
             	 hDC = GetDC (hWndDlg); 
             	 xoff = GetScrollPos (hWndDlg, SB_HORZ);
             	 yoff = GetScrollPos (hWndDlg, SB_VERT);

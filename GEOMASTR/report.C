@@ -1629,7 +1629,7 @@ BOOL FAR PASCAL BROWSETEXTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPA
 		 width = abs(rect.right - rect.left)-6;
 	 	 SetWindowPos(hWndDlg, (HWND) 0, x+1, y+1,width, height,0); 
 	 	 GetClientRect(hWndDlg,&rect);  
-	 	 GetWindowRect (GetDlgItem(hWndDlg,IDC_SCROLLBOX),&sbrect);
+	 	 GetWindowRect(GetDlgItem(hWndDlg,IDC_SCROLLBOX),&sbrect);
 	 	 SetWindowPos(GetDlgItem(hWndDlg,IDC_SCROLLBOX),(HWND)0, sbrect.left, sbrect.top,abs(rect.right), abs(rect.bottom),0);
 		 PostMessage(hWndDlg, WM_COMMAND, IDOK, 0L);
 		}

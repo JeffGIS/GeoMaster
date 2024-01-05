@@ -2914,7 +2914,7 @@ BOOL ShowBufferedScreen (BOOL Display,BOOL resetDC,int VPID,LPRECT pUpdateRect)
 		if (VPID > 0)
 			Rect = pViewports[VPID-1]->ScreenRect;
 		else
-			GetClientRect (hWndMain,&Rect);
+			GetClientRect(hWndMain,&Rect);
 		if (!IsRectEmpty (&PromptRect))
 			SubtractRect (&Rect,&Rect,&PromptRect);
 		hRgnMain = CreateRectRgnIndirect (&Rect);  
@@ -2926,7 +2926,7 @@ BOOL ShowBufferedScreen (BOOL Display,BOOL resetDC,int VPID,LPRECT pUpdateRect)
 				HRGN	hRgn2;
 				int		TypeRegion;
 
-				GetWindowRect (pViewports[i]->hWndDlg,&Rect2);
+				GetWindowRect(pViewports[i]->hWndDlg,&Rect2);
 				ScreenRectToClientRect (hWndMain,&Rect2);
 				hRgn2 = CreateRectRgnIndirect (&Rect2);  
 				TypeRegion = CombineRgn (hRgnMain,hRgnMain,hRgn2,RGN_DIFF);
@@ -3985,8 +3985,8 @@ LRESULT CALLBACK NewEditProc (HWND hwnd, UINT message,
 					float	move=0.5;
 					POINT	MidPt;
 
-					GetClientRect (hWndMain,&ClientRect);
-					GetWindowRect (hwnd,&LBRect);
+					GetClientRect(hWndMain,&ClientRect);
+					GetWindowRect(hwnd,&LBRect);
 					MidPt = RectMid (&ClientRect);
 					MovePoint.x += LBRect.left;
 					MovePoint.y += LBRect.top;
@@ -4128,7 +4128,7 @@ BOOL FAR PASCAL VEHICLE_STATUSMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam,
 			break;
 		h = h/VehStatHeight;
 		h *= VehStatHeight;
-		GetWindowRect (GetDlgItem(hWndDlg,IDC_VEHDISPLAY_FENCE),&rect);
+		GetWindowRect(GetDlgItem(hWndDlg,IDC_VEHDISPLAY_FENCE),&rect);
 		ScreenRectToClientRect (hWndDlg,&rect);
 		SetWindowPos(GetDlgItem(hWndDlg,IDC_VEHICLE_STAT_LIST),HWND_TOP,0,rect.bottom+2,w-6,h,SWP_SHOWWINDOW|SWP_NOZORDER);
 		SendDlgItemMessage (hWndDlg,IDC_VEHICLE_STAT_LIST,LB_SETITEMHEIGHT,-1,MAKELPARAM(w/maxinrow,0));
@@ -4210,7 +4210,7 @@ BOOL FAR PASCAL VEHICLE_STATUSMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam,
  
         /* Set the height of the list box items. */
 			RECT	rect;
-			GetWindowRect (GetDlgItem(hWndDlg,IDC_VEHICLE_STAT_LIST),&rect);
+			GetWindowRect(GetDlgItem(hWndDlg,IDC_VEHICLE_STAT_LIST),&rect);
 		VehStatHeight = (VehStatusVP->ScreenRect.right - VehStatusVP->ScreenRect.left)/maxinrow;
 		VehStatHeight = (rect.right - rect.left)/maxinrow;
         lpmis->itemHeight = VehStatHeight;
@@ -4385,7 +4385,7 @@ BOOL FAR PASCAL VEHICLE_STATUSMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam,
 						int		width;
 						BOOL	DoChange=FALSE;
 
-						GetWindowRect (hWnd,&Rect);
+						GetWindowRect(hWnd,&Rect);
 						width = Rect.right - Rect.left;
 						Choice=SendDlgItemMessage(hWndDlg,LOWORD(wParam),LB_GETCURSEL,0,0); 
 						SendDlgItemMessage(hWndDlg,IDC_VEHICLE_STAT_LIST, LB_GETTEXT,Choice, (LPARAM) str); 
@@ -4706,7 +4706,7 @@ BOOL FAR PASCAL PROGRESS_MONITORINGMsgProc(HWND hWndDlg, UINT Message, WPARAM wP
 						int		width;
 						BOOL	DoChange=FALSE;
 
-						GetWindowRect (hWnd,&Rect);
+						GetWindowRect(hWnd,&Rect);
 						width = Rect.right - Rect.left;
 						Choice=SendDlgItemMessage(hWndDlg,LOWORD(wParam),LB_GETCURSEL,0,0); 
 						SendDlgItemMessage(hWndDlg,IDC_PMVEHLIST, LB_GETTEXT,Choice, (LPARAM) str); 

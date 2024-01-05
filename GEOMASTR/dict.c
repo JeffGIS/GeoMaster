@@ -6548,7 +6548,7 @@ BOOL DisplaySymInWindow (HWND hWnd,HDC hDCin,HANDLE hSymbol,short nElement,HANDL
 		hDC = GetDC (hWnd);
 	else
 		hDC = hDCin;
-	GetClientRect (hWnd,&Rect); 
+	GetClientRect(hWnd,&Rect); 
 	hRgn = CreateRectRgn(Rect.left,Rect.top,Rect.right,Rect.bottom);
   	SelectClipRgn (hDC,hRgn);
   	DeleteObject(hRgn);

@@ -2132,7 +2132,7 @@ BOOL FAR PASCAL RANCOLORMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARA
             case IDOK: 
             {
             	hDC = GetDC (GetDlgItem(hWndDlg,IDC_RANCOLORS));
-            	GetClientRect (GetDlgItem(hWndDlg,IDC_RANCOLORS),&ClientRect);
+            	GetClientRect(GetDlgItem(hWndDlg,IDC_RANCOLORS),&ClientRect);
 		        
 		        if ((Choice=SendDlgItemMessage(hWndDlg,IDC_NUMCOLORS,CB_GETCURSEL,0,0)))
 		        	CurView->NumRanColor = nums[Choice-1];
@@ -2440,32 +2440,32 @@ GSSiExitProg (1107);
     	}
  		w = max (MinWidth,abs(Rect.right - Rect.left));
 		h = min (MaxHeight,abs(Rect.bottom -Rect.top)); 
-        GetWindowRect (GetDlgItem (hWndDlg,IDOK),&OKRect);
+        GetWindowRect(GetDlgItem (hWndDlg,IDOK),&OKRect);
  		ScreenRectToClientRect (hWndDlg,&OKRect);
-        GetWindowRect (GetDlgItem (hWndDlg,IDCANCEL),&Rect);
+        GetWindowRect(GetDlgItem (hWndDlg,IDCANCEL),&Rect);
 		CancelWidth = RECTWIDTH (&Rect);
 		CancelHeight = RECTHEIGHT (&Rect);
 		MinWidth = 3 * CancelWidth;
-        GetWindowRect (GetDlgItem (hWndDlg,IDC_LIST),&Rect);
+        GetWindowRect(GetDlgItem (hWndDlg,IDC_LIST),&Rect);
 		CRect = Rect;
 		ScreenRectToClientRect (hWndDlg,&CRect);
-		GetWindowRect (hWndDlg,&Rect);
-		GetClientRect (hWndDlg,&CLRect);
+		GetWindowRect(hWndDlg,&Rect);
+		GetClientRect(hWndDlg,&CLRect);
 		incW = RECTWIDTH (&Rect) - RECTWIDTH (&CLRect);
 		incH = RECTHEIGHT (&Rect) - RECTHEIGHT (&CLRect);
 		MoveWindow(hWndDlg, Rect.left,Rect.top, w+2*CRect.left+incW,h+CRect.top+CRect.left*2+incH, FALSE);
        	cwCenter(hWndDlg, -2);   
 		SetWindowPos (GetDlgItem (hWndDlg,IDC_LIST),0,0,0,w,h,SWP_NOMOVE|SWP_NOZORDER);
-//       GetWindowRect (GetDlgItem (hWndDlg,IDC_LISTHEADER),&Rect);
+//       GetWindowRect(GetDlgItem (hWndDlg,IDC_LISTHEADER),&Rect);
 //		SetWindowPos (GetDlgItem (hWndDlg,IDC_LISTHEADER),0,0,0,w,RECTHEIGHT(&Rect),SWP_NOMOVE|SWP_NOZORDER);
-        GetWindowRect (GetDlgItem (hWndDlg,IDC_LIST),&Rect);
-        GetWindowRect (hWndDlg,&Rect2);
+        GetWindowRect(GetDlgItem (hWndDlg,IDC_LIST),&Rect);
+        GetWindowRect(hWndDlg,&Rect2);
 //		ClientRectToScreenRect (hWndMain,&Rect2);
 //		MoveWindow(hWndDlg, Rect2.left+4,Rect2.top+4, max(MinWidth,Rect.right-Rect2.left+5+Rect.left-Rect2.left),
 //													  min(MaxHeight,Rect.bottom-Rect2.top+Rect.top-Rect2.top+4), FALSE);
-/*        GetWindowRect (GetDlgItem (hWndDlg,IDCANCEL),&Rect);
+/*        GetWindowRect(GetDlgItem (hWndDlg,IDCANCEL),&Rect);
 		w = Rect.right - Rect.left;
-        GetWindowRect (hWndDlg,&Rect2);
+        GetWindowRect(hWndDlg,&Rect2);
         if (UseFile)
         {
 	        Rect.left = Rect2.right-5-(Rect.right-Rect.left);
@@ -2655,23 +2655,23 @@ GSSiExitProg (1107);
 		{
 			int margins1,margins2;
 
-			GetWindowRect (hWndDlg,&Rect2);
-			GetClientRect (hWndDlg,&cRectMain);
-			GetWindowRect (GetDlgItem (hWndDlg,IDC_LIST),&Rect3);
+			GetWindowRect(hWndDlg,&Rect2);
+			GetClientRect(hWndDlg,&cRectMain);
+			GetWindowRect(GetDlgItem (hWndDlg,IDC_LIST),&Rect3);
 			margins1 = RECTWIDTH (&cRectMain) - RECTWIDTH(&Rect3);
 			margins2 = RECTHEIGHT (&cRectMain) - RECTHEIGHT(&Rect3);
 			ScreenRectToClientRect (hWndDlg,&Rect3);
 			w = Rect.right - Rect.left;
 			h = Rect.bottom -Rect.top; 
 			MoveWindow(hWndDlg, Rect.left,Rect.top, w,h, FALSE);
-			GetClientRect (hWndDlg,&cRectMain);
+			GetClientRect(hWndDlg,&cRectMain);
 			MoveWindow(GetDlgItem (hWndDlg,IDC_LIST), Rect3.left,Rect3.top, w-margins1,RECTHEIGHT (&cRectMain)-margins2, FALSE);
-//			GetWindowRect (GetDlgItem (hWndDlg,IDC_LIST),&Rect);
-//			GetWindowRect (hWndDlg,&Rect2);
+//			GetWindowRect(GetDlgItem (hWndDlg,IDC_LIST),&Rect);
+//			GetWindowRect(hWndDlg,&Rect2);
 //			MoveWindow(hWndDlg, Rect2.left,Rect2.top, Rect.right-Rect2.left+5,Rect.bottom-Rect2.top+5, FALSE);
-			GetWindowRect (GetDlgItem (hWndDlg,IDCANCEL),&Rect);
+			GetWindowRect(GetDlgItem (hWndDlg,IDCANCEL),&Rect);
 			w = Rect.right - Rect.left;
-			GetWindowRect (hWndDlg,&Rect2);
+			GetWindowRect(hWndDlg,&Rect2);
 			Rect.left = Rect2.right-5-(Rect.right-Rect.left);
 			Rect.right = Rect.left + w;
 			ScreenRectToClientRect (hWndDlg,&Rect);
@@ -2802,12 +2802,12 @@ GSSiExitProg (1107);
 /*		w = Rect.right - Rect.left;
 		h = Rect.bottom -Rect.top; 
 		MoveWindow(GetDlgItem (hWndDlg,IDC_LIST), Rect.left,Rect.top, w,h, FALSE);
-        GetWindowRect (GetDlgItem (hWndDlg,IDC_LIST),&Rect);
-        GetWindowRect (hWndDlg,&Rect2);
+        GetWindowRect(GetDlgItem (hWndDlg,IDC_LIST),&Rect);
+        GetWindowRect(hWndDlg,&Rect2);
 		MoveWindow(hWndDlg, Rect2.left,Rect2.top, Rect.right-Rect2.left+5,Rect.bottom-Rect2.top+5, FALSE);
-        GetWindowRect (GetDlgItem (hWndDlg,IDCANCEL),&Rect);
+        GetWindowRect(GetDlgItem (hWndDlg,IDCANCEL),&Rect);
 		w = Rect.right - Rect.left;
-        GetWindowRect (hWndDlg,&Rect2);
+        GetWindowRect(hWndDlg,&Rect2);
         Rect.left = Rect2.right-5-(Rect.right-Rect.left);
         Rect.right = Rect.left + w;
 		ScreenRectToClientRect (hWndDlg,&Rect);
@@ -4814,9 +4814,9 @@ BOOL FAR PASCAL CONFIGLISTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPA
 						RECT	ImageRect, TextRect;
 						HDC		hDC;
 
-						GetWindowRect (GetDlgItem (hWndDlg,IDC_CFGDISPLAY),&ImageRect); 
+						GetWindowRect(GetDlgItem (hWndDlg,IDC_CFGDISPLAY),&ImageRect); 
 						ScreenRectToClientRect (hWndDlg,&ImageRect);
-    					GetWindowRect (GetDlgItem (hWndDlg,IDC_CFGDESC),&TextRect);
+    					GetWindowRect(GetDlgItem (hWndDlg,IDC_CFGDESC),&TextRect);
 						ScreenRectToClientRect (hWndDlg,&TextRect);
 						InflateRect (&TextRect,-4,-4);
 						hDC = GetDC (hWndDlg);
@@ -7981,7 +7981,7 @@ BOOL FAR PASCAL PNPARMSMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM
 				
 				Color = lParam;   
 				ColorRGB = RGBQUADFromCOLORREF (Color);
-				GetClientRect (hWnd,&Rect);
+				GetClientRect(hWnd,&Rect);
 				FillRectPoly(hDC, &Rect, Color);
 				ReleaseDC (hWnd,hDC);
 				break;
@@ -8121,7 +8121,7 @@ BOOL FAR PASCAL PNPARMSMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM
 				COLORREF	Color2;
 				
 				Color2 = RGB (SavePalette[i].rgbRed,SavePalette[i].rgbGreen,SavePalette[i].rgbBlue);
-				GetClientRect (hWnd,&Rect);
+				GetClientRect(hWnd,&Rect);
 				FillRectPoly(hDC, &Rect, Color2);
 				ReleaseDC (hWnd,hDC); 
 				sprintf (txt,"%i-%i-%i",GetRValue(Color2),GetGValue(Color2),GetBValue(Color2));

@@ -2672,7 +2672,7 @@ BOOL FAR PASCAL SQLWHEREMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARA
 							DLGPROC lpfnMsgProc; 
 							BOOL	nRc;    
 							
-					    	GetWindowRect (GetDlgItem(hWndDlg,IDC_GLOBALLIST),&Rect); 
+					    	GetWindowRect(GetDlgItem(hWndDlg,IDC_GLOBALLIST),&Rect); 
 					        DisplayFieldList (hWndDlg,0,&Rect,1,0);
 							_fstrcpy (SQLValOp,OPCODE[Choice]);
 							lpfnMsgProc = MakeProcInstance((DLGPROC)SQL_VALUEMsgProc, hInst);
@@ -2699,7 +2699,7 @@ BOOL FAR PASCAL SQLWHEREMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARA
 							char	DiaName[3][16]={"SQL_BETWEEN","SQL_LIKE","SQL_IN"};
 							FARPROC	MsgProc[3]={SQL_BETWEENMsgProc,SQL_LIKEMsgProc,SQL_INMsgProc};
 							
-					    	GetWindowRect (GetDlgItem(hWndDlg,IDC_GLOBALLIST),&Rect); 
+					    	GetWindowRect(GetDlgItem(hWndDlg,IDC_GLOBALLIST),&Rect); 
 					        DisplayFieldList (hWndDlg,0,&Rect,1,0);
 							lpfnMsgProc = MakeProcInstance((DLGPROC)MsgProc[i], hInst);
 							nRc = DialogBox(hInst, (LPSTR)DiaName[i], hWndDlg, lpfnMsgProc);

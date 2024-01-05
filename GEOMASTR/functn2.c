@@ -6170,7 +6170,7 @@ GSSiExitProg (1350);
            		goto RtnFalse; 
            	if (!_fstricmp (Arg[1],"CLIENT"))
            	{ 
-				GetClientRect (hWndMain,&Rect);   
+				GetClientRect(hWndMain,&Rect);   
 				ClientRectToScreenRect (CurView->hWnd,&Rect); 
 			}
 			if (*Arg[1]) 
@@ -6180,7 +6180,7 @@ GSSiExitProg (1350);
 				ClientRectToScreenRect (CurView->hWnd,&Rect);
 			}
 			else	
-				GetWindowRect (hWndMain,&Rect);   
+				GetWindowRect(hWndMain,&Rect);   
 			EmptyClipboard();
            	KeepMemLength = TRUE;  
 //			hStr = BitmapToDIB (hBM,0);
