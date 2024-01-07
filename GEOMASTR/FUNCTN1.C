@@ -466,12 +466,23 @@ GSSiExitProg (1348);
 				SetViewport (*pCommandViewport);
 			if (!CurView)
 				goto RtnFalse;	
-			if (!_fstrcmp (Arg[1],"EXISTS"))
-			{  
+			if (!_fstrcmp(Arg[1], "EXISTS"))
+			{
 				if (Err)
 					goto RtnFalse;
 				else
 					goto RtnTrue;
+			}
+			if (!_fstrcmp(Arg[1], "CLEAR"))
+			{
+				FillRectPoly(CurView->hDC, &CurView->DrawRect, CurView->BackGroundColor);
+				goto RtnTrue;
+			}
+			if (!_fstrcmp(Arg[1], "FILL"))
+			{
+				COLORREF color = atoll(Arg[3]);
+				FillRectPoly(CurView->hDC, &CurView->DrawRect, color);
+				goto RtnTrue;
 			}
 			if (!_fstrcmp (Arg[1],"SET"))
 			{   
@@ -677,7 +688,7 @@ GSSiExitProg (1348);
 				RECT clientRect;
 				GetClientRect(hWndMain, &clientRect);
 				screenRect = clientRect;
-				ClientRectToScreenRect(hWndMain, &screenRect);
+				//ClientRectToScreenRect(hWndMain, &screenRect);
 				HBITMAP hScreen = SaveScreen(hDC, screenRect);
 				HDIB32 hDIB32 = BitmapToDIB32(hScreen);
 				DeleteObject(hScreen);
@@ -704,7 +715,10 @@ GSSiExitProg (1348);
 				itoa(numFound, OutLoc, 10);
 				goto Rtnl;
 			}
-			else if (!strcmp(Arg[1], "COMBINE"))//$VP(COMBINE,outvpname,vpname1,vpname2,opt,color1,color2,color3)
+			else if (!strcmp(Arg[1], "COMBINE"))//$VP(COMBINE,outvpname,vpname1,vpname2;vpname3;etc,opt,color1,color2,color3)
+			/*
+			*	opt == 1: if (color vpname1 < min(color vpname2..vpnamen)) set outvpname == color 1 else color2
+			*/
 			{
 				COLORREF color1 = atoll(Arg[6]);
 				RGBQUAD outColor1 = COLORREFtoRGBQUAD(color1);
@@ -713,7 +727,9 @@ GSSiExitProg (1348);
 				COLORREF color3 = atoll(Arg[8]);
 				RGBQUAD outColor3 = COLORREFtoRGBQUAD(color3);
 				int opt = atoi(Arg[5]);
-				LPVIEWPORT outVP, inVP1, inVP2;
+#define MAX_VP2	8
+				LPVIEWPORT outVP, inVP1, inVP2[MAX_VP2];
+				int numvp2 = 0;
 				strcpy (OutLoc, "1");
 
 				outVP = CurView;
@@ -723,12 +739,20 @@ GSSiExitProg (1348);
 				else
 				{
 					inVP1 = CurView;
-					SetCurView(SetVPFromName(Arg[4], &Err));
+					LPSTR pVPName = Arg[4];
+					do
+					{
+						LPSTR pSC = strchr(pVPName, ';');
+						if (pSC)
+							*pSC++ = 0;
+						SetCurView(SetVPFromName(pVPName, &Err));
+						inVP2[numvp2++] = CurView;
+						pVPName = pSC;
+					} while (!Err && pVPName);
 					if (Err)
 						strcpy(OutLoc, "0");
 					else
 					{
-						inVP2 = CurView;
 						CurView = outVP;
 						HDC hDC = GetDC(hWndMain);
 						RECT screenRect;
@@ -750,19 +774,23 @@ GSSiExitProg (1348);
 								DPOINT wpt = WinPtToBasePt(pt);
 								CurView = inVP1;
 								POINT pt1 = BasePtToWinPt(&wpt);
-								COLORREF c1, c2;
+								COLORREF c1, c2=MAXDWORD;
 								COLORREF white = RGB(255, 255, 255);
 								RGBQUAD c14;
 								FreeImage_GetPixelColor(hDIB32, pt1.x,pDibInfo->biHeight - pt1.y, &c14);
-								CurView = inVP2;
-								POINT pt2 = BasePtToWinPt(&wpt);
-								RGBQUAD c24;
-								FreeImage_GetPixelColor(hDIB32, pt2.x, pDibInfo->biHeight - pt2.y, &c24);
-								CurView = outVP;
 								RGBTRIPLE c13 = RGBQuadToRGBTriple(c14);
-								RGBTRIPLE c23 = RGBQuadToRGBTriple(c24);
 								c1 = RGBTRIPLEToCOLORREF(c13);
-								c2 = RGBTRIPLEToCOLORREF(c23);
+								for (int ivp = 0; ivp < numvp2; ivp++)
+								{
+									CurView = inVP2[ivp];
+									POINT pt2 = BasePtToWinPt(&wpt);
+									RGBQUAD c24;
+									FreeImage_GetPixelColor(hDIB32, pt2.x, pDibInfo->biHeight - pt2.y, &c24);
+									RGBTRIPLE c23 = RGBQuadToRGBTriple(c24);
+									COLORREF c = RGBTRIPLEToCOLORREF(c23);
+									c2 = min(c2, c);
+								}
+								CurView = outVP;
 
 								switch (opt)
 								{

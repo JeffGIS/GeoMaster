@@ -24,7 +24,7 @@ BOOL RecoverBadFile (void);
 
 BOOL CreatePrintBitmap(HWND hWnd);
 int SetLastMessage(long mes, WPARAM wParam);
-
+RECT lastRect;
 int PASCAL WinMainGeoMaster(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow);
 int  APIENTRY  WinMainGMEdit(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow);
 int  APIENTRY  WinMainGMDoc(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow);
@@ -981,7 +981,7 @@ void ExpandDL (void)
 	ExpandText(str);
 	if (*str && FileType(str) == 2)
 	{
-		strcpy(str, "[%USERDIR]geomastr.ini");
+		strcpy(str, "[%USERDIR]\\geomastr.ini");
 		ExpandText(str);
 	}
 	else
@@ -2003,15 +2003,16 @@ GSSiExitProg (437);
 				 winh = 0;
 				 winx = CW_USEDEFAULT;
 				 winy = 0;
+				 GetWindowRect(GetDesktopWindow(), &lastRect);
 			 }
 			 else
 			 {
 				 BOOL err;
-				 RECT rect = atorect(value, &err);
-				 winx = rect.left;
-				 winy = rect.top;
-				 winw = RECTWIDTH (&rect);
-				 winh = RECTHEIGHT (&rect);
+				 lastRect = atorect(value, &err);
+				 winx = lastRect.left;
+				 winy = lastRect.top;
+				 winw = RECTWIDTH (&lastRect);
+				 winh = RECTHEIGHT (&lastRect);
 			 }
 		}
 	 }
@@ -2092,7 +2093,7 @@ GSSiExitProg (437);
 	 }
 
  }
-
+ MoveWindow(hWndMain, lastRect.left, lastRect.top, RECTWIDTH (&lastRect), RECTHEIGHT(&lastRect), FALSE);
  
    PromptFocus = hWndMain;
     {
@@ -5541,9 +5542,31 @@ DisplayParcel:
 		break;
 	case WM_ENABLE:
 		goto ReturnDefault;
-//	case WM_NCCALCSIZE:
-//		ii=1;
-//		break;
+		/*	case WM_NCCALCSIZE:
+		if (wParam)
+		{
+			NCCALCSIZE_PARAMS pNCS = *(NCCALCSIZE_PARAMS*)lParam;
+			DWORD rtn = WVR_ALIGNLEFT | WVR_ALIGNTOP| WVR_VALIDRECTS|WVR_REDRAW;
+			return rtn;
+		}
+		break;
+		
+	{
+		if (!wParam)
+		{
+			RECT screenRect;
+			GetWindowRect(hWnd, &screenRect);
+			RECT clientRect;
+			GetClientRect(hWnd, &clientRect);
+			ClientRectToScreenRect(hWnd, &clientRect);
+			//clientRect.top += 50;
+			//clientRect.left += 50;
+			LPRECT pRect = (LPRECT)lParam;
+			*pRect = clientRect;
+			ii = 1;
+		}
+	}
+		break;*/
 //	case WM_NCACTIVATE:
 //		ii=1;
 //		break;

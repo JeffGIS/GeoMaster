@@ -215,12 +215,12 @@ GSSiExitProg (455);
 }
 #endif
 }
-BOOL ProcessGraphicsFunction (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
+UINT ProcessGraphicsFunction (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (1338);
 #endif
 {   
-	UINT st;
+	UINT st=0;
 	int		CmdLim;
 	LPCMDSTRING    pCmdStr;
    	HCURSOR	hcurSave=0; 
@@ -376,7 +376,7 @@ GSSiExitProg (1338);
 #if ENABLETRACE
 GSSiExitProg (1338);
 #endif
-		return TRUE;  
+		return st;  
 }
 	if (Message == GF_CLOSE)
 	{

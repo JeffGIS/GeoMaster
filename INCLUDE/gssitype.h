@@ -4488,6 +4488,12 @@ BOOL WINAPI GSSiSetWorldTransform( __in HDC hdc, __in CONST XFORM * lpxf);
 BOOL WINAPI GSSiMoveWindow(__in HWND hWnd,__in int X,__in int Y,__in int nWidth,__in int nHeight,__in BOOL bRepaint);
 #define SetWindowPos GSSiSetWindowPos
 BOOL WINAPI GSSiSetWindowPos(__in HWND hWnd,__in_opt HWND hWndInsertAfter,__in int X,__in int Y,__in int cx,__in int cy,__in UINT uFlags);
+#define GetClientRect GSSiGetClientRect
+BOOL GSSiGetClientRect(HWND hWnd, LPRECT Rect);
+#define GetWindowRect GSSiGetWindowRect
+BOOL GSSiGetWindowRect(HWND hWnd, LPRECT Rect);
+#define ShowWindow GSSiShowWindow
+BOOL GSSiShowWindow(_In_ HWND hWnd,_In_ int nCmdShow);
 #define SetTimer	GSSiSetTimer
 UINT_PTR WINAPI GSSiSetTimer( __in_opt HWND hWnd,__in UINT_PTR nIDEvent,__in UINT uElapse,__in_opt TIMERPROC lpTimerFunc);
 #define KillTimer	GSSiKillTimer

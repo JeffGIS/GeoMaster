@@ -2364,11 +2364,12 @@ GSSiExitProg (1093);
 }
 #endif
 }
-void AddGraphicsCmd (HWND hWnd,LPSTR Cmd,BOOL Keydef, UINT StartPrompt)
+UINT AddGraphicsCmd (HWND hWnd,LPSTR Cmd,BOOL Keydef, UINT StartPrompt)
 #if ENABLETRACE
 {GSSiEnterProg (1094);
 #endif
 {   
+	UINT rtn = 0;
 	USHORT	len=_fstrlen(Cmd);
 	HANDLE	hCmd = GSSiGlobAlloc (1058,GHND,len+sizeof(CMDSTRING)+1);
 	LPCMDSTRING    pCmdStrPrev,pCmdStr = (LPCMDSTRING)GlobalLock (hCmd);  
@@ -2440,7 +2441,7 @@ void AddGraphicsCmd (HWND hWnd,LPSTR Cmd,BOOL Keydef, UINT StartPrompt)
 #if ENABLETRACE
 GSSiExitProg (1094);
 #endif
-    return;
+    return rtn;
 }
 #if ENABLETRACE
 }

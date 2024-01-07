@@ -1132,21 +1132,43 @@ GSSiExitProg (1348);
 			goto RtnTrue;
 		}
 
-		case 312: /* $CMD(cmdid) invokes menu command */
+		case 312: /* $CMD(cmdid,vpname,WaitForNCompletions) invokes menu command */
 		{	
-			nArgs = GetFunArgs(Args, Arg, -2, &hMem, pBrkPt, bpOffset, bpLen);
+			int nCompletions = 0;
+			int waitForNCompletions = 0;
+
+			nArgs = GetFunArgs(Args, Arg, -3, &hMem, pBrkPt, bpOffset, bpLen);
 			ICmd = GetCmdID (Arg[1],0); 
 			if (!ICmd && strchr (Arg[1],';'))
 				ICmd = -1;
-			ExpandText (Arg[2]);
+			ExpandText(Arg[2]);
+			ExpandText(Arg[3]);
 			if (!*Arg[2])
 				SetViewport (*pCommandViewport);  
 			else
 				SetCurView ( SetVPFromName (Arg[2],&Err));
 			if (ICmd < 0)
-			{   
+			{
+				UINT st;
+				waitForNCompletions = atoi(Arg[3]);
 				ICmd = -ICmd;
-				AddGraphicsCmd (CurView->hWnd,Arg[1],FALSE,0); 
+				st = AddGraphicsCmd (CurView->hWnd,Arg[1],FALSE,0); 
+				while (waitForNCompletions)
+				{
+					MSG msg;
+					st = AddGraphicsCmd(CurView->hWnd, Arg[1], FALSE, 0);
+					while (GSSiPeekMessage(&msg, CurView->hWnd, 0, 0, PM_REMOVE))
+					{
+						if (msg.message == WM_KEYDOWN && msg.wParam == VK_ESCAPE)
+							waitForNCompletions = 0;
+						else
+						{
+							st = ProcessGraphicsFunction(CurView->hWnd, msg.message, msg.wParam, msg.lParam);
+							if (st == GF_INCREASE_SUCCESS_COUNT)
+								waitForNCompletions--;
+						}
+					}
+				}
 				if (ConfigID == SaveConfigID)
 					SetCurView ( SaveVP);   
 				else

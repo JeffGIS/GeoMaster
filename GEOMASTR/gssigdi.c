@@ -1395,6 +1395,28 @@ HBITMAP WINAPI GSSiCREATEDIBSECTION (HDC hDC,BITMAPINFO *lpbmi,UINT usage, VOID 
 	return rtn;
 } 
 
+BOOL GSSiGetClientRect(HWND hWnd, LPRECT Rect)
+{
+	BOOL rtn = TRUE;
+
+	rtn = GetClientRect(hWnd, Rect);
+	return rtn;
+}
+BOOL GSSiGetWindowRect(HWND hWnd, LPRECT Rect)
+{
+	BOOL rtn = TRUE;
+
+	rtn = GetWindowRect(hWnd, Rect);
+	return rtn;
+}
+BOOL GSSiShowWindow(_In_ HWND hWnd, _In_ int nCmdShow)
+{
+//	if (nCmdShow == SW_SHOWMAXIMIZED)
+//		nCmdShow = SW_NORMAL;
+	return ShowWindow(hWnd, nCmdShow);
+}
+
+
 BOOL WINAPI GSSiMoveWindow(__in HWND hWnd,__in int X,__in int Y,__in int nWidth,__in int nHeight,__in BOOL bRepaint)
 {
 	return MoveWindow (hWnd,X,Y,nWidth,nHeight,bRepaint);
