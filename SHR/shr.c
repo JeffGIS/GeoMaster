@@ -7409,35 +7409,24 @@ GSSiExitProg (294);
 #endif
 }     
            
-BOOL atob (LPSTR Value)
-#if ENABLETRACE
-{GSSiEnterProg (295);
-#endif  
+int atob (LPSTR Value)
 { 
 	if (!*Value)
-{
-#if ENABLETRACE
-GSSiExitProg (295);
-#endif
-	return FALSE;
-}
-	if (!_fstrcspn (Value," 0FfNn"))
-{
-#if ENABLETRACE
-GSSiExitProg (295);
-#endif
 		return FALSE;
+	if (strlen(Value) == 1)
+	{
+		if (strchr(" 0FfNn", *Value))
+		{
+			return FALSE;
+		}
+		if (strchr("1TtYy", *Value))
+		{
+			return TRUE;
+		}
+	}
+	int rtn = atoi(Value);
+	return rtn;
 }
-{
-#if ENABLETRACE
-GSSiExitProg (295);
-#endif
-	return TRUE;
-}
-#if ENABLETRACE
-}
-#endif
-}  
 void lltoa(long long l, LPSTR loc, int rad)
 {
 	sprintf(loc, "%I64i", l);
@@ -13487,7 +13476,16 @@ RECT MoveRect(LPRECT Rect, int xinc, int yinc)
 	OutRect.bottom += yinc;
 	return OutRect;
 }
+RECT MultiplyRect(LPRECT Rect, double Factor)
+{
+	RECT OutRect = *Rect;
 
+	OutRect.left *= Factor;
+	OutRect.right *= Factor;
+	OutRect.top *= Factor;
+	OutRect.bottom *= Factor;
+	return OutRect;
+}
 RECT FactorRect (LPRECT pRect,double Factor)
 {
 	RECT OutRect;  

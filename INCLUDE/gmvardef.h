@@ -56,7 +56,7 @@ short	AddUDIVarIndex;
 long	debugvalue=0;
 LPVOID	debugaddress=0; 
 BOOL	dbug=FALSE;   
-BOOL	BufferedScreen=FALSE; 
+int		BufferedScreen=FALSE; 
 HDC		hDCScreenBuffer=0;
 HBITMAP	hBitmapScreenBuffer=0;  
 BOOL	DisplayPartialBuffer=FALSE;

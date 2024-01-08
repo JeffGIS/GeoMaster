@@ -3641,7 +3641,7 @@ BOOL ClipMap (HWND hWnd, LPSTR Name,short SizeOpt,short FormatOpt)
 	HDIB32	hDib32;
 	DPOINT BitmapPoint[2], WorldPoint[2];
 	double	ScaleX, ScaleY; 
-	BOOL	SaveBS = BufferedScreen;
+	int		SaveBS = BufferedScreen;
 	RECT	CRect;
 	RECT	SaveConfigDisplayRect = ConfigDisplayRect;
 	double	SaveDeviceToScreenFactor = DeviceToScreenFactorMemMap;

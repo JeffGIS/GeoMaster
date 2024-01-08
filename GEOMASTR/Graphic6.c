@@ -161,9 +161,9 @@ HDC ScreenBufferDC (HWND hWnd,HDC hDC)
 	}
 	//if (MapServer || (!IsIconic(hWndMain) && !EqualRect(&Rect, &CurrentBufferRect)))
 	if (!IsIconic(hWndMain) && !EqualRect(&Rect, &CurrentBufferRect))
-		{
+	{
 		BITMAP bm;
-		CurrentBufferRect = Rect;
+		CurrentBufferRect = MultiplyRect(&Rect, BufferedScreen);
 		curProgID = 10011;
 		hBitmapScreenBuffer = CreateCompatibleBitmap(hDCMain, RECTWIDTH(&CurrentBufferRect),RECTHEIGHT(&CurrentBufferRect));
 		if (!hBitmapScreenBuffer)

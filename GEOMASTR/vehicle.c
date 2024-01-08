@@ -3383,7 +3383,7 @@ NextVeh:
 		if (!stricmp (pViewports[i]->Name,"Post Vehicle Viewport"))
 		{
 			static ii=1;
-			BOOL	SaveBufferedScreen = BufferedScreen;
+			int	SaveBufferedScreen = BufferedScreen;
 
 			SetViewport (i+1);
 			BufferedScreen=FALSE;

@@ -47,7 +47,7 @@ extern short			AddUDIVarIndex;
 extern long			debugvalue;
 extern LPVOID		debugaddress;   
 extern BOOL			dbug;
-extern BOOL			BufferedScreen;
+extern int			BufferedScreen;
 extern BOOL			DisplayPartialBuffer;
 extern HDC			hDCScreenBuffer;
 extern HBITMAP			hBitmapScreenBuffer;   
