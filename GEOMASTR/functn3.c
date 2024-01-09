@@ -4566,12 +4566,18 @@ GotCloseFilehSQL:
 			{
 				if (strchr (Arg[2],'\\'))
 				{
-					HDIB32 hDib32;
-
+					GdiFlush();
 					GetWindowRect(hWndMain,&Rect); 
-					hDib32 = CopyScreenToDIB32 (&Rect); 
-					SaveDIB32 (hDib32,Arg[2],FIF_TIFF,TIFF_ADOBE_DEFLATE);
-					GMDestroyDIB32 (hDib32); 
+					HDC hDC = GetDC(hWndMain);
+					HBITMAP hScreen = SaveScreen(hDC, Rect);
+					ReleaseDC(hWndMain, hDC);
+					HDIB32 hDIB32 = BitmapToDIB32(hScreen);
+					DeleteObject(hScreen);
+					LPBITMAPINFOHEADER pDibInfo = (LPBITMAPINFOHEADER)GetDibHeader(hDIB32);
+					HDIB32 hDIB24 = GSSiFreeImage_ConvertTo24Bits(hDIB32);
+					SaveDIB32 (hDIB24,Arg[2], 0, 0);
+					GMDestroyDIB32 (hDIB32);
+					GMDestroyDIB32 (hDIB24);
 				}
 				else
 				{

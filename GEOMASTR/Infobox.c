@@ -657,7 +657,7 @@ BOOL ResetTAGBox (HDC hDC,short From)
 	TAGBox.before=0;
 	TAGBox.after=0;
 	ScreenPoint = TAGPtToWinPt (TAGBox.center);
-	if (TAGBox.CoordStyle == 2 || TAGBox.CoordStyle == 4)
+	if (TAGBox.CoordStyle == IB_COORD_TYPE_WINDOW || TAGBox.CoordStyle == IB_COORD_TYPE_YELLOWTB)
 		TAGBox.TAGPointScr = TAGPtToWinPt (TAGBox.TAGPoint);
 	else
 		TAGBox.TAGPointScr = BasePtToWinPt (&TAGBox.TAGPoint);
@@ -1491,22 +1491,22 @@ POINT TAGPtToWinPt (DPOINT TagPoint)
 	switch (TAGBox.CoordStyle)
 	{
 	default:
-		case 0:
+		case IB_COORD_TYPE_WORLD:
 	    	return (BasePtToWinPt (&TagPoint));
 	    	break;
-	    case 1:
+	    case IB_COORD_TYPE_VIEWPORT:
 	    	Point.x = CurView->Rect.left + TagPoint.x * (CurView->Rect.right - CurView->Rect.left);
 	    	Point.y = CurView->Rect.top - TagPoint.y * (CurView->Rect.top - CurView->Rect.bottom);
 	    	break;  
-	    case 2:
+	    case IB_COORD_TYPE_WINDOW:
 	    	Point.x = MainRect.left + TagPoint.x * (MainRect.right - MainRect.left);
 	    	Point.y = MainRect.top - TagPoint.y * (MainRect.top - MainRect.bottom);
 	    	break;
-	    case 4://same as 2 but based on client rect instead of mainrect 
+	    case IB_COORD_TYPE_YELLOWTB://same as 2 but based on client rect instead of mainrect 
 	    	Point.x = ClientRect.left + TagPoint.x * (ClientRect.right - ClientRect.left);
 	    	Point.y = ClientRect.top - TagPoint.y * (ClientRect.top - ClientRect.bottom);
 	    	break;
-	    case 3:
+	    case IB_COORD_TYPE_INFOBOX:
 	    	Point.x = TagPoint.x;
 	    	Point.y = TagPoint.y;
 	    	break;
@@ -1523,10 +1523,10 @@ DPOINT WinPtToTAGPt (POINT WinPoint)
 	switch (TAGBox.CoordStyle)
 	{
 	default:
-	case 0:
+		case IB_COORD_TYPE_WORLD:
 	    	return (WinPtToBasePt (WinPoint));
 	    	break;
-	    case 1:
+	    case IB_COORD_TYPE_VIEWPORT:
 	    	width = CurView->Rect.right - CurView->Rect.left;
 	    	height =  CurView->Rect.top - CurView->Rect.bottom; 
 	    	if (!width || !height)
@@ -1540,8 +1540,8 @@ DPOINT WinPtToTAGPt (POINT WinPoint)
 		    	Point.y =  (double)(CurView->Rect.top-WinPoint.y)/height;
 	    	}
 	    	break; 
-	    case 2:   
-	    case 4:
+	    case IB_COORD_TYPE_WINDOW:
+	    case IB_COORD_TYPE_YELLOWTB:
 	    {
 	    	RECT	Rect;
 	    	
@@ -1564,7 +1564,7 @@ DPOINT WinPtToTAGPt (POINT WinPoint)
 	    	}
 	    	break;
 	    }	
-	    case 3:
+	    case IB_COORD_TYPE_INFOBOX:
 	    	Point.x = WinPoint.x;
 	    	Point.y = WinPoint.y;
 	    	break;
@@ -1949,8 +1949,19 @@ void ClearTAGs()
 void DisplayTAGs(HDC hDC)
 {
 	if (!CurrentConfig || DoSave) return;
-	DisplayTAGs2 (hDC,0,0);
-	SaveFullWindowBitmap (hWndMain);
+	DisplayTAGs2(hDC, 0, 0);
+	SaveFullWindowBitmap(hWndMain);
+	return;
+}
+void DisplayAllTAGs(HDC hDC)
+{
+	LPVIEWPORT pVP = CurView;
+	for (int iv = 0; iv < *pNumViewports; iv++)
+	{
+		SetViewport(iv + 1);
+		DisplayTAGs(CurView->hDC);
+	}
+	CurView = pVP;
 	return;
 }
 
@@ -1961,7 +1972,7 @@ void DisplayTAGs2 (HDC hDC,short From,short StartID)
 	int		InVP=0;
 
 	if (!TagFile[0]) return;
-
+	if (hideInfoBoxes) return;
     NumTags=0;
     TBNum = 0;
 Restart:
@@ -1999,13 +2010,29 @@ Restart:
 			{
 				if (TAGBox.Flags.UseOrigSize)
 				{
-					SetViewport (TAGBox.ViewportID);   
-					if (CurView->DisplayInParent && CurView->Parent)            	
+					SetViewport(TAGBox.ViewportID);
+					if (CurView->DisplayInParent && CurView->Parent)
 						SetViewport(CurView->Parent);
-                }
+				}
 				else
 					goto Next;
-			} 
+			}
+			else if (TAGBox.ViewportID < 0)
+				goto Next;
+		}
+		if (From == 5)
+		{
+			if (TAGBox.CoordStyle != 2 && TAGBox.CoordStyle != 4)
+			{
+				if (TAGBox.Flags.UseOrigSize)
+				{
+					SetViewport(TAGBox.ViewportID);
+					if (CurView->DisplayInParent && CurView->Parent)
+						SetViewport(CurView->Parent);
+				}
+				else
+					goto Next;
+			}
 			else if (TAGBox.ViewportID < 0)
 				goto Next;
 		}
@@ -2020,7 +2047,7 @@ Restart:
 		else if (TAGBox.CoordStyle == 2 || TAGBox.CoordStyle == 4)
 			goto Next;
 	    TAGBox.before=0;
-		if (CurView && ((TAGBox.CoordStyle == 2 || TAGBox.CoordStyle == 4) && From == 3) || (CurView->ID == TAGBox.ViewportID && CurViewActive()))
+		if (CurView && From == 5 || ((TAGBox.CoordStyle == IB_COORD_TYPE_WINDOW || TAGBox.CoordStyle == 4) && From == 3) || (CurView->ID == TAGBox.ViewportID && CurViewActive()))
 		{   
 			if (From && !TAGBox.CoordStyle)
 				goto Next;

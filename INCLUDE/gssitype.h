@@ -272,6 +272,13 @@ typedef OFSTRUCT *LPOFSTRUCT;
 #define DTM_RENDER_SLOPE_POLYGONS	4                   
 #define DTM_RENDER_CONTOURS			5                  
 
+#define IB_COORD_TYPE_WORLD 0
+#define IB_COORD_TYPE_VIEWPORT 1
+#define IB_COORD_TYPE_WINDOW 2
+#define IB_COORD_TYPE_INFOBOX 3
+#define IB_COORD_TYPE_YELLOWTB 4
+
+
 /* Handle to a DIB */
 #define HDIB HANDLE
 

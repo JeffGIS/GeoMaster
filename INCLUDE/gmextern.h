@@ -138,6 +138,7 @@ extern short			StartGEOSPANvp;
 extern short			NetMarkTimer;
 extern short			StreetEditTimer;
 extern short			EditInfoBox;
+extern BOOL			hideInfoBoxes;
 extern short			InfoBoxEditTimer;
 extern short			ConfigLevel;  
 extern long			ConfigID;

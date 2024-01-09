@@ -672,6 +672,7 @@ int GetSymbolNames (int Desc, LPHANDLE phNames, int From);
 int	GetSymbolNum (LPSTR Name);
 BOOL GetTAG (LONG Refno, LPSTR TAG);
 void DisplayTAGs(HDC hDC);
+void DisplayAllTAGs(HDC hDC);
 void DisplayTAGs2 (HDC hDC,short From,short StartID);
 void RestoreTAG(HDC hDC);
 void SaveTAG(int PickNum);

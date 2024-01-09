@@ -289,6 +289,7 @@ short	NetMarkTimer=0;
 short	StreetEditTimer=0;
 short	InfoBoxEditTimer=0;
 short	EditInfoBox;
+BOOL	hideInfoBoxes = FALSE;
 HANDLE	hSpecial=0;
 HANDLE	hRedLine=0;
 HANDLE	hLastCmd=0;

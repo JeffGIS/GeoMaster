@@ -725,19 +725,25 @@ int	GetFunctionValue7(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, 
 		short	factor, width, item = -1;
 
 		nArgs = GetFunArgs(Args, Arg, 6, &hMem, pBrkPt, bpOffset, bpLen);
+		if (!_fstricmp(Arg[1], "HIDE"))
+		{
+			hideInfoBoxes = TRUE;
+			goto RtnTrue;
+		}
+		if (!_fstricmp(Arg[1], "DISPLAY"))
+		{
+			HDC hDC = GetWindowDC(hWndMain);
+			hideInfoBoxes = FALSE;
+			DisplayAllTAGs(hDC);
+			ReleaseDC(hWndMain, hDC);
+			goto RtnTrue;
+		}
 		if (nArgs < 2)
 			goto RtnFalse;
 		if (!_fstricmp(Arg[1], "LOAD"))
 		{
 			if (LoadInfoBox(Arg[2], &TAGBox))
 				goto RtnTrue;
-		}
-		if (!_fstricmp(Arg[1], "DISPLAY"))
-		{
-			HDC hDC = GetWindowDC(hWndMain);
-			DisplayTAGs(hDC);
-			ReleaseDC(hWndMain,hDC);
-			goto RtnTrue;
 		}
 		if (!_fstricmp(Arg[1], "DELETE"))
 		{
