@@ -2406,7 +2406,7 @@ void ImediateProcessing (BOOL Imediate,BOOL Final)
         Continue=TRUE; 
         InImediate = TRUE;
 		memset (&SZmsg,0,sizeof(SZmsg));
-        while (Continue && ContinueProcessing)
+        while (Continue && ContinueProcessing && CurView)
         {   
             if (OpenMap (CurView->hWnd,CurView->hDC))
             {   
