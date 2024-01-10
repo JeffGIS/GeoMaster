@@ -1,2 +1,2 @@
-h:\MplsRemoteTemplate\GeoMas\configs\jeff\fgdb_text_problem3.gmc /F /DNC [PARMFILE]=c:\temp\parmfile.txt; 
+configs\basemap_remote.gmc /F [%USERLEV]=2;[%IGNORESYSMSG]=T;[%WantBackgroundCache]=F;[%ALLOWCACHE]=F; 
 h:\MplsRemoteTemplate\GeoMas

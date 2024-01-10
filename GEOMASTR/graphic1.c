@@ -4728,7 +4728,7 @@ void PaintMap (HWND hWnd, HDC hDC,BOOL ImediateIn,LPRECT pUpdateRect,int From)
 { 
     static  BOOL    First=TRUE;  
     BOOL	Imediate=ImediateIn;
-	BOOL	SaveInImediate = InImediate;
+//	BOOL	SaveInImediate = InImediate;
     RECT	IntRect, rect;   
 	int		i;
     
@@ -4777,9 +4777,7 @@ Top:
     DisplayCycle++;
     TotCopySize = 0;
 	PrevLayerVP=0;
-	SaveInImediate = InImediate;
-	if (SaveInImediate)
-		ii=1;
+	//SaveInImediate = InImediate;
     InImediate = Imediate;
 	if (!NumViewportsArray[0])
 	{
@@ -5009,7 +5007,7 @@ Exit:
 		PostMessage (hWndBGUpdateMsg,WM_COMMAND,IDOK,0);
 	DisplayVPDialogs (TRUE);
 	DrawMenuBar (hWnd);
-	InImediate = SaveInImediate;
+	//InImediate = SaveInImediate;
 	if (InImediate)
 		ii=1;
 {
