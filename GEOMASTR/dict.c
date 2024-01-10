@@ -5904,12 +5904,26 @@ void DisplayPoint (HDC hDC,POINT Point)
 	RestoreDC (hDC,-1);
 	return;
 }
-
+void RectAtPoint(HDC hDC, HPFPOINT pt, COLORREF color)
+{
+	RECT rect;
+	rect.left = pt->x;
+	rect.top = pt->y;
+	rect.right = pt->x + 8;
+	rect.bottom = pt->y + 8;
+	FillRectColor(hDC, &rect, color);
+}
 int GWPolylineD (HDC hDC, HPDPOINT lpPoints, long npnts,int idesc)
 #if ENABLETRACE
 {GSSiEnterProg (989);
 #endif
 {
+	BOOL showNodes = FALSE;
+	if (idesc == -1)
+	{
+		showNodes = TRUE;
+		idesc = 0;
+	}
 	HANDLE Handle;
 	HPFPOINT	lpNewPoints, lpPntNew;   
 	HPDPOINT lpPointsIn = lpPoints;
@@ -6035,7 +6049,14 @@ GSSiExitProg (989);
 				    }  
 				}
 			} 
-			*lpPntNew = BasePtToWinPtF (lpPoints);  
+			*lpPntNew = BasePtToWinPtF (lpPoints); 
+			if (showNodes)
+			{
+				if (np==3)
+					RectAtPoint(hDC, lpPntNew, RGB(255, 0, 0));
+				if (np==2)
+					RectAtPoint(hDC, lpPntNew, RGB(0,255, 0));
+			}
 			LastPoint = *lpPntNew;
 		    if (!EliminateDupPoints (np,lpNewPoints))
 		    {

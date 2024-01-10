@@ -1,2 +1,2 @@
-h:\MplsRemoteTemplate\GeoMas\configs\jeff\SpecAssParcelCompDemo5.gmc /F /DNC [PARMFILE]=c:\temp\parmfile.txt; 
+h:\MplsRemoteTemplate\GeoMas\configs\jeff\fgdb_text_problem3.gmc /F /DNC [PARMFILE]=c:\temp\parmfile.txt; 
 h:\MplsRemoteTemplate\GeoMas

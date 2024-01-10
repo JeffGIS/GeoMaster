@@ -5138,7 +5138,9 @@ double fixZeroDeg(double deg, LPDPOINT Points)
 {
 	double rtn = deg;
 
-	if (deg == 0.0)
+	rtn = getazd (&Points[3], &Points[2]);
+	rtn /= DEGtoRAD;
+/*	if (deg == 0.0)
 	{
 		DPOINT midp[4];
 		midp[0] = MidPointDp(&Points[0], &Points[1]);
@@ -5164,14 +5166,18 @@ double fixZeroDeg(double deg, LPDPOINT Points)
 			rtn = LTWOPI(rtn);
 			rtn /= DEGtoRAD;
 		}
-	}
+	}*/
 	return rtn;
 }
 static DPOINT GetTextBeginPoint(LPDPOINT Points, double* deg, int np, int nchar)
 {
 	DPOINT rtn = Points[0];
-	if (nchar > 2)
+	if (nchar > 0 && np > 3)
+	{
 		*deg = fixZeroDeg(*deg, Points);
+		rtn = Points[3];
+	}
+	/*
 	if (*deg != 0.0 && (np > 3 && np < 6))
 	{
 		DPOINT midPt = PolyAverage(Points, 4);
@@ -5197,7 +5203,7 @@ static DPOINT GetTextBeginPoint(LPDPOINT Points, double* deg, int np, int nchar)
 			}
 		}
 		rtn = Points[swPt];
-	}
+	}*/
 	return rtn;
 }
 static DPOINT GetTextBeginPoint1(LPDPOINT Points, double* az, int np)
@@ -5916,23 +5922,21 @@ NextPt:;
 					debugvalue++;
 				else if (type == 2 && *pNumPoints != 5)
 					ii = 1;
-
+	//displayTextPoly = 1;
 				if (displayTextPoly)
-        		for (i=0;i<nPoly;i++)
-        		{   
-        			int	np=*pNumPoints;
-					DPOINT pt[5];
-					pt[0] = lpDCurPoints[0];
-					pt[1] = lpDCurPoints[1];
-					pt[2] = lpDCurPoints[2];
-					pt[3] = lpDCurPoints[3];
-					pt[4] = lpDCurPoints[4];
-					GWPolylineD (hDC,lpDCurPoints,np,0);
-					lpDCurPoints+=*pNumPoints++;
+				{
+					for (i = 0; i < nPoly; i++)
+					{
+						int	np = *pNumPoints;
+						GWPolylineD(hDC, lpDCurPoints, np,-1);
+						lpDCurPoints += *pNumPoints++;
+					}
 				}
 				GlobalUnlock (hPolyPartLen);
  				pNumPoints = (LPINT)GlobalLock (hPolyPartLen);    
 				lpDCurPoints = pPoints;
+				if (nWords > 1)
+					ii = 1;
 	       		for (i=0;i<nWords;i++)
         		{   
         			int	np=*pNumPoints;
