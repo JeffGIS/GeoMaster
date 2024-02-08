@@ -1088,6 +1088,7 @@ HFONT	hSizingFont[MAXFONTS]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 BOOL	TrackVideo=TRUE;
 BOOL	MemMap=FALSE;
 BOOL	FirstMemMap=FALSE;
+BOOL	skipSetCursor = FALSE;
 BOOL	DisplayLinkedCursors=TRUE;
 short	CurrentType;
 short	CurrentTextBaseType;

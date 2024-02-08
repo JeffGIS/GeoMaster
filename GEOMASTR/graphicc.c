@@ -7276,6 +7276,8 @@ BOOL AddPolyToBuffer (int nPolyIn, LPINT lpnPntsIn,LPHANDLE phDPoints,short Type
 	CurView->FileProjectionType=0;
 	PenColor = PenColorIn;
 	nPoly = abs (nPolyIn);
+	if (Type == 1 && nPoly > 1)
+		nPoly = ReducePoly(nPoly, lpnPntsIn, phDPoints);
 	hPnts = GSSiGlobAlloc (0,GMEM_MOVEABLE,max (1,nPoly) * sizeof (int));
 	lpnPnts = GlobalLock (hPnts);
 	for (i=0;i<max (1,nPoly);i++)

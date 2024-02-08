@@ -3559,7 +3559,7 @@ GSSiExitProg (532);
 			strncpy(StreetEPType,Value,2);
 			break;
 		case 376:
-			ShowLineDirection = atoi(Value);
+			ShowLineDirection = atob(Value);
 			break;
 		case 378:
 		{

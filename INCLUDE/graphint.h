@@ -1067,6 +1067,7 @@ HMENU GMCreateMenu (HFILE MFid,LPINT line,LPSTR FileName);
 HMENU LoadToolBarMenu (LPSTR Name,LPHANDLE phPopups);
 BOOL DoUserCommand (LPSTR Cmd);
 short CompressCoordinates (LPUSHORT pNumps,HPDPOINT lpDPoint,LPHANDLE phCompressedCoord);
+int ReducePoly(int nPoly, LPINT lpnPntsIn, LPHANDLE phDPoints);
 BOOL AddPolyToMap (int nPoly, LPINT lpnPnts,LPHANDLE phDPoints,int Type, long NewRefno,HANDLE hTimeStamp,int ipen, int idesc,LPSHORT Stuff,
 					LPSTR Prefix, LPSTR UDI,long AreaColor,long PenColor, int PenWidth,
 					HANDLE hGRText,HANDLE hTextTPL,int nCurvePoints, LPSHORT CurvePoints,BOOL HiPrecis,LPDOUBLE pRouteOffset);
@@ -1286,6 +1287,8 @@ long GetMaxRefno (int PickFile,LPLONG pMinRef);
 BOOL SaveRouteNextFile (HANDLE hBTNext,LPSTR Name);
 BOOL SaveRouteAtFile (HANDLE hBTAt,LPSTR Name);
 BOOL HighlightRoute (LPSTR RouteFile,long Refno,double RefLoc,BOOL Display);
+int GetIntersectionID(LPDPOINT pt);
+DPOINT GetIntersectionPoint(int ID);
 BOOL SaveIntersectFile (LPSTR Name);
 BOOL AddIntsToNet (HWND hWnd, int Message);
 BOOL LoadNetwork(LPSTR Type, LPSTR File, LPSTR Opts);

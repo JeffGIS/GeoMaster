@@ -5444,6 +5444,7 @@ GotCloseFilehSQL:
 		case 654: //$UNIQUE(CREATE,len)
 			//$UNIQUE(ADD,handle,val)
 			//$UNIQUE(GET,handle,first,valvar,countvar)
+			//$UNIQUE(DUMP,handle,path);
 			//$UNIQUE(CLOSE,handle)
 		{
 			HANDLE hBT;
@@ -5469,6 +5470,33 @@ GotCloseFilehSQL:
 				BT_PUT(hBT, value, (LPSTR)&count);
 				free(value);
 				goto RtnTrue;
+			}
+			else if (!stricmp(Arg[1], "DUMP"))
+			{
+				int count;
+				rtn = FALSE;
+				HFILE fid = GSSiOpenFile(Arg[3], 0, OF_CREATE);
+				if (fid != HFILE_ERROR)
+				{
+					char Line[256];
+					sprintf(Line, "VALUE\tCOUNT");
+					fputstring(Line, fid);
+					hBT = (HANDLE)atoi(Arg[2]);
+					vlen = GetBTKeyLen(hBT);
+					LPSTR value = malloc(vlen + 4);
+					int pos = BT_FIRST;
+					while (!BT_FIND(hBT, value, pos, BT_ANY, (LPSTR)&count))
+					{
+						pos = BT_NEXT;
+						value[vlen] = 0;
+						sprintf(Line, "%s\t%i",value,count);
+						fputstring(Line, fid);
+						rtn = TRUE;
+					}
+					free(value);
+					GSSiClose(fid);
+				}
+				goto Rtnrtn;
 			}
 			else if (!stricmp(Arg[1], "GET"))
 			{

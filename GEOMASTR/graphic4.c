@@ -1393,7 +1393,11 @@ TAGIsRefno:		_fstrcpy(CurrentPrefix,"REFNO");
 		        if (ForceHLT)
 		        	CurItemHLTShow = 1;
 				if (CurItemHLTShow == 1) 
-						ItemIsHighlighted = TRUE;   
+						ItemIsHighlighted = TRUE; 
+				if (!ItemIsHighlighted && DisplayOnlyHLT)
+					Visible = FALSE;
+				if (ItemIsHighlighted && DisplayOnlyNonHLT)
+					Visible = FALSE;
 		    }
 	    }
 	    else if ((!ShowDeletedOpt && (ItemIsDeleted || RIPL)) ||
@@ -5278,6 +5282,161 @@ BOOL ReorderSavedPolys(void)
 	}
 	return rtn;
 }
+
+int ReducePoly(int nPoly, LPINT pnPnts, LPHANDLE phDPoints)
+{
+	if (nPoly < 2)
+		return nPoly;
+	int rtn = 0;
+	HANDLE hOrderOrig = GSSiGlobAlloc(1814, GHND, nPoly * 2 * sizeof(int));
+	HANDLE hOrderNew = GSSiGlobAlloc(1815, GHND, nPoly * 2 * sizeof(int));
+	HANDLE hConnectedTo = GSSiGlobAlloc(1815, GHND, nPoly * 2 * sizeof(int));
+	LPINT OrderOrig = GlobalLock(hOrderOrig);
+	LPINT OrderNew = GlobalLock(hOrderNew);
+	LPINT ConnectedTo = GlobalLock(hConnectedTo);
+	HANDLE hEndPoints = GSSiGlobAlloc(1815, GMEM_MOVEABLE, nPoly * 2 * sizeof(DPOINT));
+	LPDPOINT EndPoints = GlobalLock(hEndPoints);
+	HANDLE hSavedPolysJoined = 0;
+
+	int totPnts = 0;
+	int numEndPoints = nPoly * 2;
+	int nextEndPoint = 0;
+	int numNewOrder = 0;
+	BOOL haveGap = FALSE;
+
+	BOOL needToReorder = FALSE;
+	int nNewPoly = 0;
+	int j = 0;
+	for (int iPoly = 0; iPoly < nPoly; iPoly++)
+	{
+		LPDPOINT pPoints = (LPDPOINT)GlobalLock(phDPoints[iPoly]);
+		EndPoints[j] = pPoints[0];
+		OrderOrig[j] = j++;
+		EndPoints[j] = pPoints[pnPnts[iPoly] - 1];
+		OrderOrig[j] = j++;
+		totPnts += pnPnts[iPoly];
+		GlobalUnlock(phDPoints[iPoly]);
+	}
+	HANDLE hNewPoints = GSSiGlobAlloc(1865, GMEM_MOVEABLE, totPnts * sizeof(DPOINT) + 4);
+	LPDPOINT pNewPoints = GlobalLock(hNewPoints);
+	HANDLE hNewNPoints = GSSiGlobAlloc(1866, GMEM_MOVEABLE, nPoly * sizeof(int) + 4);
+	LPINT pNumNewPoints = GlobalLock(hNewNPoints);
+	//find the closest unconnected points and connect them until only 2 remain
+
+	while (NumUnconnected(numEndPoints, ConnectedTo) > 2)
+	{
+		double gap = Connect2ClosestPoints(EndPoints, numEndPoints, ConnectedTo);
+		if (gap > P_TOL)
+			haveGap = TRUE;
+	}
+	for (int i = 0; i < numEndPoints; i++)
+	{
+		if (!ConnectedTo[i])
+		{
+			nextEndPoint = i;
+			break;
+		}
+	}
+	while (numNewOrder < numEndPoints)
+	{
+		if (numNewOrder > 20)
+			ii = 1;
+		OrderNew[numNewOrder++] = nextEndPoint;
+		nextEndPoint = OppositeEndPoint(nextEndPoint);
+		OrderNew[numNewOrder++] = nextEndPoint;
+		nextEndPoint = ConnectedTo[nextEndPoint] - 1;
+		if (nextEndPoint < 0)
+			break;
+	}
+	if (numNewOrder != numEndPoints || memcmp(OrderOrig, OrderNew, numEndPoints * sizeof(int)))
+		needToReorder = TRUE;
+	if (!haveGap)
+		needToReorder = TRUE;
+	rtn = needToReorder;
+	numEndPoints = numNewOrder;
+	if (needToReorder)
+	{
+		int nTotPoints = 0;
+
+		for (int i = 0; i < numEndPoints; i += 2)
+		{
+			int iPoly = OrderNew[i] / 2;
+			LPDPOINT pPoints = (LPDPOINT)GlobalLock(phDPoints[iPoly]);
+			memcpy(&pNewPoints[nTotPoints], pPoints, pnPnts[iPoly]*sizeof(DPOINT));
+			pNumNewPoints[nNewPoly] = pnPnts[iPoly];
+			if (OrderNew[i] % 2)
+			{
+				ReversePoints2(pNumNewPoints[nNewPoly++], &pNewPoints[nTotPoints]);
+			}
+			nTotPoints += pnPnts[iPoly];
+			GlobalUnlock(phDPoints[iPoly]);
+		}
+		if (!haveGap)
+		{
+			int nJoinedPolys = 1;
+			rtn = nJoinedPolys;
+			for (int iPoly = 0; iPoly < nPoly; iPoly++)
+			{
+				GSSiGlobFree(&phDPoints[iPoly]);
+			}
+			GlobalUnlock(hNewPoints);
+			phDPoints[0] = hNewPoints;
+			pnPnts[0] = nTotPoints;
+			/*			LPSAVEPOLY pSavedPolysJoined = (LPSAVEPOLY)GlobalLock(hSavedPolysJoined);
+						pSavedPolysJoined->hSavePoly = GSSiGlobAlloc(1861, GHND, sizeof(MNMXCORD) * nTotPoints * sizeof(DPOINT));
+						LPMNMXCORD pBoundsJoined = GlobalLock(pSavedPolysJoined->hSavePoly);
+						LPDPOINT pPointsJoined = (LPDPOINT)&pBoundsJoined[1];
+						DBoundsInit(pBoundsJoined);
+						nTotPoints = 0;
+						for (int i = 0; i < nNewPoly; i++)
+						{
+							LPMNMXCORD pBounds = GlobalLock(pSavedPolysNew[i].hSavePoly);
+							AddMinMaxD(pBoundsJoined, pBounds);
+							pBounds++;
+							LPDPOINT pPoints = (LPDPOINT)pBounds;
+							for (j = 0; j < pSavedPolysNew[i].nPoints; j++)
+							{
+								pPointsJoined[nTotPoints++] = pPoints[j];
+							}
+							if (i < nNewPoly - 1)
+								nTotPoints--;
+							GlobalUnlock(pSavedPolysNew[i].hSavePoly);
+						}
+						pSavedPolysJoined->nPoints = nTotPoints;
+						GlobalUnlock(pSavedPolysJoined->hSavePoly);
+						GlobalUnlock(hSavedPolysJoined);*/
+		}
+		else
+			ii = 1;
+	}
+	//GlobalUnlock(hSavedPolys);
+	//GlobalUnlock(hSavedPolysNew);
+	if (needToReorder && haveGap)
+	{
+		//DestroySavedPolys();
+		//hSavedPolys = hSavedPolysNew;
+	}
+	else if (!haveGap)
+	{
+		//DestroySavedPolys();
+		//hSavedPolys = hSavedPolysJoined;
+		nPoly = 1;
+		//GSSiGlobFree(&hSavedPolysNew);
+	}
+	else
+	{
+		//GSSiGlobFree(&hSavedPolysNew);
+		//hSavedPolys = hSavedPolys;
+	}
+	GSSiGlobUlFree(&hNewNPoints);
+	GSSiGlobUlFree(&hOrderOrig);
+	GSSiGlobUlFree(&hOrderNew);
+	GSSiGlobUlFree(&hConnectedTo);
+	GSSiGlobUlFree(&hEndPoints);
+
+	return rtn;
+}
+
 short GetSavedPolys (void)
 #if ENABLETRACE
 {GSSiEnterProg (709);

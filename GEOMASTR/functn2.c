@@ -2851,6 +2851,52 @@ GSSiExitProg (1350);
 			}
 			goto Rtnl;
 		}
+		case 952: //$STREETINT(ID,point) gets int ID from coord
+				  //$STREETINT(COORD,ID) gets int coord from ID
+		{
+			nArgs = GetFunArgs(Args, Arg, 4, &hMem, pBrkPt, bpOffset, bpLen);
+			*OutLoc = 0;
+			if (!stricmp(Arg[1], "ID"))
+			{
+				BOOL err;
+				DPOINT pt = atopt(Arg[2], &err);
+				int ID = GetIntersectionID(&pt);
+				ltoa(ID, OutLoc, 10);
+			}
+			else if (!stricmp(Arg[1], "COORD"))
+			{
+				int ID = atol(Arg[2]);
+				DPOINT pt = GetIntersectionPoint(ID);
+				dpointtoa(OutLoc, &pt);
+			}
+			goto Rtnl;
+		}
+		case 953: //$SPLITPATH(path,drivevar,dirvar,leafvar,extvar)
+		{
+			char Drive[16], Dir[MAX_PATH + 4], Leaf[MAX_PATH], Ext[16];
+			char cmd[512];
+			nArgs = GetFunArgs(Args, Arg, 5, &hMem, pBrkPt, bpOffset, bpLen);
+			*OutLoc = 0;
+			GSSisplitpath(Arg[1], Drive,  Dir,  Leaf,  Ext);
+			if (*Arg[2])
+			{
+				sprintf(cmd, "[%s]=%s;", Arg[2], Drive);
+			}
+			if (*Arg[3])
+			{
+				sprintf(strchr(cmd,0), "[%s]=%s;", Arg[3], Dir);
+			}
+			if (*Arg[4])
+			{
+				sprintf(strchr(cmd, 0), "[%s]=%s;", Arg[4], Leaf);
+			}
+			if (*Arg[5])
+			{
+				sprintf(strchr(cmd, 0), "[%s]=%s;", Arg[5], Ext);
+			}
+			ExpandText(cmd);
+			goto Rtnl;
+		}
 		case 1001: // $DECOMPPOLY(OutFile,InteriorLineDesc,ExteriorLineDesc,LinkBetweenNodes(Opt F)
 		{	 
             DLGPROC lpfnDECOMPPOLYMsgProc; 
@@ -4562,6 +4608,13 @@ GSSiExitProg (1350);
 			if (nArgs < 0)
 				goto RtnFalse;
 			CallSynchronizeMsgProc();
+			goto RtnTrue;
+		}
+		case 1141://$FILEVERSION()
+		{
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
+			if (nArgs < 0)
+				goto RtnFalse;
 			goto RtnTrue;
 		}
 		case 1201: //$FINDWAYPOINT ()

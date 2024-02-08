@@ -839,13 +839,14 @@ GSSiExitProg (1348);
 					goto RtnFalse;
 				HANDLE hLine = GSSiGlobAlloc(0, GMEM_MOVEABLE, 1024);
 				LPSTR pLine = GlobalLock(hLine);
-				sprintf(pLine, "REFNO\tPREFIX\tUDI\tTYPE\tDESC\tBOUNDS\tLENGTH");
+				sprintf(pLine, "REFNO\tPREFIX\tUDI\tTYPE\tDESC\tBOUNDS\tLENGTH\tBP\tEP");
 				fputstring(pLine, Fid);
 				int pos = BT_FIRST;
 				while (!BT_FIND(hHighlight, (LPSTR)&Refno, pos, BT_ANY, (LPSTR)&HighlightData))
 				{
 					pos = BT_NEXT;
-					sprintf(pLine, "%i\t%s\t%s\t%i\t%i\t%lf %lf %lf %lf	%lf", HighlightData.PD.Refno, HighlightData.PD.Prefix, HighlightData.PD.UDI, HighlightData.PD.Type, HighlightData.PD.Desc, HighlightData.PD.Rect.xmn, HighlightData.PD.Rect.ymn, HighlightData.PD.Rect.xmx, HighlightData.PD.Rect.ymx, HighlightData.PD.Length);
+					sprintf(pLine, "%i\t%s\t%s\t%i\t%i\t%lf %lf %lf %lf	%lf\t%lf %lf\t%lf %lf", HighlightData.PD.Refno, HighlightData.PD.Prefix, HighlightData.PD.UDI, HighlightData.PD.Type, HighlightData.PD.Desc, HighlightData.PD.Rect.xmn, HighlightData.PD.Rect.ymn, HighlightData.PD.Rect.xmx, HighlightData.PD.Rect.ymx, HighlightData.PD.Length,
+						HighlightData.PD.BeginPoint.x, HighlightData.PD.BeginPoint.y, HighlightData.PD.EndPoint.x, HighlightData.PD.EndPoint.y);
 					fputstring(pLine, Fid);
 					nWritten++;
 				}
@@ -3649,7 +3650,10 @@ SetVis:
 			if (Err)
 				goto RtnFalse;
 			SetCurView ( SetVPFromName (Arg[2],&Err));  
-			n = PickItems (hWndMain,Point);  
+			skipSetCursor = TRUE;
+			n = PickItems (hWndMain,Point); 
+			skipSetCursor = FALSE;
+
 			SetCurView ( SaveVP);  
 			if (n)
 				ProcessPickedItem (n-1,FALSE);			

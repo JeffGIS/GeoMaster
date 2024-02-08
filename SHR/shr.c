@@ -6492,10 +6492,12 @@ GSSiExitProg (280);
 
 void GSSisplitpath (LPSTR InPath,LPSTR Drive,LPSTR Dir,LPSTR Leaf,LPSTR Ext)
 {
-	char	Name[256];
+	char	Name[MAX_PATH + 4];
+	char	fullName[MAX_PATH + 4];
 	
 	_fstrcpy (Name,InPath);
 	ExpandText (Name);
+	GetFullPathName(Name, MAX_PATH + 4, fullName, 0);
 	_splitpath (Name,Drive,Dir,Leaf,Ext);
 	return;
 }

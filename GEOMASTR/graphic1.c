@@ -1458,6 +1458,7 @@ Next:
 				{
 					CopyRec = 2;
 					UpdateItem = 0;
+					GSSiGlobFree(&hUpdateBuf);
 					hUpdateBuf = GSSiGlobAlloc ( 665,GMEM_MOVEABLE,MAXREORGBUF); 
 					lUpdateBuf = 0;
 				}
@@ -6319,7 +6320,7 @@ GSSiExitProg (66);
 	{
 		OpenDisplayedHighlightedRefs();
 	}
-    if (CurView->ID == *pCommandViewport && DisplayOnlyHLT)
+   /* if (CurView->ID == *pCommandViewport && DisplayOnlyHLT)
     {   
     	if (CurView->CurFile < 0)
     	{
@@ -6341,7 +6342,7 @@ GSSiExitProg (66);
 #endif
 	    	return FALSE;
 }
-    }
+    }*/
 Start:
     if (CurView && CurView->CurFile >= CurView->NumFiles || (!VisScan && !Pick && CurView->Type == VPTYPE_PROFILE))
 {

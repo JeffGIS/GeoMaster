@@ -449,7 +449,7 @@ int	PickItems (HWND hWnd,DPOINT InPickPointBase)
 	
     PickPointBase = InPickPointBase;
     
-	if (!MemMap && hWnd)
+	if (!MemMap && hWnd && !skipSetCursor)
 	{	
 		hcurSave = GSSiSetCursor(LoadCursor(0, IDC_WAIT)); 
 		HaltMapDisplay (FALSE,TRUE);  
@@ -465,7 +465,7 @@ int	PickItems (HWND hWnd,DPOINT InPickPointBase)
     	else
     		SetPickGlobals (Rtn-1);
     }
-	if (!MemMap && hWnd)
+	if (!MemMap && hWnd && !skipSetCursor)
 		GSSiSetCursor (hcurSave);   
 	PickPointSymbol = SavePickPointSymbol;
 {

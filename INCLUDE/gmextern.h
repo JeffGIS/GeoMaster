@@ -1353,6 +1353,7 @@ extern long			nPolyPoints;
 extern short			CurElementType;
 extern BOOL			Pickability;
 extern HANDLE			hCoords;
+extern BOOL			skipSetCursor;
 extern BOOL			DisplayLinkedCursors;
 extern BOOL			WantFunNames;
 extern RECT			PromptRect;

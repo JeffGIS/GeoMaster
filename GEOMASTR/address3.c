@@ -2337,6 +2337,37 @@ BOOL SaveStreetPolys (void)
 	return TRUE;
 }
 
+static int intFac = 2;
+int GetIntersectionID(LPDPOINT pt)
+{
+	MNMXCORD cityBounds = { 156000, 40000, 168000, 60000 };
+	double xFac = (cityBounds.xmx - cityBounds.xmn) * intFac / USHRT_MAX;
+	double yFac = (cityBounds.ymx - cityBounds.ymn) * intFac / USHRT_MAX;
+
+	USHORT x = IDNINT((pt->x - cityBounds.xmn) / xFac);
+	USHORT y = IDNINT((pt->y - cityBounds.ymn) / yFac);
+
+	DWORD drtn = MAKELONG(x, y);
+	int rtn = *(LPINT)&drtn;
+	DPOINT dbpt = GetIntersectionPoint(rtn);
+	return rtn;
+}
+
+DPOINT GetIntersectionPoint(int ID)
+{
+	MNMXCORD cityBounds = { 156000, 40000, 168000, 60000 };
+	double xFac = (cityBounds.xmx - cityBounds.xmn) * intFac / USHRT_MAX;
+	double yFac = (cityBounds.ymx - cityBounds.ymn) * intFac / USHRT_MAX;
+	DPOINT rtn = { 0,0 };
+	LONG dwID = *(LPLONG) &ID;
+	USHORT x, y;
+	x = LOWORD(dwID);
+	y = HIWORD(dwID);
+	rtn.y = (y * yFac) + cityBounds.ymn;
+	rtn.x = (x * xFac) + cityBounds.xmn;
+	return rtn;
+}
+
 
 
 

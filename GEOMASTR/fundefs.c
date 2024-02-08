@@ -446,7 +446,9 @@ int	GetFunctionID9 (LPSTR str)
 			if (!_fstrnicmp(str, "CASECOUNT", 9)) return 949;
 			if (!_fstrnicmp(str, "APPENDRAW", 9)) return 950;
 			if (!_fstrnicmp(str, "ADDQUOTES", 9)) return 951;
-			
+			if (!_fstrnicmp(str, "STREETINT", 9)) return 952;
+			if (!_fstrnicmp(str, "SPLITPATH", 9)) return 953;
+
 			return 0;
 }
 int	GetFunctionID10 (LPSTR str)
@@ -539,6 +541,7 @@ int	GetFunctionID11 (LPSTR str)
 			if (!_fstrnicmp(str, "ISLOCALFILE", 11)) return 1138;
 			if (!_fstrnicmp(str, "FILEMANAGER", 11)) return 1139;
 			if (!_fstrnicmp(str, "SYNCHRONIZE", 11)) return 1140;
+			if (!_fstrnicmp(str, "FILEVERSION", 11)) return 1141;
 
 			return 0;
 			

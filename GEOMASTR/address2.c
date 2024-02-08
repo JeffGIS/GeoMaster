@@ -455,7 +455,7 @@ BOOL UnloadStreets (HWND hWnd)
 
 BOOL ReloadStreets (HWND hWnd)
 {   
-	char	Name[128], str[256]; 
+	char	Name[MAX_PATH], str[256]; 
 	OFSTRUCTGM	OFStruct;
 	HFILE	Fid;   
 	LPSTR	lpComma, TrueName;  
