@@ -3,6 +3,7 @@
 #include "umio.h"  
 #include "dibapi.h"
 #include "std.h"  
+#include "winver.h"
 
 #include "gmextern.h"
 #include "freeimage.h"
@@ -4613,9 +4614,41 @@ GSSiExitProg (1350);
 		case 1141://$FILEVERSION()
 		{
 			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
-			if (nArgs < 0)
-				goto RtnFalse;
-			goto RtnTrue;
+			*OutLoc = 0;
+			if (nArgs > 0)
+			{
+				DWORD  verHandle = 0;
+				UINT   size = 0;
+				LPBYTE lpBuffer = NULL;
+				DWORD  verSize = GetFileVersionInfoSize(Arg[1], &verHandle);
+				int major_source = 0, minor_source = 0, build_source = 0;
+
+				if (verSize != 0)
+				{
+					LPSTR verData = malloc(verSize);
+
+					if (GetFileVersionInfo(Arg[1], verHandle, verSize, verData))
+					{
+						if (VerQueryValue(verData, "\\", (VOID FAR * FAR*) & lpBuffer, &size))
+						{
+							if (size)
+							{
+								VS_FIXEDFILEINFO* verInfo = (VS_FIXEDFILEINFO*)lpBuffer;
+								if (verInfo->dwSignature == 0xfeef04bd)
+								{
+									major_source = HIWORD(verInfo->dwFileVersionMS);
+									minor_source = LOWORD(verInfo->dwFileVersionMS);
+									build_source = verInfo->dwFileVersionLS;
+									sprintf(OutLoc, "%i.%i.%i", major_source, minor_source, build_source);
+								}
+							}
+						}
+					}
+					free(verData);
+				}
+			}
+
+			goto Rtnl;
 		}
 		case 1201: //$FINDWAYPOINT ()
         {
