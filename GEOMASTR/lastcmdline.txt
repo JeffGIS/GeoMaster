@@ -1,2 +1,2 @@
-configs\jeff\test.gmc /F [%USERLEV]=2;[%IGNORESYSMSG]=T;[%WantBackgroundCache]=F;[%ALLOWCACHE]=F; 
+configs\jeff\test.gmc /F [%USERLEV]=2;[%IGNORESYSMSG]=T;[%WantBackgroundCache]=F;[%ALLOWCACHE]=F;[%TRACEVAR]=%SYM_DICT;
 h:\MplsRemoteTemplate\GeoMas

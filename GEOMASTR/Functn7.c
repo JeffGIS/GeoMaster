@@ -2028,12 +2028,14 @@ int	GetFunctionValue7(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, 
 			  //$NETWORK(FALSEINT,CLEAR
 			  //$NETWORK(LOAD,HLTTOSLT,outfile
 		nArgs = GetFunArgs(Args, Arg, 5, &hMem, pBrkPt, bpOffset, bpLen);
-		if (nArgs < 2)
+		if (nArgs < 1)
 			goto RtnFalse;
 		if (!stricmp(Arg[1], "FALSEINT"))
 			rtn = FalseIntFunctions(Arg[2], Arg[3], OutLoc);
 		if (!stricmp(Arg[1], "LOAD"))
 			rtn = LoadNetwork(Arg[2], Arg[3], Arg[4]);
+		if (!stricmp(Arg[1], "SAVESTREET"))
+			rtn = SaveStreetPolys();
 		goto Rtnl;
 
 	case 775: //$LOADMAP()

@@ -1897,87 +1897,231 @@ NextName:;
 	return nAdded;
 }
 
-short MatchIntLists (short MatchCode, short nList1,short nList2,HANDLE hList1,HANDLE hList2,long Munic,LPHANDLE hMatch,HWND hwnddlg1,HWND hwnddlg2)
-{ 
-	NETINTPATHSKEY	NetIntPathsKey; 
+short MatchIntLists(short MatchCode, short nList1, short nList2, HANDLE hList1, HANDLE hList2, long Munic, LPHANDLE hMatch, HWND hwnddlg1, HWND hwnddlg2)
+{
+	NETINTPATHSKEY	NetIntPathsKey;
 	INTPATHSDATA	IPD;
-	DPOINT	IntPoint;   
+	DPOINT	IntPoint;
 	BOOL	MunicMatch, HaveMunics;
-	short	st, nMatch=0, n2, i;  
+	short	st, nMatch = 0, n2, i;
 	LPADDMATCH	pMatch;
-	LPLONG	pStreetNum1, pStreetNum2;  
-	long	StreetNum1, StreetNum2;   
-	BOOL	GetNext=TRUE;
+	LPLONG	pStreetNum1, pStreetNum2;
+	long	StreetNum1, StreetNum2;
+	BOOL	GetNext = TRUE;
 	MSG		msg;
-    
-    pStreetNum1 = (LPLONG)GlobalLock (hList1);
-    while (GetNext && nList1--)
-    {
-    	n2 = nList2;
-    	pStreetNum2 = (LPLONG)GlobalLock (hList2);
-    	while (GetNext && n2--)
-    	{
-			NetIntPathsKey.Path1 = min(*pStreetNum1,*pStreetNum2);
-			NetIntPathsKey.Path2 = max(*pStreetNum1,*pStreetNum2); 
+
+	if (!nList1 || !nList2)
+		return 0;
+	pStreetNum1 = (LPLONG)GlobalLock(hList1);
+	while (GetNext && nList1--)
+	{
+		n2 = nList2;
+		pStreetNum2 = (LPLONG)GlobalLock(hList2);
+		while (GetNext && n2--)
+		{
+			NetIntPathsKey.Path1 = min(*pStreetNum1, *pStreetNum2);
+			NetIntPathsKey.Path2 = max(*pStreetNum1, *pStreetNum2);
 			StreetNum1 = NetIntPathsKey.Path1;
-			StreetNum2 = NetIntPathsKey.Path2; 
+			StreetNum2 = NetIntPathsKey.Path2;
 			NetIntPathsKey.IntID = LONG_MIN;
-			st = BT_FIND (hBTNetIntPaths,(LPSTR)&NetIntPathsKey,BT_FIRST,BT_GE,(LPSTR)&IPD); 
+			st = BT_FIND(hBTNetIntPaths, (LPSTR)&NetIntPathsKey, BT_FIRST, BT_GE, (LPSTR)&IPD);
 			while (GetNext && !st && NetIntPathsKey.Path1 == StreetNum1 && NetIntPathsKey.Path2 == StreetNum2)
-			{                             
+			{
 				MunicMatch = FALSE;
 				HaveMunics = FALSE;
-				for (i=0;i<5;i++)
+				for (i = 0; i < 5; i++)
 					if (IPD.Munics[i])
 					{
 						HaveMunics = TRUE;
-						if (Munic == StandardizedMunic (IPD.Munics[i]))
+						if (Munic == StandardizedMunic(IPD.Munics[i]))
 							MunicMatch = TRUE;
 					}
-				if (!Munic || MunicMatch || !HaveMunics || MatchCode > 2) 
+				if (!Munic || MunicMatch || !HaveMunics || MatchCode > 2)
 				{
 					if (!*hMatch)
-						*hMatch = GSSiGlobAlloc ( 572,GHND,sizeof(ADDMATCH)); 
-					else 
-						*hMatch = GSSiGlobalReAlloc (0,*hMatch,(nMatch+1)*sizeof(ADDMATCH),GHND);
-					pMatch = (LPADDMATCH)GlobalLock (*hMatch); 
-					pMatch+=nMatch;
+						*hMatch = GSSiGlobAlloc(572, GHND, sizeof(ADDMATCH));
+					else
+						*hMatch = GSSiGlobalReAlloc(0, *hMatch, (nMatch + 1) * sizeof(ADDMATCH), GHND);
+					pMatch = (LPADDMATCH)GlobalLock(*hMatch);
+					pMatch += nMatch;
 					pMatch->Point = IPD.Point;
 					pMatch->IntID = NetIntPathsKey.IntID;
 					pMatch->MatchCode = MatchCode;
-					pMatch->LocationCode = 2;  
+					pMatch->LocationCode = 2;
 					if (NetIntPathsKey.Path1 == *pStreetNum1)
 					{
 						pMatch->StreetNum1 = NetIntPathsKey.Path1;
-						pMatch->StreetNum2 = NetIntPathsKey.Path2; 
+						pMatch->StreetNum2 = NetIntPathsKey.Path2;
 					}
 					else
 					{
 						pMatch->StreetNum1 = NetIntPathsKey.Path2;
-						pMatch->StreetNum2 = NetIntPathsKey.Path1; 
+						pMatch->StreetNum2 = NetIntPathsKey.Path1;
 					}
-					pMatch->Street1MP = GetIntPathMP (pMatch->IntID,pMatch->StreetNum1);   
-					pMatch->Street2MP = GetIntPathMP (pMatch->IntID,pMatch->StreetNum2);   
-					pMatch->Munic = StandardizedMunic (IPD.Munics[0]);
+					pMatch->Street1MP = GetIntPathMP(pMatch->IntID, pMatch->StreetNum1);
+					pMatch->Street2MP = GetIntPathMP(pMatch->IntID, pMatch->StreetNum2);
+					pMatch->Munic = StandardizedMunic(IPD.Munics[0]);
 					pMatch->ZIP = 0;
-					GlobalUnlock (*hMatch); 
+					GlobalUnlock(*hMatch);
 					nMatch++;
-				}                                                
-				st = BT_FIND (hBTNetIntPaths,(LPSTR)&NetIntPathsKey,BT_NEXT,BT_ANY,(LPSTR)&IPD); 
- 				if (hwnddlg1)
- 				{
-	 				if (GSSiPeekMessage(&msg,hwnddlg1,WM_KEYDOWN,WM_KEYDOWN,PM_NOREMOVE))
-	 					GetNext = FALSE;	                                                             
-	 				if (GSSiPeekMessage(&msg,hwnddlg2,WM_KEYDOWN,WM_KEYDOWN,PM_NOREMOVE))
-	 					GetNext = FALSE;
-	 			}	                                                             
-			} 
+				}
+				st = BT_FIND(hBTNetIntPaths, (LPSTR)&NetIntPathsKey, BT_NEXT, BT_ANY, (LPSTR)&IPD);
+				if (hwnddlg1)
+				{
+					if (GSSiPeekMessage(&msg, hwnddlg1, WM_KEYDOWN, WM_KEYDOWN, PM_NOREMOVE))
+						GetNext = FALSE;
+					if (GSSiPeekMessage(&msg, hwnddlg2, WM_KEYDOWN, WM_KEYDOWN, PM_NOREMOVE))
+						GetNext = FALSE;
+				}
+			}
 			pStreetNum2++;
-    	}
-    	pStreetNum1++;
-    	GlobalUnlock (hList2);
-    } 
-    GlobalUnlock (hList1);
+		}
+		pStreetNum1++;
+		GlobalUnlock(hList2);
+	}
+	GlobalUnlock(hList1);
+	return nMatch;
+}
+short MatchIntLists_new(short MatchCode, short nList1, short nList2, HANDLE hList1, HANDLE hList2, long Munic, LPHANDLE hMatch, HWND hwnddlg1, HWND hwnddlg2)
+{
+	NETINTPATHSKEY	NetIntPathsKey;
+	INTPATHSDATA	IPD;
+	DPOINT	IntPoint;
+	BOOL	MunicMatch, HaveMunics;
+	short	st, nMatch = 0, n2, i;
+	LPADDMATCH	pMatch;
+	LPLONG	pStreetNum1, pStreetNum2;
+	long	StreetNum1, StreetNum2;
+	BOOL	GetNext = TRUE;
+	MSG		msg;
+	typedef struct {
+		long	StreetNum,
+			IntID,
+			Seqno;
+	} INTSTREETNOKEY;
+	typedef struct {
+		long	IntID,
+			StreetNum,
+			Seqno;
+	} INTINTNOKEY;
+	INTSTREETNOKEY	IntStreetNoKey;
+	INTINTNOKEY		IntIntNoKey;
+	long offset;
+	int numFound1 = 0;
+	int numFound2 = 0;
+
+	char IntFile[MAX_PATH];
+#define MAXMATCH  1000
+
+	if (!nList1 || !nList2)
+		return 0;
+	strcpy(IntFile, "[%DL]maplib\\centerline\\[CLINEDATE]\\intersections.gmd");
+	ExpandText(IntFile);
+	HANDLE hDB = OpenGWDatabase(IntFile, BT_READ);
+	if (!hDB)
+		return 0;
+	LPINT pIntersections = malloc(MAXMATCH * sizeof(int));
+	LPINT pFirstInt = pIntersections;
+	LPINT pStreets = malloc(MAXMATCH * sizeof(int));
+	LPINT pFirstStreet = pStreets;
+	int nIntersections = 0;
+	LPGWDHEADER lpGWDHead = (LPGWDHEADER)GlobalLock(hDB);
+	HANDLE hBTStreetNo=lpGWDHead->BTHandle[1], hBTIntNo = lpGWDHead->BTHandle[2];
+	pStreetNum1 = (LPLONG)GlobalLock(hList1);
+	int lastInt = -1;
+	while (GetNext && nList1--)
+	{
+		IntStreetNoKey.StreetNum = *pStreetNum1;
+		IntStreetNoKey.IntID = 0;
+		IntStreetNoKey.Seqno = 0;
+		st = BT_FIND(hBTStreetNo, (LPSTR)&IntStreetNoKey, BT_FIRST,BT_GE, (LPSTR)&offset);
+		while (GetNext && !st && IntStreetNoKey.StreetNum == *pStreetNum1 && nIntersections < MAXMATCH)
+		{
+			if (IntStreetNoKey.IntID != lastInt)
+			{
+				*pIntersections++ = IntStreetNoKey.IntID;
+				nIntersections++;
+				*pStreets++ = IntStreetNoKey.StreetNum;
+			}
+			lastInt = IntStreetNoKey.IntID;
+			st = BT_FIND(hBTStreetNo, (LPSTR)&IntStreetNoKey, BT_NEXT, BT_ANY, (LPSTR)&offset);
+			if (hwnddlg1)
+			{
+				if (GSSiPeekMessage(&msg, hwnddlg1, WM_KEYDOWN, WM_KEYDOWN, PM_NOREMOVE))
+					GetNext = FALSE;
+				if (GSSiPeekMessage(&msg, hwnddlg2, WM_KEYDOWN, WM_KEYDOWN, PM_NOREMOVE))
+					GetNext = FALSE;
+			}
+		}
+		pStreetNum1++;
+	}
+	GlobalUnlock(hList1);
+	if (nIntersections)
+	{
+		int iIntersection = 0;
+		pIntersections = pFirstInt;
+		pStreets = pFirstStreet;
+		while (iIntersection++ < nIntersections)
+		{
+			pStreetNum2 = (LPLONG)GlobalLock(hList2);
+			int iStreet = 0;
+			while (iStreet++ < nList2)
+			{
+				IntIntNoKey.IntID = *pIntersections;
+				IntIntNoKey.StreetNum = *pStreetNum2;
+				IntIntNoKey.Seqno = 0;
+
+				st = BT_FIND(hBTIntNo, (LPSTR)&IntIntNoKey, BT_FIRST, BT_GE, (LPSTR)&offset);
+				if (!st && IntIntNoKey.IntID == *pIntersections && IntIntNoKey.StreetNum == *pStreetNum2)
+				{
+					BOOL haveMatch = FALSE;
+					if (nMatch)
+					{
+						pMatch = (LPADDMATCH)GlobalLock(*hMatch);
+						for (int iMatch = 0; iMatch < nMatch; iMatch++)
+						{
+							if (pMatch->IntID == IntIntNoKey.IntID)
+							{
+								haveMatch = TRUE;
+								break;
+							}
+							pMatch++;
+						}
+						GlobalUnlock(*hMatch);
+					}
+					if (!haveMatch && IntIntNoKey.StreetNum != *pStreets)
+					{
+						if (!*hMatch)
+							*hMatch = GSSiGlobAlloc(572, GHND, sizeof(ADDMATCH));
+						else
+							*hMatch = GSSiGlobalReAlloc(0, *hMatch, (nMatch + 1) * sizeof(ADDMATCH), GHND);
+						pMatch = (LPADDMATCH)GlobalLock(*hMatch);
+						pMatch += nMatch;
+						pMatch->Point = GetIntersectionPoint(IntIntNoKey.IntID);
+						pMatch->IntID = IntIntNoKey.IntID;
+						pMatch->MatchCode = MatchCode;
+						pMatch->LocationCode = 2;
+						pMatch->StreetNum1 = IntIntNoKey.StreetNum;
+						pMatch->StreetNum2 = *pStreets;
+						pMatch->Street1MP.Refno = 0;
+						pMatch->Street2MP.Refno = 0;
+						pMatch->Munic = 0;
+						pMatch->ZIP = 0;
+						GlobalUnlock(*hMatch);
+						nMatch++;
+					}
+				}
+				pStreetNum2++;
+			}
+			GlobalUnlock(hList2);
+			pIntersections++;
+			pStreets++;
+		}
+	}
+	free(pFirstInt);
+	GlobalUnlock(hDB);
+	CloseGWDatabase(hDB);
+
 	return nMatch;
 }
 

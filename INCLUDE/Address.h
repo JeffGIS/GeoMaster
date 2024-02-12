@@ -446,7 +446,8 @@ void SetAddEditValues (LPSTR House,LPSTR Street,LPSTR City,LPSTR ZIP,LPSTR OutVa
 void ShowStreetMatches (LPSTR StreetBuf,HWND hWndDlg,short idc_list,LPMNMXCORD pBounds);
 long ChangeSimilarStreets (LPSTR DestName,LPSTR OrigName,long RecordNum,LPHANDLE hChangeRecs);
 short GetAllInts (short MatchCode, short nList1,HANDLE hList1,long Munic,LPHANDLE hMatch,HWND hwnddlg1,HWND hwnddlg2);
-short MatchIntLists (short MatchCode, short nList1,short nList2,HANDLE hList1,HANDLE hList2,long Munic,LPHANDLE hMatch,HWND hwnddlg1,HWND hwnddlg2);
+short MatchIntLists(short MatchCode, short nList1, short nList2, HANDLE hList1, HANDLE hList2, long Munic, LPHANDLE hMatch, HWND hwnddlg1, HWND hwnddlg2);
+short MatchIntLists_new(short MatchCode, short nList1, short nList2, HANDLE hList1, HANDLE hList2, long Munic, LPHANDLE hMatch, HWND hwnddlg1, HWND hwnddlg2);
 short GetNameTypeList (short Type,LPSHORT nList,HANDLE hList,
 								  LPSTR STDNAM,LPSTR NRONAM,LPSTR NMONLY,
                             	  LPSTR SANSCH,LPSTR NANDCH,LPSTR NCMPNM,LPSTR ORIGNM, LPSTR SANSCP, LPSTR SANSCS);

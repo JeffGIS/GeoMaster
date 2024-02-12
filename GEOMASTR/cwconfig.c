@@ -345,7 +345,8 @@ BOOL ProcessCommandLine (LPSTR lpszCmdLine)
 //	SetGlobalValue("%INDIR",str);
 	_fstrcpy (szAppName,AppNames[App]);
 	SetGlobalValue ("%APPID",szAppName);
-	CreateInternalGlobals ();
+	CreateInternalGlobals();
+
 	 if ((lpStart = _fstrstr(CmdLine," /CACHE ")))
 	 {
  		lpStart += 8;
@@ -1797,6 +1798,22 @@ HFILE	Fid = GSSiOpenFile ("c:\\pngrid\\400\\pngrid.bin",0,OF_READWRITE);
  _fstrcpy (AppName,ApName);
  if (strstr(lpszCmdLine, "/MAPSERVER"))
 	 MapServer = TRUE;
+ AllocateTypeVar("%TRACEVAR", 291, FALSE);
+
+ LPSTR tvLoc = strstr(lpszCmdLine, "[%TRACEVAR]=");
+ if (tvLoc)
+ {
+	 char settv[256];
+	 LPSTR pEnd = strchr(tvLoc, ';');
+	 if (pEnd)
+		 *pEnd = 0;
+	 strcpy(settv, tvLoc);
+	 ExpandText(settv);
+	 strcpy(settv, TraceVar);
+	 if (pEnd)
+		 *pEnd = ';';
+ }
+
  //MessageBox (0,lpszCmdLine,"Command Line",MB_OK);
  ProcessNodeParms ();
 if (!ProcessCommandLine (lpszCmdLine))  
@@ -4763,8 +4780,13 @@ DisplayParcel:
 				 		AP = SetAutoPan (FALSE); 
 				 		setDoPaint( TRUE); 
 				 		ClearMaskArea ();
-				 		if (LocationOffset)
-							ZoomToPointAndDist (UserSpecifiedBasePoint, LocationOffset,FALSE);
+						if (LocationOffset)
+						{
+							if (nRc == 2)
+								ZoomToPointAndDist(UserSpecifiedBasePoint, -LocationOffset, FALSE);
+							else
+								ZoomToPointAndDist(UserSpecifiedBasePoint, LocationOffset, FALSE);
+						}
 						else
 							CenterWindow (UserSpecifiedBasePoint,FALSE);
 						ExecutePointLocationMacro (UserSpecifiedBasePoint,0);

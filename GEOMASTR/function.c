@@ -2416,9 +2416,18 @@ SetVis:
 			nArgs = GetFunArgs(Args, Arg, 1, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 1)
 				goto RtnFalse;
-			RVal = atof (Arg[1]);
-			RVal = fabs (RVal);
-			ftoa (OutLoc,RVal);
+			if (strchr(Arg[1], '.'))
+			{
+				RVal = atof(Arg[1]);
+				RVal = fabs(RVal);
+				ftoa(OutLoc, RVal);
+			}
+			else
+			{
+				int iVal = atoi(Arg[1]);
+				iVal = abs(iVal);
+				itoa(iVal, OutLoc, 10);
+			}
 			goto Rtnl;
 		}  
 		

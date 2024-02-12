@@ -3781,7 +3781,7 @@ NotSame:
 	return rtn;
 }   
 
-short INT_MATCH_DLG (HWND hWndDlg,UINT List1, UINT List2, long Munic, long ZIP, short MOPT,LPHANDLE hMatch,
+short INT_MATCH_DLG (HWND hWndDlg,UINT List1, UINT List2, long Munic, long ZIP, short MOPT,LPHANDLE phMatch,
 					 LPLONG	pStreetNum1, LPLONG pStreetNum2,HWND hwnddlg1,HWND hwnddlg2)
 {   
 	HANDLE	hList1, hList2; 
@@ -3790,7 +3790,7 @@ short INT_MATCH_DLG (HWND hWndDlg,UINT List1, UINT List2, long Munic, long ZIP, 
 	LPSTR	lpTAB;
 	short	nList1=0, nList2=0, rtn=0, item;
 	
-	*hMatch = 0;
+	*phMatch = 0;
 	*pStreetNum1 = 0;
 	*pStreetNum2 = 0;
     item = 0;
@@ -3806,7 +3806,7 @@ short INT_MATCH_DLG (HWND hWndDlg,UINT List1, UINT List2, long Munic, long ZIP, 
     GlobalUnlock (hList1); 
 	if (!List2)
 	{
-		rtn = GetAllInts (1, 1,hList1,Munic,hMatch,hwnddlg1,hwnddlg2);
+		rtn = GetAllInts (1, 1,hList1,Munic,phMatch,hwnddlg1,hwnddlg2);
 		GSSiGlobFree (&hList1);
 		goto Exit;
 	}
@@ -3821,7 +3821,7 @@ short INT_MATCH_DLG (HWND hWndDlg,UINT List1, UINT List2, long Munic, long ZIP, 
     GlobalUnlock (hList2); 
 	if (nList1 == 1 && nList2 == 0)
 	{
-		rtn = GetAllInts (1, 1,hList1,Munic,hMatch,hwnddlg1,hwnddlg2);
+		rtn = GetAllInts (1, 1,hList1,Munic,phMatch,hwnddlg1,hwnddlg2);
 		GSSiGlobFree (&hList1);
 		GSSiGlobFree (&hList2);
 		goto Exit;
@@ -3839,7 +3839,7 @@ short INT_MATCH_DLG (HWND hWndDlg,UINT List1, UINT List2, long Munic, long ZIP, 
 		*pStreetNum2 = *pList2;
 		GlobalUnlock (hList2);
 	}
-   	rtn = MatchIntLists (MOPT,nList1,nList2,hList1,hList2,Munic,hMatch,hwnddlg1,hwnddlg2);
+   	rtn = MatchIntLists_new (MOPT,nList1,nList2,hList1,hList2,Munic,phMatch,hwnddlg1,hwnddlg2);
 	GSSiGlobFree (&hList1);
 	GSSiGlobFree (&hList2);
 	if (rtn > 1) // check for multiple ints at same location (i.e STATE ST and 3RD AVE matching
@@ -3849,7 +3849,7 @@ short INT_MATCH_DLG (HWND hWndDlg,UINT List1, UINT List2, long Munic, long ZIP, 
 		short	n=rtn; 
 		long	IntID;
 		
-		pMatch = (LPADDMATCH)GlobalLock (*hMatch);
+		pMatch = (LPADDMATCH)GlobalLock (*phMatch);
 		IntID = pMatch++->IntID; 
 		n--;
 		while (n--)
@@ -3859,7 +3859,7 @@ short INT_MATCH_DLG (HWND hWndDlg,UINT List1, UINT List2, long Munic, long ZIP, 
 		} 
 		rtn = 1;
 NotSame:
-		GlobalUnlock (*hMatch);		
+		GlobalUnlock (*phMatch);		
 	}
 Exit:		 
 	return rtn;

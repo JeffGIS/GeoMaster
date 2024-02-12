@@ -735,6 +735,8 @@ BOOL FAR PASCAL LOC_INTERSECTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, 
  	char	MunName[66]; 
 	HWND	hPar, hParDlg;
  	static	BOOL	OnlyPrime=TRUE, IgnoreChange=FALSE;
+    BOOL    addToZoom = FALSE;
+    BOOL    checkForSegs = FALSE;
 	
  short  BRtn;
  if ((BRtn = DIALOGSTYLEMsgProc (hWndDlg,Message, wParam, lParam))) return (BRtn);
@@ -747,6 +749,7 @@ BOOL FAR PASCAL LOC_INTERSECTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, 
          SendDlgItemMessage (hWndDlg,IDM_STREET_MENU1,LB_SETTABSTOPS,2,(LPARAM)&TabStops);
          SendDlgItemMessage (hWndDlg,IDM_STREET_MENU2,LB_SETTABSTOPS,2,(LPARAM)&TabStops);
          SendDlgItemMessage (hWndDlg,IDC_INT_MATCHES,LB_SETTABSTOPS,2,(LPARAM)&TabStops);
+         SendDlgItemMessage(hWndDlg, IDC_ADDTOVIEW, BM_SETCHECK, AddToView, 0L);
          cwCenter(hWndDlg, 0);
          /* initialize working variables                                */
 	     if (!OpenStreetNameTable(FALSE))  
@@ -769,7 +772,7 @@ BOOL FAR PASCAL LOC_INTERSECTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, 
          	ShowWindow (GetDlgItem (hWndDlg,IDC_IN_PRIMARY_CITY_ONLY),TRUE);
             SendDlgItemMessage (hWndDlg,IDC_IN_PRIMARY_CITY_ONLY,BM_SETCHECK,OnlyPrime,0L); 
          }
-         SendDlgItemMessage (hWndDlg,IDC_TRYHARDER,BM_SETCHECK,TRUE,0L); 
+         SendDlgItemMessage (hWndDlg,IDC_TRYHARDER,BM_SETCHECK,FALSE,0L); 
 		 hParDlg = GetParent(hWndDlg);
 		 hPar = GetDlgItem(hParDlg, IDC_GEOCODE_OPERATION);
 
@@ -800,6 +803,10 @@ BOOL FAR PASCAL LOC_INTERSECTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, 
     case WM_COMMAND:
          switch(LOWORD(wParam))
            {
+         case IDC_ADDTOVIEW:
+             AddToView = SendDlgItemMessage(hWndDlg, IDC_ADDTOVIEW, (UINT)BM_GETCHECK, (WPARAM)0, (LPARAM)0L);
+             break;
+
             case IDC_IN_PRIMARY_CITY_ONLY:
             	if (ls1 && ls2)     
 		        	PostMessage(hWndDlg, WM_COMMAND, IDC_TEST_INT, 0L);
@@ -817,7 +824,7 @@ BOOL FAR PASCAL LOC_INTERSECTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, 
 		         		SendDlgItemMessage (intMatchWnd,intMatchList,LB_RESETCONTENT,0,0); 
                         ls1 = GetDlgItemText (hWndDlg,IDC_STREET1,Street1,33); 
 		         		FindOpt = SendDlgItemMessage (hWndDlg,IDC_TRYHARDER,(UINT)BM_GETCHECK,(WPARAM)0,(LPARAM)0L);
-                        if (DisplayStreetsINT (hWndDlg,IDM_STREET_MENU1,Street1,ls1,IDC_STREET1,FindOpt,TRUE)>=0) 
+                        if (DisplayStreetsINT (hWndDlg,IDM_STREET_MENU1,Street1,ls1,IDC_STREET1,FindOpt, checkForSegs)>=0)
 				        	PostMessage(hWndDlg, WM_COMMAND, IDC_TEST_INT, 0L);
                         break;
 
@@ -830,7 +837,7 @@ BOOL FAR PASCAL LOC_INTERSECTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, 
 					 SendDlgItemMessage(intMatchWnd, intMatchList, LB_RESETCONTENT, 0, 0);
                         ls2 = GetDlgItemText (hWndDlg,IDC_STREET2,Street2,33);
 		         		FindOpt = SendDlgItemMessage (hWndDlg,IDC_TRYHARDER,(UINT)BM_GETCHECK,(WPARAM)0,(LPARAM)0L);
-                        if (DisplayStreetsINT (hWndDlg,IDM_STREET_MENU2,Street2,ls2,IDC_STREET2,FindOpt,TRUE)>=0)
+                        if (DisplayStreetsINT (hWndDlg,IDM_STREET_MENU2,Street2,ls2,IDC_STREET2,FindOpt, checkForSegs)>=0)
 				        	PostMessage(hWndDlg, WM_COMMAND, IDC_TEST_INT, 0L);
                         break;
 
@@ -869,7 +876,10 @@ BOOL FAR PASCAL LOC_INTERSECTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, 
             case IDOK:
             	 Choice = 0;
             	 goto GetInt;
-            	 
+            case IDC_ADDTOZOOM2:
+                Choice = 0;
+                addToZoom = TRUE;
+                goto GetInt;
             case IDC_INT_MATCHES: /* List box                           */
                  switch(HIWORD(wParam))
                  {   
@@ -887,8 +897,11 @@ BOOL FAR PASCAL LOC_INTERSECTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, 
 						 CloseStreetNameTable ();
 						 CloseNetIntersect (Opened);
 		         		 OnlyPrime = SendDlgItemMessage (hWndDlg,IDC_IN_PRIMARY_CITY_ONLY,(UINT)BM_GETCHECK,(WPARAM)0,(LPARAM)0L);
-		                 EndDialog(hWndDlg, TRUE);
-                     break;
+                         if (addToZoom)
+                             EndDialog(hWndDlg, 2);
+                         else
+                             EndDialog(hWndDlg, TRUE);
+                         break;
                  }
                  break;
 
@@ -928,8 +941,11 @@ BOOL FAR PASCAL LOC_INTERSECTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, 
 					if (!WantMunic || WantMunic == pMatch->Munic)
 					{ 
 						GetMunicName (pMatch->Munic,MunName,MunAbv);
-						sprintf (_fstrchr(str,0),",%s\t%20.8f,%20.8f",MunName,pMatch->Point.x,pMatch->Point.y);
-						AddIntMatch(hWndDlg, str);
+                        if (*MunName)
+                            sprintf(_fstrchr(str, 0), ",%s\t%20.8f,%20.8f", MunName, pMatch->Point.x, pMatch->Point.y);
+                        else
+                            sprintf(_fstrchr(str, 0), "\t%20.8f,%20.8f", pMatch->Point.x, pMatch->Point.y);
+                        AddIntMatch(hWndDlg, str);
 	                }
                     pMatch++;
 				 } 
@@ -954,8 +970,11 @@ BOOL FAR PASCAL LOC_INTERSECTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, 
 						if (!WantMunic || WantMunic == pMatch->Munic)
 						{ 
 							GetMunicName (pMatch->Munic,MunName,MunAbv);
-							sprintf (_fstrchr(str,0),",%s\t%20.8f,%20.8f",MunName,pMatch->Point.x,pMatch->Point.y);
-							if (SendDlgItemMessage(intMatchWnd, intMatchList, LB_FINDSTRINGEXACT, -1, (LPARAM)str) == LB_ERR)
+                            if (*MunName)
+                                sprintf(_fstrchr(str, 0), ",%s\t%20.8f,%20.8f", MunName, pMatch->Point.x, pMatch->Point.y);
+                            else
+                                sprintf(_fstrchr(str, 0), "\t%20.8f,%20.8f", pMatch->Point.x, pMatch->Point.y);
+                            if (SendDlgItemMessage(intMatchWnd, intMatchList, LB_FINDSTRINGEXACT, -1, (LPARAM)str) == LB_ERR)
 							{
 								AddIntMatch(hWndDlg, str);
 								totmatch++;
@@ -972,7 +991,8 @@ BOOL FAR PASCAL LOC_INTERSECTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, 
 				 	Enable=TRUE;
 				 else
 				 	Enable=FALSE;
-	 			 EnableWindow (GetDlgItem(hWndDlg,IDOK),Enable);
+                 EnableWindow(GetDlgItem(hWndDlg, IDOK), Enable);
+                 EnableWindow(GetDlgItem(hWndDlg, IDC_ADDTOZOOM2), Enable);
 
 		 	}
                  break;
@@ -5872,7 +5892,7 @@ BOOL FAR PASCAL LOC_STREETMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPA
                  switch (HIWORD(wParam))
                  {  case EN_CHANGE:
                         i = GetDlgItemText (hWndDlg,IDC_STREET,Street,33);
-                        if (DisplayStreetsINT (hWndDlg,IDM_STREET_MENU,Street,i,IDC_STREET,1,TRUE)>=1)
+                        if (DisplayStreetsINT (hWndDlg,IDM_STREET_MENU,Street,i,IDC_STREET,1,FALSE)>=1)
 							EnableWindow (GetDlgItem(hWndDlg,IDOK),TRUE); 
 						else
 							EnableWindow (GetDlgItem(hWndDlg,IDOK),FALSE);

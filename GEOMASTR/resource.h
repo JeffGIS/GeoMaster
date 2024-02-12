@@ -3097,6 +3097,7 @@
 #define IDC_TRYHARDER                   2017
 #define IDC_USERCHECKBOX11              2018
 #define IDC_LABLELALLCONTOURS           2018
+#define IDC_TRYHARDER2                  2018
 #define IDC_USERCHECKBOX12              2019
 #define IDC_ALLOWHOLLOW                 2019
 #define IDC_USERCHECKBOX13              2020
@@ -3464,6 +3465,7 @@
 #define IDC_AREA_UNITS_TITLE            2325
 #define ID_ALTLOAD                      2326
 #define ID_VIEW                         2327
+#define IDC_ADDTOZOOM2                  2328
 #define PRMT_HIGHLIGHT                  5035
 #define PRMT_PANZOOM1                   5036
 #define PRMT_PANZOOM2                   5037
@@ -3809,9 +3811,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        1277
+#define _APS_NEXT_RESOURCE_VALUE        1279
 #define _APS_NEXT_COMMAND_VALUE         1250
-#define _APS_NEXT_CONTROL_VALUE         2328
+#define _APS_NEXT_CONTROL_VALUE         2329
 #define _APS_NEXT_SYMED_VALUE           1036
 #endif
 #endif

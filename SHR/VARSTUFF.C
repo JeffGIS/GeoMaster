@@ -2203,8 +2203,16 @@ GSSiExitProg (529);
 //ii=1;
 	if (*TraceVar)
 	{
-		if (!_fstricmp (Name,TraceVar))
-			MessageBox (0,Value,Name,MB_OK);
+		if (!_fstricmp(Name, TraceVar))
+		{
+			LPSTR expVal = malloc(4100);
+			strcpy(expVal, Value);
+			ExpandText(expVal);
+			MessageBox(0, Value, Name, MB_OK);
+			MessageBox(0, expVal, Name, MB_OK);
+			MessageBox(0, GetLastPathname(), Name, MB_OK);
+			free(expVal);
+		}
 	}
 	handle = AllocateVar (Name); 
 	if (handle)
@@ -3667,7 +3675,10 @@ GSSiExitProg (532);
 		case 416:
 			displayTextPoly = atob(Value);
 			break;
-			
+		case 417:
+			AddToView = atob(Value);
+			break;
+
 		default:
  			break;
 	}
@@ -3975,7 +3986,6 @@ void CreateInternalGlobals (void)
 	AllocateTypeVar("%DONOTPICKREFNO",288,FALSE); 
 	AllocateTypeVar("%BlockVehicleDisplay",289,FALSE);
 	AllocateTypeVar("%GRAPHICSFILE",290,FALSE);
-	AllocateTypeVar("%TRACEVAR",291,FALSE);
 	AllocateTypeVar("%MOVEHORZVERT",292,FALSE);
 	AllocateTypeVar("%PICKPOINTSYM",293,FALSE);
 	AllocateTypeVar("%DEBUG",294,FALSE);
@@ -4103,6 +4113,7 @@ void CreateInternalGlobals (void)
 	AllocateTypeVar("%IGNORE_PATANDTRANS", 414, FALSE);
 	AllocateTypeVar("%USEZLIB", 415, FALSE);
 	AllocateTypeVar("%DISPLAYTEXTPOLY", 416, FALSE);
+	AllocateTypeVar("%ADDTOVIEW", 417, FALSE);
 
 //	AllocateTypeVar("%DL",191,FALSE);
 	
@@ -5389,6 +5400,9 @@ GSSiExitProg (533);
 			break;
 		case 416:
 			btoa(displayTextPoly, OutStr);
+			break;
+		case 417:
+			btoa(AddToView, OutStr);
 			break;
 
 	}

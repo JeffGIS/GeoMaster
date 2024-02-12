@@ -925,7 +925,7 @@ short GetPickFile (short PickLayerID)
 #endif
 {   
 	short	i, iview;
-    char    File[128], drive[8], dir[128], leaf[40], LastFile[128];
+    char    File[MAX_PATH], drive[8], dir[MAX_PATH], leaf[128], LastFile[MAX_PATH];
 	short PickFile;
 	
 	if (PickLayerID == -1) //edit file
@@ -1323,7 +1323,13 @@ void ZoomToRect(MNMXCORD Rect,BOOL Imediate)
     		InflateBounds (&Rect,Inc);
     	} 
     }
-	CurView->NewBounds = Rect;
+	if (AddToView)
+	{
+		CurView->NewBounds = CurView->WBounds;
+		AddBoundsToBounds(&Rect, &CurView->NewBounds);
+	}
+	else
+		CurView->NewBounds = Rect;
 	SetScaleAndMidpointFromBounds (CurView);
 
 	ZoomToPointAndScale (CurView->MidPointW,CurView->Scale,Imediate);
@@ -1541,14 +1547,14 @@ void ZoomToPointAndDist (DPOINT Point, double dist,BOOL Immediate)
 {
 	MNMXCORD	Rect; 
     
-    if (dist)
+    if (dist > 0)
     {
 		Rect.xmn = Point.x - dist;
 		Rect.xmx = Point.x + dist;
 		Rect.ymn = Point.y - dist;
 		Rect.ymx = Point.y + dist;  
 	}
-	else
+	else if (dist == 0)
 	{
 	    dist = (CurView->WBounds.xmx - CurView->WBounds.xmn)/2;
 	    Rect.xmn = Point.x - dist;
@@ -1557,6 +1563,11 @@ void ZoomToPointAndDist (DPOINT Point, double dist,BOOL Immediate)
 	    Rect.ymn = Point.y - dist;
 	    Rect.ymx = Point.y + dist; 
     }
+	else
+	{
+		Rect = CurView->WBounds;
+		AddDPointToMinMax(&Point, &Rect);
+	}
     CurView->CurZoomAreaRef = 0;
 	ZoomToRect(Rect,Immediate);
 {
@@ -3589,7 +3600,7 @@ HANDLE OpenMapIndex (LPSTR Name,LPMNMXCORD pIndexBounds)
     FILEINDEX FirstIndex;   
     MNMXCORD    TestBounds;
 	MNMXCORD	FileBounds;
-    char        File[MAX_PATH], drive[8], dir[MAX_PATH], leaf[40], IndexRes[16]; 
+    char        File[MAX_PATH], drive[8], dir[MAX_PATH], leaf[128], IndexRes[16]; 
 	char		inName[MAX_PATH];
     short	SaveUnits;
 
@@ -3783,7 +3794,7 @@ short GetMapIndexType (LPSTR Name)
     FILEINDEX FirstIndex;   
     MNMXCORD    TestBounds;
 	MNMXCORD	FileBounds;
-    char        File[MAX_PATH], drive[8], dir[MAX_PATH], leaf[40], IndexRes[16];
+    char        File[MAX_PATH], drive[8], dir[MAX_PATH], leaf[128], IndexRes[16];
     
     _fstrcpy (File,Name);
     ExpandText (File);
