@@ -2209,12 +2209,12 @@ GSSiExitProg (529);
 			strcpy(expVal, Value);
 			ExpandText(expVal);
 			MessageBox(0, Value, Name, MB_OK);
-			MessageBox(0, expVal, Name, MB_OK);
-			MessageBox(0, GetLastPathname(), Name, MB_OK);
+			MessageBox(0, expVal, "Expanded Value", MB_OK);
+			MessageBox(0, GetLastPathname(),"Last File Opened", MB_OK);
 			LPSTR pmacrostack = malloc(1024 * 1024);
 			*pmacrostack = 0;
 			GetMacroStack(pmacrostack, 1024 * 1024);
-			MessageBox(0, pmacrostack, Name, MB_OK);
+			MessageBox(0, pmacrostack,"Macro Stack", MB_OK);
 			free(pmacrostack);
 			free(expVal);
 		}

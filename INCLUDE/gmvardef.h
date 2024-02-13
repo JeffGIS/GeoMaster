@@ -680,6 +680,7 @@ long	CurrentVoterID;
 short	CurrentVoterDB;   
 HANDLE	hStreetPolys=0;
 HFILE	FidStreetPolys=HFILE_ERROR;  
+HANDLE	hDBStreetNumRefs = 0;
 HANDLE	hProfilePoints=0;
 short	NumProfilePoints; 
 HANDLE	hCurProfile;

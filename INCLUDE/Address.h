@@ -480,6 +480,7 @@ BOOL GetZIPBounds (long Zip,LPMNMXCORD pBounds);
 void CloseZIPBounds (BOOL Opened);
 long DrawStreet2 (long StreetNum,long WantZIP,COLORREF Color,short Width,BOOL HighlightStreet,LPMNMXCORD pTotMinMax,BOOL LimToMinMax);
 int GetNumStreetSegs (long StreetNum,long WantZIP,LPMNMXCORD pTotMinMax,BOOL LimToMinMax, LPMNMXCORD pBounds, int DrawingOption,COLORREF Color,int Width);
+int GetNumStreetSegs_new(long StreetNum, long WantAllSegs, LPMNMXCORD pTotMinMax, BOOL LimToMinMax, LPMNMXCORD pBounds, int DrawingOption, COLORREF Color, int Width);
 BOOL CreateStnameFilesUpdate (void);
 void ReadSegData (long Offset, LPSEGDATA pSegdata);
 //void WriteSegData (long Offset, LPSEGDATA pSegdata);

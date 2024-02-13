@@ -2245,29 +2245,25 @@ BOOL CreateAddMatchByArea (LPSTR InFile,LPSTR OutFile,LPSTR AreaName)
 	return TRUE;
 }  
 	
- 
-
- 
-
- 
-
- 
 
 BOOL OpenStreetPolys (LPBOOL pOpened)
 {
 	char	FileName[MAX_PATH];
-    SetAddressDir();
-    sprintf (FileName,"%s\\streetpoly.in1",AddMatchDir);
 
 	*pOpened = FALSE;
-	
 	if (hStreetPolys)
 		return TRUE;
+	strcpy(FileName, "[%DL]maplib\\centerline\\[CLINEDATE]\\streetnumrefs.gmd");
+	ExpandText(FileName);
+	hDBStreetNumRefs = OpenGWDatabase(FileName, BT_READ);
+	if (!hDBStreetNumRefs)
+		return FALSE;
+	sprintf(FileName, "[%DL]maplib\\centerline\\[CLINEDATE]\\streetpoly.in1");
 	hStreetPolys = BT_OPEN (FileName,0,BT_READ,0);
 	if (!hStreetPolys)
 		return FALSE;
-    sprintf (FileName,"%s\\streetpoly.bin",AddMatchDir);
-	FidStreetPolys = GSSiOpenFile (FileName,NULL,OF_READ);   
+	sprintf(FileName, "[%DL]maplib\\centerline\\[CLINEDATE]\\streetpoly.bin");
+	FidStreetPolys = GSSiOpenFile (FileName,NULL,OF_READ);
 	*pOpened = TRUE;
 	return TRUE;
 }
@@ -2279,6 +2275,7 @@ void CloseStreetPolys (BOOL Opened)
 		BT_CLOSE (hStreetPolys);
 		hStreetPolys = 0;
 		GSSiClose2 (&FidStreetPolys);
+		CloseGWDatabase(hDBStreetNumRefs);
 	}
 	return;
 }
@@ -2301,11 +2298,10 @@ BOOL SaveStreetPolys (void)
 	BTVar[0].BT_VARLEN=4;
 	BTVar[0].BT_VAROFF=0;
 	
-    SetAddressDir();
-    sprintf (FileName,"%s\\streetpoly.in1",AddMatchDir);
+    sprintf (FileName,"[%DL]maplib\\centerline\\[CLINEDATE]\\streetpoly.in1");
 	BT_CREATE (FileName, 4, FALSE, 1, 1,(LPBTVARDESC)BTVar,FALSE, 0, 0, FALSE);
     hBT = BT_OPEN (FileName,0,BT_WRITE,0); 
-    sprintf (FileName,"%s\\streetpoly.bin",AddMatchDir);
+    sprintf (FileName,"[%DL]maplib\\centerline\\[CLINEDATE]\\streetpoly.bin");
     Fid = GSSiOpenFile (FileName,NULL,OF_CREATE);
    	TotRecs = BT_NUM_IN_INDEX (hHighlight); 
 	CreateStatusWind (hWndMain,1,"Writing output file");

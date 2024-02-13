@@ -117,7 +117,7 @@ long AddToCurStreets (HWND hWndDlg,long CurPath,LPMNMXCORD TotMinMax, LPINT pDis
 		CurView->hRgn = CreateVPRgn(FALSE,FALSE);
   		SelectClipRgn (CurView->hDC,CurView->hRgn);
   		GSSiDeleteObject(&CurView->hRgn); 
-		nSegs = DrawStreet (CurPath,-1,DrawStreetColors[*pDisplayedStreets%4],3,HighlightStreet,TotMinMax,FALSE,&hCurStreets);
+		nSegs = DrawStreet2 (CurPath,-1,DrawStreetColors[*pDisplayedStreets%4],3,HighlightStreet,TotMinMax,FALSE,&hCurStreets);
 		(*pDisplayedStreets)++;
 		sprintf (str,"%ld segments found",nSegs);
 		SetDlgItemText (hWndDlg,IDC_MESS,str);
@@ -135,8 +135,6 @@ long DrawStreet (long sNum,long WantLinkID,COLORREF Color,short Width,BOOL Highl
 	long	NumSegs=0, LinkID;  
 	
 	
-	if (!OpenNetLinkAndRef (NetworkID,FALSE,&Opened))
-		return 0;  
 	OpenStreetPolys (&OpenedSP);
 	CreateSpecial();
     OldCursor = GSSiSetCursor (LoadCursor (0,IDC_WAIT));
@@ -225,7 +223,6 @@ long DrawStreet (long sNum,long WantLinkID,COLORREF Color,short Width,BOOL Highl
 			ProcessPickedItem (0,2); 
 		}
 	}
-    CloseNetLinkAndRef (Opened);                 
 	CloseStreetPolys (OpenedSP);
     GSSiSetCursor (OldCursor);
 	return NumSegs;
@@ -314,7 +311,81 @@ Top:
 	return NumSegs;
 }
 
+int GetNumStreetSegs_new(long StreetNum, long WantAllSegs, LPMNMXCORD pTotMinMax, BOOL LimToMinMax, LPMNMXCORD pBounds, int DrawingOption, COLORREF Color, int Width)
+{
+	LPGWDHEADER	lpGWDHead;
+	long	NumSegs = 0, LinkID, Offset, StreetNumAndRefno[3];
+	short	pos, cond, Index = 0;
+	BOOL	OpenedSP = FALSE;
+	int		i;
 
+	OpenStreetPolys(&OpenedSP);
+	lpGWDHead = (LPGWDHEADER)GlobalLock(hDBStreetNumRefs);
+	OldCursor = GSSiSetCursor(LoadCursor(0, IDC_WAIT));
+Top:
+	StreetNumAndRefno[0] = StreetNum;
+	StreetNumAndRefno[1] = LONG_MIN;
+	StreetNumAndRefno[2] = LONG_MIN;
+	pos = BT_FIRST;
+	cond = BT_GE;
+	while (lpGWDHead->BTHandle[Index] && !BT_FIND(lpGWDHead->BTHandle[Index], (LPSTR)StreetNumAndRefno, pos, cond, (LPSTR)&Offset))
+	{
+		pos = BT_NEXT;
+		cond = BT_ANY;
+		if (StreetNumAndRefno[0] == StreetNum)
+		{
+			if (hStreetPolys)
+			{
+				long	Offset, Refno, nPnts, Size, EndPointNum;
+				short	Desc;
+				HPDPOINT	Points;
+				double	AtDist;
+				HANDLE	hPoly;
+				STREETPOLYHEADER	Header;
+
+				if (!BT_FIND(hStreetPolys, (LPSTR)&StreetNumAndRefno[1], BT_FIRST, BT_EQ, (LPSTR)&Offset))
+				{
+					GSSillseek(FidStreetPolys, Offset, 0);
+					BigRead(FidStreetPolys, (HPSTR)&Header, sizeof(STREETPOLYHEADER));
+					Size = Header.nPnts * sizeof(DPOINT);
+					hPoly = GSSiGlobAlloc(0, GMEM_MOVEABLE, Size);
+					Points = (HPDPOINT)GlobalLock(hPoly);
+					BigRead(FidStreetPolys, (HPSTR)Points, Size);
+					if (pBounds)
+					{
+						for (i = 0; i < Header.nPnts; i++)
+							AddDPointToMinMax(&Points[i], pBounds);
+					}
+					GSSiGlobUlFree(&hPoly);
+					NumSegs++;
+				}
+			}
+			else if (PickByRefno(StreetNumAndRefno[1], 0, 0, -1))
+			{
+				if (pTotMinMax)
+				{
+					if (LimToMinMax)
+					{
+						if (!BoundsInBounds(pTotMinMax, &PickList[0].Rect, 1))
+							continue;
+					}
+					else
+						AddMinMaxD(pTotMinMax, &PickList[0].Rect);
+				}
+				NumSegs++;
+				AddSpecial(PickList[0].Refno, 1, Color, Width);
+				ProcessPickedItem(0, 2);
+			}
+			if (NumSegs && !WantAllSegs)
+				break;
+		}
+		else
+			break;
+	}
+	GlobalUnlock(hDBStreetNumRefs);
+	CloseStreetPolys(OpenedSP);
+	return NumSegs;
+}
 
 long DrawStreet2 (long StreetNum,long WantZIP,COLORREF Color,short Width,BOOL HighlightStreet,LPMNMXCORD pTotMinMax,BOOL LimToMinMax)
 {   
@@ -763,7 +834,7 @@ short DisplayStreetsINT (HWND hDlg,USHORT iMenu, LPSTR InName,short nchar,UINT E
     	FillGWDData (lpGWDHead,Offset);
     	pSNum = (LPLONG)&lpGWDHead->GWDData;
     	sprintf (str,"%s\t%ld",lpSNT->TrueName,*pSNum);
-		if (!CheckForSegs || GetNumStreetSegs (*pSNum,0,0,0,0,0,0,0))
+		if (!CheckForSegs || GetNumStreetSegs_new (*pSNum,0,0,0,0,0,0,0))
 		{
 			if (SendDlgItemMessage (hDlg,iMenu,LB_FINDSTRINGEXACT,-1,(LPARAM)str) == LB_ERR) 
         		SendDlgItemMessage (hDlg,iMenu,LB_ADDSTRING,0,(LPARAM)str); 
@@ -817,7 +888,7 @@ short DisplayStreetsINT (HWND hDlg,USHORT iMenu, LPSTR InName,short nchar,UINT E
     		break; 
     	pSNum = (LPLONG)&lpGWDHead->GWDData;
     	sprintf (str,"%s\t%ld",lpSNT->TrueName,*pSNum);
- 		if (!CheckForSegs || GetNumStreetSegs (*pSNum,0,0,0,0,0,0,0))
+ 		if (!CheckForSegs || GetNumStreetSegs_new (*pSNum,0,0,0,0,0,0,0))
 		{
 			if (SendDlgItemMessage (hDlg,iMenu,LB_FINDSTRINGEXACT,-1,(LPARAM)str) == LB_ERR) 
         		SendDlgItemMessage (hDlg,iMenu,LB_ADDSTRING,0,(LPARAM)str); 

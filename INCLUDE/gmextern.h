@@ -840,6 +840,7 @@ extern HANDLE			hUDI;
 extern HANDLE			hTEXT;  
 extern HANDLE			hStreetPolys; 
 extern HFILE			FidStreetPolys;
+extern HANDLE			hDBStreetNumRefs;
 extern short			NumProfilePoints; 
 extern HANDLE			hProfilePoints; 
 extern HANDLE			hProfileRoute;

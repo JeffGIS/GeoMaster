@@ -736,7 +736,7 @@ BOOL FAR PASCAL LOC_INTERSECTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, 
 	HWND	hPar, hParDlg;
  	static	BOOL	OnlyPrime=TRUE, IgnoreChange=FALSE;
     BOOL    addToZoom = FALSE;
-    BOOL    checkForSegs = FALSE;
+    BOOL    checkForSegs = TRUE;
 	
  short  BRtn;
  if ((BRtn = DIALOGSTYLEMsgProc (hWndDlg,Message, wParam, lParam))) return (BRtn);
@@ -757,8 +757,8 @@ BOOL FAR PASCAL LOC_INTERSECTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, 
             GSSiMsgBox( GetFocus(), "Unable to open street name table", NULL,MB_OK|MB_ICONEXCLAMATION,0);
 	        return FALSE;
 	     }
-         if (!OpenNetIntersect (NetworkID,FALSE,&Opened))
-        	break; 
+//         if (!OpenNetIntersect (NetworkID,FALSE,&Opened))
+//        	break; 
          SetDlgItemText(hWndDlg,IDC_STREET1,Street1);
 		 if (!stricmp (Street2,"*"))
 			 *Street2 = 0;
@@ -5892,7 +5892,7 @@ BOOL FAR PASCAL LOC_STREETMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPA
                  switch (HIWORD(wParam))
                  {  case EN_CHANGE:
                         i = GetDlgItemText (hWndDlg,IDC_STREET,Street,33);
-                        if (DisplayStreetsINT (hWndDlg,IDM_STREET_MENU,Street,i,IDC_STREET,1,FALSE)>=1)
+                        if (DisplayStreetsINT (hWndDlg,IDM_STREET_MENU,Street,i,IDC_STREET,1,TRUE)>=1)
 							EnableWindow (GetDlgItem(hWndDlg,IDOK),TRUE); 
 						else
 							EnableWindow (GetDlgItem(hWndDlg,IDOK),FALSE);

@@ -15816,7 +15816,7 @@ GSSiExitProg (745);
                  switch (HIWORD(wParam))
                  {  case EN_CHANGE:
                         i = GetDlgItemText (hWndDlg,IDC_STREET_NAME,TrueName,33);
-                        DisplayStreetsINT (hWndDlg,IDC_STREET_NAME_LIST,TrueName,i,IDC_STREET_NAME,1,FALSE);
+                        DisplayStreetsINT (hWndDlg,IDC_STREET_NAME_LIST,TrueName,i,IDC_STREET_NAME,1,TRUE);
                         break;
 
 
