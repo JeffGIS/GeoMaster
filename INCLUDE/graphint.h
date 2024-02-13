@@ -365,6 +365,7 @@ BOOL GetPickName (int Item);
 HANDLE GWPolygon (HDC hDC, HPPOINTS lpPoints, long npnts, int nPoly, HANDLE hPolyPartLen, int desc, BOOL ShowBorder,BOOL DoFill,LPINT pBorderSymNum);
 HANDLE GWPolygonD (HDC hDC, HPDPOINT lpPoints, long npnts, int nPoly, HANDLE hPolyPartLen, int desc,BOOL ShowBorder,BOOL DoFill,LPINT pBorderSymNum);
 HANDLE GWPolygonDFast (HDC hDC, HPDPOINT lpPoints, long npnts, short nPoly, HANDLE hPolyPartLen, int desc,BOOL ShowBorder);
+void GetMacroStack(LPSTR outstr, int lnoutstr);
 void ResetObjectCount (void);
 void SetSavedGraphicsDC (HDC hDC);
 void DestroySavedGraphicsFile (int Type);

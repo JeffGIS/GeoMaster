@@ -173,6 +173,14 @@ LONG FAR PASCAL DebugSubclassProc(HWND hWnd, UINT uiMsg,WORD wParam, LONG lParam
     return (lRtn);
 }
 
+void GetMacroStack(LPSTR outstr, int lnoutstr)
+{
+	for (int i = 0; i < lnMacroStack; i++)
+	{
+		sprintf(strchr(outstr,0), "\n%s", macroStack[i]);
+	}
+
+}
 void FAR PASCAL DBSubclassControl(HWND hCtrl, void FAR *Callback)
 {
     FARPROC     lpOrgProc; 

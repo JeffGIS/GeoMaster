@@ -2211,6 +2211,11 @@ GSSiExitProg (529);
 			MessageBox(0, Value, Name, MB_OK);
 			MessageBox(0, expVal, Name, MB_OK);
 			MessageBox(0, GetLastPathname(), Name, MB_OK);
+			LPSTR pmacrostack = malloc(1024 * 1024);
+			*pmacrostack = 0;
+			GetMacroStack(pmacrostack, 1024 * 1024);
+			MessageBox(0, pmacrostack, Name, MB_OK);
+			free(pmacrostack);
 			free(expVal);
 		}
 	}
