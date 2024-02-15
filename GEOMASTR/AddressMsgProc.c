@@ -3440,6 +3440,7 @@ BOOL FAR PASCAL ADDRESSPIDMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPA
  switch(Message)
    {
     case WM_INITDIALOG:  
+        AddToView = FALSE;
 		SetSecondaryAddInput(0);
 		addMatchList = IDM_STREET_MENU;
 		addMatchWnd = hWndDlg;
@@ -3735,7 +3736,8 @@ BOOL FAR PASCAL LOCATEPIDMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPAR
  if ((BRtn = DIALOGSTYLEMsgProc (hWndDlg,Message, wParam, lParam))) return (BRtn);
  switch(Message)
    {
-    case WM_INITDIALOG:  
+    case WM_INITDIALOG: 
+        AddToView = FALSE;
          if (!OpenAddressFilesPID (hWndMain)) goto Close ;     
          SetDlgItemText(hWndDlg,IDC_ENTERPID,PID);
          SendDlgItemMessage(hWndDlg, IDC_ADDTOVIEW, BM_SETCHECK, AddToView, 0L);

@@ -820,6 +820,7 @@ BOOL AddressLocationPID (HWND hWnd, HINSTANCE hInst)
 		  int	n = 0;
 		  char testTAG[128] = "Graphic record not found for this address";
 	
+		  AddToView = FALSE;
 	      lpfnADDRESSPIDMsgProc = MakeProcInstance((DLGPROC)ADDRESSPIDMsgProc, hInst);
 	      nRc = DialogBox(hInst, (LPSTR)"ADDRESS1", hWnd, lpfnADDRESSPIDMsgProc);
 	      FreeProcInstance(lpfnADDRESSPIDMsgProc);

@@ -2701,6 +2701,7 @@ GotCloseFilehSQL:
             DLGPROC lpfnTAGLOCMsgProc;
 			int		nRc;
 			
+			AddToView = FALSE;
 			nArgs = GetFunArgs (Args,Arg,7,&hMem, pBrkPt, bpOffset, bpLen); 
 			if (nArgs < 1)
 				goto RtnFalse;

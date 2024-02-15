@@ -1050,6 +1050,7 @@ GSSiExitProg (1350);
             DLGPROC lpfnOWNERLOCMsgProc;
 			int		nRc;
 			
+			AddToView = FALSE;
 			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 			if (!nArgs)
 			{

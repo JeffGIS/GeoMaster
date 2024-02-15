@@ -4619,6 +4619,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
             {
             	DLGPROC lpfnLOC_COORDMsgProc;
 
+				AddToView = FALSE;
                 lpfnLOC_COORDMsgProc = MakeProcInstance((DLGPROC)LOC_COORDMsgProc, hInst);
                 nRc = DialogBox(hInst, (LPSTR)"LOC_COORD", hWnd, lpfnLOC_COORDMsgProc);
                 FreeProcInstance(lpfnLOC_COORDMsgProc); 

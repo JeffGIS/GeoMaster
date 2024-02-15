@@ -17262,6 +17262,7 @@ GSSiExitProg (1032);
 //		SetWindowText (hWndMain,"Step 1");
 		SetSecondaryTAGInput(0);
 
+		AddToView = FALSE;
 		if (!CurrentConfig) 
 		{
 			SetConfig (1);   
