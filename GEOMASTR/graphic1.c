@@ -5734,7 +5734,7 @@ NoFile:
             }
         }*/
 		DisplaySavedGraphicsFile (CurView->hDC,7);
-		DisplayCurStreets (FALSE,0);
+		DisplayCurStreets (FALSE,0,0,0,0);
 		if (CurView->WantDisplayHighlight)
 		{
 			int StartHLTRef = LONG_MIN;

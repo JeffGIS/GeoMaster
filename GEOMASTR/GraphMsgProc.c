@@ -17286,7 +17286,7 @@ GSSiExitProg (1032);
 			// ScreenRectToClientRect(hParDlg, &pRect);
 			MoveWindow(hWndDlg, pRect.left, pRect.top, RECTWIDTH(&pRect), RECTHEIGHT(&pRect), TRUE);
 		}
-
+		SendDlgItemMessage(hWndDlg, IDC_ADDTOVIEW, BM_SETCHECK, AddToView, 0L);
 		SendDlgItemMessage (hWndDlg,IDC_AUTOHIGHLIGHT,BM_SETCHECK,AutoHighlight,0L);
 		if (TagLocTitle && *TagLocTitle)  
 			_fstrcpy (str,TagLocTitle);
@@ -17424,7 +17424,10 @@ NextFileInList:    		GSSillseek (FidFL,FileListLoc,0);
     case WM_COMMAND:
          switch(LOWORD(wParam))
            {
-			case IDC_TAGVALUE:
+		 case IDC_ADDTOVIEW:
+			 AddToView = SendDlgItemMessage(hWndDlg, IDC_ADDTOVIEW, (UINT)BM_GETCHECK, (WPARAM)0, (LPARAM)0L);
+			 break;
+		 case IDC_TAGVALUE:
                  switch (HIWORD(wParam))
                  {	case EN_CHANGE: 
             Display:

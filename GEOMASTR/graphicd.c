@@ -2847,7 +2847,7 @@ GSSiExitProg (440);
 Exit:
     if (Final < 2) 
     {
-		DisplayCurStreets (FALSE,0);
+		DisplayCurStreets (FALSE,0,0,0,0);
 		if (!DisplayAllVehicles (TRUE,FALSE)) 
 		{
 			if (Final < 2 && BufferedScreen)

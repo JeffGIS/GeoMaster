@@ -452,7 +452,7 @@ short GetNameTypeList (short Type,LPSHORT nList,HANDLE hList,
 								  LPSTR STDNAM,LPSTR NRONAM,LPSTR NMONLY,
                             	  LPSTR SANSCH,LPSTR NANDCH,LPSTR NCMPNM,LPSTR ORIGNM, LPSTR SANSCP, LPSTR SANSCS);
 short GetMatchingNames (short NameType, LPSTR Name,LPSHORT nList,HANDLE hList);
-void DisplayCurStreets (BOOL Clear,int Flash);
+void DisplayCurStreets (BOOL Clear,int Flash, int numSelected, LPINT pStreetNum, LPMNMXCORD pBounds);
 long AddToCurStreets (HWND hWndDlg,long CurPath,LPMNMXCORD TotMinMax,LPINT pDisplayedStreets);
 BOOL GetMunicName (long MCD,LPSTR Name,LPSTR Abv);
 BOOL GetZIPCenter (long ZIP,LPDPOINT Point);    
@@ -479,6 +479,7 @@ BOOL OpenZIPBounds (LPBOOL pOpened);
 BOOL GetZIPBounds (long Zip,LPMNMXCORD pBounds);
 void CloseZIPBounds (BOOL Opened);
 long DrawStreet2 (long StreetNum,long WantZIP,COLORREF Color,short Width,BOOL HighlightStreet,LPMNMXCORD pTotMinMax,BOOL LimToMinMax);
+long DrawStreet_new(long sNum, COLORREF Color, short Width, BOOL HighlightStreet, LPMNMXCORD pTotMinMax, BOOL LimToMinMax, LPHANDLE phPoly);
 int GetNumStreetSegs (long StreetNum,long WantZIP,LPMNMXCORD pTotMinMax,BOOL LimToMinMax, LPMNMXCORD pBounds, int DrawingOption,COLORREF Color,int Width);
 int GetNumStreetSegs_new(long StreetNum, long WantAllSegs, LPMNMXCORD pTotMinMax, BOOL LimToMinMax, LPMNMXCORD pBounds, int DrawingOption, COLORREF Color, int Width);
 BOOL CreateStnameFilesUpdate (void);

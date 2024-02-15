@@ -982,7 +982,7 @@ void ExpandDL (void)
 	ExpandText(str);
 	if (*str && FileType(str) == 2)
 	{
-		strcpy(str, "[%USERDIR]\\geomastr.ini");
+		strcpy(str, "[%USERDIR]geomastr.ini");
 		ExpandText(str);
 	}
 	else

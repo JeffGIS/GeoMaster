@@ -49,27 +49,48 @@ static size_t write_response(void *ptr, size_t size, size_t nmemb, void *stream)
 	return size * nmemb;
 }
 
-
-void DisplayCurStreets (BOOL Clear,int Flash)
+static BOOL wantStreet(int streetNum, int numSelected, LPINT pStreetNums)
+{
+	BOOL rtn = FALSE;
+	if (!numSelected)
+		return TRUE;
+	for (int i = 0; i < numSelected; i++)
+	{
+		if (streetNum == pStreetNums[i])
+			rtn = TRUE;
+	}
+	return rtn;
+}
+void DisplayCurStreets (BOOL Clear,int Flash,int numSelected,LPINT pStreetNums,LPMNMXCORD pBounds)
 {
 	if (Clear)
 		GSSiGlobFree (&hCurStreets);
 	else if (hCurStreets)
 	{
 		LPSTR pPolys;
-		int	nPnts, width, color, white=RGB(255,255,255);
+		int	streetNum, nPnts, width, color, white=RGB(255,255,255);
 		LPDPOINT pPoints;
 
-		GSSiDeleteObject(&CurView->hRgn);
-		CurView->hRgn = CreateVPRgn(FALSE,FALSE);
-		SelectClipRgn (CurView->hDC,CurView->hRgn);
-		GSSiDeleteObject(&CurView->hRgn);
+		if (!pBounds)
+		{
+			GSSiDeleteObject(&CurView->hRgn);
+			CurView->hRgn = CreateVPRgn(FALSE, FALSE);
+			SelectClipRgn(CurView->hDC, CurView->hRgn);
+			GSSiDeleteObject(&CurView->hRgn);
+		}
+		else
+		{
+			DBoundsInit(pBounds);
+			Flash = 1;
+		}
 		Flash++;
 		while (Flash--)
 		{
 			pPolys = GlobalLock (hCurStreets);
-			while ((nPnts = *(LPINT)pPolys))
+			while ((streetNum = *(LPINT)pPolys))
 			{
+				pPolys += sizeof(int);
+				nPnts = *(LPINT)pPolys;
 				pPolys += sizeof(int);
 				width = *(LPINT)pPolys;
 				pPolys += sizeof(int);
@@ -79,17 +100,27 @@ void DisplayCurStreets (BOOL Clear,int Flash)
 				pPolys += sizeof(int);
 				pPoints = (LPDPOINT)pPolys;
 				pPolys += sizeof(DPOINT)*nPnts;
+				if (wantStreet (streetNum, numSelected,pStreetNums))
 				{
- 					HPEN	hPen = CreatePen (PS_SOLID,IDNINT(AdjustWidth(width)),color);
-					HPEN	OldPen = SelectObject (CurView->hDC,hPen); 
+					if (pBounds)
+					{
+						for (int i=0;i<nPnts;i++)
+							AddDPointToMinMax(&pPoints[i], pBounds);
+					}
+					else
+					{
+						HPEN	hPen = CreatePen(PS_SOLID, IDNINT(AdjustWidth(width)), color);
+						HPEN	OldPen = SelectObject(CurView->hDC, hPen);
 
-					GWPolylineD (CurView->hDC,pPoints,nPnts,0); 
-					SelectObject (CurView->hDC,OldPen);
-					GSSiDeleteObject(&hPen);
+						GWPolylineD(CurView->hDC, pPoints, nPnts, 0);
+						SelectObject(CurView->hDC, OldPen);
+						GSSiDeleteObject(&hPen);
+					}
 				}
 			}
 			GlobalUnlock (hCurStreets);
-			Sleep (50);
+			if (!pBounds)
+				Sleep (50);
 		}
 	}
 	return;
@@ -108,7 +139,7 @@ long AddToCurStreets (HWND hWndDlg,long CurPath,LPMNMXCORD TotMinMax, LPINT pDis
 	_fstrcat (str,"\t");
 	if (SendDlgItemMessage (hWndDlg,IDC_CURSTREETS,LB_FINDSTRING,(WPARAM)-1,(LPARAM) str) == LB_ERR)
 	{
-		_fstrcat (str,ColorNames[*pDisplayedStreets%4]);
+		sprintf (strchr(str,0),"%s\t%i", ColorNames[*pDisplayedStreets % 4],CurPath);
 		SendDlgItemMessage (hWndDlg,IDC_CURSTREETS,LB_ADDSTRING,0,(LPARAM)str);
 		HighlightStreet = SendDlgItemMessage (hWndDlg,IDC_HIGHLIGHT,(UINT)BM_GETCHECK,(WPARAM)0,(LPARAM)0L);
 		SetDlgItemText (hWndDlg,IDC_MESS,"");
@@ -117,7 +148,7 @@ long AddToCurStreets (HWND hWndDlg,long CurPath,LPMNMXCORD TotMinMax, LPINT pDis
 		CurView->hRgn = CreateVPRgn(FALSE,FALSE);
   		SelectClipRgn (CurView->hDC,CurView->hRgn);
   		GSSiDeleteObject(&CurView->hRgn); 
-		nSegs = DrawStreet2 (CurPath,-1,DrawStreetColors[*pDisplayedStreets%4],3,HighlightStreet,TotMinMax,FALSE,&hCurStreets);
+		nSegs = DrawStreet_new (CurPath,DrawStreetColors[*pDisplayedStreets%4],3,HighlightStreet,TotMinMax,FALSE,&hCurStreets);
 		(*pDisplayedStreets)++;
 		sprintf (str,"%ld segments found",nSegs);
 		SetDlgItemText (hWndDlg,IDC_MESS,str);
@@ -125,52 +156,52 @@ long AddToCurStreets (HWND hWndDlg,long CurPath,LPMNMXCORD TotMinMax, LPINT pDis
 	return nSegs;
 }
 
-long DrawStreet (long sNum,long WantLinkID,COLORREF Color,short Width,BOOL HighlightStreet,LPMNMXCORD pTotMinMax,BOOL LimToMinMax,LPHANDLE phPoly)
-{   
+long DrawStreet(long sNum, long WantLinkID, COLORREF Color, short Width, BOOL HighlightStreet, LPMNMXCORD pTotMinMax, BOOL LimToMinMax, LPHANDLE phPoly)
+{
 	BOOL	Opened, OpenedSP;
-	NETREFSKEY		NetRefsKey,NetRefsKey2;
-	NETREFSDATA		NetRefsData,NetRefsData2;
-	short	pos=BT_FIRST,cond=BT_GT;
+	NETREFSKEY		NetRefsKey, NetRefsKey2;
+	NETREFSDATA		NetRefsData, NetRefsData2;
+	short	pos = BT_FIRST, cond = BT_GT;
 	HCURSOR	OldCursor;
-	long	NumSegs=0, LinkID;  
-	
-	
-	OpenStreetPolys (&OpenedSP);
+	long	NumSegs = 0, LinkID;
+
+
+	OpenStreetPolys(&OpenedSP);
 	CreateSpecial();
-    OldCursor = GSSiSetCursor (LoadCursor (0,IDC_WAIT));
-	NetRefsKey.Path =  sNum;
-	NetRefsKey.MP = WantLinkID*1000000; 
-	while (!BT_FIND (hBTNetRefs,(LPSTR)&NetRefsKey,pos,cond,(LPSTR)&NetRefsData))
+	OldCursor = GSSiSetCursor(LoadCursor(0, IDC_WAIT));
+	NetRefsKey.Path = sNum;
+	NetRefsKey.MP = WantLinkID * 1000000;
+	while (!BT_FIND(hBTNetRefs, (LPSTR)&NetRefsKey, pos, cond, (LPSTR)&NetRefsData))
 	{
 		pos = BT_NEXT;
-		cond = BT_ANY;  
-		LinkID = NetRefsKey.MP/1000000;
-		if (NetRefsKey.Path != sNum || (LinkID != WantLinkID && WantLinkID >=0))
-			break;     
+		cond = BT_ANY;
+		LinkID = NetRefsKey.MP / 1000000;
+		if (NetRefsKey.Path != sNum || (LinkID != WantLinkID && WantLinkID >= 0))
+			break;
 		NumSegs++;
 		if (hStreetPolys)
-		{   
-    		long	Offset,Refno,nPnts,Size,EndPointNum;
-    		short	Desc; 
+		{
+			long	Offset, Refno, nPnts, Size, EndPointNum;
+			short	Desc;
 			UINT	i;
-    		HPDPOINT	Points; 
-    		double	AtDist; 
-    		HANDLE	hPoly;
+			HPDPOINT	Points;
+			double	AtDist;
+			HANDLE	hPoly;
 			STREETPOLYHEADER	Header;
-    		
-    		if (!BT_FIND (hStreetPolys,(LPSTR)&NetRefsData.Ref,BT_FIRST,BT_EQ,(LPSTR)&Offset))
+
+			if (!BT_FIND(hStreetPolys, (LPSTR)&NetRefsData.Ref, BT_FIRST, BT_EQ, (LPSTR)&Offset))
 			{
-    			GSSillseek (FidStreetPolys,Offset,0);
-    			BigRead (FidStreetPolys,(HPSTR)&Header,sizeof(STREETPOLYHEADER));
-    			Size = Header.nPnts * sizeof(DPOINT);
-    			hPoly = GSSiGlobAlloc (0,GMEM_MOVEABLE,Size);
-    			Points = (HPDPOINT)GlobalLock (hPoly);
-    			BigRead (FidStreetPolys,(HPSTR)Points,Size); 
+				GSSillseek(FidStreetPolys, Offset, 0);
+				BigRead(FidStreetPolys, (HPSTR)&Header, sizeof(STREETPOLYHEADER));
+				Size = Header.nPnts * sizeof(DPOINT);
+				hPoly = GSSiGlobAlloc(0, GMEM_MOVEABLE, Size);
+				Points = (HPDPOINT)GlobalLock(hPoly);
+				BigRead(FidStreetPolys, (HPSTR)Points, Size);
 				if (pTotMinMax)
 				{
-					for (i=0;i<Header.nPnts;i++)
-						if (!LimToMinMax || DPointInBounds (&Points[i],pTotMinMax))
-							AddDPointToMinMax (&Points[i],pTotMinMax);
+					for (i = 0; i < Header.nPnts; i++)
+						if (!LimToMinMax || DPointInBounds(&Points[i], pTotMinMax))
+							AddDPointToMinMax(&Points[i], pTotMinMax);
 				}
 				if (phPoly)
 				{
@@ -178,16 +209,16 @@ long DrawStreet (long sNum,long WantLinkID,COLORREF Color,short Width,BOOL Highl
 
 					if (!*phPoly)
 					{
-						*phPoly = GSSiGlobAlloc (1730,GMEM_MOVEABLE,4*sizeof(int)+Header.nPnts*sizeof(DPOINT));
-						pPolys = GlobalLock (*phPoly);
+						*phPoly = GSSiGlobAlloc(1730, GMEM_MOVEABLE, 4 * sizeof(int) + Header.nPnts * sizeof(DPOINT));
+						pPolys = GlobalLock(*phPoly);
 					}
 					else
 					{
-						int lMem = GlobalSize (*phPoly);
+						int lMem = GlobalSize(*phPoly);
 
-						*phPoly = GlobalReAlloc (*phPoly,lMem+3*sizeof(int)+Header.nPnts*sizeof(DPOINT),GMEM_MOVEABLE);
-						pPolys = GlobalLock (*phPoly);
-						pPolys += lMem-sizeof(int);
+						*phPoly = GlobalReAlloc(*phPoly, lMem + 3 * sizeof(int) + Header.nPnts * sizeof(DPOINT), GMEM_MOVEABLE);
+						pPolys = GlobalLock(*phPoly);
+						pPolys += lMem - sizeof(int);
 					}
 					*(LPINT)pPolys = Header.nPnts;
 					pPolys += sizeof(int);
@@ -195,36 +226,144 @@ long DrawStreet (long sNum,long WantLinkID,COLORREF Color,short Width,BOOL Highl
 					pPolys += sizeof(int);
 					*(LPINT)pPolys = Color;
 					pPolys += sizeof(int);
-					memcpy (pPolys,Points,Header.nPnts*sizeof(DPOINT));
-					pPolys += sizeof(DPOINT)*Header.nPnts;
+					memcpy(pPolys, Points, Header.nPnts * sizeof(DPOINT));
+					pPolys += sizeof(DPOINT) * Header.nPnts;
 					*(LPINT)pPolys = 0;
-					GlobalUnlock (*phPoly);
+					GlobalUnlock(*phPoly);
 				}
-				GSSiGlobUlFree (&hPoly);
+				GSSiGlobUlFree(&hPoly);
 				NumSegs++;
 			}
 		}
-		else if (PickByRefno(NetRefsData.Ref,0,0,-1))
+		else if (PickByRefno(NetRefsData.Ref, 0, 0, -1))
 		{
 			if (pTotMinMax)
 			{
 				if (LimToMinMax)
 				{
-					if (!BoundsInBounds (pTotMinMax,&PickList[0].Rect,1))
-						continue;   
+					if (!BoundsInBounds(pTotMinMax, &PickList[0].Rect, 1))
+						continue;
 				}
 				else
-					AddMinMaxD (pTotMinMax,&PickList[0].Rect);
+					AddMinMaxD(pTotMinMax, &PickList[0].Rect);
 			}
 			if (HighlightStreet)
-		    	AddToHighlightList (NetRefsData.Ref,&PickList[0],TRUE);
-		    else
-				AddSpecial (NetRefsData.Ref,1,Color,Width);
-			ProcessPickedItem (0,2); 
+				AddToHighlightList(NetRefsData.Ref, &PickList[0], TRUE);
+			else
+				AddSpecial(NetRefsData.Ref, 1, Color, Width);
+			ProcessPickedItem(0, 2);
 		}
 	}
-	CloseStreetPolys (OpenedSP);
-    GSSiSetCursor (OldCursor);
+	CloseStreetPolys(OpenedSP);
+	GSSiSetCursor(OldCursor);
+	return NumSegs;
+}
+long DrawStreet_new(long sNum, COLORREF Color, short Width, BOOL HighlightStreet, LPMNMXCORD pTotMinMax, BOOL LimToMinMax, LPHANDLE phPoly)
+{
+	BOOL	Opened, OpenedSP;
+	short	pos = BT_FIRST, cond = BT_GT;
+	HCURSOR	OldCursor;
+	long	NumSegs = 0, StreetNumAndRefno[2], Offset ;
+
+
+	OpenStreetPolys(&OpenedSP);
+	//CreateSpecial();
+	OldCursor = GSSiSetCursor(LoadCursor(0, IDC_WAIT));
+	LPGWDHEADER lpGWDHead = (LPGWDHEADER)GlobalLock(hDBStreetNumRefs);
+	OldCursor = GSSiSetCursor(LoadCursor(0, IDC_WAIT));
+	//CreateSpecial();
+Top:
+	StreetNumAndRefno[0] = sNum;
+	StreetNumAndRefno[1] = LONG_MIN;
+	pos = BT_FIRST;
+	cond = BT_GE;
+	while (!BT_FIND(lpGWDHead->BTHandle[0], (LPSTR)StreetNumAndRefno, pos, cond, (LPSTR)&Offset))
+	{
+		pos = BT_NEXT;
+		cond = BT_ANY;
+		if (StreetNumAndRefno[0] != sNum)
+			break;
+		NumSegs++;
+		if (hStreetPolys)
+		{
+			long	Offset, Refno, nPnts, Size, EndPointNum;
+			short	Desc;
+			UINT	i;
+			HPDPOINT	Points;
+			double	AtDist;
+			HANDLE	hPoly;
+			STREETPOLYHEADER	Header;
+
+			if (!BT_FIND(hStreetPolys, (LPSTR)&StreetNumAndRefno[1], BT_FIRST, BT_EQ, (LPSTR)&Offset))
+			{
+				GSSillseek(FidStreetPolys, Offset, 0);
+				BigRead(FidStreetPolys, (HPSTR)&Header, sizeof(STREETPOLYHEADER));
+				Size = Header.nPnts * sizeof(DPOINT);
+				hPoly = GSSiGlobAlloc(0, GMEM_MOVEABLE, Size);
+				Points = (HPDPOINT)GlobalLock(hPoly);
+				BigRead(FidStreetPolys, (HPSTR)Points, Size);
+				if (pTotMinMax)
+				{
+					for (i = 0; i < Header.nPnts; i++)
+						if (!LimToMinMax || DPointInBounds(&Points[i], pTotMinMax))
+							AddDPointToMinMax(&Points[i], pTotMinMax);
+				}
+				if (phPoly)
+				{
+					LPSTR pPolys;
+
+					if (!*phPoly)
+					{
+						*phPoly = GSSiGlobAlloc(1730, GMEM_MOVEABLE, 5 * sizeof(int) + Header.nPnts * sizeof(DPOINT));
+						pPolys = GlobalLock(*phPoly);
+					}
+					else
+					{
+						int lMem = GlobalSize(*phPoly);
+
+						*phPoly = GlobalReAlloc(*phPoly, lMem + 4 * sizeof(int) + Header.nPnts * sizeof(DPOINT), GMEM_MOVEABLE);
+						pPolys = GlobalLock(*phPoly);
+						pPolys += lMem - sizeof(int);
+					}
+					*(LPINT)pPolys = sNum;
+					pPolys += sizeof(int);
+					*(LPINT)pPolys = Header.nPnts;
+					pPolys += sizeof(int);
+					*(LPINT)pPolys = Width;
+					pPolys += sizeof(int);
+					*(LPINT)pPolys = Color;
+					pPolys += sizeof(int);
+					memcpy(pPolys, Points, Header.nPnts * sizeof(DPOINT));
+					pPolys += sizeof(DPOINT) * Header.nPnts;
+					*(LPINT)pPolys = 0;
+					GlobalUnlock(*phPoly);
+				}
+				GSSiGlobUlFree(&hPoly);
+				NumSegs++;
+			}
+		}
+		else if (PickByRefno(StreetNumAndRefno[1], 0, 0, -1))
+		{
+			if (pTotMinMax)
+			{
+				if (LimToMinMax)
+				{
+					if (!BoundsInBounds(pTotMinMax, &PickList[0].Rect, 1))
+						continue;
+				}
+				else
+					AddMinMaxD(pTotMinMax, &PickList[0].Rect);
+			}
+			if (HighlightStreet)
+				AddToHighlightList(StreetNumAndRefno[1], &PickList[0], TRUE);
+			else
+				AddSpecial(StreetNumAndRefno[1], 1, Color, Width);
+			ProcessPickedItem(0, 2);
+		}
+	}
+	GlobalUnlock(hDBStreetNumRefs);
+	CloseStreetPolys(OpenedSP);
+	GSSiSetCursor(OldCursor);
 	return NumSegs;
 }
 
@@ -319,7 +458,8 @@ int GetNumStreetSegs_new(long StreetNum, long WantAllSegs, LPMNMXCORD pTotMinMax
 	BOOL	OpenedSP = FALSE;
 	int		i;
 
-	OpenStreetPolys(&OpenedSP);
+	if (!OpenStreetPolys(&OpenedSP))
+		return 0;
 	lpGWDHead = (LPGWDHEADER)GlobalLock(hDBStreetNumRefs);
 	OldCursor = GSSiSetCursor(LoadCursor(0, IDC_WAIT));
 Top:
@@ -387,53 +527,53 @@ Top:
 	return NumSegs;
 }
 
-long DrawStreet2 (long StreetNum,long WantZIP,COLORREF Color,short Width,BOOL HighlightStreet,LPMNMXCORD pTotMinMax,BOOL LimToMinMax)
-{   
+long DrawStreet2(long StreetNum, long WantZIP, COLORREF Color, short Width, BOOL HighlightStreet, LPMNMXCORD pTotMinMax, BOOL LimToMinMax)
+{
 	BOOL	Opened;
-	LPGWDHEADER	lpGWDHead; 
+	LPGWDHEADER	lpGWDHead;
 	HCURSOR	OldCursor;
-	long	NumSegs=0, LinkID, Offset,StreetNumAndRefno[2];  
-	short	pos, cond, Index=1;
+	long	NumSegs = 0, LinkID, Offset, StreetNumAndRefno[2];
+	short	pos, cond, Index = 1;
 	HDC		hDC;
-	
-    if (!OpenStreetSegmentTable (FALSE,&Opened))
+
+	if (!OpenStreetSegmentTable(FALSE, &Opened))
 		return 0;
-	lpGWDHead = (LPGWDHEADER)GlobalLock (hDBStreetSegments); 
-    OldCursor = GSSiSetCursor (LoadCursor (0,IDC_WAIT));
+	lpGWDHead = (LPGWDHEADER)GlobalLock(hDBStreetSegments);
+	OldCursor = GSSiSetCursor(LoadCursor(0, IDC_WAIT));
 	CreateSpecial();
 Top:
 	StreetNumAndRefno[0] = StreetNum;
 	StreetNumAndRefno[1] = LONG_MIN;
 	pos = BT_FIRST;
 	cond = BT_GE;
-	while (!BT_FIND (lpGWDHead->BTHandle[Index],(LPSTR)StreetNumAndRefno,pos,cond, (LPSTR)&Offset))
+	while (!BT_FIND(lpGWDHead->BTHandle[Index], (LPSTR)StreetNumAndRefno, pos, cond, (LPSTR)&Offset))
 	{
 		pos = BT_NEXT;
-		cond = BT_ANY;  
-		if (StreetNumAndRefno[0] == StreetNum) 
-		{   
+		cond = BT_ANY;
+		if (StreetNumAndRefno[0] == StreetNum)
+		{
 			if (WantZIP)
 			{
 				// SegMaxKey.ZIPCode == WantZIP)
-			} 
-			if (PickByRefno(StreetNumAndRefno[1],0,0,-1))
+			}
+			if (PickByRefno(StreetNumAndRefno[1], 0, 0, -1))
 			{
 				if (pTotMinMax)
 				{
 					if (LimToMinMax)
 					{
-						if (!BoundsInBounds (pTotMinMax,&PickList[0].Rect,1))
-							continue;   
+						if (!BoundsInBounds(pTotMinMax, &PickList[0].Rect, 1))
+							continue;
 					}
 					else
-						AddMinMaxD (pTotMinMax,&PickList[0].Rect);
+						AddMinMaxD(pTotMinMax, &PickList[0].Rect);
 				}
 				NumSegs++;
 				if (HighlightStreet)
-			    	AddToHighlightList (PickList[0].Refno,&PickList[0],TRUE);
-			    else
-					AddSpecial (PickList[0].Refno,1,Color,Width);
-				ProcessPickedItem (0,2); 
+					AddToHighlightList(PickList[0].Refno, &PickList[0], TRUE);
+				else
+					AddSpecial(PickList[0].Refno, 1, Color, Width);
+				ProcessPickedItem(0, 2);
 			}
 		}
 		else
@@ -441,9 +581,68 @@ Top:
 	}
 	if (Index++ < 4)
 		goto Top;
-    GSSiSetCursor (OldCursor);  
-    GlobalUnlock (hDBStreetSegments);
-    CloseStreetSegmentTable(Opened); 
+	GSSiSetCursor(OldCursor);
+	GlobalUnlock(hDBStreetSegments);
+	CloseStreetSegmentTable(Opened);
+	return NumSegs;
+}
+long DrawStreet2_new(long StreetNum, long WantZIP, COLORREF Color, short Width, BOOL HighlightStreet, LPMNMXCORD pTotMinMax, BOOL LimToMinMax)
+{
+	BOOL	Opened;
+	LPGWDHEADER	lpGWDHead;
+	HCURSOR	OldCursor;
+	long	NumSegs = 0, LinkID, Offset, StreetNumAndRefno[2];
+	short	pos, cond, Index = 1;
+	HDC		hDC;
+
+	if (!OpenStreetPolys(&Opened))
+		return 0;
+	lpGWDHead = (LPGWDHEADER)GlobalLock(hDBStreetNumRefs);
+	OldCursor = GSSiSetCursor(LoadCursor(0, IDC_WAIT));
+	//CreateSpecial();
+Top:
+	StreetNumAndRefno[0] = StreetNum;
+	StreetNumAndRefno[1] = LONG_MIN;
+	pos = BT_FIRST;
+	cond = BT_GE;
+	while (!BT_FIND(lpGWDHead->BTHandle[0], (LPSTR)StreetNumAndRefno, pos, cond, (LPSTR)&Offset))
+	{
+		pos = BT_NEXT;
+		cond = BT_ANY;
+		if (StreetNumAndRefno[0] == StreetNum)
+		{
+			if (WantZIP)
+			{
+				// SegMaxKey.ZIPCode == WantZIP)
+			}
+			if (PickByRefno(StreetNumAndRefno[1], 0, 0, -1))
+			{
+				if (pTotMinMax)
+				{
+					if (LimToMinMax)
+					{
+						if (!BoundsInBounds(pTotMinMax, &PickList[0].Rect, 1))
+							continue;
+					}
+					else
+						AddMinMaxD(pTotMinMax, &PickList[0].Rect);
+				}
+				NumSegs++;
+				if (HighlightStreet)
+					AddToHighlightList(PickList[0].Refno, &PickList[0], TRUE);
+				else
+					AddSpecial(PickList[0].Refno, 1, Color, Width);
+				ProcessPickedItem(0, 2);
+			}
+		}
+		else
+			break;
+	}
+	if (Index++ < 4)
+		goto Top;
+	GSSiSetCursor(OldCursor);
+	GlobalUnlock(hDBStreetNumRefs);
+	CloseStreetPolys(Opened);
 	return NumSegs;
 }
 
@@ -606,6 +805,7 @@ BOOL LocatePID (HWND hWnd, HINSTANCE hInst)
 		  }
 		  GSSiMsgBox(hWndMain, "Graphic record not found for this parcel",
 			  "Unable to Locate", MB_OK | MB_APPLMODAL, 0);
+		  nRc = 0;
 	  }
 
       return (nRc);

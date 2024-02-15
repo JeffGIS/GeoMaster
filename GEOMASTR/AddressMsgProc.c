@@ -897,7 +897,7 @@ BOOL FAR PASCAL LOC_INTERSECTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, 
 						 CloseStreetNameTable ();
 						 CloseNetIntersect (Opened);
 		         		 OnlyPrime = SendDlgItemMessage (hWndDlg,IDC_IN_PRIMARY_CITY_ONLY,(UINT)BM_GETCHECK,(WPARAM)0,(LPARAM)0L);
-                         if (addToZoom)
+                         if (AddToView)
                              EndDialog(hWndDlg, 2);
                          else
                              EndDialog(hWndDlg, TRUE);
@@ -3738,6 +3738,7 @@ BOOL FAR PASCAL LOCATEPIDMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPAR
     case WM_INITDIALOG:  
          if (!OpenAddressFilesPID (hWndMain)) goto Close ;     
          SetDlgItemText(hWndDlg,IDC_ENTERPID,PID);
+         SendDlgItemMessage(hWndDlg, IDC_ADDTOVIEW, BM_SETCHECK, AddToView, 0L);
 
          break; /* End of WM_INITDIALOG                                 */
 
@@ -3755,7 +3756,9 @@ BOOL FAR PASCAL LOCATEPIDMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPAR
                  CloseAddressFilesPID();
                  EndDialog(hWndDlg, FALSE);
                  break;
-
+            case IDC_ADDTOVIEW:
+                 AddToView = SendDlgItemMessage(hWndDlg, IDC_ADDTOVIEW, (UINT)BM_GETCHECK, (WPARAM)0, (LPARAM)0L);
+                 break;
             case IDOK:
                  nchar = GetDlgItemText(hWndDlg,IDC_ENTERPID,PID,sizeof(PID)); 
                  _fstrcpy (AddUDI,PID);  
@@ -3780,8 +3783,11 @@ BOOL FAR PASCAL LOCATEPIDMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPAR
                     AddRefno = PIDAddRefno (Offset,AddUDI);
                     EndDialog(hWndDlg, TRUE);
                  } */
+                 CloseAddressFilesPID();
+                 if (AddToView)
+                     EndDialog(hWndDlg, 2);
+                 else
                     EndDialog(hWndDlg, TRUE);
-                CloseAddressFilesPID();
 
                  break;
 
@@ -5873,7 +5879,7 @@ BOOL FAR PASCAL LOC_STREETMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPA
          PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
          break; /* End of WM_CLOSE                                      */
 	case WM_DESTROY:
-		DisplayCurStreets (TRUE,0);
+		DisplayCurStreets (TRUE,0,0,0,0);
 		break;
     case WM_COMMAND:
          switch(LOWORD(wParam))
@@ -5892,10 +5898,7 @@ BOOL FAR PASCAL LOC_STREETMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPA
                  switch (HIWORD(wParam))
                  {  case EN_CHANGE:
                         i = GetDlgItemText (hWndDlg,IDC_STREET,Street,33);
-                        if (DisplayStreetsINT (hWndDlg,IDM_STREET_MENU,Street,i,IDC_STREET,1,TRUE)>=1)
-							EnableWindow (GetDlgItem(hWndDlg,IDOK),TRUE); 
-						else
-							EnableWindow (GetDlgItem(hWndDlg,IDOK),FALSE);
+                        DisplayStreetsINT(hWndDlg, IDM_STREET_MENU, Street, i, IDC_STREET, 1, TRUE);
                         break;
                  }
                  break;
@@ -5914,6 +5917,11 @@ BOOL FAR PASCAL LOC_STREETMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPA
                          SetDlgItemText (hWndDlg,IDC_STREET,str);
                          break;
                  }
+                 BOOL enable = SendDlgItemMessage(hWndDlg, IDC_CURSTREETS, LB_GETSELCOUNT, 0, 0) > 0;
+
+                 EnableWindow(GetDlgItem(hWndDlg, IDC_FLASH), enable);
+                 EnableWindow(GetDlgItem(hWndDlg, IDC_ZOOM_LIMITS), enable);
+
                  break;
 
             case IDM_STREET_MENU: /* List box                           */
@@ -5934,22 +5942,59 @@ BOOL FAR PASCAL LOC_STREETMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPA
                          nSegs = AddToCurStreets (hWndDlg,CurPath,&TotMinMax,&DisplayedStreets);
 						 SetConfig (1);
 						 SetViewport(*pCommandViewport);
-						 DisplayCurStreets (FALSE,0);
-          				 EnableWindow (GetDlgItem(hWndDlg,IDOK),TRUE); 
-         				 EnableWindow (GetDlgItem(hWndDlg,IDC_ZOOM_LIMITS),TRUE); 
+						 DisplayCurStreets (FALSE,0,0,0,0);
                     break;
                  }
                  break;
 
-            case IDOK: 
-				 SetConfig (1);
-				 SetViewport(*pCommandViewport);
-            	 DisplayCurStreets (FALSE,15);
+            case IDC_FLASH:
+            {
+                HANDLE hStreets;
+                int numSel = GetLBSelectedItems(hWndDlg, IDC_CURSTREETS,&hStreets);
+                if (numSel)
+                {
+                    LPINT pSel = GlobalLock(hStreets);
+                    LPINT pStreets = malloc(numSel * sizeof(int) + 4);
+                    for (int i = 0; i < numSel; i++)
+                    {
+                        SendDlgItemMessage(hWndDlg, IDC_CURSTREETS, LB_GETTEXT, *pSel++, (DWORD)str);
+                        LPSTR pTab = strrchr(str, '\t');
+                        pTab++;
+                        pStreets[i] = atoi(pTab);
+                    }
+                    SetConfig(1);
+                    SetViewport(*pCommandViewport);
+                    DisplayCurStreets(FALSE, 15, numSel, pStreets,0);
+                    GSSiGlobUlFree(&hStreets);
+                    free(pStreets);
+                }
+            }
             	 break;
 
 			case IDC_ZOOM_LIMITS:
-           		CurView->CurZoomAreaRef = 0;
-                ZoomToRect (TotMinMax,FALSE); 
+            {
+                HANDLE hStreets;
+                int numSel = GetLBSelectedItems(hWndDlg, IDC_CURSTREETS, &hStreets);
+                if (numSel)
+                {
+                    LPINT pSel = GlobalLock(hStreets);
+                    LPINT pStreets = malloc(numSel * sizeof(int) + 4);
+                    for (int i = 0; i < numSel; i++)
+                    {
+                        SendDlgItemMessage(hWndDlg, IDC_CURSTREETS, LB_GETTEXT, *pSel++, (DWORD)str);
+                        LPSTR pTab = strrchr(str, '\t');
+                        pTab++;
+                        pStreets[i] = atoi(pTab);
+                    }
+                    SetConfig(1);
+                    SetViewport(*pCommandViewport);
+                    DisplayCurStreets(FALSE, 15, numSel, pStreets,&TotMinMax);
+                    GSSiGlobUlFree(&hStreets);
+                    free(pStreets);
+                }
+                CurView->CurZoomAreaRef = 0;
+                ZoomToRect(TotMinMax, FALSE);
+            }
 				break;
             	 
             case IDC_CLEAR:
@@ -5962,7 +6007,7 @@ BOOL FAR PASCAL LOC_STREETMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPA
  				 DisplayedStreets=0;
  				 CurPath = 0;  
 				 DBoundsInit (&TotMinMax);
-				 DisplayCurStreets (TRUE,0);
+				 DisplayCurStreets (TRUE,0,0,0,0);
                  PostMessage(hWndMain, WM_COMMAND, IDM_Z_REDRAW, 0L);
                  break;
 
