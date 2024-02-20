@@ -2108,7 +2108,7 @@ BOOL ExecutePointLocationMacro(DPOINT DPoint, LPSTR locatedTo)
 	GSSiEnterProg(978);
 #endif
 	{
-		char	File[MAX_PATH];
+		char	File[MAX_PATH] = { 0 };
 		BOOL	rtn = FALSE;
 
 		CurrentPoint = DPoint;
@@ -2119,7 +2119,7 @@ BOOL ExecutePointLocationMacro(DPOINT DPoint, LPSTR locatedTo)
 			ExpandText(cmd);
 			rtn = atoi(cmd);
 		}
-		//	rtn = ProcessMacroFile(File, 0, 0, 0);
+		rtn = ProcessMacroFile(File, 0, 0, 0);
 		{
 #if ENABLETRACE
 			GSSiExitProg(978);

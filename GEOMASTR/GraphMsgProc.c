@@ -11314,6 +11314,7 @@ GSSiExitProg (656);
  switch(Message)
    {
     case WM_INITDIALOG:
+		AddToView = FALSE;
     	GSSiGlobFree (&hMacro);  
         OrigZoomListType = CurrentZoomListType; 
 		_fstrcpy (SaveAltProj,"[%ALT_PROJECTION]");  

@@ -2985,7 +2985,10 @@ SetVis:
 						DoOffset = FALSE;
 					else
 						MaskOffset = atobasedist (Arg[3],&Err);
-					Offset = atobasedist (Arg[4],&Err);
+					if (!*Arg[3] && !*Arg[4])
+						Offset = LocationOffset;
+					else
+						Offset = atobasedist (Arg[4],&Err);
 					if (*Arg[5] == 'S')
 					{
 						BOOL SaveDisplay = Display;
@@ -3004,7 +3007,7 @@ SetVis:
 							else if (MaskOffsetLine)
 								SetMaskArea(NumPicked-1,MaskOffset,1);  
 						}
-						ZoomToPickedItem (NumPicked-1,Offset,FALSE,Immediate,FALSE);
+						ZoomToPickedItem (NumPicked-1,Offset,OffsetFromLimits,Immediate,FALSE);
 					}
 					SetCurView ( SaveVP);
 	              	goto RtnTrue;

@@ -1157,13 +1157,23 @@ void ZoomToPickedItem (int Item, double Offset,BOOL FromLimits,BOOL Immediate,BO
 		return;
 	if (!FromLimits && (PickList[Item].Type == 2 || PickList[Item].Type == 3))
 	{
-		if (!GetPolyPoints ((LPPICKDATAHEADER)&PickList[Item],FALSE,&nPnts,&hPnts))
-			goto UseRect;
-		CurView->CurZoomAreaRef = PickList[Item].Refno;
-		Rect = PickList[Item].Rect;
-		OffsetPct = Offset / max(BoundsWidth(&Rect), BoundsHeight(&Rect));
-		ZoomToPolyPoints(hPnts, nPnts, OffsetPct, Immediate);
-		GSSiGlobFree(&hPnts);
+		if (Offset)
+		{
+			Rect = PickList[Item].Rect;
+			DPOINT pt = MinMaxMidPointD(&Rect);
+			MNMXCORD rect = DBoundsFromPointAndDist(pt, Offset);
+			ZoomToRect(rect, Immediate);
+		}
+		else
+		{
+			if (!GetPolyPoints((LPPICKDATAHEADER)&PickList[Item], FALSE, &nPnts, &hPnts))
+				goto UseRect;
+			CurView->CurZoomAreaRef = PickList[Item].Refno;
+			Rect = PickList[Item].Rect;
+			OffsetPct = Offset / max(BoundsWidth(&Rect), BoundsHeight(&Rect));
+			ZoomToPolyPoints(hPnts, nPnts, OffsetPct, Immediate);
+			GSSiGlobFree(&hPnts);
+		}
 	}
 	else
 	{

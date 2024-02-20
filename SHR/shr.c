@@ -5882,6 +5882,7 @@ short FillList (HWND hWndDlg,UINT Control,LPSTR file, LPSTR DefaultVal,LPRECT pR
 	        	if (pRect)
 	        		MaxLen = max (MaxLen,lpBar-str-1);
 	            *lpBar++ = '\t';
+				NumItems++;
 	            if (hWndDlg) 
 	            {
 	                Index = SendDlgItemMessage (hWndDlg,Control,LB_ADDSTRING,0,(LPARAM)str);  
@@ -7519,6 +7520,15 @@ BOOL ValidBounds2 (LPMNMXCORD Bounds)
 		Bounds->ymx < Bounds->ymn)
 			return FALSE;
 	return TRUE;
+}
+MNMXCORD DBoundsFromPointAndDist(DPOINT pt, double dist)
+{
+	MNMXCORD bounds;
+	bounds.xmn = pt.x - dist;
+	bounds.ymn = pt.y - dist;
+	bounds.xmx = pt.x + dist;
+	bounds.ymx = pt.y + dist;
+	return bounds;
 }
 
 MNMXCORD atobounds(LPSTR Value, LPBOOL err)

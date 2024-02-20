@@ -337,7 +337,7 @@ BOOL	UseShortHighlightList=FALSE;
 short	IMDataFileType;
 HWND	hWndLocStreet=0;
 HWND	hWndAddEditHelper=0;
-short	LocationChoice=-1;
+short	LocationChoice=0;
 BOOL	OffsetFromLimits=TRUE;
 //short	nRc;
 HANDLE	hSegData;

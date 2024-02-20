@@ -1004,6 +1004,7 @@ RECT atorect (LPSTR Value,LPBOOL pErr);
 void boundstoa (LPSTR Value,LPMNMXCORD Bounds);
 void lboundstoa(LPSTR Value, LPMNMXCORL Bounds);
 void bounds3Dtoa(LPSTR Value, LPMNMXCORD3D Bounds);
+MNMXCORD DBoundsFromPointAndDist(DPOINT pt, double dist);
 void recttoa (LPSTR Value,RECT Rect);
 void pttoa (LPSTR Value,POINT Point);
 void dpointtoa (LPSTR Value,LPDPOINT pPoint);
