@@ -2280,7 +2280,7 @@ void CloseStreetPolys (BOOL Opened)
 	return;
 }
 
-BOOL SaveStreetPolys (void)
+BOOL SaveStreetPolys (LPSTR dir)
 {    
 	short	pos = BT_FIRST;
 	long	Refno;
@@ -2293,24 +2293,25 @@ BOOL SaveStreetPolys (void)
 	BTVARDESC BTVar[2]; 
 	long	TotRecs, NumLoaded=0;   
 	double	Length;
+	BOOL wasReordered;
 
 	BTVar[0].BT_VARTYP=BT_INTEGER;
 	BTVar[0].BT_VARLEN=4;
 	BTVar[0].BT_VAROFF=0;
 	
-    sprintf (FileName,"[%DL]maplib\\centerline\\[CLINEDATE]\\streetpoly.in1");
+    sprintf (FileName,"%s\\streetpoly.in1",dir);
 	BT_CREATE (FileName, 4, FALSE, 1, 1,(LPBTVARDESC)BTVar,FALSE, 0, 0, FALSE);
     hBT = BT_OPEN (FileName,0,BT_WRITE,0); 
-    sprintf (FileName,"[%DL]maplib\\centerline\\[CLINEDATE]\\streetpoly.bin");
+    sprintf (FileName,"%sstreetpoly.bin",dir);
     Fid = GSSiOpenFile (FileName,NULL,OF_CREATE);
    	TotRecs = BT_NUM_IN_INDEX (hHighlight); 
 	CreateStatusWind (hWndMain,1,"Writing output file");
-	while (ContinueProcessing && !BT_FIND (hHighlight,(LPSTR)&Refno,pos,BT_ANY,(LPSTR)&HighlightData))
+	while (StatusWindowUpdate(NULL, NULL, TotRecs, NumLoaded++) && !BT_FIND (hHighlight,(LPSTR)&Refno,pos,BT_ANY,(LPSTR)&HighlightData))
 	{   
 		pos = BT_NEXT;
 		if (HighlightData.PD.Type == 2)
 		{
-			if (GetPolyPoints ((LPPICKDATAHEADER)&HighlightData.PD,FALSE,&nPnts,&hPnts))
+			if (GetPolyPoints ((LPPICKDATAHEADER)&HighlightData.PD,FALSE,&nPnts,&hPnts,&wasReordered))
 			{  
 				Points = (HPDPOINT)GlobalLock (hPnts); 
 				Offset = GSSillseek (Fid,0,1);
@@ -2322,9 +2323,13 @@ BOOL SaveStreetPolys (void)
 				BigWrite (Fid,(HPSTR)Points,nPnts*sizeof(DPOINT),-1);
 				GSSiGlobUlFree (&hPnts);  
 				BT_PUT (hBT,(LPSTR)&Refno,(LPSTR)&Offset);
+				if (wasReordered)
+				{
+					//AppendFile("c:\\temp\\reordercline.txt", HighlightData.PD.UDI);
+				}
 			}
 		}
-		StatusWindowUpdate (NULL,NULL, TotRecs, NumLoaded++);
+		
 	} 
 	SetContinueProcessing ( TRUE); 
 	DestroyStatusWindow(0);  

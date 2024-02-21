@@ -2947,7 +2947,7 @@ SetVis:
 					int nPnts, wantPt = atoi (Arg[3]);
 					HANDLE hPnts;
 
-					if (GetPolyPoints ((LPPICKDATAHEADER)&PickList[0],FALSE,&nPnts,&hPnts))
+					if (GetPolyPoints ((LPPICKDATAHEADER)&PickList[0],FALSE,&nPnts,&hPnts, 0))
 					{
 						LPDPOINT pt = GlobalLock (hPnts);
 						if (wantPt < nPnts)
@@ -4013,7 +4013,7 @@ SetVis:
 			}
 			else if (!stricmp (Arg[1],"PICKED"))
 			{
-				if (!GetPolyPoints ((LPPICKDATAHEADER)&PickList[0],FALSE,&nPoints,&hPoints))
+				if (!GetPolyPoints ((LPPICKDATAHEADER)&PickList[0],FALSE,&nPoints,&hPoints, 0))
 					goto RtnFalse;
 			}
 			else if (!strnicmp (Arg[1],"POINTS|",7))

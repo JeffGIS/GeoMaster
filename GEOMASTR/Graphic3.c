@@ -1166,7 +1166,7 @@ void ZoomToPickedItem (int Item, double Offset,BOOL FromLimits,BOOL Immediate,BO
 		}
 		else
 		{
-			if (!GetPolyPoints((LPPICKDATAHEADER)&PickList[Item], FALSE, &nPnts, &hPnts))
+			if (!GetPolyPoints((LPPICKDATAHEADER)&PickList[Item], FALSE, &nPnts, &hPnts, 0))
 				goto UseRect;
 			CurView->CurZoomAreaRef = PickList[Item].Refno;
 			Rect = PickList[Item].Rect;
@@ -4478,7 +4478,7 @@ GSSiExitProg (718);
     length[1] = HighlightData.PD.Length; 
     BeginPoint[1] = HighlightData.PD.BeginPoint;
     EndPoint[1] = HighlightData.PD.EndPoint;
-	if (!GetPolyPoints ((LPPICKDATAHEADER)&HighlightData.PD,FALSE,&npnts[1],&hPoly[1]))
+	if (!GetPolyPoints ((LPPICKDATAHEADER)&HighlightData.PD,FALSE,&npnts[1],&hPoly[1], 0))
 		goto ErrorExit;
 	if (BT_NUM_IN_INDEX (hHighlight) == 1)
 	{
@@ -4509,7 +4509,7 @@ GSSiExitProg (718);
 	type[0] = HighlightData.PD.Type;  
 	BeginPoint[0] = HighlightData.PD.BeginPoint;
 	EndPoint[0] = HighlightData.PD.EndPoint;
-	GetPolyPoints ((LPPICKDATAHEADER)&HighlightData.PD,FALSE,&npnts[0],&hPoly[0]);
+	GetPolyPoints ((LPPICKDATAHEADER)&HighlightData.PD,FALSE,&npnts[0],&hPoly[0], 0);
 	pPolyPoints[0] = (HPDPOINT)GlobalLock (hPoly[0]); 
 	length[0] = HighlightData.PD.Length; 
 	if (type[0] == 2) 
@@ -4570,7 +4570,7 @@ GetRemaining:
 		if (!st)
 		{   
 			BT_FIND (hHighlight,(LPSTR)&Refno,BT_FIRST,BT_EQ,(LPSTR)&HighlightData); 
-			GetPolyPoints ((LPPICKDATAHEADER)&HighlightData.PD,FALSE,&npnts[1],&hPoly[1]);
+			GetPolyPoints ((LPPICKDATAHEADER)&HighlightData.PD,FALSE,&npnts[1],&hPoly[1], 0);
 		    type[1] = HighlightData.PD.Type;  
 		    length[1] = HighlightData.PD.Length; 
 		    BeginPoint[1] = HighlightData.PD.BeginPoint;

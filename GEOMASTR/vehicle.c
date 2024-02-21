@@ -2028,7 +2028,7 @@ BOOL OpenDummyVehicleFile(LPSTR FileName,long InDelay)
 		}
 		_fstrncpy (pDummyVehicle->Name,str,32);
 		if (PickByRefno(0,"ROUTE",pDummyVehicle->Name,-1))
-			if (GetPolyPoints ((LPPICKDATAHEADER)&PickList[0],FALSE,&pDummyVehicle->nPnts,&pDummyVehicle->hPoly))
+			if (GetPolyPoints ((LPPICKDATAHEADER)&PickList[0],FALSE,&pDummyVehicle->nPnts,&pDummyVehicle->hPoly, 0))
 			{
 				HPDPOINT	pPoint = (HPDPOINT)GlobalLock (pDummyVehicle->hPoly);
 				

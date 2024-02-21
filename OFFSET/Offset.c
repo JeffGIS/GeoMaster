@@ -1996,7 +1996,7 @@ HANDLE OffsetPickedArea2 (int Item, double Dist,LPLONG pNumPoints)
   if (PickList[Item].Area < 0)
   	Reverse = TRUE;
   	
-	if (GetPolyPoints ((LPPICKDATAHEADER)&PickList[Item],Reverse,&nPnts,&hPoly))
+	if (GetPolyPoints ((LPPICKDATAHEADER)&PickList[Item],Reverse,&nPnts,&hPoly, 0))
     	{
 			double	MaxPixels, MaxDist, ThinDist;
 

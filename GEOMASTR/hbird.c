@@ -3348,7 +3348,7 @@ BOOL CreateLakeDepthTriangles (BOOL Init)
 			
 			if (Refno == 658740)
 				ii=1;
-			if (GetPolyPoints ((LPPICKDATAHEADER)&HighlightData.PD,FALSE,&nPnts,&hPnts))
+			if (GetPolyPoints ((LPPICKDATAHEADER)&HighlightData.PD,FALSE,&nPnts,&hPnts, 0))
 			{  
 				HPDPOINT pPoly=GlobalLock (hPnts);
 				HANDLE	hPolyInt=GSSiGlobAlloc (1773,GMEM_MOVEABLE,nPnts*sizeof(POINT));

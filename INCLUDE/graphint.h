@@ -1486,7 +1486,7 @@ BOOL PointInMaskAreaWinCoordD (LPDPOINT pDPoint);
 BOOL PolyInArea (short Type,long nPolyPoints,HPDPOINT pPolyPointsD,HPDOUBLE pPolyAZ,
 				 long nAreaPoints,HPDPOINT pAreaPoints,int nPoly,HANDLE hPolyPartLen,
 				 short InclusionOpt,LPHANDLE phPIAAcceleratorIn);
-BOOL GetPolyPoints (LPPICKDATAHEADER PickData,BOOL Reverse,LPLONG pnPnts, LPHANDLE pHandle);
+BOOL GetPolyPoints (LPPICKDATAHEADER PickData,BOOL Reverse,LPLONG pnPnts, LPHANDLE pHandle,LPBOOL pWasReordered);
 BOOL GetPolyPoints3D (LPPICKDATAHEADER PickData,BOOL Reverse,LPLONG pnPnts, LPHANDLE pHandle);
 BOOL GetPolyPnts (LPPICKDATAHEADER PickData,BOOL Reverse,LPLONG pnPnts, LPHANDLE pHandle,BOOL WantUS);
 short GetPolyPoints2 (LPPICKDATAHEADER PickData,LPINT pnPnts, LPHANDLE pHandle,short MaxLoops);

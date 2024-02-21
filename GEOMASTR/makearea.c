@@ -822,7 +822,7 @@ NextRec:
 						PickList[0] = HighlightData.PD;
 					    SetConfig (PickList[0].ConfigID);
 					    SetViewport (PickList[0].ViewID);
-						if (GetPolyPoints((LPPICKDATAHEADER)&PickList[0], FALSE, &nPnts, &hPoly))
+						if (GetPolyPoints((LPPICKDATAHEADER)&PickList[0], FALSE, &nPnts, &hPoly, 0))
 						{
 							pPoint = (HPDPOINT)GlobalLock(hPoly);
 							LastPoint = DPointToFilePointL(pPoint++, hTranToLPoint);
@@ -1396,14 +1396,14 @@ Next:
             short	i;
             
 	        PickByRefno (StartRef,0,0,-1);
-			GetPolyPoints ((LPPICKDATAHEADER)&PickList[0],StartPointIsBP,&nPnts,&hPoints);
+			GetPolyPoints ((LPPICKDATAHEADER)&PickList[0],StartPointIsBP,&nPnts,&hPoints, 0);
 			pPoints = (HPDPOINT)GlobalLock (hPoints);
             FromAZ = getazd (&pPoints[nPnts-2],&pPoints[nPnts-1]);    
             GSSiGlobUlFree (&hPoints);
             for (i=0;i<NumConnect;i++)
             {
 		        PickByRefno (ConnectRef[i],0,0,-1);
-				GetPolyPoints ((LPPICKDATAHEADER)&PickList[0],ConnectEnd[i],&nPnts,&hPoints);
+				GetPolyPoints ((LPPICKDATAHEADER)&PickList[0],ConnectEnd[i],&nPnts,&hPoints, 0);
 				pPoints = (HPDPOINT)GlobalLock (hPoints);
 	            ToAZ = getazd (&pPoints[0],&pPoints[1]);    
 	            GSSiGlobUlFree (&hPoints); 
@@ -1472,7 +1472,7 @@ LPOINT AddRefToLink (LPREFCONNECT pRC,BOOL Reverse,LPLONG pNumLinkPoints,LPHANDL
         BlowOut(0,0);
     }
     
-	GetPolyPoints ((LPPICKDATAHEADER)&PickList[0],Reverse,&nPnts,&hPoints);
+	GetPolyPoints ((LPPICKDATAHEADER)&PickList[0],Reverse,&nPnts,&hPoints, 0);
 	pPoints = (HPDPOINT)GlobalLock (hPoints); 
 	if (*pNumLinkPoints)
 	{                                                     //pPoints[1]

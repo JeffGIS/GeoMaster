@@ -3269,7 +3269,7 @@ NextFileInList:    		GSSillseek (FidFL,FileListLoc,0);
 						if (CurrentType == GF_LINE || CurrentType == GF_POLYLINE)
 						{
 							PickList[0].Type = 2;
-							if (GetPolyPoints((LPPICKDATAHEADER)&PickList[0], FALSE, &nPnts, &hPoly))
+							if (GetPolyPoints((LPPICKDATAHEADER)&PickList[0], FALSE, &nPnts, &hPoly, 0))
 							{
 								HPDPOINT lpPoints = (HPDPOINT)GlobalLock(hPoly);
 
@@ -3283,7 +3283,7 @@ NextFileInList:    		GSSillseek (FidFL,FileListLoc,0);
 						else if (CurrentType == GF_AREA)
 						{
 							PickList[0].Type = 3;
-							if (GetPolyPoints((LPPICKDATAHEADER)&PickList[0], FALSE, &nPnts, &hPoly))
+							if (GetPolyPoints((LPPICKDATAHEADER)&PickList[0], FALSE, &nPnts, &hPoly, 0))
 							{
 								HPDPOINT lpPoints = (HPDPOINT)GlobalLock(hPoly);
 
@@ -5570,12 +5570,12 @@ BOOL GetPolyPnts (LPPICKDATAHEADER PickData,BOOL Reverse,LPLONG pnPnts, LPHANDLE
 	BOOL SaveUS = WantUnsplinedPoints, rtn; 
     
     WantUnsplinedPoints = WantUS;
-	rtn =GetPolyPoints (PickData,Reverse,pnPnts, pHandle);
+	rtn =GetPolyPoints (PickData,Reverse,pnPnts, pHandle, 0);
 	WantUnsplinedPoints = SaveUS;
 	return rtn;
 }
 
-BOOL GetPolyPoints (LPPICKDATAHEADER PickData,BOOL Reverse,LPLONG pnPnts, LPHANDLE pHandle)
+BOOL GetPolyPoints (LPPICKDATAHEADER PickData,BOOL Reverse,LPLONG pnPnts, LPHANDLE pHandle,LPBOOL pWasReordered)
 {
 	LPTHEME	pTheme, SaveTheme=CurTheme; 
 	LPVIEWPORT	SaveVP=CurView;
@@ -5585,7 +5585,8 @@ BOOL GetPolyPoints (LPPICKDATAHEADER PickData,BOOL Reverse,LPLONG pnPnts, LPHAND
 	int		nPolys, iPoly;
     LPVISLIST	SaveVis = CurVis;
 	HANDLE		hVisList=GSSiGlobAlloc ( 964,GHND,sizeof(VISLIST));
-	
+	BOOL wasReordered;
+
 	if (PickData->Refno == 19047504)
 		ii = 1;
 	CurVis = (LPVISLIST)GlobalLock (hVisList);
@@ -5608,7 +5609,9 @@ BOOL GetPolyPoints (LPPICKDATAHEADER PickData,BOOL Reverse,LPLONG pnPnts, LPHAND
 		CurView->PassID = SavePass; 
 		ProcessSelectedTheme = 0;       		
 		DeleteTheme (pTheme); 
-		ReorderSavedPolys();
+		wasReordered = ReorderSavedPolys();
+		if (pWasReordered)
+			*pWasReordered = wasReordered;
 		nPolys = NumSavedPolys;
 		iPoly = 0;
 		while (GetSavedPolys())

@@ -3698,7 +3698,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
             	 break;
             
             case IDM_BUILDSTREETPOLYS:
-				 SaveStreetPolys ();
+				 //SaveStreetPolys ();
             	 break;
             	 
             case IDM_RELOAD_STREET_NAMES:

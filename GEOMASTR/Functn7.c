@@ -2027,6 +2027,7 @@ int	GetFunctionValue7(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, 
 			  //$NETWORK(FALSEINT,NEXTREF
 			  //$NETWORK(FALSEINT,CLEAR
 			  //$NETWORK(LOAD,HLTTOSLT,outfile
+			  //$NETWORK(SAVESTREET,clinedir) saves highlighted street segments to streetpoly.bin and .in1 in specified dir
 		nArgs = GetFunArgs(Args, Arg, 5, &hMem, pBrkPt, bpOffset, bpLen);
 		if (nArgs < 1)
 			goto RtnFalse;
@@ -2035,7 +2036,7 @@ int	GetFunctionValue7(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, 
 		if (!stricmp(Arg[1], "LOAD"))
 			rtn = LoadNetwork(Arg[2], Arg[3], Arg[4]);
 		if (!stricmp(Arg[1], "SAVESTREET"))
-			rtn = SaveStreetPolys();
+			rtn = SaveStreetPolys(Arg[2]);
 		goto Rtnl;
 
 	case 775: //$LOADMAP()

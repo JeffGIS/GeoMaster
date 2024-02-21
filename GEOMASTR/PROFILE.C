@@ -502,7 +502,7 @@ void DisplayProfileThemeLegend(short From)
 						}
 						else
 							OpenEnd = HighlightData1.PD.EndPoint;
-				   		if (GetPolyPoints ((LPPICKDATAHEADER)&HighlightData1.PD,Reverse,&nPolyPoints,&hPolyPoints))
+				   		if (GetPolyPoints ((LPPICKDATAHEADER)&HighlightData1.PD,Reverse,&nPolyPoints,&hPolyPoints, 0))
 				   		{
 							pPoly = (HPDPOINT)GlobalLock(hPolyPoints);
 							if (endPCT > 0)
@@ -535,7 +535,7 @@ void DisplayProfileThemeLegend(short From)
 						else
 							OpenEnd = HighlightData.PD.BeginPoint;
 					}
-			   		if (GetPolyPoints ((LPPICKDATAHEADER)&HighlightData.PD,Reverse,&nPolyPoints,&hPolyPoints))
+			   		if (GetPolyPoints ((LPPICKDATAHEADER)&HighlightData.PD,Reverse,&nPolyPoints,&hPolyPoints, 0))
 			   		{
 				   		pPoly = (HPDPOINT)GlobalLock (hPolyPoints);
 						if (endPCT > 0)
@@ -1540,7 +1540,7 @@ Show:
 			ProfPoints[0].y = CurView->WBounds.ymn;
 			ProfPoints[1].y = CurView->WBounds.ymx;
 			ExtendPoly (2,ProfPoints,100000);
-			if (GetPolyPoints ((LPPICKDATAHEADER)&PickList[0],FALSE,&nPnts,&hPoly))
+			if (GetPolyPoints ((LPPICKDATAHEADER)&PickList[0],FALSE,&nPnts,&hPoly, 0))
 			{  
 				HPDPOINT	pPolyPoints=GlobalLock (hPoly);
 				DPOINT		IntPoint;

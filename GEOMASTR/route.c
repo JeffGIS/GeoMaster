@@ -1082,7 +1082,7 @@ BOOL SplitContourLines (int iOpt)
 		SetViewport (HighlightData.PD.ViewID);
 		if (HighlightData.PD.Type == 2)
 		{
-			if (GetPolyPoints ((LPPICKDATAHEADER)&HighlightData.PD,FALSE,&npntsSplitLine[nSplitLines],&hPolySplitLine[nSplitLines]))
+			if (GetPolyPoints ((LPPICKDATAHEADER)&HighlightData.PD,FALSE,&npntsSplitLine[nSplitLines],&hPolySplitLine[nSplitLines], 0))
 				nSplitLines++;
 		}
 		DeleteRefno (HighlightData.PD.Refno);
@@ -1121,7 +1121,7 @@ BOOL SplitContourLines (int iOpt)
 				ConSym[nConLines] = HighlightData.PD.Desc;
    				if (RefnoCon[nConLines] != RefnoSplitLine[iSplitLine] && HighlightData.PD.Type == 2)         
    				{
-	   				if (GetPolyPoints ((LPPICKDATAHEADER)&HighlightData.PD,FALSE,&npntsCon[nConLines],&hPolyCon[nConLines]))
+	   				if (GetPolyPoints ((LPPICKDATAHEADER)&HighlightData.PD,FALSE,&npntsCon[nConLines],&hPolyCon[nConLines],0))
 	   					nConLines++;
 				}
 			}
@@ -1487,7 +1487,7 @@ BOOL SplitHighlightedPolys (int MaxPolyPoints)
 			if (PickList[0].Type == 2 && PickList[0].NumPoints > MaxPolyPoints)
 			{
 				nLoops = GetPolyPoints2 ((LPPICKDATAHEADER)&PickList[0],0,0,0); 
-				if (nLoops == 1 && GetPolyPoints ((LPPICKDATAHEADER)&PickList[0],FALSE,&nPntsOrig,&hPolyOrig))
+				if (nLoops == 1 && GetPolyPoints ((LPPICKDATAHEADER)&PickList[0],FALSE,&nPntsOrig,&hPolyOrig, 0))
 				{   
 					HPDPOINT	pOrigPoints = (HPDPOINT)GlobalLock (hPolyOrig), pNewPoints;
 					long		RemPoints = nPntsOrig; 

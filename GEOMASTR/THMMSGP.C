@@ -129,7 +129,7 @@ BOOL SetThemeQuan (LPTHEME pTheme,LPSTR FileName)
 			PickList[0].Element = ThemeHighlightData.Element; 
 			if (ThemeHighlightData.Type == GF_LINE)
 			{
-				if (GetPolyPoints ((LPPICKDATAHEADER)&PickList[0],FALSE,&nPnts,&hPoly))  
+				if (GetPolyPoints ((LPPICKDATAHEADER)&PickList[0],FALSE,&nPnts,&hPoly, 0))
 				{   
 					HPDPOINT lpPoints=(HPDPOINT)GlobalLock (hPoly);
 					
@@ -140,7 +140,7 @@ BOOL SetThemeQuan (LPTHEME pTheme,LPSTR FileName)
 			else if (ThemeHighlightData.Type == GF_AREA) 
 			{
 				PickList[0].Type = 3; 
-				if (GetPolyPoints ((LPPICKDATAHEADER)&PickList[0],FALSE,&nPnts,&hPoly))  
+				if (GetPolyPoints ((LPPICKDATAHEADER)&PickList[0],FALSE,&nPnts,&hPoly, 0))
 				{   
 					HPDPOINT lpPoints=(HPDPOINT)GlobalLock (hPoly);
 					

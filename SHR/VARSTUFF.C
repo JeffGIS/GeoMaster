@@ -919,7 +919,7 @@ GSSiExitProg (520);
 		}
 		if (!strcmp (SQL,"%PICKED"))
 		{
-			if (GetPolyPoints ((LPPICKDATAHEADER)&PickList[0],FALSE,&NumPolyCoord,&hPolyCoord))
+			if (GetPolyPoints ((LPPICKDATAHEADER)&PickList[0],FALSE,&NumPolyCoord,&hPolyCoord, 0))
 				goto RtnTrue;
 		}
 		goto RtnFalse;

@@ -9159,7 +9159,7 @@ int FAR PASCAL NEWSYMBOLMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARA
 									HANDLE	hPoly=0;
 									LPDPOINT	lpDpoint;
 
-									if (GetPolyPoints ((LPPICKDATAHEADER)&HighlightData.PD,FALSE,&nPnts,&hPoly))
+									if (GetPolyPoints ((LPPICKDATAHEADER)&HighlightData.PD,FALSE,&nPnts,&hPoly, 0))
 									{
 	/*							    SetViewport (PickList[0].ViewID);
 					    			pTheme = AddTheme (GF_SAVEPOLY_THEME);
@@ -10913,7 +10913,7 @@ int HighlightFromTheme(LPVIEWPORT pVP,LPTHEME pTheme,int nItems, HANDLE hItems, 
 					if (CurrentType == GF_LINE || CurrentType == GF_POLYLINE)
 					{
 						PickList[0].Type = 2;
-						if (GetPolyPoints((LPPICKDATAHEADER)&PickList[0], FALSE, &nPnts, &hPoly))
+						if (GetPolyPoints((LPPICKDATAHEADER)&PickList[0], FALSE, &nPnts, &hPoly, 0))
 						{
 							HPDPOINT lpPoints = (HPDPOINT)GlobalLock(hPoly);
 
@@ -10924,7 +10924,7 @@ int HighlightFromTheme(LPVIEWPORT pVP,LPTHEME pTheme,int nItems, HANDLE hItems, 
 					else if (CurrentType == GF_AREA)
 					{
 						PickList[0].Type = 3;
-						if (GetPolyPoints((LPPICKDATAHEADER)&PickList[0], FALSE, &nPnts, &hPoly))
+						if (GetPolyPoints((LPPICKDATAHEADER)&PickList[0], FALSE, &nPnts, &hPoly, 0))
 						{
 							HPDPOINT lpPoints = (HPDPOINT)GlobalLock(hPoly);
 
@@ -33012,7 +33012,7 @@ BOOL FAR PASCAL TXT_OUTPUTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPA
 							if (usePolyPoints)
 							{
 								CloseMap (FALSE);   
-			   					GetPolyPoints ((LPPICKDATAHEADER)&HighlightData.PD,FALSE,&nCurPolyPoints,&hCurPolyPoints);
+			   					GetPolyPoints ((LPPICKDATAHEADER)&HighlightData.PD,FALSE,&nCurPolyPoints,&hCurPolyPoints, 0);
 							}
 			   			}
 			   			else 

@@ -422,7 +422,7 @@ double GetIntersectionCost (LPSEGDATAGM pSegdataAt,LPSEGDATAGM pSegdataNext,BOOL
 double GetTurnCost (long FromRef,short FromEnd,long ToRef,short ToEnd);
 //BOOL AddSpeed (void);    
 BOOL DumpUserAdd (void);
-BOOL SaveStreetPolys (void);
+BOOL SaveStreetPolys (LPSTR dir);
 BOOL OpenStreetPolys (LPBOOL pOpened);
 void CloseStreetPolys (BOOL Opened);
 BOOL UnloadStreets (HWND hWnd);

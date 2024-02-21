@@ -256,7 +256,7 @@ GetPolylineEP:
 				{   
 					HANDLE hPnts;
 					int nPnts;
-					if (GetPolyPoints((LPPICKDATAHEADER)&PickList[CurrentProcessedPickedItem], FALSE, &nPnts, &hPnts))
+					if (GetPolyPoints((LPPICKDATAHEADER)&PickList[CurrentProcessedPickedItem], FALSE, &nPnts, &hPnts, 0))
 					{
 						HPDPOINT lpPoints = (HPDPOINT)GlobalLock(hPnts);
 						double MPAZ;

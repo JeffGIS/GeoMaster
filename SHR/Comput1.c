@@ -528,7 +528,7 @@ double PercentOfItemInHighlightAreas (int item)
 	int		npnts;
 	double	pct;
 
-	if (!GetPolyPoints ((LPPICKDATAHEADER)&PickList[item],FALSE,&npnts,&hPoly))
+	if (!GetPolyPoints ((LPPICKDATAHEADER)&PickList[item],FALSE,&npnts,&hPoly, 0))
 		return -1; 
 	pDPoint = GlobalLock (hPoly);
 	pct = PercentOfPolyInHighlightAreas (PickList[item].Type,&PickList[item].Rect,npnts,pDPoint);
@@ -7287,7 +7287,7 @@ BOOL GetAreaCenters (LPSTR OutFile,int SpeedFactor,BOOL UseMask)
 		if (HighlightData.PD.Type == 3)
 		{   
 			StatusWindowUpdate (0,HighlightData.PD.UDI, nRecs, NumRecs);
-			if (GetPolyPoints ((LPPICKDATAHEADER)&HighlightData.PD,FALSE,&nPnts,&hPnts))
+			if (GetPolyPoints ((LPPICKDATAHEADER)&HighlightData.PD,FALSE,&nPnts,&hPnts, 0))
 			{  
 				HPDPOINT	Points = (HPDPOINT)GlobalLock (hPnts);
 	      		HANDLE		hAccelerator = PointInAreaAcceleratorSetup (nPnts,Points,1,0,0); 

@@ -42,7 +42,7 @@ long PointsBetweenPCT (long Refno,double FromPCT, double ToPCT,BOOL ShapePointsO
 			FromPCT = 1.0 - FromPCT;
 			ToPCT = 1.0 - ToPCT;
 		}
-		if (GetPolyPoints((LPPICKDATAHEADER)&PickList[0], Reverse, &npnts, &hPoly))
+		if (GetPolyPoints((LPPICKDATAHEADER)&PickList[0], Reverse, &npnts, &hPoly, 0))
 		{
 			LPDPOINT pPoly = (LPDPOINT)GlobalLock(hPoly);
 			double	PolyLength = GetPolyLengthD(pPoly, npnts);
@@ -119,7 +119,7 @@ long PointsBetweenMP (long Path,double FromMP, double ToMP,LPHANDLE phPoints)
 		NumSegs++;
 		if (PickByRefno(NetRefsData.Ref,NULL,NULL,-1))
 		{
-	   		if (GetPolyPoints ((LPPICKDATAHEADER)&PickList[0],FALSE,&npnts,&hPoly)) 
+	   		if (GetPolyPoints ((LPPICKDATAHEADER)&PickList[0],FALSE,&npnts,&hPoly, 0))
 	   		{ 
 	   			LPDPOINT pPoly = (LPDPOINT)GlobalLock (hPoly);  
 	   			long	i;
@@ -2862,7 +2862,7 @@ BOOL AddFalseIntersection (void)
    		pos=BT_NEXT;
    		PickList[0]=HighlightData.PD;
 	    type[i] = PickList[0].Type;
-		if (GetPolyPoints ((LPPICKDATAHEADER)&PickList[0],FALSE,&npnts[i],&hPoly[i]))
+		if (GetPolyPoints ((LPPICKDATAHEADER)&PickList[0],FALSE,&npnts[i],&hPoly[i], 0))
 			i++;
     }
 	if (i != 2)
@@ -2989,7 +2989,7 @@ BOOL FalseIntFunctions (LPSTR Cmd,LPSTR Arg,LPSTR Out)
 					if (GetSegDataGM (Ref,&Segdata)) 
 					{ 
 						memmove (StreetNums[nStreets],Segdata.StreetNum,sizeof(Segdata.StreetNum));
-						if (GetPolyPoints ((LPPICKDATAHEADER)&PickList[0],FALSE,&npnts[nStreets],&hPoly[nStreets]))
+						if (GetPolyPoints ((LPPICKDATAHEADER)&PickList[0],FALSE,&npnts[nStreets],&hPoly[nStreets], 0))
 						{
 							HPDPOINT	pPolyPoints=GlobalLock (hPoly[nStreets]);
 
@@ -3242,7 +3242,7 @@ BOOL LoadNetwork(LPSTR Type, LPSTR File, LPSTR Opts)
 					HANDLE hPnts;
 					long nPnts;
 
-					if (GetPolyPoints((LPPICKDATAHEADER)&HighlightData.PD, FALSE, &nPnts, &hPnts))
+					if (GetPolyPoints((LPPICKDATAHEADER)&HighlightData.PD, FALSE, &nPnts, &hPnts, 0))
 					{
 						LPDPOINT pPoints = (HPDPOINT)GlobalLock(hPnts);
 						LPSTR pSpeed;

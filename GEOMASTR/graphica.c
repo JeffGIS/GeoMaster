@@ -1174,7 +1174,7 @@ BOOL CreateAreaGridLatLon (LPSTR File,LPSTR SymName,LPSTR PrefixIN,double Width,
 	OverlapInDegY = Pt.y - MidPoint.y;
 	Pt = dnewptproj (MidPoint,EastAZ,Width);  
 	WidthInDeg = Pt.x - MidPoint.x; 
-	GetPolyPoints ((LPPICKDATAHEADER)&HighlightData.PD,FALSE,&npnts,&hPoly);
+	GetPolyPoints ((LPPICKDATAHEADER)&HighlightData.PD,FALSE,&npnts,&hPoly, 0);
 	pPolyPoints = (HPDPOINT)GlobalLock (hPoly); 
 	InflateBounds (&Bounds, max (HeightInDeg*2,WidthInDeg*2));
 	strcpy (PltName,File); 
@@ -1770,7 +1770,7 @@ BOOL CreateAreaGridFromGrid (LPSTR InFile,LPSTR SymName,LPSTR Prefix,int MaxZoom
 		Point2.y = HighlightData.PD.Rect.ymx;
 		nRow = GridCellRow (&Point2) - GridCellRow (&Point1) + 1;
 		nRecs = nRow * nCol;
-		GetPolyPoints ((LPPICKDATAHEADER)&HighlightData.PD,FALSE,&npnts,&hPoly);
+		GetPolyPoints ((LPPICKDATAHEADER)&HighlightData.PD,FALSE,&npnts,&hPoly, 0);
 		pPolyPoints = (HPDPOINT)GlobalLock (hPoly); 
 		InflateBounds (&Bounds, max (GridWidth,GridHeight));
 		strcpy (PltName,File); 
@@ -2999,7 +2999,7 @@ GSSiExitProg (1100);
 	BT_FIND (hHighlight2,(LPSTR)&Sequence,BT_LAST,BT_ANY,(LPSTR)&ToRef);
 	BT_FIND (hHighlight,(LPSTR)&ToRef,BT_FIRST,BT_EQ,(LPSTR)&HighlightData); 
 	WantUnsplinedPoints = TRUE;
-	if (!GetPolyPoints ((LPPICKDATAHEADER)&HighlightData.PD,FALSE,&npnts[0],&hPoly[0]))      
+	if (!GetPolyPoints ((LPPICKDATAHEADER)&HighlightData.PD,FALSE,&npnts[0],&hPoly[0], 0))
 		goto Exit;
     type[0] = HighlightData.PD.Type;  
     pPolyPoints[0] = (HPDPOINT)GlobalLock (hPoly[0]);
@@ -3010,7 +3010,7 @@ GSSiExitProg (1100);
 		pos = BT_NEXT;
 		if (Refno != ToRef)
 		{ 
-			if (GetPolyPoints ((LPPICKDATAHEADER)&HighlightData.PD,FALSE,&npnts[1],&hPoly[1]))      
+			if (GetPolyPoints ((LPPICKDATAHEADER)&HighlightData.PD,FALSE,&npnts[1],&hPoly[1], 0))
 			{   
 				double	PCT1,PCT2;
 				

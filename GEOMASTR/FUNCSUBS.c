@@ -2792,7 +2792,7 @@ BOOL SaveMaskAreas(LPSTR Directory)
 		pos = BT_NEXT;
 		if (HighlightData.PD.Type == 3)
 		{
-			if (GetPolyPoints((LPPICKDATAHEADER)&HighlightData.PD, FALSE, &nPnts, &hPnts))
+			if (GetPolyPoints((LPPICKDATAHEADER)&HighlightData.PD, FALSE, &nPnts, &hPnts, 0))
 			{
 				Points = (HPDPOINT)GlobalLock(hPnts);
 				sprintf(FileName, "%s\\%s.bin", Directory, HighlightData.PD.UDI);
@@ -3026,7 +3026,7 @@ BOOL AreaInArea2 (LPSTR TAGOrRef,LPSTR AinAGMD,int SpeedFactor,double MinPCT,BOO
 NextArea:
 	if (!st || !SelectAreaToOffsetFile(0, 0, 0))
 		goto Exit;
-	if (!GetPolyPoints ((LPPICKDATAHEADER)&PickList[0],FALSE,&nBoundaryPoints,&hBoundaryPoints))
+	if (!GetPolyPoints ((LPPICKDATAHEADER)&PickList[0],FALSE,&nBoundaryPoints,&hBoundaryPoints, 0))
 		goto Exit;
 	sprintf (BoundaryAreaTAG,"%s:%s",PickList[0].Prefix,PickList[0].UDI);
 	ClearHighlightList(FALSE);
@@ -3055,7 +3055,7 @@ NextArea:
 			HANDLE	hPnts;
 			
 			sprintf (AreaTAG,"%s:%s",HighlightData.PD.Prefix,HighlightData.PD.UDI);
-			if (GetPolyPoints ((LPPICKDATAHEADER)&HighlightData.PD,FALSE,&nPnts,&hPnts))
+			if (GetPolyPoints ((LPPICKDATAHEADER)&HighlightData.PD,FALSE,&nPnts,&hPnts,0))
 			{  
 				HPDPOINT	Points = (HPDPOINT)GlobalLock (hPnts);
 	      		HANDLE		hAccelerator = PointInAreaAcceleratorSetup (nPnts,Points,1,0,0); 
@@ -5601,7 +5601,7 @@ BOOL AreasToLines (HWND hWnd,LPSTR OutFile,LPSTR LineSym,LPSTR Prefix)
         PickList[0]=HighlightData.PD;
 		if (PickList[0].Type != 3)
 			continue;
-		GetPolyPoints ((LPPICKDATAHEADER)&PickList[0],FALSE,&np,&hPoints);
+		GetPolyPoints ((LPPICKDATAHEADER)&PickList[0],FALSE,&np,&hPoints, 0);
 		nPoints = np;
 		_fstrcpy (PltName,OutFile);
 		PltType = 2;

@@ -2129,7 +2129,7 @@ GSSiExitProg (1350);
 				nlong = IDNINT (atof(Arg[1]));
 				if (!PickByRefno(iref,0,0,-1))
 					goto Rtnl; 
-				if (!GetPolyPoints ((LPPICKDATAHEADER)&PickList[0],FALSE,&npnts,&hPoly))
+				if (!GetPolyPoints ((LPPICKDATAHEADER)&PickList[0],FALSE,&npnts,&hPoly, 0))
 					goto Rtnl;
 				nlong = max (1,min (npnts,nlong));
 				Point = (HPDPOINT)GlobalLock (hPoly);
@@ -6330,7 +6330,7 @@ GSSiExitProg (1350);
 			int npnts;
 			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
 			i = atoi(Arg[1]);
-			if (!GetPolyPoints((LPPICKDATAHEADER)&PickList[0], FALSE, &npnts, &hPoly))
+			if (!GetPolyPoints((LPPICKDATAHEADER)&PickList[0], FALSE, &npnts, &hPoly, 0))
 				goto RtnFalse;
 			LPDPOINT points = GlobalLock(hPoly);
 			DPOINT MidPt = WeightedPolyMidPoint(points, npnts);
@@ -6396,7 +6396,7 @@ GSSiExitProg (1350);
 			item = atoi(Arg[1]);
 			pt = atopt(Arg[2], &err);
 			if (!err)
-			if (GetPolyPoints((LPPICKDATAHEADER)&PickList[item], FALSE, &np, &hPoly))
+			if (GetPolyPoints((LPPICKDATAHEADER)&PickList[item], FALSE, &np, &hPoly, 0))
 			{
 				pPoints = GlobalLock(hPoly);
 				if (GetPerpendicularOffsetToPoly(&pt, np, pPoints, &IntPoint, &OffDist, &PolyDist, 0))

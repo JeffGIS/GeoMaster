@@ -5126,6 +5126,7 @@ static int OppositeEndPoint(int endPoint)
 BOOL ReorderSavedPolys(void)
 {
 	BOOL rtn = FALSE;
+	BOOL outOfOrder = FALSE;
 
 	if (hSavedPolys && NumSavedPolys > 1)
 	{
@@ -5199,11 +5200,14 @@ BOOL ReorderSavedPolys(void)
 				if (nextEndPoint < 0)
 					break;
 			}
-			if (numNewOrder != numEndPoints || memcmp(OrderOrig, OrderNew,numEndPoints*sizeof(int)))
+			if (numNewOrder != numEndPoints || memcmp(OrderOrig, OrderNew, numEndPoints * sizeof(int)))
+			{
+				outOfOrder = TRUE;
 				needToReorder = TRUE;
+			}
 			if (!haveGap)
 				needToReorder = TRUE;
-			rtn = needToReorder;
+			rtn = outOfOrder;
 			numEndPoints = numNewOrder;
 			if (needToReorder)
 			{

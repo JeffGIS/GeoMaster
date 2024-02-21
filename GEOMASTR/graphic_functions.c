@@ -9289,7 +9289,7 @@ UsePicked:
 				WantUnsplinedPoints = TRUE;  
 				nLoops = GetPolyPoints2 ((LPPICKDATAHEADER)&PickList[NumPicked],0,0,0); 
 				if (nLoops == 1)
-					st = GetPolyPoints ((LPPICKDATAHEADER)&PickList[NumPicked],FALSE,&npnts,&hPoly);
+					st = GetPolyPoints ((LPPICKDATAHEADER)&PickList[NumPicked],FALSE,&npnts,&hPoly, 0);
 				else
 				{
 					st = 0; 
@@ -9568,7 +9568,7 @@ UsePicked:
 				WantUnsplinedPoints = TRUE;  
 				nLoops = GetPolyPoints2 ((LPPICKDATAHEADER)&PickList[NumPicked],0,0,0); 
 				if (nLoops == 1)
-					st = GetPolyPoints ((LPPICKDATAHEADER)&PickList[NumPicked],FALSE,&npnts,&hPoly);
+					st = GetPolyPoints ((LPPICKDATAHEADER)&PickList[NumPicked],FALSE,&npnts,&hPoly, 0);
 				else
 				{
 					st = 0; 
@@ -10261,7 +10261,7 @@ HavePoint:
 			   	{
 			   		pos=BT_NEXT;
 //			   		PickList[0]=HighlightData.PD;
-					if (GetPolyPoints ((LPPICKDATAHEADER)&PickList[NumPicked],FALSE,&npnts,&hPoints))
+					if (GetPolyPoints ((LPPICKDATAHEADER)&PickList[NumPicked],FALSE,&npnts,&hPoints, 0))
 					{   
 						HPDPOINT	Points=(HPDPOINT)GlobalLock (hPoints);
 
@@ -10303,7 +10303,7 @@ HavePoint:
 			   			SnapPoint.y += PickList[0].BeginPoint.y; 
 			   			nPoints++;
 			   		}
-			   		else if (GetPolyPoints ((LPPICKDATAHEADER)&PickList[NumPicked],FALSE,&npnts,&hPoints))
+			   		else if (GetPolyPoints ((LPPICKDATAHEADER)&PickList[NumPicked],FALSE,&npnts,&hPoints, 0))
 					{   
 						HPDPOINT	Points=(HPDPOINT)GlobalLock (hPoints);
 
@@ -16167,7 +16167,7 @@ ShowPoly:
    				Reverse = TRUE;
    			}
 			
-	   		if (GetPolyPoints ((LPPICKDATAHEADER)&SnapList[0],Reverse,&npnts,&hPoly)) 
+	   		if (GetPolyPoints ((LPPICKDATAHEADER)&SnapList[0],Reverse,&npnts,&hPoly, 0))
 	   		{   
 	   			HPDPOINT	pPoints = (HPDPOINT)GlobalLock (hPoly); 
 	   			HPEN		hPen, hOldPen; 
@@ -16305,7 +16305,7 @@ BOOL RedefinePolyline (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam,int
 			NewPolyType = 1;
 		if (Function == GF_REMOVE_POLY_POINT)
 		{
-			if (!GetPolyPoints ((LPPICKDATAHEADER)&HighlightData.PD,FALSE,&nPnts,&hNewPolyPoints))
+			if (!GetPolyPoints ((LPPICKDATAHEADER)&HighlightData.PD,FALSE,&nPnts,&hNewPolyPoints, 0))
 				return FALSE;
 			NumNewPolyPoints = nPnts;
 			CurPoint = 0;

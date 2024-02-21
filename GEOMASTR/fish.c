@@ -1532,7 +1532,7 @@ BOOL AddRouteToGPSList (long RouteRef)
 	PickFile = GetPickFile (-1);
 	if (!PickByRefno(RouteRef,0,0,PickFile))
 		return FALSE; 
-	if (!GetPolyPoints ((LPPICKDATAHEADER)&PickList[0],FALSE,&npnts,&hPoly))
+	if (!GetPolyPoints ((LPPICKDATAHEADER)&PickList[0],FALSE,&npnts,&hPoly, 0))
 		return FALSE; 
 	if (!GetTextString (0,RouteCode,2,"Enter a 2 charater code to uniquely identify this route",0,0,0,TRUE,TRUE))
 		return FALSE;
@@ -1620,7 +1620,7 @@ BOOL AddWPToGPSList (LPSTR WPID,long Refno,LPSTR SymName,LPDPOINT pPoint)
 
 		if (!PickByRefno(Refno,0,0,-1))
 			return FALSE; 
-		if (!GetPolyPoints ((LPPICKDATAHEADER)&PickList[0],FALSE,&npnts,&hPoly))
+		if (!GetPolyPoints ((LPPICKDATAHEADER)&PickList[0],FALSE,&npnts,&hPoly, 0))
 			return FALSE;
 		Point = (HPDPOINT)GlobalLock (hPoly);
 		for (i=0;i<npnts;i++)

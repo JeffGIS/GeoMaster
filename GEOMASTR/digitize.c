@@ -1706,7 +1706,7 @@ BOOL FindIntersectionsWithRef (long Segno,HANDLE hInt,double Tol,
     ExpandBounds (&Bounds,Tol+P_TOL*4);
 	type[0] = PickList[0].Type;  
 	AtDist = SegData[Segno].FromDist;
-   	if (!GetPolyPoints (&SegData[Segno].PD,SegData[Segno].Reverse,&npnts[0],&hPoly[0]))
+   	if (!GetPolyPoints (&SegData[Segno].PD,SegData[Segno].Reverse,&npnts[0],&hPoly[0],0))
    	{
    		GSSiGlobUlFree (&hNewSegs);
    		return TRUE;               
@@ -1728,7 +1728,7 @@ BOOL FindIntersectionsWithRef (long Segno,HANDLE hInt,double Tol,
    		if (IntRefno != Refno || fabs (SegData[Segno].Length - HighlightData.PD.Length) > P_TOL)         
    		{
 	 		type[1] = HighlightData.PD.Type;
-	   		if (GetPolyPoints ((LPPICKDATAHEADER)&HighlightData.PD,FALSE,&npnts[1],&hPoly[1]))
+	   		if (GetPolyPoints ((LPPICKDATAHEADER)&HighlightData.PD,FALSE,&npnts[1],&hPoly[1], 0))
 	   		{   
 	   			pPolyPoints[1] = (HPDPOINT)GlobalLock (hPoly[1]);
 			   	if (type[1] == 2) 

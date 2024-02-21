@@ -334,7 +334,7 @@ BOOL ParcelTranFunction(int nArgs, LPSTR *Arg, LPSTR OutLoc)
 			ProcessText(Arg[4]);
 			if (PickByRefno(0, Arg[3], lpColon,-1))
 			{
-				if (GetPolyPoints((LPPICKDATAHEADER)&PickList[0], FALSE, &npnts1, &hPoly1))
+				if (GetPolyPoints((LPPICKDATAHEADER)&PickList[0], FALSE, &npnts1, &hPoly1, 0))
 				{
 					LPINT	pnpt = (LPINT)GlobalLock(pParTran->hParNumPt);
 					pnpt[pParTran->nParcels] = npnts1;
@@ -345,7 +345,7 @@ BOOL ParcelTranFunction(int nArgs, LPSTR *Arg, LPSTR OutLoc)
 					ProcessText(Arg[5]);
 					if (PickByRefno(0, Arg[3], lpColon, -1))
 					{
-						if (GetPolyPoints((LPPICKDATAHEADER)&PickList[0], FALSE, &npnts2, &hPoly2))
+						if (GetPolyPoints((LPPICKDATAHEADER)&PickList[0], FALSE, &npnts2, &hPoly2, 0))
 						{
 							loadParcelPoints(npnts1, npnts2, hPoly1, hPoly2, pParTran);
 						}

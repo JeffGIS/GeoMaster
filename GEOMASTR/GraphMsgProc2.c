@@ -3238,7 +3238,7 @@ BOOL FAR PASCAL DTMTOTEXTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPAR
                     	fputstring (OutRec,FidMIF);
                     }
                     BP = BeginPoint; 
-					if (GetPolyPoints ((LPPICKDATAHEADER)&HighlightData.PD,FALSE,&npnts,&hPoly))
+					if (GetPolyPoints ((LPPICKDATAHEADER)&HighlightData.PD,FALSE,&npnts,&hPoly, 0))
                     while (ContinueProcessing && nRow--)
                     {   
                     	HPDPOINT	pArea;
@@ -11603,7 +11603,7 @@ BOOL FAR PASCAL DECOMPPOLYMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPA
 	                    PickList[0]=HighlightData.PD;
 	                    if (PickList[0].Type == 2 || PickList[0].Type == 3) 
 	                    {
-					   		if (GetPolyPoints ((LPPICKDATAHEADER)&PickList[0],FALSE,&npnts,&hPoly))  
+					   		if (GetPolyPoints ((LPPICKDATAHEADER)&PickList[0],FALSE,&npnts,&hPoly, 0))
 					   		{   
 					   			USHORT	ipnt = 1;
 					   			
