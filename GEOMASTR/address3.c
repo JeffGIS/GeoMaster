@@ -2261,9 +2261,20 @@ BOOL OpenStreetPolys (LPBOOL pOpened)
 	sprintf(FileName, "[%DL]maplib\\centerline\\[CLINEDATE]\\streetpoly.in1");
 	hStreetPolys = BT_OPEN (FileName,0,BT_READ,0);
 	if (!hStreetPolys)
+	{
+		CloseGWDatabase(hDBStreetNumRefs);
+		hDBStreetNumRefs = 0;
 		return FALSE;
+	}
 	sprintf(FileName, "[%DL]maplib\\centerline\\[CLINEDATE]\\streetpoly.bin");
 	FidStreetPolys = GSSiOpenFile (FileName,NULL,OF_READ);
+	if (FidStreetPolys == HFILE_ERROR)
+	{
+		CloseGWDatabase(hDBStreetNumRefs);
+		hDBStreetNumRefs = 0;
+		BT_CLOSE2(&hStreetPolys);
+		return FALSE;
+	}
 	*pOpened = TRUE;
 	return TRUE;
 }
@@ -2302,7 +2313,7 @@ BOOL SaveStreetPolys (LPSTR dir)
     sprintf (FileName,"%s\\streetpoly.in1",dir);
 	BT_CREATE (FileName, 4, FALSE, 1, 1,(LPBTVARDESC)BTVar,FALSE, 0, 0, FALSE);
     hBT = BT_OPEN (FileName,0,BT_WRITE,0); 
-    sprintf (FileName,"%sstreetpoly.bin",dir);
+    sprintf (FileName,"%s\\streetpoly.bin",dir);
     Fid = GSSiOpenFile (FileName,NULL,OF_CREATE);
    	TotRecs = BT_NUM_IN_INDEX (hHighlight); 
 	CreateStatusWind (hWndMain,1,"Writing output file");
