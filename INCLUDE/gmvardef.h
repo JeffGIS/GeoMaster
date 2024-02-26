@@ -679,6 +679,7 @@ float	WidthFactor=1;
 long	CurrentVoterID; 
 short	CurrentVoterDB;   
 HANDLE	hStreetPolys=0;
+BOOL	debugLineDir = FALSE;
 HFILE	FidStreetPolys=HFILE_ERROR;  
 HANDLE	hDBStreetNumRefs = 0;
 HANDLE	hProfilePoints=0;

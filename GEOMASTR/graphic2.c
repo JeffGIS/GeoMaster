@@ -2117,7 +2117,8 @@ GSSiExitProg (132);
 	NumDynSegPointsRemaining = 0;
 	NumDynSegPoints = nPnts;
 
-	if (Type != GF_PIXEL && !InDynamicSegmentation && !hDynamicSeg && !ProcessSingleItem && !ProcessAllElements && iref == LastRef)
+	if (Type != GF_PIXEL && !InDynamicSegmentation && !hDynamicSeg &&
+		!ProcessSingleItem && !ProcessAllElements && iref && iref == LastRef)
 	{ 
 		rtn = LastRtn;
 	}

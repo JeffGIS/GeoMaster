@@ -6,6 +6,7 @@ HBRUSH CreateTransparentBrush(int itrans, COLORREF color);
 HPEN CreateTransparentPen(int itrans, int width, COLORREF color);
 
 extern BOOL useGDIPlus;
+extern BOOL debugLineDir;
 static int ii = 0;
 static int n4 = 0;
 
@@ -993,7 +994,14 @@ WritePoly:
 			}
 		}
 		else
+		{
+			HPEN hpn;
+			if (debugLineDir)
+				hpn = SelectObject(hdc, GetStockObject(BLACK_PEN));
 			return Polyline(hdc, apt, cpt);
+			if (debugLineDir)
+				SelectObject(hdc, hpn);
+		}
 	}
 	return FALSE;
 }

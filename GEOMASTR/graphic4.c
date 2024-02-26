@@ -1260,8 +1260,9 @@ BOOL ProcessRefAndTAG (BOOL DescIsVisible,LPSTR lpTAG,int ltag)
 	HIGHLIGHTDATA	HighlightData;
     static	long	debugrefno= 100357885;
     short	ii;
-	static	BOOL	ShowOnlyDebugRef=FALSE;
-	static	char	debugUDI[34] = "283401320222";
+	static	BOOL	ShowOnlyDebugRef = FALSE;
+	static	BOOL	ShowOnlyDebugUDI = FALSE;
+	static	char	debugUDI[34] = "170933353401";
     
     if (TraceRef)
     {
@@ -1286,11 +1287,11 @@ BOOL ProcessRefAndTAG (BOOL DescIsVisible,LPSTR lpTAG,int ltag)
 			pUDI++;
 			if (!stricmp(debugUDI, pUDI))
 				ii = 1;
-			/*else
+			else if (ShowOnlyDebugUDI)
 			{
 				Visible = FALSE;
 				goto Exit;
-			}*/
+			}
 		}
 	}
     if (CurrentRefno == debugrefno)
@@ -2340,6 +2341,9 @@ LPDEBUGARRAY	pDB=0;   */
 							}
 							else if (PolyInMaskAreaFileCoord (CurrentType,&nPnts,&hCoords,&lpCurPoints,&lpDCurPoints,HiPrecis))
 							{
+								if (debugLineDir)
+									LastRef = 0;
+
 								int SDCrtn = SetDisplayChar (hDC,CurrentType,CurrentRefno,CurrentDesc,CurrentPrefix,CurrentUDI);
 								if (SDCrtn)
 								{ 

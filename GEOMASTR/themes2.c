@@ -241,9 +241,9 @@ BOOL DisplayThemeDirection (void)
 	DPOINT	Points[3];
 	DOUBLE	Az, Dist=0, Len, DistBtwnArrows=50, ArrowWidth=10,inc;
 	int		nArrows, i;
-
 	if (!HiPrecis || (CurrentType != GF_LINE && CurrentType != GF_POLYLINE && CurrentType != GF_CURVE))
 		return FALSE;
+	//debugLineDir = TRUE;
 	Len = GetPolyLengthD (lpDCurPoints,nPnts);
 	nArrows = Len / (CurView->Scale*DistBtwnArrows);
 	inc = Len / (nArrows + 1);
@@ -255,6 +255,7 @@ BOOL DisplayThemeDirection (void)
 		Points[2] = dnewpt (Points[1],Az-1.5*HALFPI,CurView->Scale*ArrowWidth);
 		GWPolylineD (CurView->hDC, Points, 3,0);   
 	}
+	debugLineDir = FALSE;
 	return TRUE;
 }
 
@@ -1930,7 +1931,7 @@ RtnProcessed:
 		CloseThemeDataFile(TRUE);
 		CurTheme->IsActive = FALSE; 
 	} 
-	else if (CurTheme->NotSetColor)
+	else if (CurTheme->NotSetColor == 1)
 {
 #if ENABLETRACE
 GSSiExitProg (1262);
@@ -4084,7 +4085,7 @@ GSSiExitProg (1228);
 }
 
 SetLine:
-	if (!CurTheme->NotSetColor) 
+	if (!CurTheme->NotSetColor && HaveVarFillColor != 2)
 	{
 		SelectObject (CurView->hDC,CurTheme->ClassPen[iclass]);
 		HaveVarFillColor = TRUE;  

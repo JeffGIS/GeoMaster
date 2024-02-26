@@ -10,6 +10,7 @@
 #define MAXFGDBLEVS	8
 #define MAX_CHILD_LENGTH 1024
 
+static int nMultiRecs = 0;
 static	struct {float fcontour;
 			float size;
 			MNMXCORD bounds;
@@ -5586,6 +5587,8 @@ DoPoly:
             pNumPoints = (LPINT)GlobalLock (hPolyPartLen);
             pNumPointsNew = (LPINT)GlobalLock (hPolyPartLenNew);
 			int nn = 0;
+			if (nPoly > 1)
+				nMultiRecs++;
 	        for (i=0;i<nPoly;i++)
 	        {   
 	            long    numpoints, startpoint,ii; 
@@ -6249,10 +6252,50 @@ badcode:
 //						if (SetDisplayChar (hDC,GF_LINE,CurrentRefno,CurrentDesc,CurrentTAG,CurrentUDI))
 //						{   
 							pNumPoints = (LPINT)GlobalLock (hPolyPartLen);
+							if (debugLineDir)
+							{
+								if (nPoly > 1)
+								{
+									TempLineWidth = 5;
+									HaveVarFillColor = 2;
+									GlobalColors[0] = RGB(255, 0, 0);
+								}
+								else
+								{
+									HaveVarFillColor = TRUE;
+									TempLineWidth = 1;
+									GlobalColors[0] = RGB(100, 100, 100);
+								}
+							}
 			        		for (i=0;i<nPoly;i++)
 			        		{ 
 								LPDPOINT savelpDCurPoints = lpDCurPoints;
+								if (debugLineDir)
+								{
+									LastRef = 0;
 
+									switch (i)
+									{
+									default:
+										GlobalColors[0] = RGB(255, 255, 0);
+										break;
+									case 0:
+										break;
+									case 1:
+										GlobalColors[0] = RGB(0, 255, 0);
+										break;
+									case 2:
+										GlobalColors[0] = RGB(0, 0, 255);
+										break;
+									case 3:
+										GlobalColors[0] = RGB(255, 0, 255);
+										break;
+									case 4:
+										GlobalColors[0] = RGB(0, 255, 255);
+										break;
+
+									}
+								}
 //								GWPolylineD (hDC,lpDCurPoints,*pNumPoints,CurrentDesc); 
 //								lpDCurPoints+=*pNumPoints++;
 			        			nPnts = *pNumPoints;  

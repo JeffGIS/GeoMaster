@@ -839,6 +839,7 @@ extern HANDLE			hPrefix;
 extern HANDLE			hUDI;
 extern HANDLE			hTEXT;  
 extern HANDLE			hStreetPolys; 
+extern BOOL			debugLineDir;
 extern HFILE			FidStreetPolys;
 extern HANDLE			hDBStreetNumRefs;
 extern short			NumProfilePoints; 
