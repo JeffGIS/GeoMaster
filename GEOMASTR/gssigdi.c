@@ -56,6 +56,8 @@ void AAPolyLine(HDC hDC, LPPOINT pPoints, int np, COLORREF Color, float w);
 void AAPolyLineF(HDC hDC, LPFPOINT pPoints, int np, COLORREF Color, float w);
 void AAPolygon(HDC hdc, LPPOINT pPoints, int np, LOGPEN *lp, LOGBRUSH *lb);
 
+LPVOID GSSiGLOBALLOCK2(HANDLE hglb);
+BOOL GSSiGLOBALUNLOCK2(HANDLE hglb);
 
 #if CHECKMEM    
 void MEMERR(LPSTR Mess);

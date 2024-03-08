@@ -1263,6 +1263,24 @@ int checkvp(int i)
 	HPEN	hOldPen;
 	RECT	LastRect = { 0,0,0,0 };
 	return 0;
+	{
+		if (CurView)
+		{
+			if (CurView->CurrentFunction == 2)
+				ii = 1;
+			if (CurView->FunStackHandle)
+			{
+				LPCMDSTRING pCmd = GSSiGLOBALLOCK2(CurView->FunStackHandle);
+				if (pCmd)
+				{
+					if (pCmd->CurFun != 0)
+						ii = 1;
+				}
+				GSSiGLOBALUNLOCK2(CurView->FunStackHandle);
+			}
+		}
+
+	}
 	if (inUnallocateConfig)
 		return 0;
 	if (pNumViewports)

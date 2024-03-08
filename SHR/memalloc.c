@@ -328,14 +328,29 @@ BOOL GlobalULk(HANDLE hglb)
 {
 	return GlobalUnlock(hglb);
 }
-LPVOID GSSiGLOBALLOCK (HANDLE hglb)
+BOOL GSSiGLOBALUNLOCK2(HANDLE hglb)
+{
+	return GlobalUnlock(hglb);
+}
+
+LPVOID GSSiGLOBALLOCK2(HANDLE hglb)
 {
 	LPVOID	pntr;
+	pntr = GlobalLock(hglb);
+	return pntr;
+}
+LPVOID GSSiGLOBALLOCK(HANDLE hglb)
+{
+		LPVOID	pntr;
 	UINT	i; 
 	HPBYTE	pstr;
 	int totAlloc = 0;
 extern LPVOID debugaddress;
-checkvp(1);	
+static BOOL inul = FALSE;
+
+
+	checkvp(1);
+
 /*	if (debugaddress && *(LPBYTE)debugaddress)
 		ii=1;
 	if (debugaddress && !*(LPBYTE)debugaddress)
@@ -406,8 +421,10 @@ BOOL GSSiGLOBALUNLOCK(HANDLE hglb)
 	HPBYTE	pstr;
 	BYTE b;
 	long	j;
- checkvp(1);	
-   
+	static BOOL inul = FALSE;
+
+		checkvp(1);
+	inul = FALSE;
     if (hglb)
     {
 	if (hglb == WantHandle)
@@ -964,7 +981,7 @@ int	GSSiEnterProg (int progid)
 	
 	if (progid == 4)
 		ii = 1;
-//	checkvp(1);
+	checkvp(1);
 //	if (_fstrncmp (FName,"..\\GEOMASTR\\funids.txt",36))
 //		ii=1;
 	if (!progid)
@@ -1058,7 +1075,7 @@ int	GSSiExitProg (int progid)
 	short	i,n;
 	short	ii;
 	char	str[256]; 
-	
+	checkvp(1);
 	if (!EnableTrace || Level <= 0)
 		return 0;  
 	curProgID = -progid;

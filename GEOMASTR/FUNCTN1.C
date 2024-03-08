@@ -797,7 +797,7 @@ GSSiExitProg (1348);
 								case 1:
 									if (c1 == white && c2 == white)
 										break;
-									else if (abs (c1 - c2) < 2)
+									else if (abs(c1 - c2) < 2)
 									{
 										if (pt.x % 2)
 											FreeImage_SetPixelColor(hDIB32, pt.x, pDibInfo->biHeight - pt.y, &outColor1);
@@ -811,6 +811,16 @@ GSSiExitProg (1348);
 									else if (c1 < c2)
 									{
 										FreeImage_SetPixelColor(hDIB32, pt.x, pDibInfo->biHeight - pt.y, &outColor2);
+									}
+									break;
+								case 3:
+									if (c1 != white)
+									{
+										if (c1 <= c2 || c2 == white)
+										{
+											RGBQUAD c = COLORREFtoRGBQUAD(c1);
+											FreeImage_SetPixelColor(hDIB32, pt.x, pDibInfo->biHeight - pt.y, &c);
+										}
 									}
 									break;
 								case 2:

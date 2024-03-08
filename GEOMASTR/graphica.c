@@ -2625,6 +2625,7 @@ InsertIfResult:
     		pCmdStr->CurLoc = EndCmd-pCmdStr->Cmd;
     		hCmd = GSSiGlobAlloc (1059,GMEM_MOVEABLE,4096);
     		pCmd = GlobalLock (hCmd);
+			*pCmd = 0;
     		SaveChr = *EndCmd;
     		*EndCmd = 0;
     		_fstrcpy (pCmd,pLoc);
