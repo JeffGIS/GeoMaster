@@ -150,6 +150,7 @@ HANDLE OpenFileGM(
 	case OF_CREATE:
 		fid = CreateFile(fullPath, GENERIC_READ | GENERIC_WRITE, 0, 0, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
 		break;
+		
 	case OF_EXIST:
 		if (GetPathType2((LPSTR)fullPath) == 1)
 			fid = (HANDLE)1;

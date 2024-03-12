@@ -3214,7 +3214,30 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
 	    	GSSiGlobUlFree (&hEmbeddedGFCommand);
 	     } 
          break;
-   
+	case GF_PROCESS_CMD_FROMOTHERWINDOW:
+	{
+		BOOL displayCmd = FALSE;
+		char fileName[MAX_PATH + 32];
+		GetTempPath(MAX_PATH, fileName);
+		int len;
+		sprintf(strchr(fileName, 0), "GF_PROCESS_CMD_FROMOTHERWINDOW.bin");
+		HANDLE hFile = OpenFileGM(fileName, 0, OF_READ);
+		int ln;
+		BigRead64(hFile, &ln, sizeof(int));
+		if (ln < 0)
+		{
+			displayCmd = TRUE;
+			ln = -ln;
+		}
+		LPSTR str = malloc(ln+4);
+		BigRead64(hFile, str, ln);
+		GSSiClose64(&hFile);
+		if (displayCmd)
+			MessageBox(0, str, 0, MB_OK);
+		ProcessText(str);
+		free(str);
+	}
+		break;
 	case GF_PROCESS_CONNECTED_CMD:	
 		SetConfig(1);
 		ProcessConnectedCommand(wParam);

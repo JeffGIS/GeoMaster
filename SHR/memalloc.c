@@ -328,17 +328,6 @@ BOOL GlobalULk(HANDLE hglb)
 {
 	return GlobalUnlock(hglb);
 }
-BOOL GSSiGLOBALUNLOCK2(HANDLE hglb)
-{
-	return GlobalUnlock(hglb);
-}
-
-LPVOID GSSiGLOBALLOCK2(HANDLE hglb)
-{
-	LPVOID	pntr;
-	pntr = GlobalLock(hglb);
-	return pntr;
-}
 LPVOID GSSiGLOBALLOCK(HANDLE hglb)
 {
 		LPVOID	pntr;
@@ -1165,6 +1154,19 @@ int SetLastMessage (long mes, WPARAM wParam)
 		return FALSE;
 	}
 #endif
+	BOOL GSSiGLOBALUNLOCK2(HANDLE hglb)
+	{
+		return GlobalUnlock(hglb);
+	}
+
+	LPVOID GSSiGLOBALLOCK2(HANDLE hglb)
+	{
+		LPVOID	pntr;
+		pntr = GlobalLock(hglb);
+		return pntr;
+	}
+
+
 BOOL DumpTraceback (LPSTR AbendFile)
 {
 #if ENABLETRACE

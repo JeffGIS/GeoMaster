@@ -4466,6 +4466,21 @@ GotCloseFilehSQL:
 				ltoa((int)hWnd, OutLoc, 10);
 				goto Rtnl;
 			}
+			if (!stricmp(Arg[2], "COMMANDSTRING"))
+			{
+				char fileName[MAX_PATH + 32];
+				GetTempPath(MAX_PATH, fileName);
+
+				sprintf(strchr(fileName, 0), "GF_PROCESS_CMD_FROMOTHERWINDOW.bin");
+				HANDLE hFile = OpenFileGM(fileName, 0, OF_CREATE);
+				int ln = strlen(Arg[3]) + 1;
+				BigWrite64(hFile, &ln,sizeof(int), 0);
+				BigWrite64(hFile, Arg[3], ln, 0);
+				FlushFileBuffers(hFile);
+				GSSiClose64(&hFile);
+				SendMessage(hWnd, GF_PROCESS_CMD_FROMOTHERWINDOW, 0,0);
+				goto RtnTrue;
+			}
 			if (!stricmp(Arg[2], "SETTEXT"))
 			{
 				if (hWnd)

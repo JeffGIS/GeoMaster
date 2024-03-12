@@ -244,7 +244,9 @@ void SetWantHandle(HANDLE hglb);
 HGLOBAL GSSiGlobalReAlloc (USHORT From,HGLOBAL hGlob, long cbAlloc,UINT fuAlloc);
 HGLOBAL GSSiGlobalCopy(USHORT From, HGLOBAL hGlob);
 void GSSiGlobFree (LPHANDLE pHandle); 
-void GSSiGlobUlFree (LPHANDLE pHandle);    
+void GSSiGlobUlFree (LPHANDLE pHandle); 
+LPVOID GSSiGLOBALLOCK2(HANDLE hglb);
+BOOL GSSiGLOBALUNLOCK2(HANDLE hglb);
 void SECLIN8(const double *X1,const double *Y1,const double *A1,const double *X2,
              const double *Y2,const double *A2,double *X3,double *Y3,short *K);
 double  AZDF(double AZC, double AZP, double RL);
