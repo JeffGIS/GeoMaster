@@ -63,6 +63,8 @@ extern char			CurrentOrthoOrigName[MAX_PATH];
 extern char			CurrentOrthoFile[MAX_PATH];
 extern long			CurrentOrthoFrame;
 extern BOOL			InDisplayOrthos;
+extern BOOL			InDisplayConfigs;
+extern char			CurrentConfigFile[MAX_PATH];
 extern short			OPCODE_EQ;
 extern short			OPCODE_GE;
 extern short			OPCODE_LE;

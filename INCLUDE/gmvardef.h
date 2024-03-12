@@ -549,6 +549,8 @@ long	CurOrthoFrame=-1;
 char	CurrentOrthoFile[MAX_PATH];
 long	CurrentOrthoFrame=-1;
 BOOL	InDisplayOrthos = FALSE;
+BOOL	InDisplayConfigs = FALSE;
+char	CurrentConfigFile[MAX_PATH] = { 0 };
 short	NumVehicles=0;
 short	NumSortedVehicles=0;
 int		VehicleTrackMaxTime = USHRT_MAX;

@@ -139,8 +139,14 @@ BOOL GMFIBMPHandleToEXT (LPSTR lpszPathName,HANDLE hBMP,DWORD Flag);
 	 char mes[1024];
 	 if (InDisplayOrthos)
 	 {
-		 sprintf (mes,"File:%s Frame:%ld Error:%s",CurrentOrthoFile,CurrentOrthoFrame,message);
+		 sprintf(mes, "File:%s Frame:%ld Error:%s", CurrentOrthoFile, CurrentOrthoFrame, message);
 		 AppendFile("[%DL]abends\\FreeImageErrors.txt", mes);
+	 }
+	 if (InDisplayConfigs)
+	 {
+		 sprintf(mes, "File:%s Error:%s", CurrentConfigFile, message);
+		 AppendFile("[%DL]abends\\FreeImageErrors.txt", mes);
+		 MessageBox(0, mes, "FreeImage Error", MB_ICONEXCLAMATION);
 	 }
 	 else
 	 {

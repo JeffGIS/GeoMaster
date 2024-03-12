@@ -2984,6 +2984,12 @@ GSSiExitProg (100);
     if (!_fstrchr (CfgName,'.'))
     	_fstrcat (CfgName,".gmc");
     _fullpath (FullPath,CfgName,sizeof(FullPath)); 
+	if (*LastChr(FullPath) == ')')
+	{
+		LPSTR pEnd = strrchr(FullPath, '(');
+		if (pEnd)
+			*pEnd = 0;
+	}
     _fstrlwr (FullPath);
 	if ((pTE = strstr(FullPath, "\\testenvironments\\")))
 	{
@@ -4013,7 +4019,8 @@ BOOL DisplayConfigPreview (HWND hWnd,HDC hDC,LPSTR Name,LPRECT ImageRect, UINT T
 	
 	if (FidConfig == HFILE_ERROR)
 		return FALSE;
-		
+	InDisplayConfigs = TRUE;
+	strcpy(CurrentConfigFile, Name);
     GSSillseek(FidConfig,(LONG)-(6),2);
 
     BigRead (FidConfig,(HPSTR)&ConfigDesc,2);
@@ -4144,6 +4151,9 @@ BOOL DisplayConfigPreview (HWND hWnd,HDC hDC,LPSTR Name,LPRECT ImageRect, UINT T
 //	ReleaseDC (hWnd,hDC);
 Exit:
 	GSSiClose2 (&FidConfig);
+	InDisplayConfigs = FALSE;
+	strcpy(CurrentConfigFile, "");
+
 	return TRUE;
 }
 
