@@ -188,7 +188,8 @@ int	GetFunctionValue7(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, 
 				}
 				GSSiClose2(&Fid);
 				EscapeFunction(TRUE);
-				sprintf(Arg[6], "$SESSION(CREATE,GeoMaster %s,,,%s)", Arg[7], Arg[5]);
+				//strcat(Arg[7], " /F @[\%USERLEV]@=2@;@[\%IGNORESYSMSG]@=T@;@[\%WantBackgroundCache]@=F@;@[\%ALLOWCACHE]@=F@;");
+				sprintf(Arg[6], "$SESSION(CREATE,GeoMaster %s,,,%s)", Arg[7],Arg[5]);
 				ProcessText(Arg[6]);
 				goto RtnTrue;
 			}

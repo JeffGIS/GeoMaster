@@ -519,7 +519,7 @@ C-------------------------------        */
 //       SetWindowText(hWndMain,PNAME);
 	   if (!ExistFile(PNAME))
 		   sprintf(PNAME, "%s%s%s", "[%DL]projections\\", NAME2, Suffix);
-
+       ExpandText(PNAME);
 	   if (!ExistFile(PNAME))
 	   {
            sprintf (PNAME,"%s%s",NAME2,Suffix);

@@ -1863,6 +1863,7 @@ extern  char	GraphicsMacro[MAX_PATH];
 extern  char	smallMessageText[MAX_SMALL_MESSAGE+1];
 extern HBITMAP hPatBMP[5];
 extern  BOOL	fromConnectedProcess;
+extern  BOOL	inConnectedCommand;
 extern  char	delayedProcessConnectedCommand[512];
 extern  HWND	hWndLinkedTo;
 extern  BOOL	firstDisplayComplete;

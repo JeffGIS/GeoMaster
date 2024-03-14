@@ -2431,10 +2431,11 @@ BOOL ProcessConnectedCommand(UINT ID)
 	Fid = OpenFileGM(ConFile, &OFStruct, OF_READ);
 	if (Fid == INVALID_HANDLE_VALUE)
 		return FALSE;
+	inConnectedCommand = TRUE;
 	HaltMapDisplay(TRUE, FALSE);
 	lMem = llFileSeek(Fid, 0, 2);
 	llFileSeek(Fid, 0, 0);
-	hMem = GSSiGlobAlloc(0, GMEM_MOVEABLE, lMem);
+	hMem = GSSiGlobAlloc(0, GMEM_MOVEABLE, lMem+4);
 	pMem = GlobalLock(hMem);
 	BigRead64(Fid, pMem, lMem);
 	GSSiClose64(&Fid);
@@ -2446,6 +2447,7 @@ BOOL ProcessConnectedCommand(UINT ID)
 	else
 		strncpy(delayedProcessConnectedCommand, pMem,sizeof(delayedProcessConnectedCommand)-1);
 	GSSiGlobUlFree (&hMem);
+	inConnectedCommand = FALSE;
 	return TRUE;
 }
 
@@ -2477,9 +2479,11 @@ void ZoomConnectedProcesses (BOOL Remove)
 	}
 	Fid = OpenFileGM (ConFile,&OFStruct,OF_CREATE);
 	ExpandText(DataLoc);
-	sprintf(Cmd, "$ZOOM(FROMCONNECTEDPROCESS,%f %f,%f,%s)", CurView->MidPointW.x, CurView->MidPointW.y, CurView->Scale,DataLoc);
-	//sprintf(Cmd, "$ZOOM(POINTANDSCALE,%f %f,%f,F,COMMAND)", CurView->MidPointW.x, CurView->MidPointW.y, CurView->Scale);
+	//sprintf(Cmd, "$ZOOM(f,%f %f,%f,%s)", CurView->MidPointW.x, CurView->MidPointW.y, CurView->Scale,DataLoc);
+	sprintf(Cmd, "$ZOOM(FROMCONNECTEDPROCESS,%f %f,%f,%s,COMMAND);", CurView->MidPointW.x, CurView->MidPointW.y, CurView->Scale,DataLoc);
 	BigWrite64 (Fid,Cmd,strlen(Cmd)+1,-1);
+	FlushFileBuffers(Fid);
+
 	GSSiClose64 (&Fid);
 
 	if (hWndLinkedTo)
