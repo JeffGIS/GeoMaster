@@ -9,6 +9,7 @@
 #include "laszip_dll.h"
 
 enum STRUCTTYPES {ST_NOTYPE,ST_FTPSTRUCT,ST_VPSTRUCT};
+#define	MAX_CONNECTED_PROCESSES	32
 
 #if WIN32
 #define HUGE 

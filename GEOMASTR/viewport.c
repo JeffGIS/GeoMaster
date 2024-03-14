@@ -8,13 +8,9 @@ int testvalue (int i);
 int CheckBTFID (HANDLE h);
 HDIB32 BitmapToDIB_32(HBITMAP hBitmap, HPALETTE hPal);
 
-#define	MAX_CONNECTED_PROCESSES	32
-
-static	HWND hWndConnected[MAX_CONNECTED_PROCESSES];
-static	int	 NumConnectedProcesses = 0;
 static	char VPCTypes[][24]={"Format","Plan View","Profile View","Container View","-not yet implemented-","Menu","Legend Viewport","Index","Legend Image","Sub Viewport"};
 
-
+#include "gssitype.h"
 #include "gmextern.h"
 
 HFILE GetCfgFid (LPSTR Name,LPSHORT pVersion)

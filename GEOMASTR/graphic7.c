@@ -5436,8 +5436,24 @@ void SetCursorPosGM (int x,int y,BOOL DisplayLinkedOnly)
 		SetCursor (hCursor);
 		SetCursorPos (x,y);
 		SetCursor (hCursor); 
-		ddbug=TRUE;
 	}
+	else
+	{
+		updateConnectedProcessCursor = TRUE;
+		if (updateConnectedProcessCursor)
+		{
+			POINT screenPoint = { x,y };
+			DPOINT basePoint = ScreenPtToBasePt(screenPoint);
+			int x, y;
+			x = basePoint.x * 100;
+			y = basePoint.y * 100;
+			for (int i = 0; i < NumConnectedProcesses; i++)
+			{
+				PostMessage(hWndConnected[i], GF_UPDATECURSOR_FROMOTHERWINDOW, x, y);
+			}
+		}
+	}
+
 	RemoveLinkedCursors ();
 	if (!CurView || !DisplayLinkedCursors)
 {

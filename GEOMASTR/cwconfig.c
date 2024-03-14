@@ -3214,6 +3214,20 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
 	    	GSSiGlobUlFree (&hEmbeddedGFCommand);
 	     } 
          break;
+	case GF_UPDATECURSOR_FROMOTHERWINDOW:
+	{
+		char str[64];
+		BOOL Err;
+		LPVIEWPORT saveVP = CurView;
+		SetCurView(SetVPFromName("COMMAND", &Err));
+		DPOINT dpt = { lParam / 100.0,wParam / 100.0 };
+		POINT pt = BasePtToScreenPt(&dpt);
+		//SetCursorPosGM(pt.x, pt.y, FALSE);
+//		sprintf(str, "%i  %i", lParam, wParam);
+//		SetWindowText(hWndMain, str);
+		CurView = saveVP;
+	}
+		break;
 	case GF_PROCESS_CMD_FROMOTHERWINDOW:
 	{
 		BOOL displayCmd = FALSE;
