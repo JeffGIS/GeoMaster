@@ -4746,6 +4746,7 @@ SetVis:
 				  //$RECT(SPLIT,rect,LR)
 				  //$RECT(ADJUST,rect,xinc,yinc)
 				  //$RECT(DISPLAY,rect,color,text,vpname)
+				  //$RECT(MIDPOINT,rect);
 		{
 			nArgs = GetFunArgs(Args, Arg, 5, &hMem, pBrkPt, bpOffset, bpLen);
 			*OutLoc = 0;
@@ -4758,7 +4759,12 @@ SetVis:
 				RECT outRect = inRect;
 				if (!err)
 				{
-					if (!stricmp(Arg[1], "WIDTH"))
+					if (!stricmp(Arg[1], "MIDPOINT"))
+					{
+						POINT pt = RectMid(&inRect);
+						pttoa(OutLoc, pt);
+					}
+					else if (!stricmp(Arg[1], "WIDTH"))
 					{
 						ival = RECTWIDTH(&inRect);
 						itoa(ival, OutLoc, 10);
@@ -4838,6 +4844,23 @@ SetVis:
 			RestoreDC(CurView->hDC, -1);
 			goto RtnTrue;
 		}
+		case 444: // $RGBI(r,g,b,i) returns color value
+				  // $RGBI(n) returns R|G|B|I
+		{
+			nArgs = GetFunArgs(Args, Arg, 4, &hMem, pBrkPt, bpOffset, bpLen);
+			if (nArgs == 1)
+			{
+				COLORREF cref = atol(Arg[1]);
+				int r = GetRValue(cref), g = GetGValue(cref), b = GetBValue(cref), i = GetIValue(cref);
+				sprintf(OutLoc, "%i-%i-%i-%i", r, g, b,i);
+			}
+			else
+			{
+				ltoa((long)RGBI(atoi(Arg[1]), atoi(Arg[2]), atoi(Arg[3]), atoi(Arg[4])), OutLoc, 10);
+			}
+			goto Rtnl;
+		}
+
 		default:
 			goto Rtn0;
 	}

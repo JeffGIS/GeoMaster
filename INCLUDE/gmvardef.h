@@ -1209,7 +1209,7 @@ long	PenCOLOR[8]={-1,-1,-1,-1,-1,-1,-1,-1};
 long	AreaCOLOR[8]={-1,-1,-1,-1,-1,-1,-1,-1};
 short	PenWIDTH[8]={0,0,0,0,0,0,0,0};
 long	TextFreq=1;
-long	GlobalColors[10]={0,0,0,0,0,0,0,0,0,0};
+COLORREF	GlobalColors[10]={0,0,0,0,0,0,0,0,0,0};
 HANDLE	hReorgParms=0;
 BOOL	ByState=FALSE;
 BYTE	HaveStates[74];

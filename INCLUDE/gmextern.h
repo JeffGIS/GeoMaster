@@ -519,7 +519,7 @@ extern HPEN			HighlightPen;
 extern HPEN			hAreaBorderPen[2];
 extern BOOL			ForceBorder;
 extern char			CurSymbolFont[4][64];
-extern long			GlobalColors[10];
+extern COLORREF			GlobalColors[10];
 extern HANDLE			hDynamicSeg;
 extern HANDLE			hHighlightArea; 
 extern HANDLE			hHighlightAreaAccelerator[3];

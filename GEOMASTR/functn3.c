@@ -2539,9 +2539,9 @@ GotCloseFilehSQL:
 			goto RtnFalse;
 		}
 
-		case 532: //$POINT(DISPLAY,id or coord,symbol,size,color,text)
+		case 532: //$POINT(DISPLAY,id or coord,symbol,size,color,text,viewport)
 		{
-			nArgs = GetFunArgs (Args,Arg,6,&hMem, pBrkPt, bpOffset, bpLen);
+			nArgs = GetFunArgs (Args,Arg,8,&hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 1)
 				goto RtnFalse;
 			if (PointCommands (nArgs,Arg,OutLoc))

@@ -132,6 +132,7 @@ int	GetFunctionID4 (LPSTR str)
 			if (!_fstrnicmp(str, "JUST", 4)) return 441;
 			if (!_fstrnicmp(str, "RECT", 4)) return 442;
 			if (!_fstrnicmp(str, "TEXT", 4)) return 443;
+			if (!_fstrnicmp(str, "RGBI", 4)) return 444;
 			return 0;
 }
 int	GetFunctionID5 (LPSTR str)

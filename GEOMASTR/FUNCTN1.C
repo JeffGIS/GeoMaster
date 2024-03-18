@@ -715,45 +715,29 @@ GSSiExitProg (1348);
 				itoa(numFound, OutLoc, 10);
 				goto Rtnl;
 			}
-			else if (!strcmp(Arg[1], "COMBINE"))//$VP(COMBINE,outvpname,vpname1,vpname2;vpname3;etc,opt,color1,color2,color3)
-			/*
-			*	opt == 1: if (color vpname1 < min(color vpname2..vpnamen)) set outvpname == color 1 else color2
-			*/
+			//$VP(MINVAL, Viewport 5, Viewport 4, $RGB(0, 255, 0), MINDIST_var, MINLOC_var);
+			else if (!strcmp(Arg[1], "MINVAL"))
 			{
-				COLORREF color1 = atoll(Arg[6]);
-				RGBQUAD outColor1 = COLORREFtoRGBQUAD(color1);
-				COLORREF color2 = atoll(Arg[7]);
-				RGBQUAD outColor2 = COLORREFtoRGBQUAD(color2);
-				COLORREF color3 = atoll(Arg[8]);
-				RGBQUAD outColor3 = COLORREFtoRGBQUAD(color3);
+				COLORREF areaColor = atoll(Arg[4]);
+				COLORREF minDistColor = MAXDWORD;
+				DPOINT minDistPt;
 				int opt = atoi(Arg[5]);
-#define MAX_VP2	8
-				LPVIEWPORT outVP, inVP1, inVP2[MAX_VP2];
+				LPVIEWPORT distanceVP, areaVP;
 				int numvp2 = 0;
-				strcpy (OutLoc, "1");
+				strcpy(OutLoc, "1");
 
-				outVP = CurView;
-				SetCurView(SetVPFromName(Arg[3], &Err));
+				SetCurView(SetVPFromName(Arg[2], &Err));
 				if (Err)
 					strcpy(OutLoc, "0");
 				else
 				{
-					inVP1 = CurView;
-					LPSTR pVPName = Arg[4];
-					do
-					{
-						LPSTR pSC = strchr(pVPName, ';');
-						if (pSC)
-							*pSC++ = 0;
-						SetCurView(SetVPFromName(pVPName, &Err));
-						inVP2[numvp2++] = CurView;
-						pVPName = pSC;
-					} while (!Err && pVPName);
+					distanceVP = CurView;
+					SetCurView(SetVPFromName(Arg[3], &Err));
 					if (Err)
 						strcpy(OutLoc, "0");
 					else
 					{
-						CurView = outVP;
+						areaVP = CurView;
 						HDC hDC = GetDC(hWndMain);
 						RECT screenRect;
 						RECT clientRect;
@@ -763,88 +747,183 @@ GSSiExitProg (1348);
 						HBITMAP hScreen = SaveScreen(hDC, clientRect);
 						HDIB32 hDIB32 = BitmapToDIB32(hScreen);
 						DeleteObject(hScreen);
+						ReleaseDC(hWndMain, hDC);
+						RGBQUAD ca4, cd4;
+						RGBTRIPLE ca3, cd3;
+						COLORREF ca, cd;
+						COLORREF white = RGB(255, 255, 255);
 						LPBITMAPINFOHEADER pDibInfo = (LPBITMAPINFOHEADER)GetDibHeader(hDIB32);
 
 						//SaveDIB32(hDIB32, "c:\\temp\\screen.bmp", 0, -1);
+						CurView = areaVP;
 						for (int irow = CurView->Rect.top; irow < CurView->Rect.bottom; irow++)
 						{
 							for (int icol = CurView->Rect.left; icol < CurView->Rect.right; icol++)
 							{
 								POINT pt = { icol,irow };
+								FreeImage_GetPixelColor(hDIB32, pt.x, pDibInfo->biHeight - pt.y, &ca4);
+								ca3 = RGBQuadToRGBTriple(ca4);
+								ca = RGBTRIPLEToCOLORREF(ca3);
 								DPOINT wpt = WinPtToBasePt(pt);
-								CurView = inVP1;
-								POINT pt1 = BasePtToWinPt(&wpt);
-								COLORREF c1, c2=MAXDWORD;
-								COLORREF white = RGB(255, 255, 255);
-								RGBQUAD c14;
-								FreeImage_GetPixelColor(hDIB32, pt1.x,pDibInfo->biHeight - pt1.y, &c14);
-								RGBTRIPLE c13 = RGBQuadToRGBTriple(c14);
-								c1 = RGBTRIPLEToCOLORREF(c13);
-								for (int ivp = 0; ivp < numvp2; ivp++)
+								CurView = distanceVP;
+								POINT ptd = BasePtToWinPt(&wpt);
+								FreeImage_GetPixelColor(hDIB32, ptd.x, pDibInfo->biHeight - ptd.y, &cd4);
+								cd3 = RGBQuadToRGBTriple(cd4);
+								cd = RGBTRIPLEToCOLORREF(cd3);
+								if (ca == areaColor)
 								{
-									CurView = inVP2[ivp];
-									POINT pt2 = BasePtToWinPt(&wpt);
-									RGBQUAD c24;
-									FreeImage_GetPixelColor(hDIB32, pt2.x, pDibInfo->biHeight - pt2.y, &c24);
-									RGBTRIPLE c23 = RGBQuadToRGBTriple(c24);
-									COLORREF c = RGBTRIPLEToCOLORREF(c23);
-									c2 = min(c2, c);
+									if (cd < minDistColor)
+									{
+										minDistColor = cd;
+										minDistPt = wpt;
+									}
 								}
-								CurView = outVP;
-
-								switch (opt)
-								{
-								case 1:
-									if (c1 == white && c2 == white)
-										break;
-									else if (abs(c1 - c2) < 2)
-									{
-										if (pt.x % 2)
-											FreeImage_SetPixelColor(hDIB32, pt.x, pDibInfo->biHeight - pt.y, &outColor1);
-										else
-											FreeImage_SetPixelColor(hDIB32, pt.x, pDibInfo->biHeight - pt.y, &outColor2);
-									}
-									else if (c1 > c2)
-									{
-										FreeImage_SetPixelColor(hDIB32, pt.x, pDibInfo->biHeight - pt.y, &outColor1);
-									}
-									else if (c1 < c2)
-									{
-										FreeImage_SetPixelColor(hDIB32, pt.x, pDibInfo->biHeight - pt.y, &outColor2);
-									}
-									break;
-								case 3:
-									if (c1 != white)
-									{
-										if (c1 <= c2 || c2 == white)
-										{
-											RGBQUAD c = COLORREFtoRGBQUAD(c1);
-											FreeImage_SetPixelColor(hDIB32, pt.x, pDibInfo->biHeight - pt.y, &c);
-										}
-									}
-									break;
-								case 2:
-									if (c1 == color2 && c2 == color3)
-									{
-										FreeImage_SetPixelColor(hDIB32, pt.x, pDibInfo->biHeight - pt.y, &outColor1);
-									}
-									break;
-								}
+								CurView = areaVP;
 							}
 						}
 						//SaveDIB32(hDIB32, "c:\\temp\\screen2.bmp", 0, -1);
-
-						HBITMAP hBMout = DIB32ToBitmap(hDIB32, 0);
-						SelectClipRgn(hDC, 0);
-						RestoreScreen(hDC, hBMout, screenRect);
 						GMDestroyDIB32(hDIB32);
-
-						ReleaseDC(hWndMain, hDC);
-						DeleteObject(hBMout);
-						
+						strcpy(OutLoc, "1");
+						char str[128];
+						ltoa(minDistColor, str, 10);
+						SetGlobalValue(Arg[5], str);
+						dpointtoa(str, &minDistPt);
+						SetGlobalValue(Arg[6], str);
 					}
 				}
 				goto Rtnl;
+			}
+			//$VP(COMBINE,outvpname,vpname1,vpname2;vpname3;etc,opt,color1,color2,color3)
+			else if (!strcmp(Arg[1], "COMBINE"))//$VP(COMBINE,outvpname,vpname1,vpname2;vpname3;etc,opt,color1,color2,color3)
+			/*
+			*	opt == 1: if (color vpname1 < min(color vpname2..vpnamen)) set outvpname == color 1 else color2
+			*/
+			{
+			COLORREF color1 = atoll(Arg[6]);
+			RGBQUAD outColor1 = COLORREFtoRGBQUAD(color1);
+			COLORREF color2 = atoll(Arg[7]);
+			RGBQUAD outColor2 = COLORREFtoRGBQUAD(color2);
+			COLORREF color3 = atoll(Arg[8]);
+			RGBQUAD outColor3 = COLORREFtoRGBQUAD(color3);
+			int opt = atoi(Arg[5]);
+#define MAX_VP2	8
+			LPVIEWPORT outVP, inVP1, inVP2[MAX_VP2];
+			int numvp2 = 0;
+			strcpy(OutLoc, "1");
+
+			outVP = CurView;
+			SetCurView(SetVPFromName(Arg[3], &Err));
+			if (Err)
+				strcpy(OutLoc, "0");
+			else
+			{
+				inVP1 = CurView;
+				LPSTR pVPName = Arg[4];
+				do
+				{
+					LPSTR pSC = strchr(pVPName, ';');
+					if (pSC)
+						*pSC++ = 0;
+					SetCurView(SetVPFromName(pVPName, &Err));
+					inVP2[numvp2++] = CurView;
+					pVPName = pSC;
+				} while (!Err && pVPName);
+				if (Err)
+					strcpy(OutLoc, "0");
+				else
+				{
+					CurView = outVP;
+					HDC hDC = GetDC(hWndMain);
+					RECT screenRect;
+					RECT clientRect;
+					GetClientRect(hWndMain, &clientRect);
+					screenRect = clientRect;
+					//ClientRectToScreenRect(hWndMain, &screenRect);
+					HBITMAP hScreen = SaveScreen(hDC, clientRect);
+					HDIB32 hDIB32 = BitmapToDIB32(hScreen);
+					DeleteObject(hScreen);
+					LPBITMAPINFOHEADER pDibInfo = (LPBITMAPINFOHEADER)GetDibHeader(hDIB32);
+
+					//SaveDIB32(hDIB32, "c:\\temp\\screen.bmp", 0, -1);
+					for (int irow = CurView->Rect.top; irow < CurView->Rect.bottom; irow++)
+					{
+						for (int icol = CurView->Rect.left; icol < CurView->Rect.right; icol++)
+						{
+							POINT pt = { icol,irow };
+							DPOINT wpt = WinPtToBasePt(pt);
+							CurView = inVP1;
+							POINT pt1 = BasePtToWinPt(&wpt);
+							COLORREF c1, c2 = MAXDWORD;
+							COLORREF white = RGB(255, 255, 255);
+							RGBQUAD c14;
+							FreeImage_GetPixelColor(hDIB32, pt1.x, pDibInfo->biHeight - pt1.y, &c14);
+							RGBTRIPLE c13 = RGBQuadToRGBTriple(c14);
+							c1 = RGBTRIPLEToCOLORREF(c13);
+							for (int ivp = 0; ivp < numvp2; ivp++)
+							{
+								CurView = inVP2[ivp];
+								POINT pt2 = BasePtToWinPt(&wpt);
+								RGBQUAD c24;
+								FreeImage_GetPixelColor(hDIB32, pt2.x, pDibInfo->biHeight - pt2.y, &c24);
+								RGBTRIPLE c23 = RGBQuadToRGBTriple(c24);
+								COLORREF c = RGBTRIPLEToCOLORREF(c23);
+								c2 = min(c2, c);
+							}
+							CurView = outVP;
+
+							switch (opt)
+							{
+							case 1:
+								if (c1 == white && c2 == white)
+									break;
+								else if (abs(c1 - c2) < 2)
+								{
+									if (pt.x % 2)
+										FreeImage_SetPixelColor(hDIB32, pt.x, pDibInfo->biHeight - pt.y, &outColor1);
+									else
+										FreeImage_SetPixelColor(hDIB32, pt.x, pDibInfo->biHeight - pt.y, &outColor2);
+								}
+								else if (c1 > c2)
+								{
+									FreeImage_SetPixelColor(hDIB32, pt.x, pDibInfo->biHeight - pt.y, &outColor1);
+								}
+								else if (c1 < c2)
+								{
+									FreeImage_SetPixelColor(hDIB32, pt.x, pDibInfo->biHeight - pt.y, &outColor2);
+								}
+								break;
+							case 3:
+								if (c1 != white)
+								{
+									if (c1 <= c2 || c2 == white)
+									{
+										RGBQUAD c = COLORREFtoRGBQUAD(c1);
+										FreeImage_SetPixelColor(hDIB32, pt.x, pDibInfo->biHeight - pt.y, &c);
+									}
+								}
+								break;
+							case 2:
+								if (c1 == color2 && c2 == color3)
+								{
+									FreeImage_SetPixelColor(hDIB32, pt.x, pDibInfo->biHeight - pt.y, &outColor1);
+								}
+								break;
+							}
+						}
+					}
+					//SaveDIB32(hDIB32, "c:\\temp\\screen2.bmp", 0, -1);
+
+					HBITMAP hBMout = DIB32ToBitmap(hDIB32, 0);
+					SelectClipRgn(hDC, 0);
+					RestoreScreen(hDC, hBMout, screenRect);
+					GMDestroyDIB32(hDIB32);
+
+					ReleaseDC(hWndMain, hDC);
+					DeleteObject(hBMout);
+
+				}
+			}
+			goto Rtnl;
 			}
 			else if (!_fstrcmp (Arg[1],"GETVAL"))
 			{  

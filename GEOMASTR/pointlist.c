@@ -183,22 +183,36 @@ BOOL PointCommands (int nArgs,LPSTR *Arg,LPSTR OutLoc)
 	int		symnum;
 	BOOL	err;
 	double	width;
+	BOOL	rtn = FALSE;
 
 	if (!stricmp(Arg[1], "DISPLAY"))
 	{
 		DPoint = atopt(Arg[2], &err);
 		if (!err)
 		{
-			Point = BasePtToWinPt(&DPoint);
-			symnum = GetDictSymbolNumber(Arg[3]);
-			width = atof(Arg[4]);
-			if (symnum)
+			LPVIEWPORT pSaveVP = CurView;
+			SetCurView(SetVPFromName(Arg[7], &err));
+			if (!err)
 			{
-				HANDLE hSymbol = GetDictSymDesc(symnum, 0);
-
-				DisplayPointSymbol(hSymbol, CurView->hDC, width, width, 0, &Point, 0, FALSE, 0, 0, FALSE, FALSE, Arg[6], 0);
-				DestroySymbol(hSymbol);
-				return TRUE;
+				Point = BasePtToWinPt(&DPoint);
+				symnum = GetDictSymbolNumber(Arg[3]);
+				width = atof(Arg[4]);
+				if (symnum)
+				{
+					HANDLE hSymbol = GetDictSymDesc(symnum, 0);
+					BOOL saveHaveVarFillColor = HaveVarFillColor;
+					COLORREF saveColor = GlobalColors[0];
+					if (*Arg[5])
+					{
+						HaveVarFillColor = TRUE;
+						GlobalColors[0] = atol (Arg[5]);
+					}
+					DisplayPointSymbol(hSymbol, CurView->hDC, width, width, 0, &Point, 0, FALSE, 0, 0, FALSE, FALSE, Arg[6], 0);
+					DestroySymbol(hSymbol);
+					HaveVarFillColor = saveHaveVarFillColor;
+					GlobalColors[0] = saveColor;
+					rtn = TRUE;
+				}
 			}
 		}
 	}
@@ -208,7 +222,7 @@ BOOL PointCommands (int nArgs,LPSTR *Arg,LPSTR OutLoc)
 		if (!err)
 		{
 			dpointtoa(OutLoc, &DPoint);
-			return TRUE;
+			rtn = TRUE;
 		}
 	}
 	else if (!stricmp(Arg[1], "EP"))
@@ -221,10 +235,10 @@ BOOL PointCommands (int nArgs,LPSTR *Arg,LPSTR OutLoc)
 			DPoint = pPoints[np - 1];
 			GSSiGlobUlFree(&hList);
 			dpointtoa(OutLoc, &DPoint);
-			return TRUE;
+			rtn = TRUE;
 		}
 	}
-	return FALSE;
+	return rtn;
 }
 
 BOOL PListCommands (int nArgs,LPSTR *Arg,LPSTR OutLoc)
@@ -706,21 +720,23 @@ DestroyAll:
 						else if (!stricmp(Arg[4], "DRAW"))
 						{
 							int iWidth = atoi(Arg[6]);
-							Color = atoi(Arg[5]);
+							Color = atol(Arg[5]);
+							int iTrans = atoi(Arg[7]);
 							hPen = CreatePen(PS_SOLID, iWidth, Color);
 							hOldPen = SelectObject(CurView->hDC, hPen);
+							useGDIPlus = wantGDIPlus;
 							if (!useGDIPlus)
 								GWPolylineD(CurView->hDC, Points1, nPointsInList[i], 0);
 							else
 							{
 								HANDLE hPoints = GSSiGlobAlloc(1864, GMEM_MOVEABLE, nPointsInList[i] * sizeof(POINT) + 4);
 								LPPOINT pPoints = GlobalLock(hPoints);
-								for (int i = 0; i < nPointsInList[i]; i++)
+								for (int j = 0; j < nPointsInList[i]; j++)
 								{
-									pPoints[i] = BasePtToWinPt(&Points1[i]);
+									pPoints[j] = BasePtToWinPt(&Points1[j]);
 								}
 								AAPolyLine(CurView->hDC, pPoints, nPointsInList[i], Color, iWidth);
-								GSSiGlobUlFree(hPoints);
+								GSSiGlobUlFree(&hPoints);
 							}
 							SelectObject(CurView->hDC, hOldPen);
 							DeleteObject(hPen);

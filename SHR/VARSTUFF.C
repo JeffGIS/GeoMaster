@@ -3564,6 +3564,7 @@ GSSiExitProg (532);
 			wantGDIPlus = atob(Value);
 			if (MapServer)
 				wantGDIPlus = FALSE;
+			useGDIPlus = wantGDIPlus;
 			break;
 		case 374:
 			strncpy(StreetBPType,Value,2);

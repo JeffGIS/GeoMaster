@@ -6625,7 +6625,41 @@ BOOL ListElements (HWND hWndDlg,UINT idclist, HANDLE hSymbol)
 
 	return TRUE;
 }
+FLTPOINT BasePtToWinPtFLT(LPDPOINT WPoint)
+{
+	DPOINT WinPointD, Intmod;
+	POINT  WinPoint;
+	FLTPOINT	WinPointF;
 
+	if (!CurView->hTranBaseToVP)
+		CreateBaseToVPTran(CurView->DrawRect);
+	switch (CurView->FileProjectionType)
+	{
+		DPOINT PPoint;
+
+	case 2:
+		PPoint = *WPoint;
+		ProjectBasePt(&PPoint);
+		TRANS2(PPoint.x, PPoint.y, &WinPointD.x, &WinPointD.y, CurView->hTranBaseToVP);
+		break;
+	case 1:
+		PPoint = *WPoint;
+		TRANS2(PPoint.x, PPoint.y, &WinPointD.x, &WinPointD.y, CurView->hTranBaseToVP);
+		break;
+	default:
+	case 0:
+		TRANS2(WPoint->x, WPoint->y, &WinPointD.x, &WinPointD.y, CurView->hTranBaseToVP);
+		break;
+	case 3:
+		PPoint = *WPoint;
+		ConvertCoord(&PPoint, 1, GOOGLEMAPSPROJECTION);
+		TRANS2(PPoint.x, PPoint.y, &WinPointD.x, &WinPointD.y, CurView->hTranProjectionToScreen);
+		break;
+	}
+	WinPointF.x = WinPointD.x;
+	WinPointF.y = WinPointD.y;
+	return (WinPointF);
+}
 
 FPOINT BasePtToWinPtF (LPDPOINT WPoint)
 #if ENABLETRACE

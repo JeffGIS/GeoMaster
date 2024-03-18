@@ -171,8 +171,8 @@ extern "C" void AAPolyLineF(HDC hdc, LPFPOINT pPoints, int np, COLORREF ColorRef
 		Pen pn(Color(255, GetRValue(ColorRef), GetGValue(ColorRef), GetBValue(ColorRef)), w);
 		graphic.SetSmoothingMode(Gdiplus::SmoothingMode::SmoothingModeHighQuality);
 		//graphic.DrawLine(&blue, 0, 0, 1024, 1024);
-		PointF pt1;
-		PointF pt2;
+		Gdiplus::PointF pt1;
+		Gdiplus::PointF pt2;
 		Gdiplus::GraphicsPath pth;
 		pn.SetLineJoin(Gdiplus::LineJoin::LineJoinRound);
 		pn.SetStartCap(lincap);
