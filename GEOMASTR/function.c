@@ -4832,15 +4832,25 @@ SetVis:
 			nArgs = GetFunArgs(Args, Arg,7, &hMem, pBrkPt, bpOffset, bpLen);
 			SetCurView(SetVPFromName(Arg[7], &Err));
 			SaveDC(CurView->hDC);
-			HFONT font = GetStockObject(DEVICE_DEFAULT_FONT);
+			int fontSize = atoi(Arg[4]);
+			//HFONT hFont = GetStockObject(DEVICE_DEFAULT_FONT);
+			HFONT hFont = CreateFont(fontSize, 0, 0, 0, FW_BOLD, 0, 0, 0, 0, OUT_TT_PRECIS, 0, PROOF_QUALITY, 0, "Courier New");
+
 			COLORREF	iColor = atoll(Arg[5]);
 			DPOINT pt = atopt(Arg[3], &Err);
 			pt.x += CurView->Rect.left;
 			pt.y += CurView->Rect.top;
-			HFONT oldFont = SelectObject(CurView->hDC, font);
+			HFONT oldFont = SelectObject(CurView->hDC, hFont);
+			SetDisplayMode(CurView->hDC, GF_TEXTMODE);
+			if (!CurView->hRgn)
+			{
+				CurView->hRgn = CreateVPRgn(FALSE, FALSE);
+			}
+			SelectVPClipRgn(CurView->hRgn);
 			SetTextColor(CurView->hDC, iColor);
 			TextOut(CurView->hDC, IDNINT(pt.x),IDNINT(pt.y), Arg[2], strlen(Arg[2]));
 			SelectObject(CurView->hDC, oldFont);
+			DeleteObject(hFont);
 			RestoreDC(CurView->hDC, -1);
 			goto RtnTrue;
 		}
