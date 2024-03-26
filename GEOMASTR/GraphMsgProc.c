@@ -11374,10 +11374,14 @@ GSSiExitProg (656);
 			{
 				char mess[128];
 						
-OpenEr:			sprintf (mess,"Unable to open zoom list file: %s",lpTab);
+OpenEr:			sprintf (mess,"Unable to open zoom list file: %s\nDo you wish to create it?",lpTab);
 				ExpandText (mess);
-				GSSiMsgBox( GetFocus(), mess,"", MB_OK|MB_ICONEXCLAMATION,0); 
-				break;
+				if (GSSiMsgBox(GetFocus(), mess, "", MB_YESNO | MB_ICONEXCLAMATION, 0) == IDYES)
+				{
+					Fid = GSSiOpenFile(lpTab, &OFStruct, OF_CREATE);
+				}
+				else
+					break;
 			}
 	        AltProjLocked=FALSE;
 	        SetGlobalValue("%ALT_PROJECTION","baseproj.cvt"); 

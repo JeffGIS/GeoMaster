@@ -686,6 +686,9 @@ void SetStartupGlobalValues (void)
 	char	str[256];
 	
 	
+	SetGlobalValue("%START_DIR", CurDir);
+	SetGlobalValue("%DATA_LOC", "");
+	SetCurVal("@[%DL]", IDS_FILEVPEDIT);
 	SetCurVal ("@[%DL]gpsfiles\\default.gps",IDS_FILEGPS);
 	SetCurVal ("@[%DL]formats\\",IDS_FILEFMT);
 	SetCurVal ("@[%DL]menus\\",IDS_FILEMEN);
@@ -701,9 +704,6 @@ void SetStartupGlobalValues (void)
 	SetCurVal ("@[%DL]vpoffset.txt",IDS_FILEVPOFF);
 	SetCurVal ("@[%DL]offline.txt",IDS_FILEOFFLINE);
 	SetCurVal ("@[%DL]daterang.txt",IDS_FILEDATERANGES);
-	SetGlobalValue("%START_DIR",CurDir);
-	SetGlobalValue("%DATA_LOC",""); 
-	SetCurVal ("@[%DL]",IDS_FILEVPEDIT);
 	SetGlobalValue("%SUBDL","Y");
 	SetGlobalValue("%PROMPTS","N");
 	SetGlobalValue("%IDM","Y");  

@@ -3941,7 +3941,7 @@ BOOL MakeVPFullScreen (int vpid, int Opt)
 		CurView->Width = CurView->SaveWidth; 
 		CurView->Height = CurView->SaveHeight; 
 		CurView->Parent = CurView->SaveParent;
-		CurView->NewBounds = CurView->WBounds = CurView->SaveWBounds;
+		CurView->NewBounds = CurView->WBounds;// = CurView->SaveWBounds;
 		CurView->DisplayedFullScreen = 0;   
 		*pCommandViewport = CurView->PreviousCommandVP;
 //		Factor = ((double)CurView->SaveWidth + CurView->SaveHeight)/200.0;
@@ -3968,7 +3968,7 @@ BOOL MakeVPFullScreen (int vpid, int Opt)
 	}
     SetupViewports (CurView->hWnd,CurView->hDC,0,MainRect,0); 
 	DisplayCycle++;
-	SetBounds(CurView->hWnd,CurView->hDC);
+	ZoomToRect(CurView->NewBounds, FALSE);
 	RedisplayWindow ();
 	return TRUE;
 }  

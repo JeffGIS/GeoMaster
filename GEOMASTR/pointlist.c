@@ -283,6 +283,7 @@ BOOL PointListCommands (int nArgs,LPSTR *Arg,LPSTR OutLoc)
 //$POINTLIST(DISPLAY,name,vp,DRAW,color,width)
 //$POINTLIST(LENGTH,name)
 //$POINTLIST(AREA,name)
+//$POINTLIST(REVERSE,name);
 //$POINTLIST(PCT,name,point)
 //$POINTLIST(AZM,name,pct,before;after;at(default) at averages before and after if at node point. all 3 the same if not at node pt)
 //$POINTLIST(INTERSECT,name,name2,COUNT;id;Farthest;nearest,farornearpoint)
@@ -1160,6 +1161,28 @@ DestroyAll:
 			{
 				HPDPOINT	Points = GlobalLock (hPointList[i]);
 				HANDLE		hList = GSSiGlobAlloc (0,GMEM_MOVEABLE,nPointsInList[i]*sizeof(DPOINT));
+				
+				Points2 = GlobalLock (hList);
+				k = nPointsInList[i] - 1;
+				for (j=0;j<nPointsInList[i];j++)
+					Points2[j] = Points[k--];
+				GSSiGlobUlFree (&hPointList[i]);
+				GlobalUnlock (hList);
+				hPointList[i] = hList;
+				strcpy (OutLoc,"1");
+				rtn = TRUE;
+				break;
+			}
+		}
+	}
+	else if (!stricmp (Arg[1],"EXTEND"))//$POINTLIST(EXTEND,plid,which(1=begin,2=end,3=both),dist)
+	{
+		for (i=0;i<nPointLists;i++)
+		{
+			if (!stricmp (PointListID[i],Arg[2]) && nPointsInList[i]>1)
+			{
+				HPDPOINT	Points = GlobalLock (hPointList[i]);
+				HANDLE		hList = GSSiGlobAlloc (0,GMEM_MOVEABLE,(nPointsInList[i]+2)*sizeof(DPOINT));
 				
 				Points2 = GlobalLock (hList);
 				k = nPointsInList[i] - 1;

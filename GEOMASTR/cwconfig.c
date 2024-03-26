@@ -520,7 +520,7 @@ GSSiExitProg (436);
 	 _getcwd (OriginalDir,MAX_PATH);
 	 _getcwd (CurDir,MAX_PATH);  
 	 CreateCursors();		 	
-	 SetStartupGlobalValues (); 
+	 SetStartupGlobalValues();
 	 _fstrcpy (str,"[%DATA_LOC]");
 	 ExpandText (str);
 	 if (!*str)
