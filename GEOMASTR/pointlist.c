@@ -1175,7 +1175,7 @@ DestroyAll:
 			}
 		}
 	}
-	else if (!stricmp (Arg[1],"EXTEND"))//$POINTLIST(EXTEND,plid,which(1=begin,2=end,3=both),dist)
+	else if (!stricmp (Arg[1],"EXTEND"))//$POINTLIST(EXTEND,plid,which(1=begin,2=end,0or3=both),dist)
 	{
 		for (i=0;i<nPointLists;i++)
 		{
@@ -1183,14 +1183,28 @@ DestroyAll:
 			{
 				HPDPOINT	Points = GlobalLock (hPointList[i]);
 				HANDLE		hList = GSSiGlobAlloc (0,GMEM_MOVEABLE,(nPointsInList[i]+2)*sizeof(DPOINT));
-				
+				int np = 0;
 				Points2 = GlobalLock (hList);
-				k = nPointsInList[i] - 1;
+				double dist = atof(Arg[4]);
+				int opt = atoi(Arg[3]);
+				if (!opt)
+					opt = 3;
+				double az = getazd(&Points[1], &Points[0]);
+				DPOINT newPt = dnewpt(Points[0],az,dist);
+				if (opt == 1 || opt == 3)
+					Points2[np++] = newPt;
 				for (j=0;j<nPointsInList[i];j++)
-					Points2[j] = Points[k--];
+					Points2[np++] = Points[j];
+				if (opt == 2 || opt == 3)
+				{
+					az = getazd(&Points[nPointsInList[i]-2], &Points[nPointsInList[i]-1]);
+					newPt = dnewpt(Points[nPointsInList[i]-1], az, dist);
+					Points2[np++] = newPt;
+				}
 				GSSiGlobUlFree (&hPointList[i]);
 				GlobalUnlock (hList);
 				hPointList[i] = hList;
+				nPointsInList[i] = np;
 				strcpy (OutLoc,"1");
 				rtn = TRUE;
 				break;
