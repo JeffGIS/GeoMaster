@@ -357,6 +357,9 @@ void ComputePickPointD (HPDPOINT BPOINT, HPDPOINT EPOINT,double Dist,
 					   double TotDist,LPDOUBLE PCT, LPDOUBLE OffDist,LPDOUBLE AZ,
 				  	   LPMNMXCORD BOUNDS,LPDPOINT PickedPoint);
 void SetPickGlobals (int item);
+HANDLE SavePickList(void);
+void RestorePickList(HANDLE hSavedList);
+
 void SetPickGlobalsFromThemeHighlightData (LPTHEMEHIGHLIGHTKEY pThemeHighlightKey,LPTHEMEHIGHLIGHTDATA pThemeHighlightData);
 DPOINT WinPtToTAGPt (POINT WinPoint);
 POINT TAGPtToWinPt (DPOINT TagPoint);

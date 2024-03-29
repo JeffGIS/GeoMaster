@@ -3571,7 +3571,20 @@ SetVis:
 			nArgs = GetFunArgs (Args,Arg,6,&hMem, pBrkPt, bpOffset, bpLen); 
 			if (nArgs < 1)
 				goto RtnFalse;
-			if (!stricmp (Arg[1],"SELECT"))
+			if (!stricmp(Arg[1], "SAVE"))
+			{
+				HANDLE hSavedList = SavePickList();
+				ii = sizeof(HANDLE);
+				ltoa((LONG)hSavedList, OutLoc, 10);
+				goto Rtnl;
+			}
+			else if (!stricmp(Arg[1], "DESTROY"))//$PICK(DESTROY,handle to saved list)
+			{
+				HANDLE hSavedList = (HANDLE)atol(Arg[2]);
+				GSSiGlobFree(&hSavedList);
+				goto RtnTrue;
+			}
+			else if (!stricmp(Arg[1], "SELECT"))
 			{
 				n = atoi (Arg[2]);
 				if (n > NumPicked)

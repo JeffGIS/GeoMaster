@@ -2518,18 +2518,33 @@ GSSiExitProg (1350);
 		  goto Rtnl;
 		} 
 		 
-		case 931: //$GETPICKED(item)  
+		case 931: //$GETPICKED(item,(opt)savedListHandle)  
 		{
-			nArgs = GetFunArgs(Args, Arg, 1, &hMem, pBrkPt, bpOffset, bpLen);
+			HANDLE hSavedList = 0;
+			HANDLE hCurrentList = 0;
+			
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 1)
 				goto RtnFalse;
-			n = atoi(Arg[1]);  
+			n = atoi(Arg[1]); 
+			rtn = FALSE;
+			if (*Arg[2])
+			{
+				hSavedList = (HANDLE)atol(Arg[2]);
+				hCurrentList = SavePickList();
+				RestorePickList(hSavedList);
+			}
 			if (n && n <= NumPicked)
 			{
 				ProcessPickedItem (n-1,FALSE);
-				goto RtnTrue;
-			}			
-			goto RtnFalse; 
+				rtn = TRUE;
+			}
+			if (hCurrentList)
+			{
+				RestorePickList(hCurrentList);
+				GSSiGlobFree(&hCurrentList);
+			}
+			goto Rtnrtn;
 		}
 			
 		case 932: //$SENDEMAIL(from,to,subject,message(or body),attach,html

@@ -3547,6 +3547,29 @@ void SetPickGlobalsFromThemeHighlightData (LPTHEMEHIGHLIGHTKEY pThemeHighlightKe
 	return;
 }
 
+HANDLE SavePickList(void)
+{
+	HANDLE hSavedList = GSSiGlobAlloc(1869, GMEM_MOVEABLE, sizeof(int) + NumPicked * sizeof(PICKDATA) + 4);
+	LPINT pNum = GlobalLock(hSavedList);
+	*pNum++ = NumPicked;
+	if (NumPicked > 0)
+	{
+		memcpy(pNum, PickList, NumPicked * sizeof(PICKDATA));
+	}
+	GlobalUnlock(hSavedList);
+	return hSavedList;
+}
+void RestorePickList(HANDLE hSavedList)
+{
+	LPINT pNum = GlobalLock(hSavedList);
+	NumPicked = *pNum++;
+	if (NumPicked > 0)
+	{
+		memcpy(PickList, pNum,  NumPicked * sizeof(PICKDATA));
+	}
+	GlobalUnlock(hSavedList);
+	return;
+}
 
 void SetPickGlobals (int item)
 #if ENABLETRACE
