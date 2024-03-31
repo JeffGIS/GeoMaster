@@ -1,2 +1,2 @@
-configs\basemap_remote.gmc /F [%USERLEV]=2;[%IGNORESYSMSG]=T;[%WantBackgroundCache]=F;[%ALLOWCACHE]=F; 
-h:\MplsRemoteTemplate\GeoMas
+configs\2024_01.gmc [%USEGDIPLUS]=F;[%KFO]=T; 
+c:\gmmobile\metroUTM
