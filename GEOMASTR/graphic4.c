@@ -1258,7 +1258,7 @@ BOOL ProcessRefAndTAG (BOOL DescIsVisible,LPSTR lpTAG,int ltag)
 	char	str[16]; 
 	BOOL	Visible=DescIsVisible;
 	HIGHLIGHTDATA	HighlightData;
-    static	long	debugrefno= 100357885;
+    static	long	debugrefno= 104352421;
     short	ii;
 	static	BOOL	ShowOnlyDebugRef = FALSE;
 	static	BOOL	ShowOnlyDebugUDI = FALSE;
@@ -5435,7 +5435,10 @@ int ReducePoly(int nPoly, LPINT pnPnts, LPHANDLE phDPoints)
 	{
 		//GSSiGlobFree(&hSavedPolysNew);
 		//hSavedPolys = hSavedPolys;
+		rtn = nPoly;
 	}
+	if (!rtn)
+		rtn = nPoly;
 	GSSiGlobUlFree(&hNewNPoints);
 	GSSiGlobUlFree(&hOrderOrig);
 	GSSiGlobUlFree(&hOrderNew);
