@@ -5138,8 +5138,7 @@ DPOINT PolyAverage(LPDPOINT points, int np)
 double fixZeroDeg(double deg, LPDPOINT Points)
 {
 	double rtn = deg;
-
-	rtn = getazd (&Points[3], &Points[2]);
+	rtn = getazd (&Points[textBpoint], &Points[textEpoint]);
 	rtn /= DEGtoRAD;
 /*	if (deg == 0.0)
 	{
@@ -5176,7 +5175,7 @@ static DPOINT GetTextBeginPoint(LPDPOINT Points, double* deg, int np, int nchar)
 	if (nchar > 0 && np > 3)
 	{
 		*deg = fixZeroDeg(*deg, Points);
-		rtn = Points[3];
+		rtn = Points[textBpoint];
 	}
 	/*
 	if (*deg != 0.0 && (np > 3 && np < 6))
@@ -5363,6 +5362,7 @@ BOOL ProcessFGDBRecord (HDC hDC,long RecordNumber)
 	static BOOL	showmarker[3] = { FALSE,FALSE,FALSE };
 	static noPOC = FALSE;
     
+	PTRot = 0;
     if (CurView->ID == dbugid)
     	ii=1; 
    // if (RecordNumber == DebugRecNum)

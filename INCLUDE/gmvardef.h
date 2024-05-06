@@ -958,6 +958,8 @@ DPOINT	TXLocEPBase;
 DPOINT	TXLocPOCBase;
 DPOINT	TXLoc;
 BOOL	HaveTXLoc=FALSE;
+int		textBpoint = 3;
+int		textEpoint = 2;
 BOOL	ExpandGrText=TRUE;
 short	PointRot;
 double	TXRot;

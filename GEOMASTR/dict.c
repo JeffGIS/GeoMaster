@@ -6052,9 +6052,9 @@ GSSiExitProg (989);
 			*lpPntNew = BasePtToWinPtF (lpPoints); 
 			if (showNodes)
 			{
-				if (np==3)
+				if (np== textEpoint)
 					RectAtPoint(hDC, lpPntNew, RGB(255, 0, 0));
-				if (np==2)
+				if (np== textBpoint)
 					RectAtPoint(hDC, lpPntNew, RGB(0,255, 0));
 			}
 			LastPoint = *lpPntNew;

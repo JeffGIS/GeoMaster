@@ -1511,6 +1511,8 @@ extern BOOL			TLSet;
 extern DPOINT			TXLocBPBase;
 extern DPOINT			TXLocEPBase;
 extern DPOINT			TXLocPOCBase;
+extern int			textBpoint;
+extern int			textEpoint;
 extern BOOL			DisplayAllRefs;
 extern long			LastFGSLoc;
 extern long			LastFGSlRec;

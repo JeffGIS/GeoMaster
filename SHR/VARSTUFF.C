@@ -3684,7 +3684,12 @@ GSSiExitProg (532);
 		case 417:
 			AddToView = atob(Value);
 			break;
-
+		case 418:
+			textBpoint = atoi(Value);
+			break;
+		case 419:
+			textEpoint = atoi(Value);
+			break;
 		default:
  			break;
 	}
@@ -4120,7 +4125,9 @@ void CreateInternalGlobals (void)
 	AllocateTypeVar("%USEZLIB", 415, FALSE);
 	AllocateTypeVar("%DISPLAYTEXTPOLY", 416, FALSE);
 	AllocateTypeVar("%ADDTOVIEW", 417, FALSE);
-
+	AllocateTypeVar("%TEXTBPOINT", 418, FALSE);
+	AllocateTypeVar("%TEXTEPOINT", 419, FALSE);
+	
 //	AllocateTypeVar("%DL",191,FALSE);
 	
 {
@@ -5410,7 +5417,12 @@ GSSiExitProg (533);
 		case 417:
 			btoa(AddToView, OutStr);
 			break;
-
+		case 418:
+			itoa(textBpoint, OutStr, 10);
+			break;
+		case 419:
+			itoa(textEpoint, OutStr, 10);
+			break;
 	}
 	GlobalUnlock (hGlobal);
 {

@@ -1,2 +1,2 @@
-D:\MplsRemoteTemplate\GEOMas\Configs\LOADNEWDATA\PROPLOAD.GMC /F [%USERLEV]=2;[%IGNORESYSMSG]=T;[%WantBackgroundCache]=F;[%ALLOWCACHE]=F; 
+D:\MplsRemoteTemplate\GEOMas\Configs\LOADNEWDATA\jeff.GMC /F [%USERLEV]=2;[%IGNORESYSMSG]=T;[%WantBackgroundCache]=F;[%ALLOWCACHE]=F; 
 d:\MplsRemoteTemplate\GeoMas
