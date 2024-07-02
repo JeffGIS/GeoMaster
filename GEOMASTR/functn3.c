@@ -4488,6 +4488,23 @@ GotCloseFilehSQL:
 			}
 			else if (!stricmp(Arg[2], "COMMAND"))
 				SendMessage(hWnd, WM_COMMAND, atol(Arg[3]), 0L);
+			else if (!stricmp(Arg[2], "PARENT"))
+			{
+				HWND parent = GetParent(hWnd);
+				ltoa((int)parent, OutLoc, 10);
+				goto Rtnl;
+			}
+			else if (!stricmp(Arg[2], "TOPPARENT"))
+			{
+				HWND parent = GetTopParent(hWnd);
+				ltoa((int)parent, OutLoc, 10);
+				goto Rtnl;
+			}
+			else if (!stricmp(Arg[2], "GETTEXT"))
+			{
+				GetWindowText(hWnd, OutLoc, 256);					 
+				goto Rtnl;
+			}
 			else if (!stricmp(Arg[2], "MESSAGE"))
 			{
 				HANDLE hMessage = GSSiGlobAlloc(0, GMEM_MOVEABLE, strlen(Arg[3]) + 4);
@@ -4522,11 +4539,19 @@ GotCloseFilehSQL:
 			else if (!stricmp(Arg[2], "SHOWALL"))
 				ShowHideWindows(Arg[1], SW_SHOW);
 			else if (!stricmp(Arg[2], "SHOWCHILDREN"))
-				ShowHideChildren(GetTopParent(hWnd), SW_SHOW);
+				ShowHideChildren(hWnd, SW_SHOW);
 			else if (!stricmp(Arg[2], "HIDECHILDREN"))
-				ShowHideChildren(GetTopParent(hWnd), SW_HIDE);
+				ShowHideChildren(hWnd, SW_HIDE);
 			else if (!stricmp(Arg[2], "HIDEPAR"))
-				ShowWindow(GetTopParent(hWnd), SW_HIDE);
+			{
+				HWND parent = GetParent(hWnd);
+				ShowWindow(parent, SW_HIDE);
+			}
+			else if (!stricmp(Arg[2], "HIDETOPPAR"))
+			{
+				HWND parent = GetTopParent(hWnd);
+				ShowWindow(parent, SW_HIDE);
+			}
 			else if (!stricmp(Arg[2], "SHOWPAR"))
 				SetWindowPos(GetTopParent(hWnd), HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
 

@@ -2914,6 +2914,16 @@ GSSiExitProg (1350);
 			ExpandText(cmd);
 			goto Rtnl;
 		}
+		case 954: //$SENDINPUT(path,drivevar,dirvar,leafvar,extvar)
+		{
+			char Drive[16], Dir[MAX_PATH + 4], Leaf[MAX_PATH], Ext[16];
+			char cmd[512];
+			nArgs = GetFunArgs(Args, Arg, 5, &hMem, pBrkPt, bpOffset, bpLen);
+			*OutLoc = 0;
+			INPUT ip;
+			SendInput(1, &ip, sizeof(ip);
+			goto Rtnl;
+		}
 		case 1001: // $DECOMPPOLY(OutFile,InteriorLineDesc,ExteriorLineDesc,LinkBetweenNodes(Opt F)
 		{	 
             DLGPROC lpfnDECOMPPOLYMsgProc; 
