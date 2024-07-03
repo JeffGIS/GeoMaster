@@ -2921,7 +2921,7 @@ GSSiExitProg (1350);
 			nArgs = GetFunArgs(Args, Arg, 5, &hMem, pBrkPt, bpOffset, bpLen);
 			*OutLoc = 0;
 			INPUT ip;
-			SendInput(1, &ip, sizeof(ip);
+			SendInput(1, &ip, sizeof(ip));
 			goto Rtnl;
 		}
 		case 1001: // $DECOMPPOLY(OutFile,InteriorLineDesc,ExteriorLineDesc,LinkBetweenNodes(Opt F)

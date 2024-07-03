@@ -2695,7 +2695,29 @@ GotCloseFilehSQL:
 			}
 			goto RtnFalse;
 		}
-
+		case 542: //$VALUE(fieldname,file,sql)
+		{
+			nArgs = GetFunArgs(Args, Arg, 4, &hMem, pBrkPt, bpOffset, bpLen);
+			*OutLoc = 0;
+			if (nArgs == 3)
+			{
+				HANDLE hSQL = 0;
+				char dataFile[MAX_PATH + 16];
+				char varName[256];
+				char value[1024];
+				sprintf(dataFile, "%%VFILE=%s", Arg[2]);
+				if (OpenDataFile(dataFile, Arg[3], BT_READ, &hSQL))
+				{
+					sprintf(varName, "%%VFILE.%s", Arg[1]);
+					if (GetValFromOpenFiles(varName, value, 1024))
+					{
+						strcpy(OutLoc, value);
+					}
+					CloseDataFile(FALSE, &hSQL);
+				}
+			}
+			goto Rtnl;
+		}
 		case 601: /* $TAGLOC(Prefix,minchar,SaveGlobalName(optional-not in brackets),Title(opt),Viewport(opt),Layer(opt),locatetagonly(opt,T locates,)) Tag locator */
 		{	 
             DLGPROC lpfnTAGLOCMsgProc;

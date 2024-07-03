@@ -1,2 +1,2 @@
-D:\MplsRemoteTemplate\GEOMas\Configs\LOADNEWDATA\jeff.GMC /F [%USERLEV]=2;[%IGNORESYSMSG]=T;[%WantBackgroundCache]=F;[%ALLOWCACHE]=F; 
-H:\MplsRemoteTemplate\GeoMas
+[%DL]sportmap4.GMC 
+d:\spm3\spm3
