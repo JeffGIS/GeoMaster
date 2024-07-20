@@ -2590,6 +2590,25 @@ int	GetFunctionValue7(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, 
 		lltoa(iTime, OutLoc, 10);
 		goto Rtnl;
 	}
+	case 791: //$WEATHER(RETRIEVE,location,refno,time,outFile)
+	{
+			int	iTime;
+			nArgs = GetFunArgs(Args, Arg, 5, &hMem, pBrkPt, bpOffset, bpLen);
+			*OutLoc = 0;
+			if (!stricmp(Arg[1], "RETRIEVE"))
+			{
+				BOOL err;
+				DPOINT pt = atopt(Arg[2], &err);
+				int refno = atol(Arg[3]);
+				iTime = atol(Arg[4]);
+				rtn = GetHistoricWeatherData(pt,refno, iTime,Arg[5]);
+			}
+			else if (!stricmp(Arg[1], "DECODE"))
+			{
+				rtn = decodeHistoricWeather(Arg[2]);
+			}
+			goto Rtnrtn;
+	}
 
 		default:
 			goto Rtn0;

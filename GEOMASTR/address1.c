@@ -4356,7 +4356,7 @@ Exit:
 }
 
 
-int GetGoogleLocation(LPSTR FullAddressIN, int wantMatch,LPSTR formattedAddress, LPDPOINT pLocPoint, LPBOOL pHaveVPPoints,LPDPOINT pVPPoints,LPSTR locType,LPSTR types)
+int GetGoogleLocation(LPSTR FullAddressIN, int wantMatch, LPSTR formattedAddress, LPDPOINT pLocPoint, LPBOOL pHaveVPPoints, LPDPOINT pVPPoints, LPSTR locType, LPSTR types)
 //returns num matches found, -1 if request fails, -2 if unable to convert coord.
 {
 	int		rtn = 0;
@@ -4375,6 +4375,144 @@ int GetGoogleLocation(LPSTR FullAddressIN, int wantMatch,LPSTR formattedAddress,
 	{
 		if (ConvertCoord(pLocPoint, 2, 1))
 			rtn = -2;
+	}
+	return rtn;
+}
+static int retrieveHistoricWeather(LPSTR url,int refno,int time,LPSTR cDate,HFILE outFid)
+{
+	char* text;
+	int rtn = -1;
+	char outRec[1024];
+
+	text = requestFromURL(url);
+	if (!text)
+		return -1;
+	int textLength = strlen(text);
+	sprintf(outRec, "%i\t%i\t%s\t%s", refno, time,cDate, text);
+	fputstring(outRec, outFid);
+	free(text);
+	return textLength;
+}
+ int decodeHistoricWeather(LPSTR text)
+{
+	unsigned int i;
+
+	double latitude, longitude;
+	int rtn = -1, nResults = 0;
+
+	json_t* root;
+	json_error_t error;
+	json_t* status;
+	json_t* precipTotal;
+	json_t* results;
+	const char* status_text;
+	//add bounds to restrict results, return only results in bounds
+	//&bounds = 34.172684, -118.604794 | 34.236144, -118.50093
+	
+	int textLength = strlen(text);
+	root = json_loads(text, 0, &error);
+
+	if (!root)
+	{
+		fprintf(stderr, "error: on line %d: %s\n", error.line, error.text);
+		return -1;
+	}
+
+	status = json_object_get(root, "precipitation");
+	precipTotal = json_object_get(status, "total");
+	float precip = json_real_value(precipTotal);
+	nResults = 1;
+/*	if (!stricmp(status_text, "OK"))
+	{
+		results = json_object_get(root, "results");
+		if (!json_is_array(results))
+		{
+			fprintf(stderr, "error: results is not an array\n");
+			goto Exit;
+		}
+
+		for (i = 0; i < json_array_size(results); i++)
+		{
+			json_t* result, * formatted_address, * message, * geometry, * location, * location_type, * lat, * lng;
+			const char* message_text, * formattedadd, * locationtype;
+
+			result = json_array_get(results, i);
+			if (!json_is_object(result))
+			{
+				fprintf(stderr, "error: result %d is not an object\n", i + 1);
+				goto Exit;
+			}
+
+			formatted_address = json_object_get(result, "formatted_address");
+			if (!json_is_string(formatted_address))
+			{
+				fprintf(stderr, "error: formatted_address %d: id is not a string\n", i + 1);
+				goto Exit;
+			}
+
+			geometry = json_object_get(result, "geometry");
+			if (!json_is_object(geometry))
+			{
+				fprintf(stderr, "error: geometry %d: message is not an object\n", i + 1);
+				goto Exit;
+			}
+			location = json_object_get(geometry, "location");
+			location_type = json_object_get(geometry, "location_type");
+			lat = json_object_get(location, "lat");
+			lng = json_object_get(location, "lng");
+			formattedadd = json_string_value(formatted_address);
+			locationtype = json_string_value(location_type);
+			if (stricmp(locationtype, "APPROXIMATE") &&
+				stricmp(locationtype, "GEOMETRIC_CENTERx"))
+			{
+				//strcpy(formattedAddress, formattedadd);
+				//strcpy(locType, locationtype);
+				//pLocPoint->y = json_real_value(lat);
+				//pLocPoint->x = json_real_value(lng);
+				nResults++;
+			}
+		}
+	}
+	*/
+//	if (!nResults)
+//		strcpy(formattedAddress, status_text);
+	rtn = nResults;
+Exit:
+	json_decref(root);
+	return rtn;
+}
+
+int GetHistoricWeatherData(DPOINT point,int refno,int time,LPSTR outFile)
+//returns num matches found, -1 if request fails, -2 if unable to convert coord. 1712898000
+{
+	int		rtn = 0;
+	//char	CMD[512], fmt[] = "https://maps.googleapis.com/maps/api/geocode/json?address=%s&sensor=false&key=%s";
+	char	CMD[512], fmt[] = "https://api.openweathermap.org/data/3.0/onecall/day_summary?lat=%f&lon=%f&units=imperial&appid=38dde0e75b863c1dad14cb6d2a7f423e&date=%s";
+	char	TempFile[MAX_PATH], FullAddress[256];
+	char	cDate[32];
+	DPOINT	latlon = point;
+	HFILE fid;
+	if (ConvertCoord(&latlon, 1, 2))
+		rtn = -2;
+	else
+	{
+		if (ExistFile(outFile))
+		{
+			fid = GSSiOpenFile(outFile, 0, OF_WRITE);
+			GSSillseek(fid, 0, 2);
+		}
+		else
+		{
+			fid = GSSiOpenFile(outFile, 0, OF_CREATE);
+			fputstring("REFNO\tTIME\tDATE\tDATA", fid);
+		}
+		sprintf(cDate, "$BEFORE($CAL(%i, 3), )", time);
+		ExpandText(cDate);
+		sprintf(CMD, fmt, latlon.y,latlon.x,cDate);
+		//sprintf(CMD, fmt, FullAddress);
+		rtn = retrieveHistoricWeather(CMD, refno, time,cDate, fid);
+		//rtn = decodeHistoricWeather(CMD);
+		GSSiClose(fid);
 	}
 	return rtn;
 }

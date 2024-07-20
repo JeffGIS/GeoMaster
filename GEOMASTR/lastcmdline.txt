@@ -1,2 +1,2 @@
-[%DL]sportmap4.GMC 
-d:\spm3\spm3
+configs\PheasantPointsCreate.gmc [%USEGDIPLUS]=F;[%KFO]=T;   
+f:\gmmobile\metroUTM

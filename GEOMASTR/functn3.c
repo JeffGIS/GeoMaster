@@ -3578,13 +3578,45 @@ GotCloseFilehSQL:
 			}
 			else if (!_fstricmp(Arg[1], "MAX"))
 			{
-			Bounds = atobounds(Arg[2], &Err);
-			if (Err || !ValidBounds(&Bounds))
-				goto RtnFalse;
-			Point.x = Bounds.xmx;
-			Point.y = Bounds.ymx;
-			dpointtoa(OutLoc, &Point);
-			goto Rtnl;
+				Bounds = atobounds(Arg[2], &Err);
+				if (Err || !ValidBounds(&Bounds))
+					goto RtnFalse;
+				Point.x = Bounds.xmx;
+				Point.y = Bounds.ymx;
+				dpointtoa(OutLoc, &Point);
+				goto Rtnl;
+			}
+			else if (!_fstricmp(Arg[1], "MINX"))
+			{
+				Bounds = atobounds(Arg[2], &Err);
+				if (Err || !ValidBounds(&Bounds))
+					goto RtnFalse;
+				ftoa(OutLoc, Bounds.xmn);
+				goto Rtnl;
+			}
+			else if (!_fstricmp(Arg[1], "MAXX"))
+			{
+				Bounds = atobounds(Arg[2], &Err);
+				if (Err || !ValidBounds(&Bounds))
+					goto RtnFalse;
+				ftoa(OutLoc, Bounds.xmx);
+				goto Rtnl;
+			}
+			else if (!_fstricmp(Arg[1], "MINY"))
+			{
+				Bounds = atobounds(Arg[2], &Err);
+				if (Err || !ValidBounds(&Bounds))
+					goto RtnFalse;
+				ftoa(OutLoc, Bounds.ymn);
+				goto Rtnl;
+			}
+			else if (!_fstricmp(Arg[1], "MAXY"))
+			{
+				Bounds = atobounds(Arg[2], &Err);
+				if (Err || !ValidBounds(&Bounds))
+					goto RtnFalse;
+				ftoa(OutLoc, Bounds.ymx);
+				goto Rtnl;
 			}
 			else if (!_fstricmp(Arg[1], "MINWH"))
 			{
