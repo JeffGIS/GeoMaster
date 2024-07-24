@@ -4393,10 +4393,10 @@ static int retrieveHistoricWeather(LPSTR url,int refno,int time,LPSTR cDate,HFIL
 	free(text);
 	return textLength;
 }
- int decodeHistoricWeather(LPSTR text)
+ int decodeHistoricWeather(LPSTR text,LPSTR precipVar,LPSTR windMinVar,LPSTR windMaxVar,LPSTR tempMinVar,LPSTR tempMaxVar)
 {
 	unsigned int i;
-
+	char setVars[256];
 	double latitude, longitude;
 	int rtn = -1, nResults = 0;
 
@@ -4421,6 +4421,8 @@ static int retrieveHistoricWeather(LPSTR url,int refno,int time,LPSTR cDate,HFIL
 	status = json_object_get(root, "precipitation");
 	precipTotal = json_object_get(status, "total");
 	float precip = json_real_value(precipTotal);
+	sprintf(setVars, "[%s]=%f", precipVar, precip);
+	ProcessText(setVars);
 	nResults = 1;
 /*	if (!stricmp(status_text, "OK"))
 	{

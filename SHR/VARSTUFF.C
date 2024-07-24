@@ -143,9 +143,9 @@ void Wait (long MicroSeconds)
 	
 	if (!MS)
 		return;
-	SetTimer (hWndMain,9999,MS,0);
+	UINT timerID = SetTimer (hWndMain,9999,MS,0);
 	msg.wParam = 0; 
-	while (msg.wParam != 9999)
+	while (msg.wParam != timerID)
 		GSSiGetMessage (&msg,hWndMain,WM_TIMER,WM_TIMER); 
 	KillTimer (hWndMain,9999);
 {

@@ -500,7 +500,7 @@ short AddPrecinctCenterMatch (HWND hWndDlg,UINT icntl,long ZipCode);
 int GetMapQuestLocation (LPSTR FullAddress,LPSTR Quality,LPDPOINT pPoint,int MaxAcceptableQuality);
 int GetGoogleLocation(LPSTR FullAddressIN, int wantMatch, LPSTR formattedAddress, LPDPOINT pLocPoint, LPBOOL pHaveVPPoints, LPDPOINT pVPPoints, LPSTR locType, LPSTR types);
 int GetHistoricWeatherData(DPOINT point,int refno, int time,LPSTR outFile);
-int decodeHistoricWeather(LPSTR text);
+int decodeHistoricWeather(LPSTR text, LPSTR precipVar, LPSTR windMinVar, LPSTR windMaxVar, LPSTR tempMinVar, LPSTR tempMaxVar);
 BOOL AddMapQuestMatch(HWND hWndDlg, UINT icntl, LPSTR FullAddress);
 BOOL ReverseGeocodeCommand (int nArgs,LPSTR *Arg,LPSTR OutLoc);
 BOOL GeocodeAlltypes(HWND hWnd,LPSTR OutLoc, LPSTR Arg1);

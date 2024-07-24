@@ -2593,7 +2593,7 @@ int	GetFunctionValue7(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, 
 	case 791: //$WEATHER(RETRIEVE,location,refno,time,outFile)
 	{
 			int	iTime;
-			nArgs = GetFunArgs(Args, Arg, 5, &hMem, pBrkPt, bpOffset, bpLen);
+			nArgs = GetFunArgs(Args, Arg, 7, &hMem, pBrkPt, bpOffset, bpLen);
 			*OutLoc = 0;
 			if (!stricmp(Arg[1], "RETRIEVE"))
 			{
@@ -2605,7 +2605,7 @@ int	GetFunctionValue7(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, 
 			}
 			else if (!stricmp(Arg[1], "DECODE"))
 			{
-				rtn = decodeHistoricWeather(Arg[2]);
+				rtn = decodeHistoricWeather(Arg[2], Arg[3], Arg[4], Arg[5], Arg[6],Arg[7]);
 			}
 			goto Rtnrtn;
 	}

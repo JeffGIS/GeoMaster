@@ -1421,8 +1421,8 @@ BOOL SetThemeColorsFromScheme (void)
 {   
 	int	R1,R2,G1,G2,B1,B2;
 	short	i; 
-	COLORREF	StartColor[5]={RGB(240,240,240),RGB(255,240,240),RGB(240,255,240),RGB(240,240,255),RGB(255,240,240)};
-	COLORREF	EndColor[5]  ={RGB(64,64,64),RGB(255,64,64),RGB(64,255,64),RGB(64,64,255),RGB(64,64,255)};
+	COLORREF	StartColor[5]={RGB(255,240,240),RGB(255,240,240),RGB(240,255,240),RGB(240,240,255),RGB(255,240,240)};
+	COLORREF	EndColor[5]  ={RGB(64,0,0),RGB(255,64,64),RGB(64,255,64),RGB(64,64,255),RGB(64,64,255)};
 	COLORREF	R,G,B;
 	
 	if (CurTheme->ColorScheme <= 0 || CurTheme->ColorScheme > 5|| !CurTheme->NumClass)
