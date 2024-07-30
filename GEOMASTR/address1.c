@@ -4393,7 +4393,7 @@ static int retrieveHistoricWeather(LPSTR url,int refno,int time,LPSTR cDate,HFIL
 	free(text);
 	return textLength;
 }
- int decodeHistoricWeather(LPSTR text,LPSTR precipVar,LPSTR windMinVar,LPSTR windMaxVar,LPSTR tempMinVar,LPSTR tempMaxVar)
+ int decodeHistoricWeather(LPSTR text,LPSTR precipVar,LPSTR windMaxVar,LPSTR windDirVar,LPSTR tempMinVar,LPSTR tempMaxVar)
 {
 	unsigned int i;
 	char setVars[256];
@@ -4404,6 +4404,11 @@ static int retrieveHistoricWeather(LPSTR url,int refno,int time,LPSTR cDate,HFIL
 	json_error_t error;
 	json_t* status;
 	json_t* precipTotal;
+	json_t* tempMin;
+	json_t* tempMax;
+	json_t* windMax;
+	json_t* windSpeed;
+	json_t* windDir;
 	json_t* results;
 	const char* status_text;
 	//add bounds to restrict results, return only results in bounds
@@ -4422,7 +4427,32 @@ static int retrieveHistoricWeather(LPSTR url,int refno,int time,LPSTR cDate,HFIL
 	precipTotal = json_object_get(status, "total");
 	float precip = json_real_value(precipTotal);
 	sprintf(setVars, "[%s]=%f", precipVar, precip);
-	ProcessText(setVars);
+	if (*precipVar)
+		ProcessText(setVars);
+	status = json_object_get(root, "temperature");
+	tempMin = json_object_get(status, "min");
+	float minTemp = json_real_value(tempMin);
+	tempMax = json_object_get(status, "max");
+	float maxTemp = json_real_value(tempMax);
+	sprintf(setVars, "[%s]=%f", tempMinVar, minTemp);
+	if (*tempMinVar)
+		ProcessText(setVars);
+	sprintf(setVars, "[%s]=%f", tempMaxVar, maxTemp);
+	if (*tempMaxVar)
+		ProcessText(setVars);
+	status = json_object_get(root, "wind");
+	windMax = json_object_get(status, "max");
+	windSpeed = json_object_get(windMax, "speed");
+	float maxWind = json_real_value(windSpeed);
+	windDir = json_object_get(windMax, "direction");
+	int dirWind = IDNINT(json_real_value(windDir));
+	sprintf(setVars, "[%s]=%f", windMaxVar, maxWind);
+	if (*windMaxVar)
+		ProcessText(setVars);
+	sprintf(setVars, "[%s]=%i", windDirVar, dirWind);
+	if (windDirVar)
+		ProcessText(setVars);
+
 	nResults = 1;
 /*	if (!stricmp(status_text, "OK"))
 	{
