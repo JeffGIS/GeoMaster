@@ -5251,90 +5251,128 @@ BOOL FAR PASCAL LOADXFERFILEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, L
    	static	HANDLE	hSaveBM=0;
 	static	int		UpdateID = 0;
 	static  BOOL    zlibCompressed = FALSE;
-		
+	short version;
+	int maxlen;
+	int len, marker;
+	int lenlen;
+
  short  BRtn;
  if ((BRtn = DIALOGSTYLEMsgProc (hWndDlg,Message, wParam, lParam))) return (BRtn);
  switch(Message)
    {
     case WM_INITDIALOG:
-    {
-		 LONGLONG	NextFileLoc=0, loc, FileLength, EndOfFile;
-		 int len, marker;
-		 int lenlen = 4;
-		  
-	     UpdateID = 0;
-		 HaltMapDisplay(TRUE,TRUE); 
-		 DisableUndo (TRUE);
-	     CloseSymDict();  
-		 CloseAllRequestedFiles(FALSE);
-    	 hSaveBM = EnterBlockingWindow (hWndDlg);
-       	 cwCenter(hWndDlg, 0);  
-       	 if (!*TransferFileName)
-       	 	break;
-		 if (!BuildTransferFileFromSegments(TransferFileName, TransferFileSplitOpt,TRUE))
-		 {
-			 sprintf(str, "Unable to rebuild transfer file\r%s", TransferFileName);
-			 MessageBox(hWndDlg, str, 0, MB_ICONEXCLAMATION);
-			 PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
-			 break;
-		 }
-    case GSSI_REINITDIALOG:  
-		 FidTF=OpenFileGM (TransferFileName,0,OF_READ);
-		 if (FidTF == INVALID_HANDLE_VALUE)
-		 {   
-		 	 sprintf (str,"Unable to open transfer file\r%s",TransferFileName);
-	         MessageBox (hWndDlg,str,0,MB_ICONEXCLAMATION);
-	         PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
-	         break;
-	     }
-		 if ((pUI = strrchr (TransferFileName,'_')))
-			 UpdateID = atoi (++pUI);
-		 FileLength = GSSifilelength64 (FidTF);
-		 GSSillseek64(FidTF, FileLength - 4, 0);
-		 BigRead64(FidTF, (HPSTR)&marker, 4);
-		 zlibCompressed = FALSE;
-		 if (marker == 80251)
-		 {
-			 lenlen = 8;
-		 }
-		 else if (marker == 80351)
-		 {
-			 lenlen = 8;
-			 zlibCompressed = TRUE;
-		 }
-		 else if (marker != 32349)
-			 goto FileIsInvalid;
-		 NextFileLoc = 6 + lenlen;
-		 GSSillseek64(FidTF, 0, 0);
-		 if (lenlen == 4)
-		 {
-			 BigRead64(FidTF, (HPSTR)&len, 4);
-			 loc = len;
-		 }
-		 else
-			BigRead64(FidTF, (HPSTR)&loc, sizeof(LONGLONG));
-		 if (loc != FileLength)
-	     {
-FileIsInvalid:
-		 	 sprintf (str,"Invalid transfer file\r%s",TransferFileName);
-	         MessageBox (hWndDlg,str,0,MB_ICONEXCLAMATION);
-	         PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
-	         break;
-	     } 
-		 while (NextFileLoc > 0)
-		 {
+	{
+		LONGLONG	NextFileLoc = 0, loc, FileLength, EndOfFile;
+
+		lenlen = 4;
+
+		UpdateID = 0;
+		HaltMapDisplay(TRUE, TRUE);
+		DisableUndo(TRUE);
+		CloseSymDict();
+		CloseAllRequestedFiles(FALSE);
+		hSaveBM = EnterBlockingWindow(hWndDlg);
+		cwCenter(hWndDlg, 0);
+		if (!*TransferFileName)
+			break;
+		if (!BuildTransferFileFromSegments(TransferFileName, TransferFileSplitOpt, TRUE))
+		{
+			sprintf(str, "Unable to rebuild transfer file\r%s", TransferFileName);
+			MessageBox(hWndDlg, str, 0, MB_ICONEXCLAMATION);
+			PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
+			break;
+		}
+	case GSSI_REINITDIALOG:
+		FidTF = OpenFileGM(TransferFileName, 0, OF_READ);
+		if (FidTF == INVALID_HANDLE_VALUE)
+		{
+			sprintf(str, "Unable to open transfer file\r%s", TransferFileName);
+			MessageBox(hWndDlg, str, 0, MB_ICONEXCLAMATION);
+			PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
+			break;
+		}
+		if ((pUI = strrchr(TransferFileName, '_')))
+			UpdateID = atoi(++pUI);
+		FileLength = GSSifilelength64(FidTF);
+		GSSillseek64(FidTF, FileLength - 4, 0);
+		BigRead64(FidTF, (HPSTR)&marker, 4);
+		zlibCompressed = FALSE;
+		if (marker == 80251)
+		{
+			lenlen = 8;
+			NextFileLoc = 6 + lenlen;
+		}
+		else if (marker == 80351)
+		{
+			lenlen = 8;
+			NextFileLoc = 6 + lenlen;
+			zlibCompressed = TRUE;
+		}
+		else if (marker == 32449)
+		{
+			lenlen = 4;
+			zlibCompressed = TRUE;
+			NextFileLoc = 6;
+			GSSillseek64(FidTF, 0, 0);
+			BigRead64(FidTF, (HPSTR)&version, 2);
+			BigRead64(FidTF, (HPSTR)&maxlen, 4);
+		}
+		else if (marker != 32349)
+			goto FileIsInvalid;
+		if (marker != 32449)
+		{
+			GSSillseek64(FidTF, 0, 0);
+			if (lenlen == 4)
+			{
+				BigRead64(FidTF, (HPSTR)&len, 4);
+				loc = len;
+			}
+			else
+				BigRead64(FidTF, (HPSTR)&loc, sizeof(LONGLONG));
+			if (loc != FileLength)
+			{
+			FileIsInvalid:
+				sprintf(str, "Invalid transfer file\r%s", TransferFileName);
+				MessageBox(hWndDlg, str, 0, MB_ICONEXCLAMATION);
+				PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
+				break;
+			}
+			while (NextFileLoc > 0)
+			{
+				int iPos;
+				GSSillseek64(FidTF, NextFileLoc, 0);
+				BigRead64(FidTF, (HPSTR)&len, 4);
+				BigRead64(FidTF, (HPSTR)File, len);
+				BigRead64(FidTF, (HPSTR)&NextFileLoc, 8);
+				if (NextFileLoc > 0)
+					EndOfFile = NextFileLoc - 1;
+				else
+					EndOfFile = FileLength - 4;
+				iPos = SendDlgItemMessage(hWndDlg, IDC_XFERFILELISTS, LB_ADDSTRING, 0, (LPARAM)File);
+				n++;
+			}
+		}
+		else
+		{
+			int pieceLen;
 			int iPos;
-		 	GSSillseek64 (FidTF,NextFileLoc,0); 
-	     	BigRead64 (FidTF,(HPSTR)&len,4);
-	     	BigRead64 (FidTF,(HPSTR)File,len);
-	     	BigRead64 (FidTF,(HPSTR)&NextFileLoc,8);
-	     	if (NextFileLoc > 0)
-	     		EndOfFile = NextFileLoc - 1;
-	     	else
-	     		EndOfFile = FileLength - 4;
-			iPos = SendDlgItemMessage (hWndDlg,IDC_XFERFILELISTS,LB_ADDSTRING,0,(LPARAM)File);
-    	 	n++;
-    	 }
+			BigRead64(FidTF, (HPSTR)&len, 4);
+			while (len > 0)
+			{
+				BigRead64(FidTF, (HPSTR)File, len);
+				iPos = SendDlgItemMessage(hWndDlg, IDC_XFERFILELISTS, LB_ADDSTRING, 0, (LPARAM)File);
+				n++;
+				BigRead64(FidTF, (HPSTR)&pieceLen, 4);
+				while (pieceLen > 0)
+				{
+					LONGLONG pieceLen64 = pieceLen;
+					GSSillseek64(FidTF, pieceLen64, SEEK_CUR);
+					BigRead64(FidTF, (HPSTR)&pieceLen, 4);
+				}
+				BigRead64(FidTF, (HPSTR)&len, 4);
+			}
+		}
+
     	 GSSiClose64 (&FidTF);  
     	 if (Message == WM_INITDIALOG && !_fstricmp(BuildTransferFileOption, "LOAD"))
          	PostMessage(hWndDlg, WM_COMMAND, IDOK, 0L);
@@ -5367,34 +5405,74 @@ FileIsInvalid:
 			int	len;
 			int    nSelected = SendDlgItemMessage(hWndDlg, IDC_XFERFILELISTS, LB_GETCURSEL, 0, 0);
 			char	SelectedFile[MAX_PATH];
-
+			char	subStringFrom[MAX_PATH] = { 0 }, subStringTo[MAX_PATH] = { 0 };
 			if (nSelected >= 0)
 				SendDlgItemMessage(hWndDlg, IDC_XFERFILELISTS, LB_GETTEXT, nSelected, (DWORD)SelectedFile);
 
-
+			GetDlgItemText(hWndDlg, IDM_SUBSTRINGFROM, subStringFrom, MAX_PATH);
+			GetDlgItemText(hWndDlg, IDM_SUBSTRINGTO, subStringTo, MAX_PATH);
 			FidTF = OpenFileGM(TransferFileName, 0, OF_READ);
 			FileLength = GSSifilelength64(FidTF);
-			NextFileLoc = 14;
-			BigRead64(FidTF, (HPSTR)&length8, 8);
-			BigRead64(FidTF, (HPSTR)&Version, 2);
-			BigRead64(FidTF, (HPSTR)&MaxLength, 4);
+
+			GSSillseek64(FidTF, FileLength - 4, 0);
+			BigRead64(FidTF, (HPSTR)&marker, 4);
+			zlibCompressed = FALSE;
+			if (marker == 80251)
+			{
+				lenlen = 8;
+				NextFileLoc = 6 + lenlen;
+			}
+			else if (marker == 80351)
+			{
+				lenlen = 8;
+				NextFileLoc = 6 + lenlen;
+				zlibCompressed = TRUE;
+			}
+			else if (marker == 32449)
+			{
+				lenlen = 4;
+				zlibCompressed = TRUE;
+				NextFileLoc = 6;
+				GSSillseek64(FidTF, 0, 0);
+				BigRead64(FidTF, (HPSTR)&version, 2);
+				BigRead64(FidTF, (HPSTR)&MaxLength, 4);
+			}
+			else if (marker != 32349)
+				goto FileIsInvalid;
+			if (marker != 32449)
+			{
+				NextFileLoc = 14;
+				BigRead64(FidTF, (HPSTR)&length8, 8);
+				BigRead64(FidTF, (HPSTR)&Version, 2);
+				BigRead64(FidTF, (HPSTR)&MaxLength, 4);
+			}
 			Processing = TRUE;
 			while (ContinueProcessing && NextFileLoc > 0)
 			{
 				GSSillseek64(FidTF, NextFileLoc, 0);
 				BigRead64(FidTF, (HPSTR)&len, 4);
+				if (len == -1)
+					break;
 				BigRead64(FidTF, (HPSTR)File, len);
-				BigRead64(FidTF, (HPSTR)&NextFileLoc, 8);
+				if (marker != 32449)
+					BigRead64(FidTF, (HPSTR)&NextFileLoc, 8);
 				if (nSelected >= 0 && stricmp(File, SelectedFile))
 					continue;
-				if (altLoad)
+				if (*subStringFrom && *subStringTo)
+					REPLAC(File, subStringFrom,subStringTo, MAX_PATH);
+				else if (altLoad)
 					REPLAC(File, "[%DL]","[%DL]\\altloc\\",MAX_PATH);
 				if (NextFileLoc > 0)
 					EndOfFile = NextFileLoc - 1;
 				else
 					EndOfFile = FileLength - 4;
-				LenToRead = EndOfFile - GSSillseek64(FidTF, 0, 1) + 1;
+				if (marker != 32449)
+					LenToRead = EndOfFile - GSSillseek64(FidTF, 0, 1) + 1;
+				else
+					LenToRead = FileLength - GSSillseek64(FidTF, 0, 1);
 				SetDlgItemText(hWndDlg, IDC_MESSAGE, File);
+				if (strstr(File, "DTM"))
+					ii = 1;
 				if (!_fstrnicmp(File, "[XCMD]", 6))
 					ExpandText(&File[6]);
 				else if (!GetFileFromTransferFile(GetDlgItem(hWndDlg, IDC_STATUS2), FidTF, File, LenToRead, MaxLength, zlibCompressed))
@@ -5406,6 +5484,12 @@ FileIsInvalid:
 				{
 					sprintf(str, "%i\t%s", UpdateID, File);
 					AppendFile("[%%DL]updates\\updatefiles.txt", str);
+				}
+				if (marker == 32449)
+				{
+					NextFileLoc = GSSillseek64(FidTF, 0, 1);
+					if (NextFileLoc >= FileLength - 4)
+						NextFileLoc = -1;
 				}
 				PctBox(GetDlgItem(hWndDlg, IDC_STATUS), FileLength, GSSillseek64(FidTF, 0, 1), 0);
 			}

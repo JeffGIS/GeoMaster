@@ -13753,8 +13753,8 @@ LONGLONG GSSillseek64(HANDLE Fid, LONGLONG loc, int opt)
 	liDistanceToMove.QuadPart = loc;
 	LARGE_INTEGER  liRtnLoc;
 	rtnloc = llFileSeek(Fid, loc, opt);
-	BOOL st = SetFilePointerEx(Fid, liDistanceToMove, &liRtnLoc, opt);
-	rtnloc = liRtnLoc.QuadPart;
+//	BOOL st = SetFilePointerEx(Fid, liDistanceToMove, &liRtnLoc, opt);
+//	rtnloc = liRtnLoc.QuadPart;
 	return rtnloc;
 }
 

@@ -2744,7 +2744,7 @@ int OpenIndexedDTMs(LPDTMINFO pDTMInfo, LPMNMXCORD pBounds)
 	else
 		sprintf(Cmd, "SELECT * FROM DTMINDEX");
 	SQLOK(sqlite3_prepare_v2(pDTMInfo->db, Cmd, -1, &statement, 0), pDTMInfo->db, "get dtm", 0);
-	while (numDTM < MAXOPENSURF && sqlite3_step(statement) == SQLITE_ROW)
+	while (numDTM < MAXOPENINDEXSURF && sqlite3_step(statement) == SQLITE_ROW)
 	{
 		int i = 0;
 		id = sqlite3_column_int(statement, i++);
@@ -3050,6 +3050,14 @@ ReOpen:
 
 			pDTMInfo->NULLElv = NULLElv;
 			PlaneElev = pDTMInfo->NULLElv;
+			for (i = 0; i < MAXOPENSURF; i++)
+			{
+				if (!hOpenSurf[i])
+				{
+					hOpenSurf[i] = hSurf;
+					break;
+				}
+			}
 			OpenIndexedDTMs(pDTMInfo, pWindowBounds);
 			GlobalUnlock(hSurf);
 		}
@@ -3062,12 +3070,15 @@ ReOpen:
 		PlaneElev = pDTMInfo->NULLElv;
 
 		GlobalUnlock (hSurf);
-		for (i=0;i<MAXOPENSURF;i++)
-		{ 
-			if (!hOpenSurf[i]) 
+		if (Type != DTMTYPE_INDEX)
+		{
+			for (i = 0; i < MAXOPENSURF; i++)
 			{
-				hOpenSurf[i] = hSurf;
-				break;
+				if (!hOpenSurf[i])
+				{
+					hOpenSurf[i] = hSurf;
+					break;
+				}
 			}
 		}
 	} 
@@ -4330,7 +4341,7 @@ double NGIELV(DPOINT Point, HANDLE hSurf, short DesiredUnits)
 	}
 	else
 	{
-		memset(pDTMInfo->triedDTM, 0, sizeof(BOOL) * MAXOPENSURF);
+		memset(pDTMInfo->triedDTM, 0, sizeof(BOOL) * MAXOPENINDEXSURF);
 		if (DPointInBounds(&Point, &pDTMInfo->DTMBounds[pDTMInfo->currentHandleID]))
 		{
 			pDTMInfo->triedDTM[pDTMInfo->currentHandleID] = TRUE;
@@ -5580,10 +5591,11 @@ BOOL DisplayDTMSegment (void)
 	{
 		case DTM_RENDER_RAW_POINTS:
 		{    
+
 			switch (pDTMInfo->Type)
 			{   
 				case 0:
-				case 1: 
+				case DTMTYPE_NGI:
 				Refno = 0;
 				pSubCell = (LPLONG)GlobalLock (DTMSubCellHandle);  
 				ip = 0;
@@ -5603,10 +5615,10 @@ BOOL DisplayDTMSegment (void)
 				GlobalUnlock (DTMSubCellHandle);
 				break;
 				
-				case 2:
+				case DTMTYPE_TIN_GM:
 				break;
 				
-				case 3:
+				case DTMTYPE_LIDAR_GM:
 				Refno =	DTMCellID*MAXLIDARPERREC;  
 				if (DTMCellHandle)
 				{
@@ -5635,8 +5647,11 @@ BOOL DisplayDTMSegment (void)
 				{   
 					Refno++;
 					if (pRenderNode[irow][ip] != pDTMInfo->NULLElv)
-					{  
-						DisplayDTMPoint (Refno,Point,pRenderNode[irow][ip],0,DTMPointSymbol,pDTMInfo->GridSpace/100,pDTMInfo);
+					{
+						double size = pDTMInfo->GridSpace / 100;
+						if (pDTMInfo->Type == DTMTYPE_INDEX)
+							size = 1.5 * CurView->BaseUnitsPerPixel;
+						DisplayDTMPoint (Refno,Point,pRenderNode[irow][ip],0,DTMPointSymbol,size,pDTMInfo);
 						ShowValue (CurView->hDC,FALSE); 
 					}
 					Point.x += DTMRenderGridSpacing;
@@ -5782,6 +5797,12 @@ BOOL DisplayDTMSegment (void)
 			GlobalUnlock (hDTMRenderGridRow[2]);
 		}
 		break; 
+		case DTM_RENDER_COVERAGE:
+			if (pDTMInfo->Type == DTMTYPE_INDEX)
+			{
+
+			}
+		break;
 	}
 	ShowValue (CurView->hDC,FALSE); 
 	InGraphicsProcessor = FALSE;
@@ -5800,8 +5821,12 @@ BOOL SetDTMRenderAs (int Layer)
 	} 
 	if (DTMRenderAs == DTM_RENDER_SLOPE_POLYGONS)
 	{
-		DTMSlopeAreaSymbol = GetDictSymbolNumber ("DTMSLOPEAREA");
-	} 
+		DTMSlopeAreaSymbol = GetDictSymbolNumber("DTMSLOPEAREA");
+	}
+	if (DTMRenderAs == DTM_RENDER_COVERAGE)
+	{
+		DTMSlopeAreaSymbol = GetDictSymbolNumber("PARCEL");
+	}
 	if (DTMRenderAs == DTM_RENDER_SLOPE_VECTORS)
 	{
 		DTMSlopeArrowSymbol = GetDictSymbolNumber ("DTMSLOPEPOINT"); 

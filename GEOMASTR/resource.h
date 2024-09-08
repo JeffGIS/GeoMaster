@@ -3467,6 +3467,9 @@
 #define ID_VIEW                         2327
 #define IDC_ADDTOZOOM2                  2328
 #define IDC_FLASH                       2329
+#define IDM_SUBSTRINGFROM               2330
+#define IDM_SUBSTRINGFROM2              2331
+#define IDM_SUBSTRINGTO                 2331
 #define PRMT_HIGHLIGHT                  5035
 #define PRMT_PANZOOM1                   5036
 #define PRMT_PANZOOM2                   5037
@@ -3814,7 +3817,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        1282
 #define _APS_NEXT_COMMAND_VALUE         1250
-#define _APS_NEXT_CONTROL_VALUE         2330
+#define _APS_NEXT_CONTROL_VALUE         2331
 #define _APS_NEXT_SYMED_VALUE           1036
 #endif
 #endif

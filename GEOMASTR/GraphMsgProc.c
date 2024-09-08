@@ -4221,8 +4221,9 @@ BOOL FAR PASCAL DTMSETTINGSMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LP
 		 SendDlgItemMessage (hWndDlg,IDC_RENDERAS,CB_ADDSTRING,0,(LPARAM)(LPSTR)"Grid Points");
 		 SendDlgItemMessage (hWndDlg,IDC_RENDERAS,CB_ADDSTRING,0,(LPARAM)(LPSTR)"Slope Vectors");
 		 SendDlgItemMessage (hWndDlg,IDC_RENDERAS,CB_ADDSTRING,0,(LPARAM)(LPSTR)"Slope Areas");
-		 SendDlgItemMessage (hWndDlg,IDC_RENDERAS,CB_ADDSTRING,0,(LPARAM)(LPSTR)"Contour Lines");
-		 SendDlgItemMessage (hWndDlg,IDC_RENDERAS,CB_SETCURSEL,CurView->DTMRenderAs[DTMSettingLayerNum]-1,0); 
+		 SendDlgItemMessage(hWndDlg, IDC_RENDERAS, CB_ADDSTRING, 0, (LPARAM)(LPSTR)"Contour Lines");
+		 SendDlgItemMessage(hWndDlg, IDC_RENDERAS, CB_ADDSTRING, 0, (LPARAM)(LPSTR)"Coverage Areas");
+		 SendDlgItemMessage (hWndDlg,IDC_RENDERAS,CB_SETCURSEL,CurView->DTMRenderAs[DTMSettingLayerNum]-1,0);
 		 for (i=1;i<9;i++)
 		 {
 			sprintf (str,"%.1lf",i*0.5);  
@@ -14899,7 +14900,8 @@ BOOL FAR PASCAL VPEDITMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM 
 		 SendDlgItemMessage (hWndDlg,IDC_RENDERAS,CB_ADDSTRING,0,(LPARAM)(LPSTR)"Grid Points");
 		 SendDlgItemMessage (hWndDlg,IDC_RENDERAS,CB_ADDSTRING,0,(LPARAM)(LPSTR)"Slope Vectors");
 		 SendDlgItemMessage (hWndDlg,IDC_RENDERAS,CB_ADDSTRING,0,(LPARAM)(LPSTR)"Slope Areas");
-		 SendDlgItemMessage (hWndDlg,IDC_RENDERAS,CB_ADDSTRING,0,(LPARAM)(LPSTR)"Contour Lines");
+		 SendDlgItemMessage(hWndDlg, IDC_RENDERAS, CB_ADDSTRING, 0, (LPARAM)(LPSTR)"Contour Lines");
+		 SendDlgItemMessage(hWndDlg, IDC_RENDERAS, CB_ADDSTRING, 0, (LPARAM)(LPSTR)"Coverage Areas");
 
        	 GSSiGlobFree (&hSaveView);
     	 hSaveView = GSSiGlobAlloc (1308,GHND,sizeof(VIEWPORT)+MAX_VIEWPORT_FILES*MAX_PATH);

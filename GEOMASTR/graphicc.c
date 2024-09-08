@@ -884,14 +884,19 @@ BOOL GetFileFromTransferFile(HWND hWndStatus, HANDLE FidTF, LPSTR FileToGet, LON
 	while (LenRead < LenToRead)
 	{
 		BigRead64(FidTF, (HPSTR)&CompressedLength, 4);
-		LenRead += CompressedLength + 4;
-		BigRead64(FidTF, pCompressedRec, CompressedLength);
-		if (zlibCompressed)
-			lRec = ZLibUncompress(pRec, MaxLength * 2,pCompressedRec, CompressedLength);
+		if (CompressedLength > 0)
+		{
+			LenRead += CompressedLength + 4;
+			BigRead64(FidTF, pCompressedRec, CompressedLength);
+			if (zlibCompressed)
+				lRec = ZLibUncompress(pRec, MaxLength * 2, pCompressedRec, CompressedLength);
+			else
+				lRec = DecompressBinaryRecordUnsafe(pRec, pCompressedRec, CompressedLength);
+			BigWrite64(Fid, (HPSTR)pRec, lRec, -1);
+			PctBox(hWndStatus, LenToRead, LenRead, 0);
+		}
 		else
-			lRec = DecompressBinaryRecordUnsafe(pRec, pCompressedRec, CompressedLength);
-		BigWrite64(Fid, (HPSTR)pRec, lRec, -1);
-		PctBox(hWndStatus, LenToRead, LenRead, 0);
+			break;
 	}
 	GSSiClose64(&Fid);
 	GSSiGlobUlFree(&hCompressedRec);

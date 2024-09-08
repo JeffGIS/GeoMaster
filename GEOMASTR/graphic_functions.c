@@ -10131,6 +10131,15 @@ HavePoint:
 				UnlockCursor();
 			sprintf(str, "[%%SCREENPT]=%i %i", MousePoint.x, MousePoint.y);
 			ExpandText(str);
+			DPOINT Point;
+			Point.x = MousePoint.x;
+			Point.y = MousePoint.y;
+			Point = TranPoint(&Point, CurView->hTranScreenToBase);
+			Point = TranPoint(&Point, CurView->hTranBaseToVP);
+			sprintf(str, "[%%VPPT]=%.2f %.2f", Point.x, Point.y);
+			ExpandText(str);
+			sprintf(str, "[%%VPX]=%.2f;[%%VPY]=%.2f", Point.x, Point.y);
+			ExpandText(str);
 			SetPickCursor(FALSE);
 			EnlargeScreen(0, 0);
 			PostMessage(hWnd, GF_CLOSE, 0, 0L);

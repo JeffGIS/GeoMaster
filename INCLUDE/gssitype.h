@@ -272,6 +272,7 @@ typedef OFSTRUCT *LPOFSTRUCT;
 #define DTM_RENDER_SLOPE_VECTORS	3                   
 #define DTM_RENDER_SLOPE_POLYGONS	4                   
 #define DTM_RENDER_CONTOURS			5                  
+#define DTM_RENDER_COVERAGE			6                  
 
 #define IB_COORD_TYPE_WORLD 0
 #define IB_COORD_TYPE_VIEWPORT 1
@@ -4285,9 +4286,9 @@ typedef struct {
 				VISLIST	VisList; //location of data for TIN surface
 				BOOL	useProjection;
 				int numOpenDTMs;
-				HANDLE DTMHandles[MAXOPENSURF];
-				MNMXCORD DTMBounds[MAXOPENSURF];
-				BOOL triedDTM[MAXOPENSURF];
+				HANDLE DTMHandles[MAXOPENINDEXSURF];
+				MNMXCORD DTMBounds[MAXOPENINDEXSURF];
+				BOOL triedDTM[MAXOPENINDEXSURF];
 				int	currentHandleID;
 				} DTMINFO;
 typedef DTMINFO	FAR	*LPDTMINFO;

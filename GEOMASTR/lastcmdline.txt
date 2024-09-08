@@ -1,2 +1,2 @@
-configs\PheasantPointsCreate.gmc [%USEGDIPLUS]=F;[%KFO]=T;    
-f:\gmmobile\metroUTM
+[%DL]configs\Pheasant2024.gmc
+d:\spm3\spm3
