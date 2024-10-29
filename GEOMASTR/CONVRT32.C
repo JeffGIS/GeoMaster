@@ -3188,6 +3188,8 @@ GSSiExitProg (100);
     	pStr = GlobalLock (hStartupMenu);
         GSSilread (FidConfig,pStr,128);
         OneSpace (pStr);
+		if (strchr(pStr, '='))
+			ExpandText(pStr);
         GlobalUnlock (hStartupMenu);
         GSSilread (FidConfig,&NumIB,sizeof(NumIB));  
         while (NumIB--)

@@ -2155,7 +2155,7 @@ else if (ShowMax == 10)
 	RECT wndRect;
 	showWindowCmd = SW_SHOWMAXIMIZED;
 	ShowWindow(hWndMain, showWindowCmd);
-	ShowWindow(hWndMain, SW_HIDE);
+	//ShowWindow(hWndMain, SW_HIDE);
 	hDC = GetDC(hWndMain);
 	/*{
 		HPEN	hCPen, hPen = 0;
@@ -2178,7 +2178,7 @@ else
 	GetWindowRect(hWndMain, &rect);
 
 	showWindowCmd = SW_SHOW;
-	ShowWindow(hWndMain, SW_HIDE);
+	//ShowWindow(hWndMain, SW_HIDE);
 	hDC = GetDC(hWndMain);
 	OpenConfig(hWndMain, hDC);
 	ReleaseDC(hWndMain, hDC);

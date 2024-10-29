@@ -6184,29 +6184,48 @@ GSSiExitProg (1350);
         	goto RtnFalse;
         }
 
-		case 1606: //$APPENDFILETOFILE(tofile,fromfile)
+		case 1606: //$APPENDFILETOFILE(tofile,fromfile,lenbuf(opt),compress(opt,TF))
 		{
+			int lBuf = SHRT_MAX;
+			BOOL compress = FALSE;
 			nArgs = GetFunArgs(Args, Arg, 4, &hMem, pBrkPt, bpOffset, bpLen);
 			strcpy (OutLoc,"-1");
 			if (nArgs < 2)
 				goto Rtnl;
+			if (nArgs > 2)
+			{
+				if (atol(Arg[3]) > 0)
+					lBuf = atol(Arg[3]);
+				compress = atob(Arg[4]);
+			}
 			Fid1 = GSSiOpenFile (Arg[1],0,OF_READWRITE);
 			if (Fid1 == HFILE_ERROR)
 				Fid1 = GSSiOpenFile (Arg[1],0,OF_CREATE);
 			if (Fid1 != HFILE_ERROR)
 			{
 				int loc = GSSillseek (Fid1,0,2);
-				int	lBuf = SHRT_MAX, ln;
+				int	ln;
 				HANDLE	hBuf = GSSiGlobAlloc (0,GMEM_MOVEABLE,lBuf);
 				LPSTR	pBuf = GlobalLock (hBuf);
 
 				Fid2 = GSSiOpenFile (Arg[2],0,OF_READ);
 				if (Fid2 != HFILE_ERROR)
 				{
-					while ((ln = BigRead (Fid2,pBuf,lBuf)) > 0)
-						BigWrite (Fid1,pBuf,ln,-1);
+					itoa(loc, OutLoc, 10);
+					while ((ln = BigRead(Fid2, pBuf, lBuf)) > 0)
+					{
+						if (compress)
+						{
+							LPSTR pCompressedRec = malloc(lBuf * 2+4);
+							int lRecCMP = ZLibCompress(pCompressedRec,lBuf*2, pBuf, ln);
+							BigWrite(Fid1, pCompressedRec, lRecCMP, -1);
+							free(pCompressedRec);
+							sprintf(OutLoc, "%i-%i", loc, lRecCMP);
+						}
+						else
+							BigWrite(Fid1, pBuf, ln, -1);
+					}
 					GSSiClose2 (&Fid2);
-					itoa (loc,OutLoc,10);
 				}
 				GSSiClose2 (&Fid1);
 				GSSiGlobUlFree (&hBuf);

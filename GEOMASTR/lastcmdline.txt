@@ -1,2 +1,2 @@
-[%DL]configs\Pheasant2024.gmc
-d:\spm3\spm3
+configs\basemap_remote.gmc /F [%USERLEV]=2;[%IGNORESYSMSG]=T;[%WantBackgroundCache]=F;[%ALLOWCACHE]=F; 
+h:\MplsRemoteTemplate\GeoMas
