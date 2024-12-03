@@ -20677,8 +20677,8 @@ NextFile:
 					 }
 					//FidSHP = SHPFid; 
 					GSSillseek (FidSHP,0,0);
-					OpenSHPFileIndex (0,HFILE_ERROR);
-					OpenSHPFileIndex (Name,FidSHP); 
+					OpenSHPFileIndex (0,HFILE_ERROR,FALSE);
+					OpenSHPFileIndex (Name,FidSHP,TRUE); 
                 
 					_splitpath (Name,0,0,LeafName,0); 
 					SetGlobalValue("%SOURCENAME",LeafName);
@@ -21451,7 +21451,7 @@ NextFile:
 				 {
 					// CloseSHPFile ();
    					GSSiClose2 (&FidSHP);
-					OpenSHPFileIndex (0,HFILE_ERROR);
+					OpenSHPFileIndex (0,HFILE_ERROR,FALSE);
 				 }
    				 if (FileIsDir)
    				 { 

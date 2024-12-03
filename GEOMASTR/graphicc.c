@@ -4759,7 +4759,7 @@ DoSid:
 			} 
 			CreateFileTran (&MinMax,&CurView->FileMNMX); 
 			NextSHPRec = 0;
-			OpenSHPFileIndex (PltName,FidMap); 
+			OpenSHPFileIndex (PltName,FidMap,FALSE); 
         }
         break;
 		case MT_PERSONAL_GEO_DB:
@@ -5505,7 +5505,7 @@ void CloseMap (BOOL Update)
         DestroySymList (&NumSyms,&hSymDesc);
 	} 
 	if (MapType == MT_SHP)
-		OpenSHPFileIndex (0,HFILE_ERROR);  
+		OpenSHPFileIndex (0,HFILE_ERROR,FALSE);  
 	else if (MapType == MT_PERSONAL_GEO_DB)
 		OpenPGDB (0,0,0);
 	else if (MapType == MT_FILE_GEO_DB)

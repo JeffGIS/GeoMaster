@@ -2341,7 +2341,7 @@ BOOL GetShapeType(LPSTR file, int * ptype);
 BOOL GetShapeNumRecs(LPSTR file, int * nrecs);
 BOOL CopySHPParm(LPSTR fromfile, LPSTR tofile, int startref);
 long ReadSHPHeader(HFILE FidSHP, LPMNMXCORD pMinMaxCoord, LPSTR FileName);
-BOOL OpenSHPFileIndex (LPSTR SHPFileName,HFILE SHPFid);
+BOOL OpenSHPFileIndex (LPSTR SHPFileName,HFILE SHPFid,BOOL Load);
 SHPHandle SHPOpenGSSi(const char * pszShapeFile, const char * pszAccess);
 MNMXCORL AdjustShapeBounds(LPMNMXCORD pBounds,BOOL Insert);
 BOOL CreateShapeFileIndexSLT(LPSTR shapeFileName,LPSTR TAG);
