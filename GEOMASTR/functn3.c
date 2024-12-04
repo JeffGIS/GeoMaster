@@ -5657,6 +5657,17 @@ GotCloseFilehSQL:
 			strcpy(OutLoc, Arg[1]);
 			goto Rtnl;
 		}
+		case 658: // $NONINT(value)
+		{
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
+			*OutLoc = 0;
+			LPSTR nonInt = FirstNonInt(Arg[1]);
+			if (nonInt)
+			{
+				strcpy(OutLoc, nonInt);
+			}
+			goto Rtnl;
+		}
 
 		default:
 			goto Rtn0;
