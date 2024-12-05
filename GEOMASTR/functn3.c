@@ -9,8 +9,8 @@
 #include "CRAPI.h"
 
 
-
-static	char	MonthAbv[12][4]={"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
+static char SubDef[1024] = { 0 };
+static char	MonthAbv[12][4]={"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
 static short	nSetVals=0;
 static UINT	lSetVals=0;
 static char	CurrentDialogType[16];
@@ -5668,6 +5668,25 @@ GotCloseFilehSQL:
 			}
 			goto Rtnl;
 		}
+
+		case 659: // $SETSUB(subname,sub)
+		{
+			nArgs = GetFunArgs(Args, Arg, -2, &hMem, pBrkPt, bpOffset, bpLen);
+			*OutLoc = 0;
+			strcpy(SubDef, Arg[2]);
+			goto Rtnl;
+		}
+		case 660: // $RUNSUB(subname)
+		{
+			nArgs = GetFunArgs(Args, Arg, 1, &hMem, pBrkPt, bpOffset, bpLen);
+			*OutLoc = 0;
+			LPSTR sub = malloc(4096);
+			strcpy(sub, SubDef);
+			ExpandText(sub);
+			free(sub);
+			goto Rtnl;
+		}
+
 
 		default:
 			goto Rtn0;
