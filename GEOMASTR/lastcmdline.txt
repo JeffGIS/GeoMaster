@@ -1,2 +1,2 @@
-configs\jeff\loadvacarea.gmc
+projects\vacations\vacations_edit2.gmc /F [%USERLEV]=2;[%IGNORESYSMSG]=T;[%WantBackgroundCache]=F;[%ALLOWCACHE]=F; 
 e:\MplsRemoteTemplate\GeoMas

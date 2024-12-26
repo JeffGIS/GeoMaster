@@ -1438,7 +1438,10 @@ UINT AddNewPoint (DPOINT Point,BOOL Display,LPSTR FileToEdit)
     rtn=AddPointToMap (Point,NewRefno,hTime,NewPointSymbol,size,rot,(LPSHORT)pStuff,hText,hTextTPL,
     					Prefix,UDI,color,color,-1,FALSE,DigHiPrecis,&hBuf,&lBuf);
 	if (rtn)
+	{
 		SetGlobalValueLong("%LASTNEWPOINTREF", NewRefno);
+		SetGlobalValueDPoint("%LASTNEWPOINTCOORD",Point);
+	}
 	if (rtn && *Prefix)
 	{   
 		double	IncVal = GetGlobalDVal2 ("[%NEW_POINT_AUTOINC]",0);

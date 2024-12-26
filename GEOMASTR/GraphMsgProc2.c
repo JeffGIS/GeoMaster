@@ -5442,6 +5442,7 @@ BOOL FAR PASCAL LOADXFERFILEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, L
 			if (marker != 32449)
 			{
 				NextFileLoc = 14;
+				GSSillseek64(FidTF, 0, 0);
 				BigRead64(FidTF, (HPSTR)&length8, 8);
 				BigRead64(FidTF, (HPSTR)&Version, 2);
 				BigRead64(FidTF, (HPSTR)&MaxLength, 4);
