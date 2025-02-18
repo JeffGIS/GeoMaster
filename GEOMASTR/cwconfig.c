@@ -5644,12 +5644,15 @@ DisplayParcel:
 				ii=1;
 			case WA_CLICKACTIVE:
 				activeCount++;
-				if (GetToolbarIDFromWnd ((HWND)lParam) < 0)
+				if (!RemoveLinkedCursors())
 				{
-					if (hFullWindowBitMap && !IgnoreActivate) 
-						RestoreFullWindowBitmap ();					
-					UpdateVehicleStatusDlg ();
-					DisplayAllToolbars (4);
+					if (GetToolbarIDFromWnd((HWND)lParam) < 0)
+					{
+						if (hFullWindowBitMap && !IgnoreActivate)
+							RestoreFullWindowBitmap();
+						UpdateVehicleStatusDlg();
+						DisplayAllToolbars(4);
+					}
 				}
 				break;
 			}

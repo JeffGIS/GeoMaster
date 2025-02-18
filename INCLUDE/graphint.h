@@ -1051,7 +1051,7 @@ BOOL SaveZooms (LPMNMXCORD pBounds);
 void TransferSavedZoom (void); 
 void DestroySavedZooms (void);
 BOOL InLinkedList (short LinkedTo);  
-void RemoveLinkedCursors (void);
+BOOL RemoveLinkedCursors (void);
 BOOL HaveDesiredDocType (LPSTR TAG, LPSTR UDI);
 LPVIEWPORT GetVPByName (LPSTR Name);
 void CloseTheme(void);

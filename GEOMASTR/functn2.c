@@ -2034,7 +2034,7 @@ GSSiExitProg (1350);
 		}  
 		break;  
 		
-		case 905: // $DELETEREF(refno)  
+		case 905: // $DELETEREF(refno,VPname)  
 		{	 
 			
 			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);

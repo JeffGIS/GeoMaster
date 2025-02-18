@@ -5572,17 +5572,19 @@ GSSiExitProg (923);
 #endif
 }
 
-void RemoveLinkedCursors (void)
+BOOL RemoveLinkedCursors (void)
 #if ENABLETRACE
 {GSSiEnterProg (924);
 #endif
 {   
 	LPVIEWPORT	SaveVP=CurView;
 	short	iview;
-	
+	BOOL rtn = FALSE;
     for (iview = 0;iview < *pNumViewports; iview++)
     {
 		SetCurView ( pViewports[iview]); 
+		if (CurView->LinkedCursorHandle)
+			rtn = TRUE;
 		RestoreScreen2 (CurView->hDC, CurView->LinkedCursorHandle,0,FALSE);
 	    DestroySavedScreen (&CurView->LinkedCursorHandle,0);
 	}
@@ -5591,7 +5593,7 @@ void RemoveLinkedCursors (void)
 #if ENABLETRACE
 GSSiExitProg (924);
 #endif
-	return;
+	return rtn;
 }
 #if ENABLETRACE
 }

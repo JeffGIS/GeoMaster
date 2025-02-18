@@ -947,6 +947,11 @@ GSSiExitProg (1348);
 					btoa(CurView->HaveOrthos, OutLoc);
 					goto Rtnl;
 				}
+				else if (!_fstricmp(Arg[3], "UPDATEFILE"))
+				{
+					itoa(CurView->UpdateFile, OutLoc, 10);
+					goto Rtnl;
+				}
 				else if (!_fstricmp(Arg[3], "GOOGLEZOOM"))
 				{
 					itoa(CurView->GoogleZoom, OutLoc, 10);
@@ -1110,19 +1115,23 @@ GSSiExitProg (1348);
 					else
 						CurView->HaveFixedProfileRoute = FALSE;
 				}
-				else if (!_fstricmp (Arg[3],"PROJECTION"))//$VP(SETVAL,vp,PROJECTION,projectionid,bounds)
+				else if (!_fstricmp(Arg[3], "PROJECTION"))//$VP(SETVAL,vp,PROJECTION,projectionid,bounds)
 				{
 					if (*Arg[5])
 					{
-						Bounds = atobounds (Arg[5],&Err);
-						if (SetVPOutputProjection (atoi(Arg[4]),&Bounds))
+						Bounds = atobounds(Arg[5], &Err);
+						if (SetVPOutputProjection(atoi(Arg[4]), &Bounds))
 							goto RtnTrue;
 					}
 					else // projectionid == 0 or no bounds clears the projection
 					{
-						if (SetVPOutputProjection (atoi(Arg[4]),0))
+						if (SetVPOutputProjection(atoi(Arg[4]), 0))
 							goto RtnTrue;
 					}
+				}
+				else if (!_fstricmp(Arg[3], "UPDATEFILE"))//$VP(SETVAL,vp,UPDATEFILE,fileno)
+				{
+					CurView->UpdateFile = atoi(Arg[4]);
 				}
 				else if (!_fstricmp (Arg[3],"GRAY"))
 				{ 

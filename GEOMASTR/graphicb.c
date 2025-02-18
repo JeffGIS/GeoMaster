@@ -1466,22 +1466,25 @@ GSSiExitProg (1156);
 BOOL RestoreFullWindowBitmap (void)   
 { 
 	BOOL rtn = FALSE;
-	if (hFullWindowBitMap && (int)hFullWindowBitMap != -1)
+	if (!RemoveLinkedCursors())
 	{
-		HDC	hDC = GetDC (hWndMain);
-    
-		MergeImageIntoViewport(0, 0, 0, 0);
-		SaveDC(hDC);
-		SelectClipRgn (hDC,0);
-		RestoreScreen (hDC,hFullWindowBitMap,FullWindowBitMapRect);	     
-		ReleaseDC (hWndMain,hDC);
-		RedisplayLastPrompt (); 
-	    NotifyFunction ((LPVIEWPORT)-1,GF_REDRAW);  
-		//DisplayAllToolbars  (1);
-		//BackgroundUpdateMessage ("!REDISPLAY!");
-		RestoreDC (hDC,-1);
-		GdiFlush ();
-		rtn = TRUE;
+		if (hFullWindowBitMap && (int)hFullWindowBitMap != -1)
+		{
+			HDC	hDC = GetDC(hWndMain);
+
+			MergeImageIntoViewport(0, 0, 0, 0);
+			SaveDC(hDC);
+			SelectClipRgn(hDC, 0);
+			RestoreScreen(hDC, hFullWindowBitMap, FullWindowBitMapRect);
+			ReleaseDC(hWndMain, hDC);
+			RedisplayLastPrompt();
+			NotifyFunction((LPVIEWPORT)-1, GF_REDRAW);
+			//DisplayAllToolbars  (1);
+			//BackgroundUpdateMessage ("!REDISPLAY!");
+			RestoreDC(hDC, -1);
+			GdiFlush();
+			rtn = TRUE;
+		}
 	}
 	RepaintServerInfo();
 	return rtn;
@@ -1522,6 +1525,7 @@ GSSiExitProg (1157);
 }   
 	GdiFlush ();
 	
+	RemoveLinkedCursors();
 	SetViewport (*pCommandViewport);
 	ClearFullWindowBitmap (hWnd);	
 	if (!hWnd)

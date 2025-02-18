@@ -532,11 +532,13 @@ BOOL FAR PASCAL DEBUGGERMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARA
 void SetDebug (BOOL state)
 {
 	doDebug = state;
+	RemoveLinkedCursors();
 	if (doDebug)
 	{
 		CloseBufferedMacros();
 		DialogBox(hInst, (LPSTR)"DEBUGGER", hWndMain,(DLGPROC) DEBUGGERMsgProc);
 	}
+	RemoveLinkedCursors();
 	//CreateDialog (hInst, (LPSTR)"DEBUGGER", hWndMain, DEBUGGERMsgProc);
 	return;
 }

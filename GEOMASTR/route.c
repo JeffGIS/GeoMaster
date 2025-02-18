@@ -1441,7 +1441,7 @@ BOOL DeleteRefno (long Refno)
 			if (DeletePickedItem (0,12,92))    
 				return TRUE;
 		}
-		return FALSE;; 
+		return FALSE; 
 	}
 	_fstrcpy (PltName,CurView->lpFiles[CurView->UpdateFile-1]);
 	PltType = 2;
