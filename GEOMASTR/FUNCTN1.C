@@ -952,6 +952,11 @@ GSSiExitProg (1348);
 					itoa(CurView->UpdateFile, OutLoc, 10);
 					goto Rtnl;
 				}
+				else if (!_fstricmp(Arg[3], "TITLELOC"))
+				{
+					itoa(CurView->titleLocation, OutLoc, 10);
+					goto Rtnl;
+				}
 				else if (!_fstricmp(Arg[3], "GOOGLEZOOM"))
 				{
 					itoa(CurView->GoogleZoom, OutLoc, 10);
@@ -1132,6 +1137,12 @@ GSSiExitProg (1348);
 				else if (!_fstricmp(Arg[3], "UPDATEFILE"))//$VP(SETVAL,vp,UPDATEFILE,fileno)
 				{
 					CurView->UpdateFile = atoi(Arg[4]);
+					goto RtnTrue;
+				}
+				else if (!_fstricmp(Arg[3], "TITLELOC"))//$VP(SETVAL,vp,TITLELOC,loc)
+				{
+					CurView->titleLocation = atoi(Arg[4]);
+					goto RtnTrue;
 				}
 				else if (!_fstricmp (Arg[3],"GRAY"))
 				{ 

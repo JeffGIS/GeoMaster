@@ -5558,9 +5558,24 @@ GSSiExitProg (923);
 		}
 NextVP:;
 	}
-	RestoreDC (CurView->hDC,-1); 
-Exit:
-	SetCurView ( SaveVP);
+	HDC hDC = SaveVP->hDC;
+	for (int iview = 0; iview < *pNumViewports; iview++)
+	{
+		SetCurView(pViewports[iview]);
+		if (CurViewActive() && CurView->titleLocation)
+		{
+			HFONT	hOldFont = SelectObject(hDC, GetStockObject(ANSI_VAR_FONT));
+			RECT rect = CurView->Rect;
+			int l = strlen(CurView->Name);
+			LPSTR txt = malloc(l + 8);
+			sprintf(txt, "%s", CurView->Name);
+			DrawText(hDC,txt, strlen(txt), &rect, DT_CENTER);
+			SelectObject(hDC, hOldFont);
+		}
+	}
+	SetCurView(SaveVP);
+	RestoreDC(CurView->hDC, -1);
+
 {
 #if ENABLETRACE
 GSSiExitProg (923);
