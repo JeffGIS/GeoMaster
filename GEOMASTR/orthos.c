@@ -1055,7 +1055,7 @@ BOOL DisplayBMFileInVP32(HDC hDC, LPSTR BMFile, double RotationAZ, BOOL fitToVP,
 				bf.AlphaFormat = AC_SRC_ALPHA;
 				bf.SourceConstantAlpha = 0xFF;//AlphaBlendFactor;///
 			}
-			AlphaBlend(hDC,0,0,vpwidth,vpheight, 
+			BOOL st = AlphaBlend(hDC,0,0,vpwidth,vpheight, 
 						hdc,0,0,pDibInfo->biWidth,pDibInfo->biHeight,bf);
 			SelectObject (hdc,hbmold);
 		    DeleteObject(hbitmap);

@@ -1190,6 +1190,7 @@ HDIB32 GM32AllocateDIB (DWORD Width,DWORD Height,DWORD BitsPerPixel);
 DWORD GM32PasteDIB (HDIB32 ToDIB,HDIB32 FromDIB,DWORD Left,DWORD Top,DWORD Alpha);
 int ConvertBitmapColorToTransparent(LPSTR BitmapPath, COLORREF FromColor);
 int ConvertBitmapColorsInRect (LPSTR BitmapPath,LPMNMXCORD pBounds,COLORREF FromColor,COLORREF ToColor,BOOL CountOnly);
+BOOL AddImageToImage(HDIB32 hDib32Out, HDIB32 hDib32In, COLORREF FromColor, COLORREF ToColor);
 int ConvertBitmapColorsInRange(LPSTR BitmapPath, LPSTR ToPath, COLORREF FromColor, COLORREF ToColor, double colordist, LPMNMXCORD pBounds);
 DWORD GM32CompressFrame (LPBITMAPINFOHEADER	lpbiIn, LPBITMAPINFOHEADER lpbiOut);
 BOOL GSSiGetGMCName (HWND hWnd,LPSTR PathName,LPSTR InitialDir,LPSTR Title,LPBOOL pStartInNewSession,LPBOOL pRetainZoom,LPBOOL pLinkZoom,LPSTR NetworkDir,LPSTR PersonalDir);

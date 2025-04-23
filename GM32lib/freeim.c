@@ -310,7 +310,7 @@ NoSave:
 
 WORD GM32SaveBitmap (HANDLE hBitmap16,LPSTR OutFile,long Format,DWORD Flag)
 {
-	HDIB32 dib;
+	HDIB32 dib,dib24;
 	BOOL	rtn=FALSE;
 	HBITMAP hBitmap= hBitmap16;
 	int	l;
@@ -321,7 +321,8 @@ WORD GM32SaveBitmap (HANDLE hBitmap16,LPSTR OutFile,long Format,DWORD Flag)
 	{
 		dib = BitmapToDIB_32(hBitmap,NULL);
 		l = FreeImage_GetDIBSize (dib);
-		rtn = GMFIBMPHandleToEXT (OutFile,dib,Flag);
+		dib24 = GSSiFreeImage_ConvertTo24Bits(dib);
+		rtn = GMFIBMPHandleToEXT (OutFile,dib24,Flag);
 		GSSiFreeImage_Unload(dib);
 	}
 	return (WORD)rtn;
@@ -452,6 +453,35 @@ int ConvertBitmapColorsInRect(LPSTR BitmapPath, LPMNMXCORD pBounds, COLORREF Fro
 	GSSiFreeImage_Unload(hDIB24);
 	return n;
 }
+
+BOOL AddImageToImage(HDIB32 hDib32Out, HDIB32 hDib32In, COLORREF FromColor, COLORREF ToColor)
+{
+	DWORD	nrow, ncol, row, col, begrow, begcol;
+	int		height, width, n = 0;
+	RGBQUAD	FromColorQ = RGBQUADFromCOLORREF(FromColor);
+	RGBQUAD	ToColorQ = RGBQUADFromCOLORREF(ToColor);
+
+	GetDIBDimensionsFromHandle(hDib32In, &height, &width);
+	for (row = 0; row < height; row++)
+	{
+		for (col = 0; col < width; col++)
+		{
+			RGBQUAD	c;
+
+			if (FreeImage_GetPixelColor(hDib32In, col, row, &c))
+			{
+				if (c.rgbBlue == FromColorQ.rgbBlue && c.rgbGreen == FromColorQ.rgbGreen && c.rgbRed == FromColorQ.rgbRed)
+				{
+					if (FreeImage_SetPixelColor(hDib32Out, col, row, &ToColorQ))
+						n++;
+				}
+			}
+		}
+	}
+	return n;
+}
+
+
 int ConvertBitmapColorsInRange(LPSTR BitmapPath, LPSTR ToPath, COLORREF FromColor, COLORREF ToColor, double colordist, LPMNMXCORD pBounds)
 {
 	HDIB32	hDIB, hDIB24;

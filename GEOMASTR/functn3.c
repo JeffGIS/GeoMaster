@@ -1482,6 +1482,7 @@ GotCloseFilehSQL:
 				  // $IMAGE(WIDTH,imageFile);
 				  // $IMAGE(HEIGHT,imageFile);
 				  // $IMAGE(CONVERT,infile,outfile,flag)
+				  // $IMAGE(ADD,infile,outfile,fromcolor,tocolor);
 		{				
 			
 			nArgs = GetFunArgs (Args,Arg,8,&hMem, pBrkPt, bpOffset, bpLen); 
@@ -1586,6 +1587,22 @@ GotCloseFilehSQL:
 					}
 					DestroyDIB32(hDib32, FALSE);
 				}
+				goto RtnTrue;
+			}
+			
+			if (!_fstricmp(Arg[1], "ADD"))//$IMAGE(ADD, infile, outfile, fromcolor, tocolor);
+			{
+				COLORREF fromColor = atol(Arg[4]);
+				COLORREF toColor = atol(Arg[5]);
+				AllowBMPCaching = FALSE;
+				AllowCache = FALSE;
+
+				HDIB32	hDib32In = LoadDIB32(Arg[2], FALSE, 0);
+				HDIB32	hDib32Out = LoadDIB32(Arg[3], FALSE, 0);
+				AddImageToImage(hDib32Out, hDib32In, fromColor, toColor);
+				SaveDIB32(hDib32Out, Arg[3], 0, 0);
+				GMDestroyDIB32(hDib32Out);
+				GMDestroyDIB32(hDib32In);
 				goto RtnTrue;
 			}
 			if (!_fstricmp(Arg[1], "WIDTH"))
