@@ -2177,6 +2177,7 @@ int	GetFunctionValue7(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, 
 			  //$SESSION(COMMAND,hwnd
 			  //$SESSION(MINIMIZE)
 			  //$SESSION(MAXIMIZE)
+			  //$SESSION(PATH) returns executable path
 	{
 		char modulePath[MAX_PATH];
 

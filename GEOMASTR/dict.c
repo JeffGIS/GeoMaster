@@ -5497,7 +5497,7 @@ int GetLineElementWidthAndColor (LPSYMBOL lpSym,LPELEMENT pElement,LPCOLORREF pC
 				if (lpSym->BaseScale == 15)
 					Width = ((lpSym->VSize * Width)/100) * FTM * BaseDistToWinDist * PenWidthFactor;
 				else if (Width < 0)
-					Width = -Width * FTM * BaseDistToWinDist * PenWidthFactor;
+					Width = -Width * FTM * BaseDistToWinDist * PenWidthFactor * LineWidthFactor;
 				else
 				{ 
 					Fac = LineWidthFactor * PenWidthFactor;
