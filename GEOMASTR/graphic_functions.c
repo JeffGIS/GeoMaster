@@ -6999,7 +6999,7 @@ BOOL CreateNewPoint (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 	POINTS	MousePoint;  
 	static	HCURSOR	InCursor;
 	static	POINT	DragPoints[2];   
-	short	rtn=FALSE, OldMode;
+	UINT	rtn=FALSE, OldMode;
 	static	UINT	CurrentPrompt;
 	char	str[128];
 	

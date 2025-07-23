@@ -264,14 +264,14 @@ BOOL OpenSHPFile (LPSTR SHPFileNameIN)
 	} 
 	CreateFileTran (&MinMax,&FileMNMX); 
 	NextSHPRec = 0;
-	OpenSHPFileIndex (SHPFileName,SHPFid);
+	OpenSHPFileIndex (SHPFileName,SHPFid,FALSE);
 	return TRUE;
 } 
 
 void CloseSHPFile (void)
 {   
 	GSSiClose2 (&SHPFid);
-	OpenSHPFileIndex (0,HFILE_ERROR);
+	OpenSHPFileIndex (0,HFILE_ERROR,FALSE);
 	return;
 } 
 
@@ -1181,7 +1181,7 @@ MNMXCORL AdjustShapeBounds(LPMNMXCORD pBounds,BOOL Insert)
 	}
 	return AdjustedBounds;
 }
-BOOL OpenSHPFileIndex(LPSTR SHPFileName, HFILE SHPFid)
+BOOL OpenSHPFileIndex(LPSTR SHPFileName, HFILE SHPFid,BOOL loading)
 { 
 	char	Name[MAX_PATH];  
 	LPSTR	pDot; 
@@ -1228,7 +1228,10 @@ BOOL OpenSHPFileIndex(LPSTR SHPFileName, HFILE SHPFid)
 		OpenDataFile (Name,"",BT_READ,&hSHPDBF); 
 		CurrentSHPRec = SaveSHPRec;
 	}
-	SHPIndexType = GetSHPIndexType(LastSHPFile);
+	if (loading)
+		SHPIndexType = SHP_INDEX_STANDARD;
+	else
+		SHPIndexType = GetSHPIndexType(LastSHPFile);
 	if (SHPIndexType == SHP_INDEX_SIMPLE)
 	{ 
 		HFILE	TMPFid;

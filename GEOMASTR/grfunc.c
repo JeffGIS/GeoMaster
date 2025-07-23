@@ -953,6 +953,7 @@ BOOL LoadFunctionLists (HWND hWndDlg,HMENU hMenu,short WantLine,short opt,BOOL s
 		else if (WantLine > 0)
 			WantLine--;
 	}
+	AddToMacroStack(6, 0, str, 0, 0);
 	if (sort)
 	{
 		char sortFile[MAX_PATH + 2];

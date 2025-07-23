@@ -3476,7 +3476,8 @@ typedef struct
 		char	RButFunction[MAX_RBUTFUN];
 		short	OnPrintAddSpaceToVP; 
 		short	displayImagePlaneInRed;
-		char	unusedspace[6];
+		short	titleLocation;
+		char	unusedspace[4];
 		HANDLE  hTranScreenToBase;
 		HANDLE  hTranBaseToScreen;
 		double	LLNormFactor; 
