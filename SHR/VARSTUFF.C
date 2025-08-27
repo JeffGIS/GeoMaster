@@ -3690,6 +3690,25 @@ GSSiExitProg (532);
 		case 419:
 			textEpoint = atoi(Value);
 			break;
+		case 420:
+		{
+			UINT opt2 = _O_CREAT | _O_RDWR | _O_BINARY;
+			UINT pmode = _S_IREAD | _S_IWRITE;
+			DWORD lastErr = 0;
+			if (*Value)
+			{
+				fidLogFileUse2 = CreateFile(Value, GENERIC_READ | GENERIC_WRITE, 0, 0, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
+				if (fidLogFileUse2 == INVALID_HANDLE_VALUE)
+					lastErr = GetLastError();
+			}
+			else
+			{
+				if (fidLogFileUse2 != INVALID_HANDLE_VALUE)
+					CloseHandle(fidLogFileUse2);
+				fidLogFileUse2 = INVALID_HANDLE_VALUE;
+			}
+		}
+		break;
 		default:
  			break;
 	}
@@ -4127,7 +4146,8 @@ void CreateInternalGlobals (void)
 	AllocateTypeVar("%ADDTOVIEW", 417, FALSE);
 	AllocateTypeVar("%TEXTBPOINT", 418, FALSE);
 	AllocateTypeVar("%TEXTEPOINT", 419, FALSE);
-	
+	AllocateTypeVar("%FILEUSAGEFILE2", 420, FALSE);
+
 //	AllocateTypeVar("%DL",191,FALSE);
 	
 {

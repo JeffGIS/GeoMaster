@@ -1,2 +1,2 @@
-configs\basemap_remote.gmc /F  [%USERLEV]=2;[%IGNORESYSMSG]=T;[%WantBackgroundCache]=F;[%ALLOWCACHE]=T;[%LogUncachedFiles]=F;  
-L:\geomas
+configs\basemap_remote.gmc /F  /KFO [%USERLEV]=2;[%IGNORESYSMSG]=T;[%WantBackgroundCache]=F;[%ALLOWCACHE]=F;[%LogUncachedFiles]=F;  
+e:\geomas

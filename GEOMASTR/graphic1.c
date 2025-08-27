@@ -393,6 +393,7 @@ void QuitGraphics()
 	char	str[256],ExitMessage[256];
 	short	i; 
 	
+	ProcessText("[%FILEUSAGEFILE2]=");
 	ProcessText("[%EXITCMD]");
 	GSSiSetCursor((HCURSOR)-1);
 	CRAPI_Destroy();

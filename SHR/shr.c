@@ -9327,7 +9327,9 @@ HFILE GSSiOpenFile (LPSTR InName,LPOFSTRUCTGM pOFStruct,UINT Mode)
 	if (Mode == (OF_CREATE | OF_READWRITE))
 		Mode = OF_CREATE;
 	if (Mode == OF_EXIST)
-		ii=1;
+		ii = 1;
+	if (Mode == OF_READ)
+		ii = 1;
 	if (First && AllowCache)
 	{
 		First = FALSE;
@@ -9367,7 +9369,6 @@ HFILE GSSiOpenFile (LPSTR InName,LPOFSTRUCTGM pOFStruct,UINT Mode)
 	{
 		char entry[512];
 		DWORD dwBytesWritten;
-
 		sprintf(entry, "%s\t%i\r\n", Name, (int)Mode);
 		WriteFile(fidLogFileUse, entry, strlen(entry), &dwBytesWritten, NULL);
 	}
@@ -9796,6 +9797,18 @@ Open:
     		CreateFidSmall (); 
     		goto Open2;
     	}
+		else if (Mode == OF_READ)
+		{
+			if (fidLogFileUse2 != INVALID_HANDLE_VALUE)
+			{
+				LPSTR entry = malloc(1024);
+				LONGLONG flen = GSSifilelength(Fid);
+				DWORD dwBytesWritten;
+				sprintf(entry, "%s\t%i\t%li\r\n", Name, (int)Mode,flen);
+				WriteFile(fidLogFileUse2, entry, strlen(entry), &dwBytesWritten, NULL);
+				free(entry);
+			}
+		}
     }
     if (TraceOn)
     {

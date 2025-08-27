@@ -1564,9 +1564,8 @@ WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, 
 		if (!stricmp(keyloc, "03231949_1"))
 			haveKey = TRUE;
 	}
-	if (*LastChr (cmdLine) != ';')
-		strcat (cmdLine," ");
-
+	if (*LastChr(cmdLine) != ';')
+		strcat(cmdLine, " ");
 	CreateVarSpace(VARSPACE_GLOBAL);
 
 	if (strstr(cmdLine, "/GMEdit"))
@@ -1827,6 +1826,8 @@ GSSiExitProg (437);
 }
  } 
 ExpandDL ();
+ProcessText("[%FILEUSAGEFILE2]=C:/temp/fileusage.txt");
+
 /*{
 	 BITMAPINFOHEADER    bmiHeader1, bmiHeader2;
 	 BITMAPFILEHEADER	fH1,fH2;

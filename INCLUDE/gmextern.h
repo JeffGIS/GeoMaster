@@ -1611,6 +1611,7 @@ extern long			OpenFileLength[MAXFILEHANDLES];
 extern HANDLE			hFilesWithJournals;
 extern int			lFilesWithJournals;
 extern HANDLE		fidLogFileUse;
+extern HANDLE		fidLogFileUse2;
 extern struct tm	tmtime;//sharewithvarstuffso%DATE%TIMEsetfromlast$CLKor$CALcall;
 extern LPVIEWPORT			FAR *pViewports;
 extern LPVIEWPORT			FAR	*pViewportsD;     
