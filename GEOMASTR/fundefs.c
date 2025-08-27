@@ -600,6 +600,7 @@ int	GetFunctionID13 (LPSTR str)
 			if (!_fstrnicmp(str, "PARENTSYMBOLS", 13)) return 1312;
 			if (!_fstrnicmp(str, "ACCELEROMETER", 13)) return 1313;
 			if (!_fstrnicmp(str, "POINTINBOUNDS", 13)) return 1314;
+			if (!_fstrnicmp(str, "GETWINDOWTEXT", 13)) return 1315;
 
 			return 0; 
 			

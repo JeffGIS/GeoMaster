@@ -152,6 +152,7 @@ typedef struct _OFSTRUCTGM {
 void dbBreak(int i);
 WNDPROC ORIGINALPROC(HWND hWnd);
 BOOL SetContinueProcessing(BOOL set);
+void GetWindowsText(HWND hWnd, LPSTR OutFile);
 
 HWND WindowExists(HWND hWnd);
 HWND FindWindowByName (LPSTR WindowName);

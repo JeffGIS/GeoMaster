@@ -5483,7 +5483,18 @@ GSSiExitProg (1350);
 			}
 			goto RtnFalse;
 		}
-        case 1401: //$SETTEXTGLOBALS() 
+		case 1315: //$GETWINDOWTEXT(StartHWND,OutFile)
+		{
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
+			if (nArgs == 2)
+			{
+				HWND hWnd = atol (Arg[1]);
+				GetWindowsText (hWnd, Arg[2]);
+				goto RtnTrue;
+			}
+			goto RtnFalse;
+		}
+		case 1401: //$SETTEXTGLOBALS() 
         {
 		
 			LPGRTEXTHEADER	pPickedTextHeader; 

@@ -8,7 +8,8 @@
 #include "CurbRamps.h"
 #include "CRAPI.h"
 
-
+static int numWindows;
+static HWND windows[4096];
 static char SubDef[1024] = { 0 };
 static char	MonthAbv[12][4]={"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
 static short	nSetVals=0;
@@ -210,6 +211,56 @@ BOOL CALLBACK HideEnumWndProc(HWND hCtrl, LPWINPROCESSANDTHREAD pWpt)
 		//SetWindowPos(hCtrl, HWND_BOTTOM, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_HIDEWINDOW);
 	}
 	return TRUE;
+}
+BOOL CALLBACK GetWindowsTextEnumWndProc(HWND hCtrl, LONG lParam)
+{
+	windows[numWindows++] = hCtrl;
+	return TRUE;
+}
+BOOL CALLBACK GetChildWindowsTextEnumWndProc(HWND hCtrl, LONG lParam)
+{
+	LPSTR text = malloc (1026);
+	strcpy (text, "    ");
+	int tl = GetWindowText (hCtrl, &text[4], 1024);
+	if (tl > 0)
+	{
+		HANDLE hFile = (HANDLE)lParam;
+		LPSTR OutFile = GlobalLock (hFile);
+		appendStringToFile (text, OutFile);
+		GlobalUnlock (hFile);
+	}
+	free (text);
+	return TRUE;
+}
+
+void GetWindowsText(HWND hWnd,LPSTR OutFile)
+{
+	WINPROCESSANDTHREAD wpt;
+
+	wpt.thread = GetWindowThreadProcessId(hWnd, &wpt.process);
+	HANDLE hFile = GSSiGlobAlloc (0, GMEM_MOVEABLE, 258);
+	LPSTR file = GlobalLock (hFile);
+	strcpy (file, OutFile);
+	GlobalUnlock (hFile);
+	numWindows = 0;
+	EnumWindows((WNDENUMPROC)GetWindowsTextEnumWndProc,0);
+	for (int i = 0; i < numWindows; i++)
+	{
+		LPSTR text = malloc (1030);
+		strcpy (text, "----");
+		int tl = GetWindowText (windows[i], &text[4], 1024);
+		if (tl > 0)
+		{
+			LPSTR OutFile = GlobalLock (hFile);
+			appendStringToFile (text, OutFile);
+			GlobalUnlock (hFile);
+		}
+		free (text);
+		if (tl > 0)
+			EnumChildWindows (windows[i], GetChildWindowsTextEnumWndProc,(LPARAM) hFile);
+	}
+	GSSiGlobFree (&hFile);
+	return;
 }
 
 void ShowHideWindows(LPSTR WindowName, UINT fun)

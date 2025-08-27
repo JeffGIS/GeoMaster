@@ -15448,7 +15448,12 @@ HaveEmpty:
 	         		  	ShowWindow (GetDlgItem(hWndDlg,IDC_RENDERAS),FALSE);
 	         		  	ShowWindow (GetDlgItem(hWndDlg,IDC_RENDERASSETTINGS),FALSE);
 	         		  }
-					  SendDlgItemMessage (hWndDlg,IDC_PATH_TYPE,CB_SETCURSEL,Types[CurView->FileType[EditLayer]],0);   
+					  SendDlgItemMessage (hWndDlg,IDC_PATH_TYPE,CB_SETCURSEL,Types[CurView->FileType[EditLayer]],0); 
+					  if (CurView->FileType[EditLayer] == 3)
+					  {
+						  ShowWindow(GetDlgItem(hWndDlg, IDC_STRETCHIMAGE), TRUE);
+						  SendDlgItemMessage(hWndDlg, IDC_STRETCHIMAGE, BM_SETCHECK, CurView->StretchImage[EditLayer], 0L);
+					  }
 					  SendDlgItemMessage (hWndDlg,IDC_RENDERAS,CB_SETCURSEL,CurView->DTMRenderAs[EditLayer]-1,0);   
 	        EditFiles:	
 	        		  EnableWindow (GetDlgItem(hWndDlg,IDOK),FALSE);
