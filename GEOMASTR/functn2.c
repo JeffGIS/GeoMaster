@@ -5488,7 +5488,7 @@ GSSiExitProg (1350);
 			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs == 2)
 			{
-				HWND hWnd = atol (Arg[1]);
+				HWND hWnd = atoll (Arg[1]);
 				GetWindowsText (hWnd, Arg[2]);
 				goto RtnTrue;
 			}

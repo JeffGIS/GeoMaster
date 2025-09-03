@@ -9804,7 +9804,7 @@ Open:
 				LPSTR entry = malloc(1024);
 				LONGLONG flen = GSSifilelength(Fid);
 				DWORD dwBytesWritten;
-				sprintf(entry, "%s\t%i\t%li\r\n", Name, (int)Mode,flen);
+				sprintf(entry, "%s\t%i\t%lli\r\n", Name, (int)Mode,flen);
 				WriteFile(fidLogFileUse2, entry, strlen(entry), &dwBytesWritten, NULL);
 				free(entry);
 			}
