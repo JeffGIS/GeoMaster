@@ -4658,13 +4658,25 @@ SetVis:
 		   }
 		   goto RtnFalse;
 		}
-		case 438: //$POST(Macro)
+		case 438: //$POST(Macro,hWnd(opt))
 		{
+			int ierr = 0;
 			nArgs = GetFunArgs(Args, Arg, -2, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 1)
 				goto RtnFalse;
 			strcpy(CommandMacro, Arg[1]);
-			PostMessage(hWndMain, PROCESS_COMMAND_MACRO,0, 0L);
+			if (nArgs == 1)
+				PostMessage(hWndMain, PROCESS_COMMAND_MACRO,0, 0L);
+			else
+			{
+				SetLastError(0);
+				ExpandText(Arg[2]);
+				HWND hWnd = atoll(Arg[2]);
+				PostMessage(hWnd, WM_LBUTTONDOWN, 0, 0L);
+				PostMessage(hWnd, WM_LBUTTONUP, 0, 0L);
+			}
+			ierr = GetLastError();
+			ii = ierr;
 			goto RtnTrue;
 		}
 

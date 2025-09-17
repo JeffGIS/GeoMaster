@@ -454,6 +454,8 @@ int	GetFunctionID9 (LPSTR str)
 			if (!_fstrnicmp(str, "ADDQUOTES", 9)) return 951;
 			if (!_fstrnicmp(str, "STREETINT", 9)) return 952;
 			if (!_fstrnicmp(str, "SPLITPATH", 9)) return 953;
+			if (!_fstrnicmp(str, "SENDINPUT", 9)) return 954;
+			if (!_fstrnicmp(str, "CURSORPOS", 9)) return 955;
 
 			return 0;
 }
@@ -635,6 +637,7 @@ int	GetFunctionID15 (LPSTR str)
 			if (!_fstrnicmp(str, "DELETEDIRECTORY", 15)) return 1508;
 			if (!_fstrnicmp(str, "NETWORKANALYZER", 15)) return 1509;
 			if (!_fstrnicmp(str, "COPYWITHREPLACE", 15)) return 1510;
+			if (!_fstrnicmp(str, "WINDOWFROMPOINT", 15)) return 1511;
 
 			return 0;
 }

@@ -246,18 +246,21 @@ void GetWindowsText(HWND hWnd,LPSTR OutFile)
 	EnumWindows((WNDENUMPROC)GetWindowsTextEnumWndProc,0);
 	for (int i = 0; i < numWindows; i++)
 	{
-		LPSTR text = malloc (1030);
-		strcpy (text, "----");
-		int tl = GetWindowText (windows[i], &text[4], 1024);
-		if (tl > 0)
+		if (windows[i] == hWnd)
 		{
-			LPSTR OutFile = GlobalLock (hFile);
-			appendStringToFile (text, OutFile);
-			GlobalUnlock (hFile);
+			LPSTR text = malloc(1030);
+			strcpy(text, "----");
+			int tl = GetWindowText(windows[i], &text[4], 1024);
+			if (tl > 0)
+			{
+				LPSTR OutFile = GlobalLock(hFile);
+				appendStringToFile(text, OutFile);
+				GlobalUnlock(hFile);
+			}
+			free(text);
+			if (tl > 0)
+				EnumChildWindows(windows[i], GetChildWindowsTextEnumWndProc, (LPARAM)hFile);
 		}
-		free (text);
-		if (tl > 0)
-			EnumChildWindows (windows[i], GetChildWindowsTextEnumWndProc,(LPARAM) hFile);
 	}
 	GSSiGlobFree (&hFile);
 	return;

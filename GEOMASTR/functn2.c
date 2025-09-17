@@ -2924,6 +2924,16 @@ GSSiExitProg (1350);
 			SendInput(1, &ip, sizeof(ip));
 			goto Rtnl;
 		}
+		case 955: //$CURSORPOS(wait time)
+		{
+			POINT pt;
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
+			int waitTime = atoi(Arg[1]);
+			Wait(waitTime);
+			GetCursorPos(&pt);
+			pttoa(OutLoc, pt);
+			goto Rtnl;
+		}
 		case 1001: // $DECOMPPOLY(OutFile,InteriorLineDesc,ExteriorLineDesc,LinkBetweenNodes(Opt F)
 		{	 
             DLGPROC lpfnDECOMPPOLYMsgProc; 
@@ -5489,6 +5499,7 @@ GSSiExitProg (1350);
 			if (nArgs == 2)
 			{
 				HWND hWnd = atoll (Arg[1]);
+				GetWindowText(hWnd, pCommonMem, lCommonMem);
 				GetWindowsText (hWnd, Arg[2]);
 				goto RtnTrue;
 			}
@@ -6051,6 +6062,27 @@ GSSiExitProg (1350);
 			GSSiClose2 (&Fid1);
 			GSSiClose2 (&Fid2);
 			goto RtnTrue;
+		}
+		case 1511://$WINDOWFROMPOINT(cursorpt)
+		{
+			LPSTR line;
+			BOOL er;
+
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
+			POINT P = atopt16 (Arg[1],&er);
+			HWND Handle, hParent;
+			WINDOWINFO WindowInfo;
+
+			WindowInfo.cbSize = sizeof(WINDOWINFO);
+
+			Handle = WindowFromPoint(P);
+			GetWindowInfo(Handle, &WindowInfo);
+			GetWindowText(Handle, pCommonMem, lCommonMem);
+			hParent = GetParent(Handle);
+			if (!hParent)
+				hParent = GetWindow(Handle, GW_OWNER);
+			ltoa(Handle, OutLoc, 10);
+			goto Rtnl;
 		}
 		case 1601: //$CREATESPORTMAPCD(orderfile,outdir) 
         {
