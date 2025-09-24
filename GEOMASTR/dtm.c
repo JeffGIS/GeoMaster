@@ -1393,7 +1393,7 @@ BOOL LoadBILDTM(LPSTR InFile, LPSTR OutFile,BOOL new)
 				}
 				for (icol = 0; icol < 32; icol++)
 				{
-					if (BINRow[icol] != DTMData.NULLElv)
+					if (BINRow[icol] != DTMData.NULLElv)	
 						DTMRow[icol] = IDNINT(BINRow[icol]*100);
 					else
 						DTMRow[icol] = LONG_MAX;

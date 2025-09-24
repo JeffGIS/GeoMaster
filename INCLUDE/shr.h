@@ -380,6 +380,7 @@ BOOL CloseDataFile (BOOL Final,HANDLE *hDB);
 HANDLE GetDBHandleFromSQL (HANDLE hSQL);
 BOOL GetFieldInfoFromName (HANDLE hDB,LPSTR FldName,LPSTR pFldType,LPSHORT pFldLen);
 BOOL FetchDBRec (HANDLE hSQLPtr);
+BOOL IsFileInternal(HANDLE hSQLPtr);
 int GetDBPos(HANDLE hSQLPtr);
 BOOL SaveDBRec (HANDLE hSQLPtr);
 BOOL SetGMDField (HANDLE hSQLPtr,LPSTR Name,LPSTR Value);

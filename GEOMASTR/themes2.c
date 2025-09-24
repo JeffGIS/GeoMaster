@@ -460,6 +460,7 @@ short ThemeSetChar (int Type, long iref, int desc, LPSTR TAG, LPSTR UDI)
 	short	MinClass=MAX_THEME_CLASSES+1;
 	BOOL	datafileIsGraphics = FALSE;
 	int nAttempts = 0;
+	BOOL fileIsInternal = FALSE;
 
     if (desc == 376)
 		ii = 1;
@@ -1418,10 +1419,10 @@ SetClassChar:
 				lnKey = GetBTKeyLen(CurTheme->hScatterFile); 
 			ResetFileChangeTime (CurTheme->hThemeDB);
 			AtEndOfValues = FALSE;
+			fileIsInternal = IsFileInternal(CurTheme->hThemeDB);
 			if (CurTheme->MultiValOption < 4 &&
 				((CurTheme->MultiValOption && !StartAutoClassDef ()) || CurTheme->MultiValOption == 3))
 			{  
-				
 				if (CurTheme->MultiValOption == 2 || CurTheme->MultiValOption == 3)
 					MinClass = -1;
 NextValue:		
@@ -1495,7 +1496,10 @@ CheckStatus:
 						strncpy0(MinClassValue, Value, sizeof(MinClassValue)-1);
 						MinClass = ClassNo;
 					}
-					goto NextValue;
+					if (!fileIsInternal)
+						goto NextValue;
+					else
+						AtEndOfValues = TRUE;
 			/*	this seems to skip a record
 				if (FetchDBRec (CurTheme->hThemeDB))
 						goto NextValue;

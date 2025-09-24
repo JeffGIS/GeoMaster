@@ -8216,6 +8216,44 @@ int GetDBPos(HANDLE hSQLPtr)
 	return pos;
 }
 
+BOOL IsFileInternal(HANDLE hSQLPtr)
+{
+	BOOL rtn = FALSE;
+	LPOPENSQLDATA	SQLPtr;
+	LPOPENFILEDATA	FilePtr;
+	LPGWDHEADER	lpGWDHead;
+
+	if (hSQLPtr)
+	{
+		SQLPtr = (LPOPENSQLDATA)GlobalLock(hSQLPtr);
+		FilePtr = (LPOPENFILEDATA)GlobalLock(SQLPtr->OFHandle);
+		switch (FilePtr->Type)
+		{
+		case GMCENSUS_DATAFILE:
+		case ORA_DATAFILE:
+		case UMIFS_DATAFILE:
+		{
+			if (SQLPtr->IndexToUse >= 0)
+			{
+				lpGWDHead = (LPGWDHEADER)GlobalLock(FilePtr->FileHandle);
+				if (lpGWDHead->Version > 1000)
+				{
+					rtn = TRUE;
+				}
+				GlobalUnlock (FilePtr->FileHandle);
+			}
+		}
+		break;
+		default:
+			break;
+		}
+		GlobalUnlock(SQLPtr->OFHandle);
+		GlobalUnlock(hSQLPtr);
+	}
+
+	return rtn;
+}
+
 BOOL FetchDBRec (HANDLE hSQLPtr)
 #if ENABLETRACE
 {GSSiEnterProg (573);
