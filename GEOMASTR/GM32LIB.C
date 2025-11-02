@@ -780,12 +780,15 @@ BOOL GetFreeImageVersionAndCopyright (LPSTR Version, LPSTR Copyright)
 }	
 
 
-BOOL GetGeoTiffData (HDIB32 hBMP,LPDOUBLE pScaleX,LPDOUBLE pScaleY,LPDPOINT pBitmapPoint, LPDPOINT pWorldPoint) 
+BOOL GetGeoTiffData (HDIB32 hBMP,LPDOUBLE pScaleX,LPDOUBLE pScaleY,LPDPOINT pBitmapPoint, LPDPOINT pWorldPoint,BOOL showTags) 
 {
 	DWORD	st=FALSE;  
-	DWORD	ShowTag=GetGlobalBVal2 ("[%GEOTIFSHOWTAGS]",FALSE);
+	DWORD	ShowTag;
 
-		
+	if (!showTags)
+		ShowTag = GetGlobalBVal2("[%GEOTIFSHOWTAGS]", FALSE);
+	else
+		ShowTag = TRUE;
 	st = GMFIGetGeoTiffData (hBMP,ShowTag,(DWORD) pScaleX,(DWORD) pScaleY,(DWORD) pBitmapPoint, (DWORD) pWorldPoint);
 	return st;
 	

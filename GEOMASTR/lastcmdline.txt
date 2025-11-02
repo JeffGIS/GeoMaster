@@ -1,2 +1,2 @@
-configs\foresthealth.gmc /F  /KFO [%USERLEV]=2;[%IGNORESYSMSG]=T;[%WantBackgroundCache]=F;[%ALLOWCACHE]=F;[%LogUncachedFiles]=F;  
-E:\GMMobile\MetroUTM
+configs\basemap_remote_noelev.gmc /F [%USERLEV]=2;[%IGNORESYSMSG]=T;[%WantBackgroundCache]=F;[%ALLOWCACHE]=F; 
+F:\MplsRemoteTemplate\GeoMas

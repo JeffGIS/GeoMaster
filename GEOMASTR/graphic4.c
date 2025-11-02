@@ -2177,9 +2177,9 @@ LPDEBUGARRAY	pDB=0;   */
 								if (Pick)
 								{
 									if (HiPrecis)
-										PickPolygonD (lpDCurPoints,nPnts,nPoly,hPolyPartLen,9999999,hElevBuffer);
+										PickPolygonD (lpDCurPoints,nPnts,nPoly,hPolyPartLen,pickedAreaOffsetDist,hElevBuffer);
 									else
-										PickPolygon (lpCurPoints,nPnts,9999999);
+										PickPolygon (lpCurPoints,nPnts, pickedAreaOffsetDist);
 								}
 								else if (PolyInMaskAreaFileCoord (CurrentType,&nPnts,&hCoords,&lpCurPoints,&lpDCurPoints,HiPrecis))
 								{

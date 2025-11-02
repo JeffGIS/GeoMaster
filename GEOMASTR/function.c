@@ -4671,7 +4671,7 @@ SetVis:
 			{
 				SetLastError(0);
 				ExpandText(Arg[2]);
-				HWND hWnd = atoll(Arg[2]);
+				HWND hWnd = (HWND)atoll(Arg[2]);
 				PostMessage(hWnd, WM_LBUTTONDOWN, 0, 0L);
 				PostMessage(hWnd, WM_LBUTTONUP, 0, 0L);
 			}

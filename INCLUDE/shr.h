@@ -1238,7 +1238,7 @@ DWORD GMFIGetVersionAndCopyright (LPSTR Version,LPSTR Copyright);
 HDIB32  CopyBMP32 (HDIB32 hBitmap,DWORD left,DWORD right, DWORD top, DWORD bottom); 
 BOOL GetBitmapInfoFromHandle (LPBITMAPINFOHEADER pDibInfo,HDIB32 hDib);
 DWORD GM32QuantizeDIBEx (HDIB32 hDIB,DWORD Flag,DWORD PalSize, DWORD ResPalSize, LPRGBQUAD Pallet);
-BOOL GetGeoTiffData (HDIB32 hBMP,LPDOUBLE pScaleX,LPDOUBLE pScaleY,LPDPOINT pBitmapPoint, LPDPOINT pWorldPoint); 
+BOOL GetGeoTiffData (HDIB32 hBMP,LPDOUBLE pScaleX,LPDOUBLE pScaleY,LPDPOINT pBitmapPoint, LPDPOINT pWorldPoint,BOOL showTags); 
 BOOL SetGeoTiffData (HDIB32 hBMP,LPDOUBLE pScaleX,LPDOUBLE pScaleY,LPDPOINT pBitmapPoint, LPDPOINT pWorldPoint); 
 BOOL GetImageCoord (HANDLE hBMP, LPDPOINT pWorldPoint,LPSTR DateTaken);
 HDIB32 Create8BitBMP (HDIB32 dibin,RGBQUAD	*rgbpal, LPLONG plPalette);

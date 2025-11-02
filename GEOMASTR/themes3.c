@@ -966,7 +966,7 @@ BOOL PickDispersedPoints (DPOINT PickPointBase,int PickAp,LPDOUBLE pNearDist)
 	HPDPOINT	HLTAreaPoints;	
 	LPTHEME	SaveTheme=CurTheme;
 	LPVIEWPORT	pSaveVP = CurView;
-		
+
     if (CurView->Type == SUBVIEWPORT && CurView->Parent)
      	SetCurView (pViewports[CurView->Parent-1]);
 	for (i=0;i<CurView->NumThemes;i++)

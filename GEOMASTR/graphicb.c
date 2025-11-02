@@ -2051,6 +2051,52 @@ GSSiExitProg (1163);
 #endif
 }
 
+int RemoveDupDesc(nPicked)
+{
+	int np = nPicked;
+//	PickList[i].Elev = Elev;
+//	_fmemcpy(PickedStreets[i], CurStreetNumbers, sizeof(CurStreetNumbers));
+
+	if (np < 2)
+		return np;
+	if (np >= MaxPick)
+	{
+		return np;
+	}
+	for (int j = np - 1; j > 0; j--)
+	{
+		int desc = PickList[j].Desc;
+		int removeItem = -1;
+		for (int i = j - 1; i >= 0; i--)
+		{
+			if (PickList[i].Desc == desc)
+				removeItem = i;
+		}
+		if (removeItem > -1)
+		{
+			for (int i = removeItem; i < np; i++)
+			{
+				_fmemmove(&PickList[i], &PickList[i + 1], sizeof(PICKDATA));
+				_fmemmove(PickedStreets[i], PickedStreets[i + 1], 28);
+			}
+			np--;
+		}
+	}
+	/*
+	{
+		LPSTR ptxt = malloc(4096);
+		*ptxt = 0;
+		sprintf(ptxt, "%i\t%i\t%f", PickList[0].Desc, PickList[0].Refno, PickList[0].OffDist);
+		for (int i = 1; i < np; i++)
+		{
+			sprintf(strchr(ptxt,0), "\n%i\t%i\t%f", PickList[i].Desc, PickList[i].Refno, PickList[i].OffDist);
+		}
+		
+		MessageBox(GetFocus(), ptxt, 0, MB_OK);
+		free(ptxt);
+	}*/
+	return np;
+}
 short PickListAdd (short FileNum,short SubFile, USHORT FileInIndex,long CurrentSeg,
 				  long CurrentRefno,short CurrentDesc,int PolyID,
 				  int InType, double PCT,double OffDist,LPDOUBLE AZ, double Length,
@@ -2162,11 +2208,15 @@ GSSiExitProg (1164);
 			NumPicked--; 
 			goto Sort; 
 		}
-		if (OffDist == 9999999.0 && PickList[i].OffDist == 9999999.0 && fabs(Area) > fabs(PickList[i].Area))
+		if ((Type == 3 || OffDist == 9999999.0) && (PickList[i].Type == 3 || PickList[i].OffDist == 9999999.0) && fabs(Area) > fabs(PickList[i].Area))
 			goto Next;
-		if (fabs(OffDist)==fabs(PickList[i].OffDist) &&
-			Length < PickList[i].Length) goto Insert; //allows segs 1 file coord long to be picked
-		if (fabs(OffDist)<=fabs(PickList[i].OffDist)) goto Insert;  
+		if (fabs(OffDist)==fabs(PickList[i].OffDist) &&	Length < PickList[i].Length)
+			goto Insert; //allows segs 1 file coord long to be picked
+		double d = PickList[i].OffDist;
+		if (d == 9999999.0)
+			d = 0;
+		if (fabs(OffDist)<=fabs(d))
+			goto Insert;  
 Next:;
 	}
 	 
@@ -2248,6 +2298,10 @@ Insert:
 	}
 	if (NumPicked < MaxPick)
 		NumPicked++; 
+	if (noDupDesc)
+	{
+		NumPicked = RemoveDupDesc(NumPicked);
+	}
 {
 #if ENABLETRACE
 GSSiExitProg (1164);

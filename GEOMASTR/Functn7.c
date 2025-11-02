@@ -1367,7 +1367,12 @@ int	GetFunctionValue7(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, 
 		}
 		else if (!_fstricmp(Arg[1], "XYZ"))
 		{
-			if (LoadXYZDem(Arg[2], Arg[3],OutLoc))
+			if (LoadXYZDem(Arg[2], Arg[3], OutLoc))
+				goto Rtnl;
+		}
+		else if (!_fstricmp(Arg[1], "TIF"))
+		{
+			if (LoadTIFDTM(Arg[2], Arg[3], atob(Arg[4])))
 				goto Rtnl;
 		}
 		goto RtnFalse;

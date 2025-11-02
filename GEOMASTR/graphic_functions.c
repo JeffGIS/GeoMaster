@@ -1672,6 +1672,8 @@ BOOL PanZoomTarget (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam, short
  static	int	LastClass=-1;
  double	Offset;
  BOOL	QOnMouseMove=TRUE;
+ double savePickedAreaOffsetDist = pickedAreaOffsetDist;
+ BOOL saveNoDupDesc = noDupDesc;
   
   if (InPanZoom)
 {
@@ -1720,6 +1722,8 @@ GSSiExitProg (119);
 }
 Next:
   InPanZoom = TRUE;
+  pickedAreaOffsetDist = 0;
+  noDupDesc = TRUE;
   switch (Message)
    { 
     case GF_REINIT:
@@ -3048,6 +3052,10 @@ NextPickItem:
     	goto RtnFalse;
     }
    	InPanZoom = FALSE;
+	pickedAreaOffsetDist = savePickedAreaOffsetDist;
+	noDupDesc = saveNoDupDesc;
+
+
 {
 #if ENABLETRACE
 GSSiExitProg (119);
@@ -3056,6 +3064,9 @@ GSSiExitProg (119);
 }
 RtnFalse:
 	InPanZoom = FALSE;
+	pickedAreaOffsetDist = savePickedAreaOffsetDist;
+	noDupDesc = saveNoDupDesc;
+
 {
 #if ENABLETRACE
 GSSiExitProg (119);

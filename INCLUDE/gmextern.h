@@ -187,6 +187,8 @@ extern BOOL			PickOnlyEndPoints;
 extern BOOL			GIDIndexFile;
 extern BOOL			Processing;
 extern BOOL			DoTime;
+extern double		pickedAreaOffsetDist;
+extern BOOL			noDupDesc;
 extern BOOL			ContinueProcessing;  
 extern BOOL			DisplayFailure;
 extern BOOL			ForceHalfTone;

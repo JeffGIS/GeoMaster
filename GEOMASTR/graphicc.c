@@ -3819,7 +3819,7 @@ BOOL GetImageBounds (LPSTR PathName, HDIB32 hdib,LPMNMXCORD pBitmapBounds,LPMNMX
 		pBitmapBounds->xmn = pBitmapBounds->ymn = 0;
 		pBitmapBounds->xmx = DibInfo.biWidth-1;
 		pBitmapBounds->ymx = DibInfo.biHeight-1;
-		if (GetGeoTiffData (hdib,&ScaleX,&ScaleY,&BitmapPoint, &WorldPoint))  
+		if (GetGeoTiffData (hdib,&ScaleX,&ScaleY,&BitmapPoint, &WorldPoint,FALSE))  
 		{
 			GetGlobalCVal ("[%GEOTIFFUNITS]",units,0);
 			if (!stricmp (units,"FEET"))

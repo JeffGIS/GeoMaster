@@ -25,6 +25,8 @@ static  int		numImagesAllocated = 0;
 static  char	curOutImagePath[MAX_PATH];
 static  DWORD	curFlag;
 
+
+
 /*#define MAX_ALLOCATED_IMAGES	1024
 static	HDIB32	allocatedImages[MAX_ALLOCATED_IMAGES];
 static	int		allocatedImagesFrom[MAX_ALLOCATED_IMAGES];
@@ -1076,6 +1078,9 @@ BOOL GMFIGetGeoTiffData (HANDLE hBMP,DWORD ShowTag,DWORD pScaleX, DWORD pScaleY,
 	FREE_IMAGE_MDMODEL	model = FIMD_GEOTIFF;
 	BOOL	HaveScale=FALSE, HavePoint=FALSE;
 	LPDOUBLE	pDouble;
+	int datum = 0;
+	int NAD27 = 27;
+	int NAD83 = 83;
 
 	if (dib)
 	{
@@ -1108,19 +1113,28 @@ BOOL GMFIGetGeoTiffData (HANDLE hBMP,DWORD ShowTag,DWORD pScaleX, DWORD pScaleY,
 				}
 				//sprintf (Tag,"%ld %ld %ld",FreeImage_GetTagID(tag),FreeImage_GetTagType(tag),FreeImage_GetTagCount(tag));
 				//MessageBox (0,Tag,NULL,MB_OK);
-				switch (FreeImage_GetTagID(tag))
+				typedef enum TIFF_TAG_TYPE {
+					ModelPixelScaleTag = 33550,
+					ModelTransformationTag = 34264,
+					ModelTiepointTag = 33922,
+					GeoKeyDirectoryTag = 34735,
+					GeoDoubleParamsTag = 34736,
+					GeoAsciiParamsTag = 34737,
+				} TIFF_TAG_TYPE;
+				int tagID = FreeImage_GetTagID(tag);
+				switch (tagID)
 				{
-				case 33550:
+				case ModelPixelScaleTag:
 					if (FreeImage_GetTagType(tag)==FIDT_DOUBLE && FreeImage_GetTagCount(tag)==3)
 					{
 						pDouble = (LPDOUBLE)FreeImage_GetTagValue(tag);
 						*(LPDOUBLE)pScaleX = *pDouble++;
-						*(LPDOUBLE)pScaleY = *pDouble;
+						*(LPDOUBLE)pScaleY = *pDouble++;
 						HaveScale=TRUE;
 					}
 					break;
 
-				case 33922:
+				case ModelTiepointTag:
 					if (FreeImage_GetTagType(tag)==FIDT_DOUBLE && FreeImage_GetTagCount(tag)==6)
 					{
 						LPDPOINT pPoint=(LPDPOINT)pBitmapPoint;
@@ -1134,6 +1148,45 @@ BOOL GMFIGetGeoTiffData (HANDLE hBMP,DWORD ShowTag,DWORD pScaleX, DWORD pScaleY,
 						pPoint->y = *pDouble++;
 						HavePoint=TRUE;
 					}
+					break;
+
+				case GeoAsciiParamsTag:
+				{
+					if (strstr(value, "NAD27"))
+						datum = NAD27;
+					else if (strstr(value, "NAD83"))
+						datum = NAD83;
+				}
+					break;
+
+				case GeoDoubleParamsTag:
+				{
+					int tagType = FreeImage_GetTagType(tag);
+					int tagCount = FreeImage_GetTagCount(tag);
+					pDouble = (LPDOUBLE)FreeImage_GetTagValue(tag);
+					while (tagCount--)
+						pDouble++;
+					int rtn = 1;
+				}
+				break;
+
+				case GeoKeyDirectoryTag:
+				{
+					int tagType = FreeImage_GetTagType(tag);
+					int tagCount = FreeImage_GetTagCount(tag);
+					short *pGeoKeyDirectory = (LPSHORT)FreeImage_GetTagValue(tag);
+
+					int rtn = 1;
+				}
+				break;
+
+				default:
+				{
+					int unhandledTag = tagID;
+					int unhandledTagType = FreeImage_GetTagType(tag);
+					int unhandledTagCount = FreeImage_GetTagCount(tag);
+					int rtn = 1;
+				}
 					break;
 				}
 

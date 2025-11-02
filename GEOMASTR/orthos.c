@@ -2657,7 +2657,7 @@ BOOL GetBMCoord (LPSTR lpFile,MNMXCORD *Bounds, double *Resolution,LPRECT32 Clip
         	goto ErrOut;
 
 		GetBitmapInfoFromHandle (&DibInfo,hDib32);
-		st = GetGeoTiffData (hDib32,&ScaleX,&ScaleY,&BitmapPoint, &WorldPoint);
+		st = GetGeoTiffData (hDib32,&ScaleX,&ScaleY,&BitmapPoint, &WorldPoint,FALSE);
 		GMDestroyDIB32 (hDib32); 
 		if (!st)
 			goto ErrOut;

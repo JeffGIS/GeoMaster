@@ -1562,7 +1562,7 @@ GotCloseFilehSQL:
 					goto RtnFalse;
 
 				GetBitmapInfoFromHandle(&DibInfo, hDib32);
-				st = GetGeoTiffData(hDib32, &ScaleX, &ScaleY, &BitmapPoint, &WorldPoint);
+				st = GetGeoTiffData(hDib32, &ScaleX, &ScaleY, &BitmapPoint, &WorldPoint,TRUE);
 				GMDestroyDIB32(hDib32);
 				goto RtnTrue;
 			}

@@ -5498,7 +5498,7 @@ GSSiExitProg (1350);
 			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs == 2)
 			{
-				HWND hWnd = atoll (Arg[1]);
+				HWND hWnd = (HWND)atoll (Arg[1]);
 				GetWindowText(hWnd, pCommonMem, lCommonMem);
 				GetWindowsText (hWnd, Arg[2]);
 				goto RtnTrue;
@@ -6081,7 +6081,7 @@ GSSiExitProg (1350);
 			hParent = GetParent(Handle);
 			if (!hParent)
 				hParent = GetWindow(Handle, GW_OWNER);
-			ltoa(Handle, OutLoc, 10);
+			ltoa((long)Handle, OutLoc, 10);
 			goto Rtnl;
 		}
 		case 1601: //$CREATESPORTMAPCD(orderfile,outdir) 
