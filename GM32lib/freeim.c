@@ -1070,7 +1070,7 @@ DLL_API BOOL DLL_CALLCONV FreeImage_GetMetadata(FREE_IMAGE_MDMODEL model, FIBITM
 33550
 33922*/
 
-BOOL GMFIGetGeoTiffData (HANDLE hBMP,DWORD ShowTag,DWORD pScaleX, DWORD pScaleY, DWORD pBitmapPoint, DWORD pWorldPoint)
+BOOL GMFIGetGeoTiffData (HANDLE hBMP,DWORD ShowTag, LPDOUBLE pScaleX, LPDOUBLE pScaleY, LPDPOINT pBitmapPoint, LPDPOINT pWorldPoint)
 {
 	FIBITMAP *dib = (FIBITMAP *) hBMP;
 	BOOL	rtn=FALSE;
@@ -1089,9 +1089,10 @@ BOOL GMFIGetGeoTiffData (HANDLE hBMP,DWORD ShowTag,DWORD pScaleX, DWORD pScaleY,
 		
 		if (FreeImage_GetMetadataCount (model,dib))
 		{
-		mdhandle = FreeImage_FindFirstMetadata(model, dib, &tag);
+			mdhandle = FreeImage_FindFirstMetadata(model, dib, &tag);
 
-		if(mdhandle) {
+			if(mdhandle)
+			{
 
 			do {
 				// convert the tag value to a string
@@ -1161,7 +1162,7 @@ BOOL GMFIGetGeoTiffData (HANDLE hBMP,DWORD ShowTag,DWORD pScaleX, DWORD pScaleY,
 
 				case GeoDoubleParamsTag:
 				{
-					int tagType = FreeImage_GetTagType(tag);
+					FREE_IMAGE_MDTYPE tagType = FreeImage_GetTagType(tag);
 					int tagCount = FreeImage_GetTagCount(tag);
 					pDouble = (LPDOUBLE)FreeImage_GetTagValue(tag);
 					while (tagCount--)
@@ -1172,10 +1173,17 @@ BOOL GMFIGetGeoTiffData (HANDLE hBMP,DWORD ShowTag,DWORD pScaleX, DWORD pScaleY,
 
 				case GeoKeyDirectoryTag:
 				{
-					int tagType = FreeImage_GetTagType(tag);
+					FREE_IMAGE_MDTYPE tagType = FreeImage_GetTagType(tag);
 					int tagCount = FreeImage_GetTagCount(tag);
-					short *pGeoKeyDirectory = (LPSHORT)FreeImage_GetTagValue(tag);
-
+					USHORT *pGeoKeyDirectory = (LPUSHORT)FreeImage_GetTagValue(tag);
+					LPSTR ptxt = malloc(tagCount * 8 + 4);
+					sprintf(ptxt, "%i %i %i %i", pGeoKeyDirectory[0], pGeoKeyDirectory[1], pGeoKeyDirectory[2], pGeoKeyDirectory[3]);
+					for (int i = 4; i < tagCount; i+=4)
+					{
+						sprintf (strchr (ptxt,0), "\n%i %i %i %i", pGeoKeyDirectory[i], pGeoKeyDirectory[i+1], pGeoKeyDirectory[i+2], pGeoKeyDirectory[i+3]);
+					}
+					MessageBox(0, ptxt, "GeoKey Directory Values", MB_OK);
+					free(ptxt);
 					int rtn = 1;
 				}
 				break;
@@ -1183,7 +1191,7 @@ BOOL GMFIGetGeoTiffData (HANDLE hBMP,DWORD ShowTag,DWORD pScaleX, DWORD pScaleY,
 				default:
 				{
 					int unhandledTag = tagID;
-					int unhandledTagType = FreeImage_GetTagType(tag);
+					FREE_IMAGE_MDTYPE unhandledTagType = FreeImage_GetTagType(tag);
 					int unhandledTagCount = FreeImage_GetTagCount(tag);
 					int rtn = 1;
 				}

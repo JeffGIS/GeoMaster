@@ -789,7 +789,7 @@ BOOL GetGeoTiffData (HDIB32 hBMP,LPDOUBLE pScaleX,LPDOUBLE pScaleY,LPDPOINT pBit
 		ShowTag = GetGlobalBVal2("[%GEOTIFSHOWTAGS]", FALSE);
 	else
 		ShowTag = TRUE;
-	st = GMFIGetGeoTiffData (hBMP,ShowTag,(DWORD) pScaleX,(DWORD) pScaleY,(DWORD) pBitmapPoint, (DWORD) pWorldPoint);
+	st = GMFIGetGeoTiffData (hBMP,ShowTag, pScaleX, pScaleY, pBitmapPoint, pWorldPoint);
 	return st;
 	
 }

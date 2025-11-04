@@ -1253,7 +1253,7 @@ BOOL GMFIBMPGetBitmapInfo (LPBITMAPINFOHEADER pDibInfoD, HANDLE hDib);
 BOOL GMFIInfoFromEXT(LPSTR PathName, LPBITMAPINFOHEADER	pDibInfo);
 DWORD GM32StretchDIBitsFromHandle (HDC hDC16,long destX,long destY,long destW,long destH,long xoff,
 						 long yoff,long sourcew, long sourceh, HANDLE Handle,DWORD ColorType,DWORD RasterOpt,LPDOUBLE pFactorD);
-BOOL GMFIGetGeoTiffData (HANDLE hBMP,DWORD ShowTag,DWORD pScaleX, DWORD pScaleY, DWORD pBitmapPoint, DWORD pWorldPoint);
+BOOL GMFIGetGeoTiffData (HANDLE hBMP,DWORD ShowTag, LPDOUBLE pScaleX, LPDOUBLE pScaleY, LPDPOINT pBitmapPoint, LPDPOINT pWorldPoint);
 DWORD GM32DrawLineWithFlatEnd (HDC hDC16,DWORD npt,LPPOINT pPoints32,DWORD Width,DWORD Color);
 HDIB32 LoadDIBFromMem (LPBYTE pMem,int MemLen,int Format,int flags);
 HDIB32  BMPHandleFromEXT (LPSTR ImageFile); 

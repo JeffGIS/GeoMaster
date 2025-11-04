@@ -1503,7 +1503,7 @@ void DisplayDistanceThemeLegend(short From,double ThisDist,double AZ,double TotD
 		{   
 			long	VPWidth = (long)CurView->ScreenRect.right - (long)CurView->ScreenRect.left;
 		    double  BaseDistPerPixel = (CurView->NewBounds.xmx - CurView->NewBounds.xmn)/VPWidth;
-		    double  BaseDistPerUnit  = -CurView->OrthoRes; 
+			double  BaseDistPerUnit = 0;
 		    double	MinorInc, MajorInc,ScaleDist=CurView->ScaleDist;  
 		    long	BarHeight, BarWidth, Width, Height;
 		    RECT	Bar;   
@@ -1513,7 +1513,9 @@ void DisplayDistanceThemeLegend(short From,double ThisDist,double AZ,double TotD
 		    long	Dist1=1, Dist2=5, DistFactor=1;
 		    short	NumDec;
 		    
-		    if (!DevicePixelsPerInch || !BaseDistPerPixel || !BaseDistPerUnit)
+			if (CurView->OrthoRes)
+				BaseDistPerUnit = -CurView->OrthoRes;
+		    if (!DevicePixelsPerInch || !BaseDistPerPixel)
 		    	break;
  			if (!CurView->WindowZoomedToOrtho || CurView->OrthoRes >= 0)
  			{   
@@ -1528,7 +1530,7 @@ void DisplayDistanceThemeLegend(short From,double ThisDist,double AZ,double TotD
  				}
  				ScaleDistUnits = abs (CurTheme->ValConv);  
  				ScaleDist = ConvertDist (BaseDistPerPixel * DevicePixelsPerInch,ScaleDistUnits);
- 				ilog = log10 (ScaleDist);
+				BaseDistPerUnit = ConvertInDist(ScaleDist, ScaleDistUnits); 				ilog = log10 (ScaleDist);
  				Min = pow (10,ilog);
  				Max = pow (10,ilog+1);
  				if (ScaleDist < Max/2)
@@ -1553,7 +1555,6 @@ void DisplayDistanceThemeLegend(short From,double ThisDist,double AZ,double TotD
  					NumMinorInc = UpInc;
  					ScaleDist = Max;
  				}
- 				BaseDistPerUnit = ConvertInDist (ScaleDist,ScaleDistUnits);
  			} 
  			else
  			{   

@@ -1552,7 +1552,7 @@ BOOL LoadTIFDTM(LPSTR InFile, LPSTR OutFile, BOOL new)
 		BOOL	st;
 		BITMAPINFOHEADER DibInfo = { 0 };
 		double	ScaleX, ScaleY;
-		DPOINT	BitmapPoint, WorldPoint;
+		DPOINT	BitmapPoint[4], WorldPoint[4];
 
 		hDib32 = BMPHandleFromEXT(InFile);
 		if (!hDib32)
@@ -1564,7 +1564,7 @@ BOOL LoadTIFDTM(LPSTR InFile, LPSTR OutFile, BOOL new)
 		}
 
 		GetBitmapInfoFromHandle(&DibInfo, hDib32);
-		st = GetGeoTiffData(hDib32, &ScaleX, &ScaleY, &BitmapPoint, &WorldPoint, FALSE);
+		st = GetGeoTiffData(hDib32, &ScaleX, &ScaleY, BitmapPoint, WorldPoint, FALSE);
 
 		strcpy(File, OutFile);
 		if (new)
