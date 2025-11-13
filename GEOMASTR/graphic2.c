@@ -616,20 +616,35 @@ BOOL ProcessCloseIcon (HWND hWnd,UINT Message, WPARAM wParam,LPARAM lParam)
 						InPan = FALSE;
 		        		if (Message == WM_LBUTTONUP)
 		        		{
-			        		CurView->Active = FALSE;
-							PickBoxesDestroy(CurView->ID);
-							ProcessText(CurView->VPCloseCmd);
-							if (CurView->DisplayedFullScreen)
-								MakeVPFullScreen (CurView->ID,0);
-							CurView = SaveView;
-							HaltMapDisplay(FALSE,FALSE); 
-							IgnoreLbutton = TRUE;
-							setDoPaint(TRUE);
-							PostMessage(hWndMain, WM_COMMAND, IDM_REDISPLAY, 0L); 
+							if (CurView->pTheme && CurView->pTheme->ID == PF_COORD_DISPLAY)
+							{
+								LPCOORDINATEDISPLAY pCD = CurView->pTheme;
+								pCD->active = !pCD->active;
+								CurView = SaveView;
+								IgnoreLbutton = TRUE;
+							}
+							else
+							{
+								CurView->Active = FALSE;
+								PickBoxesDestroy(CurView->ID);
+								ProcessText(CurView->VPCloseCmd);
+								if (CurView->DisplayedFullScreen)
+									MakeVPFullScreen (CurView->ID,0);
+								CurView = SaveView;
+								HaltMapDisplay(FALSE,FALSE); 
+								IgnoreLbutton = TRUE;
+								setDoPaint(TRUE);
+								PostMessage(hWndMain, WM_COMMAND, IDM_REDISPLAY, 0L);
+							}
 						}
 						else
 						{
 					        SetCurs (LoadCursor (hInst,IDC_ARROW),FALSE);
+						}
+						if (CurView->pTheme)
+						{
+							if (CurView->pTheme->ID == PF_COORD_DISPLAY)
+								DisplayCloseIcon();
 						}
 						CurView = SaveView;
 						rtn = TRUE;
@@ -776,7 +791,34 @@ GSSiExitProg (114);
 #endif
 		return;
 }
-    if (!DisplayView->Active)
+	if (!CD->active)
+	{
+		SaveView = CurView;
+		SetCurView(DisplayView);
+		HDC hDC = GetDC(DisplayView->hWnd);
+		SaveDC(hDC);
+		SetDisplayMode(hDC, GF_TEXTMODE);
+		GSSiDeleteObject(&CurView->hRgn);
+		CurView->hRgn = CreateVPRgn(FALSE, FALSE);
+		SelectClipRgn(hDC, CurView->hRgn);
+		GSSiDeleteObject(&CurView->hRgn);
+
+		FillRectColor(CurView->hDC, &CurView->ScreenRect, CurView->BackGroundColor);
+		LPSTR pTxt = malloc(256);
+		strcpy(pTxt, "Check the box to the right to display coordinates");
+		COLORREF ShadowColor = CurView->BackGroundColor;
+		RECT rect = CurView->DrawRect;
+		SIZE txSize;
+		GetTextExtentPoint32(hDC, pTxt, _fstrlen(pTxt), &txSize);
+		TextOut(hDC, rect.left+(RECTWIDTH(&rect)- txSize.cx)/2, rect.top+(RECTHEIGHT(&rect)-txSize.cy)/2, pTxt, _fstrlen(pTxt));
+		//DrawTextInRect(CurView->hDC, pTxt, &rect, ShadowColor, 12, 14);
+		free(pTxt);
+		DisplayCloseIcon();
+		RestoreDC(hDC, -1);
+		CurView = SaveView;
+		return;
+	}
+	if (!DisplayView->Active)
 {
 #if ENABLETRACE
 GSSiExitProg (114);
@@ -792,7 +834,6 @@ GSSiExitProg (114);
 #endif
     	return; 
 }                   
-	
     SaveView = CurView;
     CursorPoint = POINTStoPOINT(MAKEPOINTS(lParam));
 	iview = *pNumViewports;
@@ -1095,6 +1136,7 @@ Exit:
 	}
 	if (CurView)
 	{	
+		DisplayCloseIcon();
 		SetTextColor (hDC,OldColor);
 		RestoreDC (hDC,-1); 
 	}

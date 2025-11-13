@@ -443,12 +443,12 @@ BOOL CompressedFileCmd(int nArgs, LPSTR *Arg)
 		long	MaxLength = 8L * (long)USHRT_MAX;
 		short	Version = 101;
 
-		if (atob(Arg[6]))
+		if (nArgs > 5 && atob(Arg[6]))
 			useGZIP = TRUE;
 		fidFiles = GSSiOpenFile(Arg[3], 0, OF_READ);
 		if (fidFiles == HFILE_ERROR)
 			goto Exit;
-		if (*Arg[5])
+		if (nArgs > 4 && *Arg[5])
 		{
 			fidIndex = GSSiOpenFile(Arg[5], 0, OF_CREATE);
 			if (fidIndex == HFILE_ERROR)
@@ -546,11 +546,12 @@ static int GetFileFromTransferFile_del(HFILE FidTF,LPSTR FileToGet,long MaxLengt
 BOOL DecompressGMZipFile(LPSTR TransferFileName, LPSTR toDirectory, LPSTR whichFile,BOOL showStatus)
 {
 #define PATH_MAX MAX_PATH
-			int	len, MaxLength;
+			long len, MaxLength;
 			char File[PATH_MAX], OutFile[PATH_MAX];
 			short Version, endMarker;
 			HANDLE FidTF;
 			BOOL rtn = TRUE;
+			BOOL useZIP = FALSE;
 			LPSTR pBS;
 			FidTF = OpenFileGM(TransferFileName, 0,OF_READ);
 			LONGLONG fileLen;
@@ -571,7 +572,11 @@ BOOL DecompressGMZipFile(LPSTR TransferFileName, LPSTR toDirectory, LPSTR whichF
 			GSSillseek64(FidTF, -4, SEEK_END);
 			BigRead64(FidTF,&endMarker, sizeof(short));
 
-			if (endMarker != 32349)
+			if (endMarker == 32449)
+			{
+				useZIP = TRUE;
+			}
+			else if (endMarker != 32349)
 			{
 				rtn = FALSE;
 				goto Exit;
@@ -579,8 +584,8 @@ BOOL DecompressGMZipFile(LPSTR TransferFileName, LPSTR toDirectory, LPSTR whichF
 
 			GSSillseek64(FidTF, 0, SEEK_SET);
 			BigRead64(FidTF, &Version, sizeof(short));
-			BigRead64(FidTF, &MaxLength, sizeof(int));
-			BigRead64(FidTF, &len, 4);
+			BigRead64(FidTF, &MaxLength, sizeof(long));
+			BigRead64(FidTF, &len, sizeof(long));
 
 			while (rtn && len > 0)
 			{
@@ -595,7 +600,7 @@ BOOL DecompressGMZipFile(LPSTR TransferFileName, LPSTR toDirectory, LPSTR whichF
 					pBS++;
 				}
 				sprintf(OutFile, "%s\\%s", toDirectory, pBS);
-				rtn = GetFileFromTransferFile(0,FidTF,OutFile,MaxLength,totLen,FALSE);
+				rtn = GetFileFromTransferFile(0,FidTF,OutFile,MaxLength,totLen,useZIP);
 				nFilesRead++;
 				if (!rtn)
 					goto Exit;

@@ -4584,12 +4584,22 @@ void DisplayCloseIcon (void)
 			Rect.bottom = Rect.top + 18;  
 			Rect.left = Rect.right - 18;
 			FillRect (CurView->hDC,&Rect,GetStockObject(LTGRAY_BRUSH));
-			//	FrameRect (CurView->hDC,&Rect,GetStockObject(BLACK_BRUSH));   
-			hSavePen = SelectObject (CurView->hDC,hBlackPenDW);
-			MoveToEx (CurView->hDC, Rect.left+5, Rect.bottom-5,0);
-			LineTo (CurView->hDC, Rect.right-5,Rect.top+5);
-			MoveToEx (CurView->hDC, Rect.left+5, Rect.top+5,0);
-			LineTo (CurView->hDC, Rect.right-5,Rect.bottom-5);
+			//	FrameRect (CurView->hDC,&Rect,GetStockObject(BLACK_BRUSH));
+			hSavePen = SelectObject(CurView->hDC, hBlackPenDW);
+			BOOL displayX = TRUE;
+			if (CurView->pTheme && CurView->pTheme->ID == PF_COORD_DISPLAY)
+			{
+				LPCOORDINATEDISPLAY pCD = CurView->pTheme;
+				displayX = pCD->active;
+			}
+
+			if (displayX)
+			{
+				MoveToEx(CurView->hDC, Rect.left + 5, Rect.bottom - 5, 0);
+				LineTo(CurView->hDC, Rect.right - 5, Rect.top + 5);
+				MoveToEx(CurView->hDC, Rect.left + 5, Rect.top + 5, 0);
+				LineTo(CurView->hDC, Rect.right - 5, Rect.bottom - 5);
+			}
 			SelectObject (CurView->hDC,hSavePen);
 			GSSiDeleteObject(&hBlackPenDW);
 			CurView->CloseIconRect = Rect;        

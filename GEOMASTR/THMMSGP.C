@@ -1412,10 +1412,10 @@ void DisplayDistanceThemeLegend(short From,double ThisDist,double AZ,double TotD
     SetViewport (CurTheme->TargetViewport);  
     if (CurView->NewBounds.xmx < CurView->NewBounds.xmn)
     	goto Exit;
-    if (Printing)
-    	Type = 2;
-    else
-    	Type = CurTheme->ClassType;  
+	if (Printing)
+		Type = 2;
+	else
+		Type = CurTheme->ClassType;
 	switch (Type)
 	{
 		case 1:
@@ -1517,7 +1517,13 @@ void DisplayDistanceThemeLegend(short From,double ThisDist,double AZ,double TotD
 				BaseDistPerUnit = -CurView->OrthoRes;
 		    if (!DevicePixelsPerInch || !BaseDistPerPixel)
 		    	break;
- 			if (!CurView->WindowZoomedToOrtho || CurView->OrthoRes >= 0)
+			static int iii = 0;
+			char str[1024];
+			sprintf(str, "\n\nStart %i %f %f %f %i", iii++, CurView->NewBounds.xmn,CurView->NewBounds.xmx, CurView->NewBounds.xmx-CurView->NewBounds.xmn, VPWidth);
+			OutputDebugString(str);
+			sprintf(str, "\n%i %f %f", iii++, DevicePixelsPerInch, BaseDistPerPixel);
+			OutputDebugString(str);
+			if (!CurView->WindowZoomedToOrtho || CurView->OrthoRes >= 0)
  			{   
  				double	Min, Max;
  				
@@ -1530,7 +1536,8 @@ void DisplayDistanceThemeLegend(short From,double ThisDist,double AZ,double TotD
  				}
  				ScaleDistUnits = abs (CurTheme->ValConv);  
  				ScaleDist = ConvertDist (BaseDistPerPixel * DevicePixelsPerInch,ScaleDistUnits);
-				BaseDistPerUnit = ConvertInDist(ScaleDist, ScaleDistUnits); 				ilog = log10 (ScaleDist);
+				BaseDistPerUnit = ConvertInDist(ScaleDist, ScaleDistUnits);
+				ilog = log10 (ScaleDist);
  				Min = pow (10,ilog);
  				Max = pow (10,ilog+1);
  				if (ScaleDist < Max/2)
@@ -1555,6 +1562,9 @@ void DisplayDistanceThemeLegend(short From,double ThisDist,double AZ,double TotD
  					NumMinorInc = UpInc;
  					ScaleDist = Max;
  				}
+				sprintf(str, "\n%i %f %f", ScaleDistUnits,ScaleDist, BaseDistPerUnit);
+				OutputDebugString(str);
+
  			} 
  			else
  			{   
@@ -1597,6 +1607,9 @@ void DisplayDistanceThemeLegend(short From,double ThisDist,double AZ,double TotD
 			if (NumMajorInc > 10 && NumMajorInc%2)
 				NumMajorInc--;
 			BarWidth = IDNINT ((NumMajorInc + 1) * MajorInc / BaseDistPerPixel);
+			sprintf(str, "\nBW %i %f %f", BarWidth, MajorInc,MinorInc);
+			OutputDebugString(str);
+
 			Bar.left = CurView->ScreenRect.left + (CurView->ScreenRect.right - CurView->ScreenRect.left)/2 - BarWidth/2;
 			Bar.right = Bar.left + BarWidth; 
 			Bar.bottom = CurView->ScreenRect.bottom - BarHeight; 

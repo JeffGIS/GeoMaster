@@ -608,7 +608,7 @@ HWND WINAPI GSSiSetFocus(_In_opt_ HWND hWnd)
 	static icmd = 0;
 	char printfcmd[128];
 	sprintf(printfcmd, "setfocus = %#010x:%#010x:%#010x  %6i\n",hWnd,rtn,hWndMain, icmd++);
-	OutputDebugString(printfcmd);
+	//OutputDebugString(printfcmd);
 
 #endif
 	if (rtn == (HWND)-1)

@@ -853,7 +853,7 @@ BOOL AddFileToTransferFile (HWND hWndStatus,HANDLE FidTF,LPSTR FileToAdd,long Ma
 			lRecCMP = CompressBinaryRecord(pRec, pCompressedRec, lRec);
 //		int lUCRec3 = ZLibUncompress(pRec, MaxLength * 2, pCompressedRec,lRec3);
 //		int diff = IDNINT((100.0 * lRecFI) / lRec);
-//		int dclen = DecompressBinaryRecordUnsafe(pRec, pCompressedRec, lRec);
+		int dclen = DecompressBinaryRecordUnsafe(pRec, pCompressedRec, lRecCMP);
 		BigWrite64 (FidTF,(HPSTR)&lRecCMP,4,-1);
     	BigWrite64 (FidTF,(HPSTR)pCompressedRec,lRecCMP,-1);       
     	if (hWndStatus)
@@ -867,7 +867,7 @@ Exit:
     return rtn; 
 }
 
-BOOL GetFileFromTransferFile(HWND hWndStatus, HANDLE FidTF, LPSTR FileToGet, LONGLONG LenToRead, long MaxLength, BOOL zlibCompressed)
+BOOL GetFileFromTransferFile(HWND hWndStatus, HANDLE FidTF, LPSTR FileToGet, long LenToRead, LONGLONG MaxLength, BOOL zlibCompressed)
 {
 	long	lRec;
 	HANDLE	hRec = GSSiGlobAlloc(1552, GMEM_MOVEABLE, MaxLength);
@@ -881,7 +881,7 @@ BOOL GetFileFromTransferFile(HWND hWndStatus, HANDLE FidTF, LPSTR FileToGet, LON
 	if (Fid == INVALID_HANDLE_VALUE)
 		return FALSE;
 	PctBox(hWndStatus, LenToRead, LenRead, 0);
-	while (LenRead < LenToRead)
+	while (LenRead < MaxLength)
 	{
 		BigRead64(FidTF, (HPSTR)&CompressedLength, 4);
 		if (CompressedLength > 0)
