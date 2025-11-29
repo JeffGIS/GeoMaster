@@ -715,6 +715,11 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 		db = (sqlite3*)atoi(ARG[2]);
 		rtn = DoesSLTTableExist(db, ARG[3]);
 	}
+	else if (!stricmp(ARG[1], "SUMMARIZE"))//$SQLITE(SUMMARIZE, DBHANDLE,Outfile)
+	{
+		db = (sqlite3*)atoi(ARG[2]);
+		rtn = SummarizeSLTDB(db, ARG[3]);
+	}
 	else if (!stricmp(ARG[1], "DOESFIELDEXIST"))
 	{
 		db = (sqlite3*)atoi(ARG[2]);
@@ -4453,6 +4458,56 @@ BOOL DoesSLTTableExist(sqlite3 *db, LPSTR tableName)
 			rtn = TRUE;
 		}
 		sqlite3_finalizeGSSi(&statement);
+	}
+	return rtn;
+}
+BOOL SummarizeSLTDB(sqlite3* db, LPSTR OutFile)
+{
+	BOOL rtn = FALSE;
+	sqlite3_stmt* statement;
+
+	if (db)
+	{
+		char cmd[256];
+		char outLine[512];
+		LPSTR pTempFile = malloc(512);
+		GSSiGetTempFileName(0, "gm", 0, pTempFile);
+		HFILE Fid = GSSiOpenFile(pTempFile, 0, OF_CREATE);
+		if (Fid != HFILE_ERROR)
+		{
+
+			sprintf(cmd, "SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name");
+
+			SQLOK(sqlite3_prepare_v2GSSi(db, cmd, -1, &statement, 0), db, "summarize", 0);
+
+			while (sqlite3_step(statement) == SQLITE_ROW)
+			{
+				LPSTR pName = (LPSTR)sqlite3_column_text(statement, 0);
+				fputstring(pName, Fid);
+				rtn = TRUE;
+			}
+			sqlite3_finalizeGSSi(&statement);
+			GSSiClose(Fid);
+			Fid = GSSiOpenFile(pTempFile, 0, OF_READ);
+			HFILE FidOut = GSSiOpenFile(OutFile, 0, OF_CREATE);
+			char tableName[260];
+			while (fgetstring(tableName, 256, Fid))
+			{
+				sprintf(cmd, "SELECT COUNT (*) FROM %s", tableName);
+				SQLOK(sqlite3_prepare_v2GSSi(db, cmd, -1, &statement, 0), db, "summarize", 0);
+
+				if (sqlite3_step(statement) == SQLITE_ROW)
+				{
+					long nrows = sqlite3_column_int(statement, 0);
+					sprintf(outLine, "%s\t%i", tableName, nrows);
+					fputstring(outLine, FidOut);
+				}
+			}
+			GSSiClose(Fid);
+			GSSiClose(FidOut);
+		}
+
+		free(pTempFile);
 	}
 	return rtn;
 }
