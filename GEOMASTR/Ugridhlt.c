@@ -513,14 +513,20 @@ BOOL GetRowHighlightData (long RowNum,LPHIGHLIGHTDATA pHighlightData)
 	return FALSE;
 } 
 
-BOOL GetNextHighlightData (LPLONG pRefno,LPHIGHLIGHTDATA pHighlightData,BOOL First)
+BOOL GetNextHighlightData (LPLONG pRefno,LPHIGHLIGHTDATA pHighlightData,BOOL First,BOOL getSameRec)
 {
 	long	Sequence;
 	short	st, pos=BT_NEXT; 
 	char	Key[260];
+	static HIGHLIGHTDATA lastHltData;
 	
 	if (!hHighlight)
 		return FALSE;
+	if (getSameRec)
+	{
+		memcpy(pHighlightData, &lastHltData, sizeof(HIGHLIGHTDATA));
+		return TRUE;
+	}
 	if (First)  
 	{
 		pos = BT_FIRST;
@@ -537,6 +543,7 @@ BOOL GetNextHighlightData (LPLONG pRefno,LPHIGHLIGHTDATA pHighlightData,BOOL Fir
 	}
 	if (!st)
 	{
+		memcpy(&lastHltData, pHighlightData, sizeof(HIGHLIGHTDATA));
 		HLTGraphicsPos = pHighlightData->HLTGraphicsFilePos;
 		if (*HLTGraphicsFile)
 			PickList[0].Segment = 0;

@@ -1,2 +1,2 @@
-configs\PheasantPointsCreate.gmc [%USEGDIPLUS]=F;[%KFO]=T;    
+configs\TrailTest.gmc [%USEGDIPLUS]=T;[%KFO]=T;    
 e:\gmmobile\metroUTM

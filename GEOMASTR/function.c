@@ -2805,7 +2805,15 @@ SetVis:
 			if (!_fstricmp(Arg[1], "PARMCOPY"))//$SHP(PARMCOPY,fromfile,tofile,startref)
 			{
 				int startref = atoi(Arg[4]);
-				if (CopySHPParm(Arg[2],Arg[3],startref))
+				if (CopySHPParm(Arg[2], Arg[3], startref))
+				{
+					goto RtnTrue;
+				}
+			}
+
+			if (!_fstricmp(Arg[1], "TEST"))//$SHP(TEST,type,file)
+			{
+				if (main_shptest(nArgs-1,&Arg[1]))
 				{
 					goto RtnTrue;
 				}

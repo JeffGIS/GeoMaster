@@ -2295,9 +2295,23 @@ DoPoly:
 									{ 
 										if (!WantSegmentID || WantSegmentID-1 == i)
 										{
+											static BOOL showSubSegs = FALSE;
 											if (SetDisplayChar (hDC,GF_LINE,CurrentRefno,CurrentDesc,CurrentPrefix,CurrentUDI) > 0)
-											{   
-												GWPolylineD (hDC,lpDCurPoints,NumDynSegPoints,CurrentDesc); 
+											{
+												HPEN hOldPen;
+												if (showSubSegs)
+												{
+													int pWidth=i*2+1;
+													COLORREF color=0;
+													hSpecialPen = CreatePen(PS_SOLID, pWidth, color);
+													hOldPen = SelectObject(hDC, hSpecialPen);
+													//if (!i)
+														GWPolylineD(hDC, lpDCurPoints, NumDynSegPoints,0);
+													SelectObject(hDC, hOldPen);
+													GSSiDeleteObject(&hSpecialPen);
+												}
+												else
+													GWPolylineD (hDC,lpDCurPoints,NumDynSegPoints,CurrentDesc); 
 											}
 										}
 										else

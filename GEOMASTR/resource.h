@@ -3453,6 +3453,8 @@
 #define IDC_IMAGEBUTTON                 2314
 #define IDC_ALLOW_DUPLICATES            2315
 #define ID_THEMELIST_1                  2316
+#define IDC_ALLOW_DECOMPOSE             2316
+#define IDC_DECOMPOSE                   2316
 #define ID_THEMELIST_2                  2317
 #define IDC_SHOWREG                     2318
 #define IDC_END_DISPLAY_COMMAND         2319

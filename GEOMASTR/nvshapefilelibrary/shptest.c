@@ -280,7 +280,7 @@ int main_shptest( int argc, char ** argv )
         Test_WriteMultiPoints( SHPT_MULTIPOINTM, "test6.shp" );
 
     else if( atoi(argv[1]) == 7 )
-        Test_WriteArcPoly( SHPT_ARC, "test7.shp" );
+        Test_WriteArcPoly( SHPT_ARC, argv[2]);
     else if( atoi(argv[1]) == 8 )
         Test_WriteArcPoly( SHPT_ARCZ, "test8.shp" );
     else if( atoi(argv[1]) == 9 )
@@ -305,6 +305,6 @@ int main_shptest( int argc, char ** argv )
     malloc_dump(2);
 #endif
 
-   exitApp(__func__);
+//   exitApp(__func__);
    return 0;
 }

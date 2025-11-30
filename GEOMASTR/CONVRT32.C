@@ -2636,7 +2636,7 @@ int ReadVISLIST16 (HFILE Fid,LPVISLIST CurVis)
 {
 	int	nread;
 
-	HANDLE	hVL16 = GSSiGlobAlloc (0,GMEM_MOVEABLE,sizeof(VISLIST16));
+	HANDLE	hVL16 = GSSiGlobAlloc (1872,GMEM_MOVEABLE,sizeof(VISLIST16));
 	LPVISLIST16 pVL16 = (LPVISLIST16)GlobalLock (hVL16);
 	nread = BigRead (Fid,pVL16,sizeof(VISLIST16));
 	if (nread == sizeof(VISLIST16))

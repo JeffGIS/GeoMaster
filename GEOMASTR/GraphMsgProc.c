@@ -30348,7 +30348,7 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPA
             case IDOK: 
             {
                 HFILE   FidMIF, FidMID, FidSHP, FidSHPIdx;
-                char    IdxName[128];   
+                char    IdxName[MAX_PATH];
                 OFSTRUCTGM    OFStruct;  
                 short     pos, nTranFile, nParts;  
                 LPSTR	lpSC;
@@ -30396,10 +30396,16 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPA
 				int		fileType;
 				char	SaveAltProj[MAX_PATH] = { 0 };
 				BOOL	duplicatePoly = FALSE;
+				BOOL	getSameRec = FALSE;
+				BOOL	decomposeRec = FALSE;
+				long	currentDecomposedRecord=0;
+				int		nOriginalParts = 0;
 
 				if (SendDlgItemMessage(hWndDlg, IDC_ALLOW_DUPLICATES, BM_GETCHECK, 0, 0))
 					duplicatePoly = TRUE;
-                CloseDataFile (FALSE,&MIFOuthDB);  
+				if (SendDlgItemMessage(hWndDlg, IDC_DECOMPOSE, BM_GETCHECK, 0, 0))
+					decomposeRec = TRUE;
+				CloseDataFile (FALSE,&MIFOuthDB);
                 GetDlgItemText (hWndDlg,IDC_SHAPETYPE,str,sizeof(str));
                 if (!_fstricmp (str,"Point"))    
                 	ShapeType = 1;
@@ -30715,16 +30721,18 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPA
                 FullCurves = TRUE; 
                 SaveDisplaySymbol = DisplaySymbol;
                 DisplaySymbol = FALSE;
+				currentDecomposedRecord = 0;
  //               while (!BT_FIND (hHighlight,(LPSTR)&iref,pos,BT_ANY,(LPSTR)&HighlightData)&&ContinueProcessing)
   				while (ContinueProcessing && 
 						   (GetNextThinnedContour (&contourElev,&nconPnts,&hConPnts) ||
 						    GetNextDataRecord(useDataFile, MIFOuthDB,&iref, &HighlightData, FirstRec) ||
-						    GetNextHighlightData (&iref,&HighlightData,FirstRec)))
+						    GetNextHighlightData (&iref,&HighlightData,FirstRec,getSameRec)))
                 {   
               		long	ii; 
                 	short	Subrec = 0, NumSubrecs=1;
 					int		dupRecs = 0;
 
+					currentDecomposedRecord++;
 					FirstRec = FALSE;
         NextSubrec: 
         			Subrec++;
@@ -30782,6 +30790,25 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPA
 							nParts = 1;
 							nSavePoly = nconPnts;
 						}
+						else if (decomposeRec)
+						{
+							nOriginalParts = GetSavedPolys();
+							nParts = 1;
+							if (nOriginalParts <= currentDecomposedRecord)
+							{
+								getSameRec = FALSE;
+								currentDecomposedRecord = 0;
+							}
+							else
+							{
+								getSameRec = TRUE;
+							}
+							for (int i = 0; i < currentDecomposedRecord; i++)
+							{
+								GetSavedPolys();
+							}
+							GSSiGlobFree(&hSavePolyParts);
+						}
 						else
                     		nParts = GetSavedPolys ();
                         if (hSavePoly)
@@ -30817,8 +30844,7 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPA
                             	i = SHPPolyHeader.NumParts; 
 	                            nareas=SHPPolyHeader.NumParts; 
 	                            nSavePoly2 = nSavePoly;
-								hSavePoly2 = GSSiGlobalCopy(0, hSavePoly);
-	                            hSavePoly = 0;
+								hSavePoly2 = GSSiGlobalCopy(1876, hSavePoly);
 	                            pIndex++; 
                             	while (GetSavedPolys ())
                             	{   
@@ -30826,7 +30852,7 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPA
                             		
                             		*pIndex = nSavePoly2;
                             		nSavePoly2 += nSavePoly;
-									hSavePoly2 = GSSiGlobalReAlloc (0,hSavePoly2,
+									hSavePoly2 = GSSiGlobalReAlloc (1877,hSavePoly2,
 																(long)sizeof(MNMXCORD)+(long)(nSavePoly2)*sizeof(DPOINT),GMEM_MOVEABLE);
 		                            lpRect = (LPMNMXCORD) GlobalLock (hSavePoly2);
 		                            lpRect++;
@@ -30995,7 +31021,7 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPA
 //							if (hSavePoly)
 //								GlobalUnlock(hSavePoly);
 							DestroySavedPolys();
-                         }
+						 }
                          else
                          	goto NextHlt;
                      }
@@ -32882,7 +32908,7 @@ BOOL FAR PASCAL TXT_OUTPUTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPA
 	            	 
 	            	 CensusValueField = IDC_OUTLINE1;
 	            	 CensusValueWnd = hWndDlg;   
-	            	 if (GetNextHighlightData (&iref,&HighlightData,TRUE)) 
+	            	 if (GetNextHighlightData (&iref,&HighlightData,TRUE,FALSE)) 
 	            	 {
 						char	saveHGF = *HLTGraphicsFile;
 
@@ -32988,7 +33014,7 @@ BOOL FAR PASCAL TXT_OUTPUTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPA
 					if (strstr (lpStr,"$POLYPOINT"))
 						usePolyPoints = TRUE;
 					while (ContinueProcessing && 
-						   GetNextHighlightData (&iref,&HighlightData,First))
+						   GetNextHighlightData (&iref,&HighlightData,First,FALSE))
 				    {   
 				    	RECT	Rect;  
 				    	short	st;

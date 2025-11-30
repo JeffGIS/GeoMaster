@@ -4589,7 +4589,7 @@ void DisplayCloseIcon (void)
 			BOOL displayX = TRUE;
 			if (CurView->pTheme && CurView->pTheme->ID == PF_COORD_DISPLAY)
 			{
-				LPCOORDINATEDISPLAY pCD = CurView->pTheme;
+				LPCOORDINATEDISPLAY pCD = (LPCOORDINATEDISPLAY)CurView->pTheme;
 				displayX = pCD->active;
 			}
 

@@ -202,7 +202,7 @@ void CreateBigMem (void)
 				//	+ MAXFONTS * sizeof(double);  
 
 //common memory
-	hNulls = GSSiGlobAlloc(0, GHND, 128);
+	hNulls = GSSiGlobAlloc(1871, GHND, 128);
 	hBigMem7 = GSSiGlobAlloc (1302, GHND,lCommonMem+32);
 	pCommonMem = GlobalLock (hBigMem7);
 

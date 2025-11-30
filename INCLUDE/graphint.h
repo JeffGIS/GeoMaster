@@ -782,7 +782,7 @@ void SaveHighlightList (LPHANDLE pH1, LPHANDLE pH2);
 void RestoreHighlightList (HANDLE H1, HANDLE H2); 
 HFILE SaveHighlightListToConfig (HFILE FidConfig);
 BOOL ReadHighlightListFromConfig (HFILE *FidConfig);
-BOOL GetNextHighlightData (LPLONG pRefno,LPHIGHLIGHTDATA pHighlightData,BOOL First);
+BOOL GetNextHighlightData (LPLONG pRefno,LPHIGHLIGHTDATA pHighlightData,BOOL First,BOOL getSameRec);
 void DrawTAG (HWND hWnd, HDC hDC, BOOL MoveMode, BOOL Restore);
 HANDLE ShowPointerLine (HDC hDC,RECT rect,POINT endpoint, POINT begpoint, BOOL *HavePL,BOOL MoveMode,int LineWidth,int Elww,int Elwh,LPRECT pClipRect);
 void DisplayShadow (HDC hDC,LPRECT pRect,short offset);

@@ -4116,7 +4116,7 @@ HANDLE  PointInAreaAcceleratorSetup (DWORD nPoints, HPDPOINT pAreaPoints,int nPo
 	if (bm.bmBitsPixel == 32)
 	{
 		int		l = (int)bm.bmWidthBytes * (int)bm.bmHeight; 
-		HANDLE	hBits = GSSiGlobAlloc (0,GMEM_MOVEABLE,l);
+		HANDLE	hBits = GSSiGlobAlloc (1875,GMEM_MOVEABLE,l);
 //		LPCOLORREF	pBits = GlobalLock (hBits);
 		LPRGBQUAD	pBits = GlobalLock (hBits);
 

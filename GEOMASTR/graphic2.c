@@ -618,7 +618,7 @@ BOOL ProcessCloseIcon (HWND hWnd,UINT Message, WPARAM wParam,LPARAM lParam)
 		        		{
 							if (CurView->pTheme && CurView->pTheme->ID == PF_COORD_DISPLAY)
 							{
-								LPCOORDINATEDISPLAY pCD = CurView->pTheme;
+								LPCOORDINATEDISPLAY pCD = (LPCOORDINATEDISPLAY)CurView->pTheme;
 								pCD->active = !pCD->active;
 								CurView = SaveView;
 								IgnoreLbutton = TRUE;
