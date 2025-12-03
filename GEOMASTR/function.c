@@ -837,7 +837,7 @@ GSSiExitProg (1348);
 				HFILE Fid = GSSiOpenFile(Arg[2], 0, OF_CREATE);
 				if (Fid == HFILE_ERROR)
 					goto RtnFalse;
-				HANDLE hLine = GSSiGlobAlloc(0, GMEM_MOVEABLE, 1024);
+				HANDLE hLine = GSSiGlobAlloc(1877, GMEM_MOVEABLE, 1024);
 				LPSTR pLine = GlobalLock(hLine);
 				sprintf(pLine, "REFNO\tPREFIX\tUDI\tTYPE\tDESC\tBOUNDS\tLENGTH\tBP\tEP");
 				fputstring(pLine, Fid);

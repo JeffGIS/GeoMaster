@@ -1727,7 +1727,7 @@ RedrawTable:
 													break;
 												if (nItems)
 												{
-													HANDLE hMem = GSSiGlobAlloc(0, GMEM_MOVEABLE, nItems * sizeof (long));
+													HANDLE hMem = GSSiGlobAlloc(1878, GMEM_MOVEABLE, nItems * sizeof (long));
 													LPLONG	pRefs = GlobalLock(hMem);
 
 													GSSiSetCursor(LoadCursor(0, IDC_WAIT));

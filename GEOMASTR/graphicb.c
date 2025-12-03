@@ -1235,7 +1235,7 @@ BOOL GetTextString (HWND hWnd,LPSTR String,int lenstring, LPSTR Title,LPSTR List
 	int		nRc;
 	char	InitValc[64];
 	BOOL	SaveDoPaint = DoPaint();
-	HANDLE	hStr=GSSiGlobAlloc (0,GMEM_MOVEABLE,4096);  
+	HANDLE	hStr=GSSiGlobAlloc (1881,GMEM_MOVEABLE,4096);  
 	LPSTR	str=GlobalLock (hStr),Arg5;
 	
 	if (GetGlobalCVal ("[%NEXTCVAL]",str,0))

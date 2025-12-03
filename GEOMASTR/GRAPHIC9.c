@@ -2360,7 +2360,7 @@ long FillProjectionList (HWND hWndDlg,UINT cntl,LPSHORT pCurProj,UINT unitscntl,
 
     if (!hProjectionFile)
     {
-    	hProjectionFile = GSSiGlobAlloc (0,GMEM_MOVEABLE,256); 
+    	hProjectionFile = GSSiGlobAlloc (1879,GMEM_MOVEABLE,256);
     	pName = GlobalLock (hProjectionFile);
 		GSSiGetTempFileName(0,"gma",0,pName); 
 	}	

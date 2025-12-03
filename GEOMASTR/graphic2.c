@@ -784,7 +784,7 @@ GSSiExitProg (114);
 		return;
 }
 	DisplayView = pViewports[CD->DisplayViewport-1];
-	if (!DisplayView)
+	if (!DisplayView || !DisplayView->Active)
 {
 #if ENABLETRACE
 GSSiExitProg (114);

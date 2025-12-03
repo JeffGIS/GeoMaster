@@ -6560,7 +6560,7 @@ BOOL DisplaySymInWindow (HWND hWnd,HDC hDCin,HANDLE hSymbol,short nElement,HANDL
     
     if (!hSymbol)
     	return FALSE;
-	hVP = GSSiGlobAlloc (0,GMEM_MOVEABLE,sizeof(VIEWPORT));
+	hVP = GSSiGlobAlloc (1880,GMEM_MOVEABLE,sizeof(VIEWPORT));
 	pSaveVP = GlobalLock (hVP);
 	*pSaveVP = *CurView;
 	CurView->HalfTone = 0;
