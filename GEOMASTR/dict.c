@@ -863,7 +863,7 @@ void DisplayAreaSymbol (HANDLE hSymbol, HDC hDC, int nPnts, LPPOINT Points)
 HDIB32 GetSymbolImage (LPSTR SymName)
 {
 	HDIB32	hDib=0;
-	HANDLE	hMem = GSSiGlobAlloc (0,GMEM_MOVEABLE,512);
+	HANDLE	hMem = GSSiGlobAlloc (1884,GMEM_MOVEABLE,512);
 	LPSTR	pBS, BMPName = GlobalLock (hMem);
 		
 	_fstrcpy (BMPName,"[%SYM_DICT]");

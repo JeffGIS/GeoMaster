@@ -121,7 +121,7 @@ HANDLE CreateUniqueList (int length, LPSTR Name)
 	
 	if (!Name)
 	{
-		hMem = GSSiGlobAlloc (0,GHND,256);
+		hMem = GSSiGlobAlloc (1882,GHND,256);
 		Name = GlobalLock (hMem);
 	}					
 	GSSiGetTempFileName (0,"gmu",0,(LPSTR)Name);
@@ -248,7 +248,7 @@ RETCODE rc;
 HDBC hdbc;
 UDWORD collen;
 SDWORD  lenanswer;
-HANDLE	hStr=GSSiGlobAlloc (0,GMEM_MOVEABLE,4096);
+HANDLE	hStr=GSSiGlobAlloc (1883,GMEM_MOVEABLE,4096);
 LPSTR str=GlobalLock(hStr);
 LPSTR sqlstr=str+1024;
 LPSTR	lpsqlstr=sqlstr, lpBrack, lpEndBrack, lpParam, lpOrder, Value, lpFrom;

@@ -905,6 +905,10 @@ int	GetFunctionValue7(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, 
 		char space[2] = " ";
 		LPSTR VB;
 		int cancelNum = 0;
+		static BOOL skipmessage = FALSE;
+
+		if (skipmessage)
+			goto RtnTrue;
 
 		nArgs = GetFunArgs(Args, Arg, 4, &hMem, pBrkPt, bpOffset, bpLen);
 		if (nArgs < 1)

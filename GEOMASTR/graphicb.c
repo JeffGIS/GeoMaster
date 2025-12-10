@@ -267,7 +267,7 @@ GSSiExitProg (1143);
     if (Clip)
     {
 		long	npts = nPnts - beginpoint;
-		HANDLE hPoly = GSSiGlobAlloc (0,GMEM_MOVEABLE,sizeof(DPOINT)*npts);
+		HANDLE hPoly = GSSiGlobAlloc (1886,GMEM_MOVEABLE,sizeof(DPOINT)*npts);
 		HPDPOINT	ScreenPoints = GlobalLock (hPoly);
 		DPOINT	BasePt;
 

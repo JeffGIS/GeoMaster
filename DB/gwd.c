@@ -3357,7 +3357,7 @@ GSSiExitProg (635);
 	}
 FoundFile:
 	lUp = strlen (UpdateStringIN);
-	hUpdateString = GSSiGlobAlloc (0,GMEM_MOVEABLE,lUp+1);
+	hUpdateString = GSSiGlobAlloc (1885,GMEM_MOVEABLE,lUp+1);
 	UpdateString = GlobalLock (hUpdateString);
 	lpGWDHead = (LPGWDHEADER)GlobalLock (hDBDest);
 	hmemset ((HPSTR)&lpGWDHead->GWDData,0,lpGWDHead->Reclen); 
