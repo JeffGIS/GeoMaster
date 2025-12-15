@@ -1,2 +1,2 @@
-configs\FixTrails.gmc [%USEGDIPLUS]=T;[%KFO]=T;    
+configs\ClipTrails.gmc [%USEGDIPLUS]=T;[%KFO]=T;    
 e:\gmmobile\metroUTM

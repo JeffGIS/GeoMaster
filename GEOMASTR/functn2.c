@@ -2008,17 +2008,29 @@ GSSiExitProg (1350);
 		{	 
 			BOOL updateOnly;
 			GMDUpdateConvertCommas(Args);
-			nArgs = GetFunArgs(Args, Arg, -5, &hMem, pBrkPt, bpOffset, bpLen);
+			nArgs = GetFunArgs(Args, Arg, -6, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 3)
 				goto RtnFalse;  
 			ExpandText (Arg[1]);
 			ExpandText(Arg[4]);
 			ExpandText(Arg[5]);
+			ExpandText(Arg[6]);
+			LPSTR debugID = atoi(Arg[6]);
 			if (*Arg[4])
 				n=atoi(Arg[4]);
 			else
 				n=1;
 			updateOnly = atob(Arg[5]);
+			if (GMDUPDATEDebug)
+			{
+				LPSTR dbArgs = malloc(4096 * 4);
+				sprintf(dbArgs, "% s\n % s\n % s", Arg[1], Arg[2], Arg[3]);
+				ReplaceChar(dbArgs, '=', '\a');
+				ExpandText(dbArgs);
+				ReplaceChar(dbArgs, '\a', '=');
+				MessageBox(0, dbArgs, Arg[6], MB_OK);
+				free (dbArgs);
+			}
 			n = UpdateGMDFile (Arg[1],Arg[2],Arg[3],';',n,updateOnly);
 			itoa (n,OutLoc,10);
 			goto Rtnl;

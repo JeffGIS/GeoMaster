@@ -3709,6 +3709,9 @@ GSSiExitProg (532);
 			}
 		}
 		break;
+		case 421:
+			GMDUPDATEDebug = atob(Value);
+			break;
 		default:
  			break;
 	}
@@ -4147,6 +4150,7 @@ void CreateInternalGlobals (void)
 	AllocateTypeVar("%TEXTBPOINT", 418, FALSE);
 	AllocateTypeVar("%TEXTEPOINT", 419, FALSE);
 	AllocateTypeVar("%FILEUSAGEFILE2", 420, FALSE);
+	AllocateTypeVar("%GMDUPDATEDEBUG", 421, FALSE);
 
 //	AllocateTypeVar("%DL",191,FALSE);
 	

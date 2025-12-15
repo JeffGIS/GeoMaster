@@ -964,6 +964,7 @@ extern long			NumSHPDBFRecs;
 extern long			SHPRecOffset; 
 extern HANDLE			hSHPDBF; 
 extern int			gridSymbol;
+extern BOOL			GMDUPDATEDebug;
 extern unsigned int			totContourPoints,trimmedContourPoints,maxContourPoints;
 extern float		removeContourSize, contourPointMergeDist, contourPointLinearSmooth;
 extern BOOL			displayOriginalContours;
