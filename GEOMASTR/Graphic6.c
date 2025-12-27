@@ -3582,6 +3582,7 @@ void SetPickGlobals (int item)
 	LPVIEWPORT	SaveVP=CurView;
     
     FileNum = PickList[item].FileNum;
+	SubFile = PickList[item].SubFile;
     SetPickGlobalsCalled = TRUE; 
 	SetConfig (PickList[item].ConfigID);
 	SetViewport(PickList[item].ViewID);
@@ -3590,6 +3591,27 @@ void SetPickGlobals (int item)
     {
     	GetPickName (item);
     	_fstrupr (PickName);
+
+		if (_fstrstr(PickName, "FILELIST.TXT"))
+		{
+			int wantFile = SubFile;
+			
+			HFILE FidFL = GSSiOpenFile(PickName, 0, OF_READ);
+			if (FidFL != HFILE_ERROR)
+			{
+				SubFile = 0;
+				while (SubFile < wantFile && fgetstring(PickName, MAX_PATH - 1, FidFL))
+				{
+					SubFile++;
+				}
+				GSSiClose2(&FidFL);
+				LPSTR tab = strchr(PickName, '\t');
+				if (tab)
+					*tab = 0;
+			}
+		}
+	
+
 		SetGlobalValue ("%PICKED_FILE",PickName);   
 		SetGlobalValue ("%PICKED_LAYER",CurView->FileID[FileNum]);   
 	}

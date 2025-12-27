@@ -183,6 +183,11 @@ typedef OFSTRUCT *LPOFSTRUCT;
 #define SVVARCOLOR	1   
 #define SVNULLCOLOR 2
 
+#define DISPLAY_TIMER_ID	1
+#define FADE_TIMER_ID		2
+#define DISPLAY_TIMER_DURATION 3000
+#define FADE_TIMER_DURATION 30
+
 #define	NETMARKERTIMERID	4
 #define	STREETEDITTIMERID	5
 #define INFOBOXEDITTIMERID	7
@@ -4427,6 +4432,8 @@ HPEN WINAPI GSSiEXTCREATEPEN(DWORD iPenStyle,
                                     DWORD cStyle,
                                     DWORD *pstyle);
 
+#define InvalidateRect GSSiINVALIDATERECT
+BOOL GSSiINVALIDATERECT(_In_opt_ HWND hWnd,_In_opt_ CONST RECT* lpRect,_In_ BOOL bErase);
 #define CreatePen GSSiCREATEPEN  
 HPEN    WINAPI GSSiCREATEPEN (int style, int width, COLORREF color);
 #define CreateSolidBrush GSSiCREATESOLIDBRUSH

@@ -1163,7 +1163,12 @@ HPEN WINAPI GSSiEXTCREATEPEN( DWORD iPenStyle,
 		TrackObject (rtn,19);
 	return rtn;
 }
-
+BOOL GSSiINVALIDATERECT(_In_opt_ HWND hWnd, _In_opt_ CONST RECT* lpRect, _In_ BOOL bErase)
+{
+	BOOL rtn = TRUE;
+	rtn = InvalidateRect(hWnd, lpRect, bErase);
+	return rtn;
+}
 
 HBRUSH  WINAPI GSSiCREATESOLIDBRUSH(COLORREF color)
 {

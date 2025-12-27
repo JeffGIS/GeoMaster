@@ -843,7 +843,7 @@ GSSiExitProg (6);
         OldCursor = GSSiSetCursor (hDrawingCursor);
 		if (InfoBoxEditTimer)
 			KillTimer (hWndMain,InfoBoxEditTimer);
-        idTimer =  SetTimer(hWndMain, 1, 1, (TIMERPROC) 0); 
+        idTimer =  SetTimer(hWndMain, DISPLAY_TIMER_ID, 1, (TIMERPROC) 0);
         if (!idTimer)
         	ii=1;
     }
@@ -1444,7 +1444,7 @@ Next:
     if (MapType == MT_FILE_GEO_DB)
     {
     	MNMXCORD	SHPBounds;
-    	short	n=0, maxn=100;
+    	short	n=1, maxn=100;
 		BOOL quitProcessing;
 
     	do 
@@ -5686,21 +5686,23 @@ NextFile:
         	goto NextVP;
         } 
     }
-    if (CurView->PassID >= 5 || CurView->PassID <= 3)
-    {
-        if (!GetNextViewportFile (FALSE))
-        	goto NoFile;
-        CurView->FirstFile = FALSE;
-        if (DisplayPlotInit(hWnd,Immediate))
-{
+	if (CurView->PassID >= 5 || CurView->PassID <= 3)
+	{
+		if (!GetNextViewportFile(FALSE))
+			goto NoFile;
+		CurView->FirstFile = FALSE;
+		if (DisplayPlotInit(hWnd, Immediate))
+		{
 #if ENABLETRACE
-GSSiExitProg (57);
+			GSSiExitProg(57);
 #endif
-        	return (TRUE);
-}
-		else 
+			return (TRUE);
+		}
+		else
 			goto NextFile;
-    }
+	}
+	else
+		ii = 1;
 NoFile:
     PltName[0]='\0';
 	DisplaySavedGraphicsFile (CurView->hDC,CurView->PassID+1);

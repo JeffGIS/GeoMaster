@@ -4,10 +4,6 @@
 
 #define PROMPTWINDOWCLASS	"PromptWindowClass"
 #define MAXWINDOWS			256
-#define DISPLAY_TIMER_ID	1
-#define FADE_TIMER_ID		2
-#define DISPLAY_TIMER_DURATION 3000
-#define FADE_TIMER_DURATION 30
 
 
 BOOL	ddbug=FALSE;

@@ -2500,7 +2500,19 @@ LONG FAR PASCAL WndProc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 	if (isGMEdit)
 		return WndProcGMEdit(hWnd,Message,wParam,lParam);
 	else if (!inDisplayAllToobars)
-		return WndProcGeoMaster(hWnd,Message,wParam,lParam);
+	{
+		if (Message == 273 && wParam == 65720)
+		{
+			RECT UpdateRect;
+			if (GetUpdateRect(hWndMain, &UpdateRect, FALSE))
+			{
+				if (UpdateRect.bottom < 0)
+					ii = 1;
+			}
+			ii = 1;
+		}
+		return WndProcGeoMaster(hWnd, Message, wParam, lParam);
+	}
 	return 0;
 }
 
@@ -4432,7 +4444,13 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
 			     	else
 					{
 						SetConfigDisplayRect ();
-			     		InvalidateRect (hWndMain,&ConfigDisplayRect,TRUE);
+						ValidateRect(hWnd, 0);
+						HDC hDC = GetDC(hWndMain);
+						int CurGraphicsMode = GetGraphicsMode(hDC);
+
+						if (!InvalidateRect(hWndMain, &ConfigDisplayRect, TRUE))
+							ii = 1;
+						ReleaseDC(hWndMain, hDC);
 					}
 			     }
 			     break;    
@@ -5745,14 +5763,15 @@ DisplayParcel:
             default:
             	ii=1;
             	break;
-            case 1:
+            case DISPLAY_TIMER_ID:
             {	
             	clock_t StartTime,EndTime; 
             	long	DiffTime;
 				static	int lastVPID=1;
             	 
 				 SetConfig (-1);
-            	 if (!*pNumViewports || NoDisplay || InImediate || !DoPaint() || InTime) break; 
+            	 if (!*pNumViewports || NoDisplay || InImediate || !DoPaint() || InTime)
+					 break; 
             	 InTime = TRUE;
                	 StartTime = GetTickCount();
                  if (Counter <MaxTimePerSeg)
@@ -6323,13 +6342,14 @@ GSSiExitProg (438);
          if (InPaint || Printing || idTimer || InDisplayProcessing==1)
 			goto ReturnDefault;
 		 InDisplayProcessing = 0;
-			  
-	     if (!GetUpdateRect (hWnd,&UpdateRect,TRUE))
-	     {
-//		 	if (DoPaint)
-//				PostMessage(hWnd, WM_COMMAND, IDM_REDISPLAY, 0L);
-			goto ReturnDefault;
-	     }
+		 if (!GetUpdateRect(hWnd, &UpdateRect, TRUE))
+		 {
+			 //		 	if (DoPaint)
+			 //				PostMessage(hWnd, WM_COMMAND, IDM_REDISPLAY, 0L);
+			 goto ReturnDefault;
+		 }
+		 else if (!IsRectEmpty (&ConfigDisplayRect))
+			 UpdateRect = ConfigDisplayRect;
          _fmemset(&ps, 0x00, sizeof(PAINTSTRUCT));
          hDC = hDCScreen = BeginPaint(hWnd, &ps);
 		 if (hFullWindowBitMap && (int)hFullWindowBitMap != -1)

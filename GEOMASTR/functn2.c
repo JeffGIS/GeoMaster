@@ -1952,6 +1952,8 @@ GSSiExitProg (1350);
 			if (Printing)
 				goto RtnTrue;
 			skipPaint = 0;
+			setDoPaint(TRUE);
+
 			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
 			if (*Arg[1] == 'D')
 			{

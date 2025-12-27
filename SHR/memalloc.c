@@ -1063,7 +1063,13 @@ int	GSSiExitProg (int progid)
 {   
 	short	i,n;
 	short	ii;
-	char	str[256]; 
+	char	str[256];
+	RECT UpdateRect;
+	if (GetUpdateRect(hWndMain, &UpdateRect, FALSE))
+	{
+		if (UpdateRect.bottom < 0)
+			ii = 1;
+	}
 	checkvp(1);
 	if (!EnableTrace || Level <= 0)
 		return 0;  
