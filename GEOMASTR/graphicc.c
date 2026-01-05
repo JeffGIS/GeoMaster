@@ -881,7 +881,7 @@ BOOL GetFileFromTransferFile(HWND hWndStatus, HANDLE FidTF, LPSTR FileToGet, lon
 	if (Fid == INVALID_HANDLE_VALUE)
 		return FALSE;
 	PctBox(hWndStatus, LenToRead, LenRead, 0);
-	while (LenRead < MaxLength)
+	while (LenRead < LenToRead)
 	{
 		BigRead64(FidTF, (HPSTR)&CompressedLength, 4);
 		if (CompressedLength > 0)

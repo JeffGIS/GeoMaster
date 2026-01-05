@@ -2137,7 +2137,7 @@ GSSiExitProg (627);
 		int	Size;
 
 		GSSillseek (Fid,0,0);
-		DBHandle = GSSiGlobAlloc ( 264,GHND,sizeof (GWDHEADER)+4);
+		DBHandle = GSSiGlobAlloc (1890,GHND,sizeof (GWDHEADER)+4);
 		lpGWDHead =(LPGWDHEADER) GlobalLock (DBHandle);
 	    BigRead (Fid,(HPSTR)lpGWDHead,sizeof(GWDHEADER));
 		Size = sizeof (GWDHEADER)+ 4 + lpGWDHead->Reclen;
@@ -2193,10 +2193,10 @@ TryAgain:
 	}
 	else
 	{
-		HANDLE DBHandle32 = GSSiGlobAlloc ( 264,GHND,sizeof (GWDHEADER32));
+		HANDLE DBHandle32 = GSSiGlobAlloc (1887,GHND,sizeof (GWDHEADER32));
 		LPGWDHEADER32 lpGWDHead32 =(LPGWDHEADER32) GlobalLock (DBHandle32);
 
-		DBHandle = GSSiGlobAlloc ( 264,GHND,sizeof (GWDHEADER)+GWDHead16.Reclen+4);
+		DBHandle = GSSiGlobAlloc (1888,GHND,sizeof (GWDHEADER)+GWDHead16.Reclen+4);
 		lpGWDHead =(LPGWDHEADER) GlobalLock (DBHandle);
 		*lpGWDHead32 = GWDHEADER16toGWDHEADER32 (&GWDHead16);
 		*lpGWDHead = GWDHEADER32toGWDHEADER (lpGWDHead32);
@@ -7362,7 +7362,7 @@ BOOL GMDFunctions (int nArgs,LPSTR *Arg,LPSTR OutLoc)
 		if (GWDHead16.Unused)
 		{
 			int	Size;
-			HANDLE DBHandle = GSSiGlobAlloc ( 264,GHND,sizeof (GWDHEADER)+4);
+			HANDLE DBHandle = GSSiGlobAlloc (1889,GHND,sizeof (GWDHEADER)+4);
 
 			lpGWDHead2 =(LPGWDHEADER) GlobalLock (DBHandle);
 			GSSillseek (lpGWDHead->Fid,0,0);

@@ -5255,6 +5255,7 @@ BOOL FAR PASCAL LOADXFERFILEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, L
 	int maxlen;
 	int len, marker;
 	int lenlen;
+	static BOOL saveKeepFilesOpen;
 
  short  BRtn;
  if ((BRtn = DIALOGSTYLEMsgProc (hWndDlg,Message, wParam, lParam))) return (BRtn);
@@ -5265,12 +5266,14 @@ BOOL FAR PASCAL LOADXFERFILEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, L
 		LONGLONG	NextFileLoc = 0, loc, FileLength, EndOfFile;
 
 		lenlen = 4;
-
+		saveKeepFilesOpen = KeepFilesOpen;
+		ShowWindow(hWndDlg, SW_SHOW);
 		UpdateID = 0;
 		HaltMapDisplay(TRUE, TRUE);
 		DisableUndo(TRUE);
 		CloseSymDict();
 		CloseAllRequestedFiles(FALSE);
+		KeepFilesOpen = FALSE;
 		hSaveBM = EnterBlockingWindow(hWndDlg);
 		cwCenter(hWndDlg, 0);
 		if (!*TransferFileName)
@@ -5382,6 +5385,7 @@ BOOL FAR PASCAL LOADXFERFILEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, L
     	 
     case WM_CLOSE:
          /* Closing the Dialog behaves the same as Cancel               */
+		 KeepFilesOpen = saveKeepFilesOpen;
          PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
          break; /* End of WM_CLOSE                                      */
 
@@ -5406,6 +5410,11 @@ BOOL FAR PASCAL LOADXFERFILEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, L
 			int    nSelected = SendDlgItemMessage(hWndDlg, IDC_XFERFILELISTS, LB_GETCURSEL, 0, 0);
 			char	SelectedFile[MAX_PATH];
 			char	subStringFrom[MAX_PATH] = { 0 }, subStringTo[MAX_PATH] = { 0 };
+
+			EnableWindow(GetDlgItem(hWndDlg, IDOK), FALSE);
+			EnableWindow(GetDlgItem(hWndDlg, IDCANCEL), FALSE);
+			EnableWindow(GetDlgItem(hWndDlg, ID_ALTLOAD), FALSE);
+			EnableWindow(GetDlgItem(hWndDlg, IDC_SETXFERFILE), FALSE);
 			if (nSelected >= 0)
 				SendDlgItemMessage(hWndDlg, IDC_XFERFILELISTS, LB_GETTEXT, nSelected, (DWORD)SelectedFile);
 
@@ -5467,10 +5476,10 @@ BOOL FAR PASCAL LOADXFERFILEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, L
 					EndOfFile = NextFileLoc - 1;
 				else
 					EndOfFile = FileLength - 4;
-				if (marker != 32449)
+				if (marker != 32449 && marker != 80351)
 					LenToRead = EndOfFile - GSSillseek64(FidTF, 0, 1) + 1;
 				else
-					LenToRead = FileLength - GSSillseek64(FidTF, 0, 1);
+					LenToRead = EndOfFile - GSSillseek64(FidTF, 0, 1);
 				SetDlgItemText(hWndDlg, IDC_MESSAGE, File);
 				if (strstr(File, "DTM"))
 					ii = 1;
