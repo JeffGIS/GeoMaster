@@ -678,7 +678,8 @@ int	GetFunctionID18 (LPSTR str)
 
 int	GetFunctionID19 (LPSTR str)
 {
-			if (!_fstrnicmp (str,"CONVERTTEXTPOINTERS",19)) return 1901;
+	if (!_fstrnicmp(str, "CONVERTTEXTPOINTERS", 19)) return 1901;
+	if (!_fstrnicmp(str, "GETDEFLECTIONPOINTS", 19)) return 1902;
 			return 0; 
 }
 int	GetFunctionID20 (LPSTR str)

@@ -969,6 +969,7 @@ BOOL DeleteHighlightedMarkers (void);
 //BOOL CanTurnOnto (short Curdir, LPSTR CurNameIn, LPSTR NewNameIn);
 BOOL SameRoute (LPSTR Name1In,LPSTR Name2In);
 BOOL FalseIntFunctions (LPSTR Cmd,LPSTR Arg,LPSTR Out);
+long GetDeflectionPoints(double minDeflection, HFILE fidOut);
 long PointsBetweenMP (long Path,double FromMP, double ToMP,LPHANDLE phPoints);
 long PointsBetweenPCT (long Path,double FromMP, double ToMP,BOOL ShapePointsOnly,LPHANDLE phPoints,LPHANDLE phCurvePoints,HANDLE hNewBPEP);
 BOOL CreateNetLink (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam,short function);

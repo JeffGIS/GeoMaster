@@ -2017,7 +2017,6 @@ GSSiExitProg (1350);
 			ExpandText(Arg[4]);
 			ExpandText(Arg[5]);
 			ExpandText(Arg[6]);
-			LPSTR debugID = atoi(Arg[6]);
 			if (*Arg[4])
 				n=atoi(Arg[4]);
 			else
@@ -6511,16 +6510,30 @@ GSSiExitProg (1350);
 			goto RtnFalse;
 		}
 		case 1901: //$CONVERTTEXTPOINTERS ()
-        {   
-			hMem = GSSiGlobAlloc (1232,GMEM_MOVEABLE,3*2048);
-			Arg1 = GlobalLock(hMem); 
-			_fstrcpy (Arg1,Args);
-			ExpandText (Arg1); 
-			if (ConvertTextPointers (CurView->hWnd))
-		    	goto RtnTrue;
-		    goto RtnFalse;
-        }
-
+		{
+			hMem = GSSiGlobAlloc(1232, GMEM_MOVEABLE, 3 * 2048);
+			Arg1 = GlobalLock(hMem);
+			_fstrcpy(Arg1, Args);
+			ExpandText(Arg1);
+			if (ConvertTextPointers(CurView->hWnd))
+				goto RtnTrue;
+			goto RtnFalse;
+		}
+		case 1902: //$GETDEFLECTIONPOINTS (mindeflection,OutFile)
+		{
+			int ndp = 0;
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
+			double mindef = atof(Arg[1]);
+			HFILE fidOut = GSSiOpenFile(Arg[2], 0, OF_CREATE);
+			if (fidOut != HFILE_ERROR)
+			{
+				fputstring("POINT\tNPNTS\tNAME", fidOut);
+				ndp = GetDeflectionPoints(mindef, fidOut);
+				GSSiClose(fidOut);
+			}
+			itoa(ndp, OutLoc,10);
+			goto Rtnl;
+		}
 		case 2001: //$GETINTERSECTIONCOORD
 		{
 			nArgs = GetFunArgs(Args, Arg, -6, &hMem, pBrkPt, bpOffset, bpLen);

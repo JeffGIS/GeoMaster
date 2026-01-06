@@ -16,15 +16,15 @@ typedef struct {
 typedef STREETSEGMENT	FAR	*LPSTREETSEGMENT;    
 
 
-long PointsBetweenPCT (long Refno,double FromPCT, double ToPCT,BOOL ShapePointsOnly,LPHANDLE phPoints,LPHANDLE phCurvePoints,HANDLE hNewBPEP)
-{   
-	long	npnts;   
+long PointsBetweenPCT(long Refno, double FromPCT, double ToPCT, BOOL ShapePointsOnly, LPHANDLE phPoints, LPHANDLE phCurvePoints, HANDLE hNewBPEP)
+{
+	long	npnts;
 	int		PolyID;
-	BOOL	Reverse=FALSE;     
-	HANDLE	hPoly;    
-	HPDPOINT	OutPoints;  
-	int		NumOutPoints=0; 
-	
+	BOOL	Reverse = FALSE;
+	HANDLE	hPoly;
+	HPDPOINT	OutPoints;
+	int		NumOutPoints = 0;
+
 	*phPoints = *phCurvePoints = 0;
 	if (hNewBPEP)
 		ShapePointsOnly = FALSE;
@@ -80,6 +80,52 @@ long PointsBetweenPCT (long Refno,double FromPCT, double ToPCT,BOOL ShapePointsO
 	else
 		ii = 1;
 	return NumOutPoints;
+}
+
+long GetDeflectionPoints(double minDeflection, HFILE fidOut)
+{
+	long	npnts;
+	int		PolyID;
+	BOOL	Reverse = FALSE;
+	HANDLE	hPoly;
+	HPDPOINT	OutPoints;
+	int		numDeflection = 0;
+	int	TotNum = BT_NUM_IN_INDEX(hHighlight);
+	int pos = BT_FIRST;
+	int Refno;
+	HIGHLIGHTDATA HighlightData;
+
+	if (!TotNum)
+	{
+		MessageBox(GetFocus(), "No records highlighted", NULL, MB_OK | MB_ICONEXCLAMATION);
+		return FALSE;
+	}
+	while (!BT_FIND(hHighlight, (LPSTR)&Refno, pos, BT_ANY, (LPSTR)&HighlightData))
+	{
+		pos = BT_NEXT;
+		PickList[0] = HighlightData.PD;
+
+		if (GetPolyPoints((LPPICKDATAHEADER)&PickList[0], FALSE, &npnts, &hPoly, 0))
+		{
+			LPDPOINT pPoly = (LPDPOINT)GlobalLock(hPoly);
+			for (int i = 0; i < npnts-2; i++)
+			{
+				double AZ1 = getazd(&pPoly[i], &pPoly[i+1]);
+				double AZ2 = getazd(&pPoly[i+1], &pPoly[i+2]);
+				double deflection = DeflectionAngle(AZ1, AZ2);
+				if (fabs(deflection) > minDeflection)
+				{
+					char str[256];
+					sprintf(str, "%f %f\t%i\t%s", pPoly[i + 1].x, pPoly[i + 1].y, npnts, PickList[0].UDI);
+					fputstring(str, fidOut);
+					numDeflection++;
+				}
+			}
+
+			GSSiGlobUlFree(&hPoly);
+		}
+	}
+	return numDeflection;
 }
 
 long PointsBetweenMP (long Path,double FromMP, double ToMP,LPHANDLE phPoints)
