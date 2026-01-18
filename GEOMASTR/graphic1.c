@@ -1331,7 +1331,8 @@ Next:
         for (iview=0;iview<*pNumViewports;iview++)
         {   
             SetCurView ( pViewports[iview]);
-            CurView->Display = FALSE;
+            if (!CurView->pTheme || CurView->pTheme->ID != PF_COORD_DISPLAY)
+				CurView->Display = FALSE;
         }
 
         goto RtnFalse;
@@ -2298,7 +2299,9 @@ GSSiExitProg (18);
     for (iview=0;iview<*pNumViewports;iview++) 
     {
 		SaveDisplay[iview] = pViewportsD[iview]->Display;
-        pViewportsD[iview]->Display = FALSE;
+		if (pViewportsD[iview]->pTheme && pViewportsD[iview]->pTheme->ID == PF_COORD_DISPLAY)
+			continue;
+		pViewportsD[iview]->Display = FALSE;
         if (!Imediate && !Printing && pViewportsD[iview]->Active && !CurView->Type)  
         {
 	        //FormatViewport = pViewports[iview]->ID;
@@ -2319,7 +2322,7 @@ NextLink:
         {
              if (CurView->pTheme)
              {
-             	if (CurView->pTheme->TargetViewport == DisplayVP)
+             	if (CurView->pTheme->TargetViewport == DisplayVP || CurView->pTheme->ID == PF_COORD_DISPLAY)
                 	CurView->Display = TRUE; 
              }
              if (CurView->DisplayInParent && CurView->Parent == DisplayVP)
@@ -2909,7 +2912,7 @@ GSSiExitProg (25);
 	}   
     SetCurView ( SaveView);
 
-    if (lSaveVis && !IsBadWritePtr (SaveVis,lSaveVis))  
+    //if (lSaveVis && !IsBadWritePtr (SaveVis,lSaveVis))  
     	CurVis = SaveVis;
 	if (CurView->MaxOffsetDist)
 	{
@@ -4564,7 +4567,7 @@ void DisplayCloseIcon (void)
 	char	str[MAX_PATH];
 	int		x,y;
 	
-	if (CurView && CurView->hDC && !InShowZoomArea && !Printing && !InSmoothZoom && !MemMap)
+	if (CurView && CurView->Display && CurView->hDC && !InShowZoomArea && !Printing && !InSmoothZoom && !MemMap)
 	{
 	    SaveDC (CurView->hDC);
 		SetDisplayMode (CurView->hDC, GF_SCREENMODE); 
@@ -4593,7 +4596,7 @@ void DisplayCloseIcon (void)
 				displayX = pCD->active;
 			}
 
-			if (displayX)
+			if (displayX > 0)
 			{
 				MoveToEx(CurView->hDC, Rect.left + 5, Rect.bottom - 5, 0);
 				LineTo(CurView->hDC, Rect.right - 5, Rect.top + 5);
@@ -4908,14 +4911,16 @@ Top:
 				{
 					short image, nearimage=0;
 					int	  Size, SizeDiff=INT_MAX, Diff;
-					int	  SizeMain=RECTWIDTH(&MainRect) * RECTHEIGHT(&MainRect);
 					LPSTR	pCfgImage;
 					HDIB32	hDib;
 					double adjustwidthmin = 1, adjustheightmin = 1;
+					RECT windowClient;
+					GetClientRect(hWndMain, &windowClient);
+					int	  SizeMain = RECTWIDTH(&windowClient) * RECTHEIGHT(&windowClient);
 					for (image = 0;image < NumSavedImages;image++)
 					{
 						double adjustwidth, adjustheight;
-						RECT testrect = AdjustRectToRect(&SavedImageData[image].ClientRect, &MainRect, &adjustwidth, &adjustheight);
+						RECT testrect = AdjustRectToRect(&SavedImageData[image].ClientRect, &windowClient, &adjustwidth, &adjustheight);
 						Size = RECTWIDTH(&testrect) * RECTHEIGHT(&testrect);
 
 						Diff = abs (Size - SizeMain);
@@ -4996,7 +5001,7 @@ Next:
 		ShowBufferedScreen (TRUE,TRUE,0,0);
     ImediateProcessing (Imediate,2);
 Exit:    
-	if (!idTimer)
+	if (!idTimer && !IsRectEmpty (&MainRect))
 	{
 		if (!CurrentConfig)
 		{

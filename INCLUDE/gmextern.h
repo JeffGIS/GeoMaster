@@ -27,6 +27,7 @@ extern HANDLE			hVirtualPrintFile;
 extern BOOL			ShowVirtualPrintAreas;   
 extern BOOL			InCloseMap;
 extern char			szAppName[20];
+extern LPSTR	pAppName;
 extern UINT		ThemeEditStartCmd;
 extern short			NumOpenFiles;
 extern HANDLE			hPIDAdd;

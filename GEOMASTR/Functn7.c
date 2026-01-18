@@ -2526,10 +2526,15 @@ int	GetFunctionValue7(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, 
 			  //$MONITOR(MOVE,id)
 			  //$MONITOR(SWITCH)
 	{
+		static BOOL alreadyCalled = FALSE;
 		nArgs = GetFunArgs(Args, Arg, 5, &hMem, pBrkPt, bpOffset, bpLen);
 		*OutLoc = 0;
-		numMonitors = GetNumMonitors();
-		GetMonitorRectangles(numMonitors, hInst);
+		if (!alreadyCalled)
+		{
+			numMonitors = GetNumMonitors();
+			//GetMonitorRectangles(numMonitors, hInst);
+			alreadyCalled = TRUE;
+		}
 
 		if (!stricmp(Arg[1], "COUNT"))
 		{

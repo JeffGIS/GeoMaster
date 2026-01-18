@@ -641,9 +641,15 @@ extern "C" int isLaptop(int ii)
 		)
 	{
 		MONITORINFOEX mi;
+		memset(&mi, 0, sizeof(MONITORINFOEX));
 		mi.cbSize = sizeof(mi);
 		GetMonitorInfo(hMonitor, &mi);
-		MonitorRectangle[numMon++] = *lprcMonitor;
+		int inc = 1;
+		mi.rcWork.left += inc;
+		mi.rcWork.top += inc;
+		mi.rcWork.right -= inc;
+		mi.rcWork.bottom -=inc;
+		MonitorRectangle[numMon++] = mi.rcWork;
 
 		if (hMonIn && hMonIn != hMonitor)
 		{
@@ -675,6 +681,7 @@ extern "C" int isLaptop(int ii)
 			displayDevice.cb = sizeof(DISPLAY_DEVICE);
 			while (EnumDisplayDevices(NULL, deviceNum, &displayDevice, 0))
 			{
+				memset(&devMode, 0, sizeof(DEVMODE));
 				EnumDisplaySettings(displayDevice.DeviceName, ENUM_CURRENT_SETTINGS, &devMode);
 				//printf("deviceNum:%d\n", deviceNum);
 				//printf("DeviceName:%s\n", displayDevice.DeviceName);

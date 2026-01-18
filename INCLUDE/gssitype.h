@@ -2330,7 +2330,7 @@ typedef struct
        	BOOL	DisplayElevation;
        	char	ElevationID[34];
 		BOOL	MultiLine;
-		BOOL	active;
+		int		active;
        	char	Space[462];
     }	COORDINATEDISPLAY;
 typedef	COORDINATEDISPLAY	FAR	*LPCOORDINATEDISPLAY; 

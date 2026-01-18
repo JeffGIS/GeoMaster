@@ -1,2 +1,2 @@
-configs\fixtrails3.gmc [%USEGDIPLUS]=F;[%KFO]=T;    
-e:\gmmobile\metroUTM
+configs\basemap_remote_noelev.gmcL [%USERLEV]=2;[%IGNORESYSMSG]=T;[%WantBackgroundCache]=F;[%ALLOWCACHE]=F; 
+F:\MplsRemoteTemplate\GeoMas

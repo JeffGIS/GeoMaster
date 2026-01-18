@@ -244,6 +244,7 @@ int	GetFunctionID6 (LPSTR str)
 			if (!_fstrnicmp(str, "NONINT", 6)) return 658;
 			if (!_fstrnicmp(str, "SETSUB", 6)) return 659;
 			if (!_fstrnicmp(str, "RUNSUB", 6)) return 660;
+			if (!_fstrnicmp(str, "ENDSIN", 6)) return 661;
 			return 0;
 }
 int	GetFunctionID7 (LPSTR str)

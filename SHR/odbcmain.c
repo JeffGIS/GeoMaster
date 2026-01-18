@@ -110,29 +110,52 @@ UDWORD display_size(SWORD coltype, UDWORD collen, UCHAR *colname)
 return 0;
 }  
 
-HANDLE CreateUniqueList (int length, LPSTR Name)
+HANDLE CreateUniqueList(int length, LPSTR Name)
 {
 
 	BTVARDESC	BTVar[2];
 	int	i, ifield;
 	OFSTRUCTGM	OFStruct;
-	HANDLE	hBT; 
-	HANDLE	hMem=0;
-	
+	HANDLE	hBT;
+	HANDLE	hMem = 0;
+
 	if (!Name)
 	{
-		hMem = GSSiGlobAlloc (1882,GHND,256);
-		Name = GlobalLock (hMem);
-	}					
-	GSSiGetTempFileName (0,"gmu",0,(LPSTR)Name);
-	BTVar[0].BT_VARTYP=BT_CHAR;
-	BTVar[0].BT_VARLEN=min(200,length);
-	BTVar[0].BT_VAROFF=0;
-	BT_CREATE (Name, 4, FALSE, 1, 1, (LPBTVARDESC)BTVar, FALSE, 0, 0, FALSE);
-	hBT = BT_OPEN (Name, 0, BT_WRITE, 0);
-    GSSiGlobUlFree (&hMem);
+		hMem = GSSiGlobAlloc(1882, GHND, 256);
+		Name = GlobalLock(hMem);
+	}
+	GSSiGetTempFileName(0, "gmu", 0, (LPSTR)Name);
+	BTVar[0].BT_VARTYP = BT_CHAR;
+	BTVar[0].BT_VARLEN = min(200, length);
+	BTVar[0].BT_VAROFF = 0;
+	BT_CREATE(Name, 4, FALSE, 1, 1, (LPBTVARDESC)BTVar, FALSE, 0, 0, FALSE);
+	hBT = BT_OPEN(Name, 0, BT_WRITE, 0);
+	GSSiGlobUlFree(&hMem);
 	return hBT;
-}  
+}
+HANDLE CreateUniqueList2(int length, LPSTR Name)
+{
+
+	BTVARDESC	BTVar[2];
+	int	i, ifield;
+	OFSTRUCTGM	OFStruct;
+	HANDLE	hBT;
+	HANDLE	hMem = 0;
+
+	if (!Name)
+	{
+		hMem = GSSiGlobAlloc(1882, GHND, 256);
+		Name = GlobalLock(hMem);
+	}
+	GSSiGetTempFileName(0, "gmu", 0, (LPSTR)Name);
+	BTVar[0].BT_VARTYP = BT_INT4;
+	BTVar[0].BT_VARLEN = 4;
+	BTVar[0].BT_VAROFF = 0;
+	BT_CREATE(Name, min(200, length), FALSE, 1, 1, (LPBTVARDESC)BTVar, FALSE, 0, 0, FALSE);
+	hBT = BT_OPEN(Name, 0, BT_WRITE, 0);
+	GSSiGlobUlFree(&hMem);
+	return hBT;
+}
 
 BOOL GetODBCUniqueFieldValues (int DBhandle, LPCSTR SQL,LPSTR name,int length, 
                                HANDLE hDBList)

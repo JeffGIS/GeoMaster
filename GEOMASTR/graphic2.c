@@ -619,9 +619,13 @@ BOOL ProcessCloseIcon (HWND hWnd,UINT Message, WPARAM wParam,LPARAM lParam)
 							if (CurView->pTheme && CurView->pTheme->ID == PF_COORD_DISPLAY)
 							{
 								LPCOORDINATEDISPLAY pCD = (LPCOORDINATEDISPLAY)CurView->pTheme;
-								pCD->active = !pCD->active;
+								if (pCD->active == 1)
+									pCD->active = 0;
+								else
+									pCD->active = 1;
 								CurView = SaveView;
 								IgnoreLbutton = TRUE;
+								DisplayCloseIcon();
 							}
 							else
 							{
@@ -793,6 +797,7 @@ GSSiExitProg (114);
 }
 	if (!CD->active)
 	{
+		//CD->active = -1;
 		SaveView = CurView;
 		SetCurView(DisplayView);
 		HDC hDC = GetDC(DisplayView->hWnd);
@@ -818,16 +823,7 @@ GSSiExitProg (114);
 		CurView = SaveView;
 		return;
 	}
-	if (!DisplayView->Active)
-{
-#if ENABLETRACE
-GSSiExitProg (114);
-#endif
-    	return;
-}
-    
-
-    if (Message != WM_MOUSEMOVE)
+    if (Message != WM_MOUSEMOVE || CD->active < 0)
 {
 #if ENABLETRACE
 GSSiExitProg (114);
@@ -840,6 +836,8 @@ GSSiExitProg (114);
     while (iview--)
     {
 		SetCurView ( pViewportsD[iview]); 
+		if (CD->TargetViewport != CurView->ID)
+			continue;
 		if (CurView->Type != VIEWPORT_TYPE_CONTAINER && CurView->Type != VIEWPORT_TYPE_FORMAT)
 		{
 			if ((HaveVP <= 0 || !CurView->Type) && CurViewActive())
@@ -974,7 +972,7 @@ GSSiExitProg (116);
 		return;
 }
 	CD = CurPassiveFun;  
-	if (CD->ID != PF_COORD_DISPLAY)
+	if (CD->ID != PF_COORD_DISPLAY || CD->active <= 0)
 {
 #if ENABLETRACE
 GSSiExitProg (116);
@@ -1325,7 +1323,7 @@ GSSiExitProg (118);
 		return FALSE;
 }
 	CD = CurPassiveFun;  
-	if (CD->ID != PF_COORD_DISPLAY)
+	if (CD->ID != PF_COORD_DISPLAY || CD->active < 0)
 {
 #if ENABLETRACE
 GSSiExitProg (118);

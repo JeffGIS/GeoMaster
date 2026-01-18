@@ -218,7 +218,7 @@ int nCwRegisterClasses(LPSTR Menu)
  _fmemset(&wndclass, 0x00, sizeof(WNDCLASS));
 
   /* load WNDCLASS with window's characteristics                         */
- wndclass.style = CS_HREDRAW | CS_VREDRAW | CS_BYTEALIGNCLIENT | CS_DBLCLKS | CS_OWNDC;
+ wndclass.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS | CS_OWNDC | CS_BYTEALIGNCLIENT | CS_BYTEALIGNWINDOW;
  wndclass.lpfnWndProc = (WNDPROC)WndProc;
  /* Extra storage for Class and Window objects                          */
  wndclass.cbClsExtra = 0;
@@ -680,8 +680,12 @@ GSSiExitProg (436);
  	ShowMax=6;
  if (_fstrstr(CmdLine," /MINBL "))
  	ShowMax=7;
- if (_fstrstr(CmdLine," /MINBR "))
- 	ShowMax=8;
+ if (_fstrstr(CmdLine, " /MINBR "))
+	 ShowMax = 8;
+ if (_fstrstr(CmdLine, " /MON1 "))
+	 ShowMax = 12;
+ if (_fstrstr(CmdLine, " /MON2 "))
+	 ShowMax = 13;
  if ((lpOpt = strstr(CmdLine," /RECT ")))
  {
 	 lpOpt += 7;
@@ -1525,7 +1529,7 @@ WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, 
 
 	CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
 	numMonitors = GetNumMonitors();
-	GetMonitorRectangles(numMonitors, hInstance);
+//	GetMonitorRectangles(numMonitors, hInstance);
 	typeChassis = ChassisType();
 	//mouseType = MouseType();
 	if (typeChassis == 3)
@@ -1618,6 +1622,45 @@ WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, 
 	}
 }
 
+void CreateMainWindow(int winx, int winy, int winw, int winh, BOOL useStyle)
+{
+	
+	DWORD stylex = WS_CAPTION |        /* Title and Min/Max           */
+		WS_SYSMENU |        /* Add system menu box         */
+		WS_MINIMIZEBOX |        /* Add minimize box            */
+		WS_MAXIMIZEBOX |        /* Add maximize box            */
+		//WS_THICKFRAME |        /* thick sizeable frame        */
+		//WS_MAXIMIZE |        /* create maximized window     */
+		//WS_CLIPCHILDREN |         /* don't draw in child windows areas */
+		//WS_CLIPSIBLINGS |
+		WS_OVERLAPPEDWINDOW;
+	DWORD style = WS_CAPTION |        /* Title and Min/Max           */
+		WS_SYSMENU |        /* Add system menu box         */
+		WS_MINIMIZEBOX |        /* Add minimize box            */
+		WS_MAXIMIZEBOX |        /* Add maximize box            */
+		
+		WS_MAXIMIZE |        /* create maximized window     */
+		//WS_CLIPCHILDREN |         /* don't draw in child windows areas */
+		//WS_CLIPSIBLINGS |
+		WS_OVERLAPPED;
+	//WS_THICKFRAME |        /* thick sizeable frame        */
+
+	if (!useStyle)
+		style = 0;
+	HWND hPar = 0;
+	hWndMain = CreateWindowEx(WS_EX_APPWINDOW| WS_EX_OVERLAPPEDWINDOW,
+		szAppName,              //* Window class name           */
+		pAppName,             //* Window's title              */
+		style,
+		winx, winy, winw, winh,
+		//CW_USEDEFAULT, 0,   
+		//CW_USEDEFAULT, 0,
+		hPar,                    //* Parent window's handle      */
+		0,                   //* Default to Class Menu       */
+		hInst,                   //* Instance of window          */
+		0);                   //* Create struct for WM_CREATE */
+
+}
 int PASCAL WinMainGeoMaster(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow)
 #if ENABLETRACE
 {GSSiEnterProg (437);
@@ -2011,11 +2054,23 @@ GSSiExitProg (437);
 		 winh = RECTHEIGHT(&customRect);
 		 break;
 		 //if (GetGlobalBVal2 ("[%DualScreen]",FALSE))
+	 case 12:
+		 winx = MonitorRectangle[0].left;
+		 winy = MonitorRectangle[0].top;
+		 winw = RECTWIDTH(&MonitorRectangle[0]);
+		 winh = RECTHEIGHT(&MonitorRectangle[0]);
+		 break;
+	 case 13:
+		 winx = MonitorRectangle[1].left;
+		 winy = MonitorRectangle[1].top;
+		 winw = RECTWIDTH(&MonitorRectangle[1]);
+		 winh = RECTHEIGHT(&MonitorRectangle[1]);
+		 break;
 	 default:
 		 {
 			 char value[128];
 			 GetPrivateProfileString("User", "LastWindowPos", "0", value, sizeof(value), GMIni);
-			 if (strlen(value) == 1)
+			 if (strlen(value) <= 1)
 			 {
 				 winw = CW_USEDEFAULT;
 				 winh = 0;
@@ -2037,21 +2092,11 @@ GSSiExitProg (437);
  /* create application's Main window                                    */
 	 {
 		 char mapServerAppName[] = { "GeoMaster MapServer" };
+		 BOOL useStyle = TRUE;
 		 HWND hPar = 0;
-		 LPSTR pAppName = szAppName;
-		 DWORD style = WS_CAPTION |        /* Title and Min/Max           */
-			 WS_SYSMENU |        /* Add system menu box         */
-			 WS_MINIMIZEBOX |        /* Add minimize box            */
-			 WS_MAXIMIZEBOX |        /* Add maximize box            */
-			 WS_THICKFRAME |        /* thick sizeable frame        */
-			 //WS_MAXIMIZE |        /* create maximized window     */
-			 //WS_CLIPCHILDREN |         /* don't draw in child windows areas */
-			 //WS_CLIPSIBLINGS |
-			 WS_OVERLAPPED;
-
 		 if (MapServer)
 		 {
-			 style = 0;
+			 useStyle = FALSE;
 			 mapServerWidth = winw;
 			 mapServerHeight = winh;
 			 winw = 100;
@@ -2064,18 +2109,7 @@ GSSiExitProg (437);
 				 MessageBox(0, mess, "", MB_OK);
 			 }
 		 }
-
-		 hWndMain = CreateWindowEx(WS_EX_APPWINDOW,
-			 szAppName,               /* Window class name           */
-			 pAppName,             /* Window's title              */
-			 style,
-			 winx, winy, winw, winh,
-			 /*CW_USEDEFAULT, 0,  */      /* Use default X, Y            */
-			 /*CW_USEDEFAULT, 0,*/        /* Use default X, Y            */
-			 hPar,                    /* Parent window's handle      */
-			 0,                    /* Default to Class Menu       */
-			 hInst,                   /* Instance of window          */
-			 0);                   /* Create struct for WM_CREATE */
+		 CreateMainWindow(winx, winy, winw, winh,useStyle);
 	 }
  if (hWndLinkedTo)
 	 PostMessage (hWndLinkedTo,GF_CONNECT_PROCESS,(WPARAM)hWndMain,0);
@@ -2300,6 +2334,8 @@ nMess = -1;
 		 break; case WM_SETFOCUS:
 			 ii = 1;
 		 break; case WM_MOVE:
+			 ii = 1;
+		 break; case WM_SIZING:
 			 ii = 1;
 		 break; case WM_WINDOWPOSCHANGED:
 			 ii = 1;
@@ -2847,6 +2883,11 @@ if (Message == WM_LBUTTONDOWN)
  	 BlowOut(0,0);
  }
 
+ if (Message == WM_SIZING)
+ {
+	 LPRECT pRect = (LPRECT)lParam;
+	 ii = 1;
+}
 if (Message == WM_MOUSEMOVE)
 {	if (IgnoreMouseMove)
 	{

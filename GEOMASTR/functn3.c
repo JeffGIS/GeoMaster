@@ -57,23 +57,14 @@ BOOL CreateGMStartupFile(LPSTR OutFile, LPSTR ConfigPath, BOOL LinkZoom, BOOL Re
 int GetCurrentMonitor(void)
 {
 	int rtn = 0;
-	RECT rect, outRect;
-	double area, maxarea = 0;
 	
+	POINT pt;
+	GetCursorPos(&pt);
 	if (numMonitors > 1)
 	for (int i = 0;i<numMonitors;i++)
 	{
-		GetWindowRect(hWndMain, &rect);
-		InflateRect(&rect, -32, -32);
-		if (IntersectRect(&outRect, &MonitorRectangle[i], &rect))
-		{
-			area = RECTWIDTH(&rect) * RECTHEIGHT(&rect);
-			if (area > maxarea)
-			{
-				area = maxarea;
-				rtn = i;
-			}
-		}
+		if (PtInRect(&MonitorRectangle[1], pt))
+			rtn = i;
 	}
 	return rtn;
 }
@@ -94,13 +85,26 @@ void MoveToMonitor(int imon,int fromMon,HWND hWnd)
 {
 	if (!hWnd)
 		hWnd = hWndMain;
+	RECT wRect, cRect;
+	GetWindowRect(hWnd, &wRect);
+	GetClientRect(hWnd, &cRect);
 	if (fromMon != imon)
 	{
+		//imon = fromMon;
 		if (imon < numMonitors)
 		{
-			MoveWindow(hWnd, MonitorRectangle[imon].left, MonitorRectangle[imon].top, RECTWIDTH(&MonitorRectangle[imon]), RECTHEIGHT(&MonitorRectangle[imon]), TRUE);
-			MoveToolbarsToMonitor(fromMon, imon);
+			//DestroyWindow(hWndMain);
+			//CreateMainWindow(MonitorRectangle[imon].left, MonitorRectangle[imon].top, RECTWIDTH(&MonitorRectangle[imon]), RECTHEIGHT(&MonitorRectangle[imon]),TRUE);
+			//int irtn =// MoveWindow(hWnd, MonitorRectangle[imon].left, MonitorRectangle[imon].top, RECTWIDTH(&MonitorRectangle[imon]), RECTHEIGHT(&MonitorRectangle[imon]), TRUE);
+			int w = RECTWIDTH(&MonitorRectangle[imon]);
+			int h = RECTHEIGHT(&MonitorRectangle[imon]);
+			SetWindowPos (hWnd,HWND_TOP, MonitorRectangle[imon].left, MonitorRectangle[imon].top,w,h, SWP_SHOWWINDOW| SWP_DRAWFRAME);
+
+			//MoveToolbarsToMonitor(fromMon, imon);
 			MoveCursorToMonitor(imon);
+			GetWindowRect(hWnd, &wRect);
+			GetClientRect(hWnd, &cRect);
+			ii = 1;
 		}
 	}
 }
@@ -5610,7 +5614,7 @@ GotCloseFilehSQL:
 		case 654: //$UNIQUE(CREATE,len)
 			//$UNIQUE(ADD,handle,val)
 			//$UNIQUE(GET,handle,first,valvar,countvar)
-			//$UNIQUE(DUMP,handle,path);
+			//$UNIQUE(DUMP,handle,path,sorton(0or1=val,2=count,-2=reverse count);
 			//$UNIQUE(CLOSE,handle)
 		{
 			HANDLE hBT;
@@ -5639,6 +5643,7 @@ GotCloseFilehSQL:
 			}
 			else if (!stricmp(Arg[1], "DUMP"))
 			{
+				int sortOn = atoi(Arg[4]);
 				int count;
 				rtn = FALSE;
 				HFILE fid = GSSiOpenFile(Arg[3], 0, OF_CREATE);
@@ -5650,14 +5655,41 @@ GotCloseFilehSQL:
 					hBT = (HANDLE)atoi(Arg[2]);
 					vlen = GetBTKeyLen(hBT);
 					LPSTR value = malloc(vlen + 4);
-					int pos = BT_FIRST;
-					while (!BT_FIND(hBT, value, pos, BT_ANY, (LPSTR)&count))
+					if (abs(sortOn) > 1)
 					{
-						pos = BT_NEXT;
-						value[vlen] = 0;
-						sprintf(Line, "%s\t%i",value,count);
-						fputstring(Line, fid);
-						rtn = TRUE;
+						HANDLE hBT2 = CreateUniqueList2(vlen, 0);
+						int pos = BT_FIRST;
+						while (!BT_FIND(hBT, value, pos, BT_ANY, (LPSTR)&count))
+						{
+							pos = BT_NEXT;
+							value[vlen] = 0;
+							if (sortOn == -2)
+								count = -count;
+							BT_PUT(hBT2, (LPSTR)&count, value);
+						}
+					
+						pos = BT_FIRST;
+						while (!BT_FIND(hBT2,(LPSTR) &count, pos, BT_ANY,value))
+						{
+							pos = BT_NEXT;
+							value[vlen] = 0;
+							sprintf(Line, "%s\t%i", value, abs(count));
+							fputstring(Line, fid);
+							rtn = TRUE;
+						}
+						BT_CLOSE(hBT2);
+					}
+					else
+					{
+						int pos = BT_FIRST;
+						while (!BT_FIND(hBT, value, pos, BT_ANY, (LPSTR)&count))
+						{
+							pos = BT_NEXT;
+							value[vlen] = 0;
+							sprintf(Line, "%s\t%i", value, count);
+							fputstring(Line, fid);
+							rtn = TRUE;
+						}
 					}
 					free(value);
 					GSSiClose(fid);
@@ -5687,7 +5719,7 @@ GotCloseFilehSQL:
 			}
 			else if (!stricmp(Arg[1], "CLOSE"))
 			{
-				hBT = (HANDLE)atoi(Arg[2]);
+				hBT = (HANDLE)atol(Arg[2]);
 				rtn = BT_CLOSEANDDELETE(&hBT);
 				goto Rtnrtn;
 			}
@@ -5757,7 +5789,23 @@ GotCloseFilehSQL:
 			free(sub);
 			goto Rtnl;
 		}
-
+		case 661: //$ENDSIN(VAL,SEARCHVAL)
+		{
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
+			if (nArgs < 2)
+				goto RtnFalse;
+			int l1 = strlen(Arg[1]);
+			int l2 = strlen(Arg[2]);
+			LPSTR pVal = Arg[1];
+			rtn = FALSE;
+			if (l1 >= l2)
+			{
+				pVal += l1 - l2;
+				if (!stricmp(pVal, Arg[2]))
+					rtn = TRUE;
+			}
+			goto Rtnrtn;
+		}
 
 		default:
 			goto Rtn0;

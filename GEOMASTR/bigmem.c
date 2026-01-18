@@ -117,6 +117,7 @@ RECT	ConfigDisplayRect={0,0,0,0};
 
 char	AppName[16];
 char	szAppName[20];
+LPSTR	pAppName = szAppName;
 char    AddPrefix[4][10] = { 0 };
 char	AddUDI[34];
 char	AddUDIVar[32];  

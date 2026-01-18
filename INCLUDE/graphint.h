@@ -1795,6 +1795,7 @@ void TranPointReorgFile (HPPOINT pPoint,HANDLE hTran);
 DPOINT CopyFilePtToBasePt (POINT Point);
 BOOL ConvertFileBounds (HFILE Fid); 
 BOOL GetNextHLTListItem (BOOL First,BOOL ProcessItem); 
+void CreateMainWindow(int winx, int winy, int winw, int winh, BOOL useStyle);
 LPVIEWPORT SetVPFromName (LPSTR Arg2,LPBOOL pErr);      
 BOOL LoadNewData (LPSTR Dir);
 BOOL FixDupRef (void);

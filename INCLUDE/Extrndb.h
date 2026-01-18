@@ -88,4 +88,5 @@ void ODBCTerminate (BOOL Quit);
 BOOL GetSQLWhereClause (HWND hWnd, HANDLE hDB, LPSTR Where);
 BOOL FAR PASCAL SQLWHEREMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam);
 BOOL FAR PASCAL SQL_BETWEENMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam);
-HANDLE CreateUniqueList (int length, LPSTR Name);
+HANDLE CreateUniqueList(int length, LPSTR Name);
+HANDLE CreateUniqueList2(int length, LPSTR Name);
