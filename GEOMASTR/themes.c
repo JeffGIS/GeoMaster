@@ -934,7 +934,7 @@ BOOL DisplayVPThemeLegends (void)
 		CurTheme=CurView->pThemes[itheme]; 
 		if (VPIsActive (CurTheme->DisplayViewport))
 			ThemeDisplayLegend2(2,SaveVP->ID);
-NextTheme:; 
+NextTheme:SetCurView(SaveVP);
 	}
 	SetCurView (SaveVP);
 {

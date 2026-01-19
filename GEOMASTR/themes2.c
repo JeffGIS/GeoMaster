@@ -4667,7 +4667,7 @@ void DisplaySVThemeLegend(short From)
     }
     else
     {
-	    if (!CurView->Transparent)
+	    if (!CurView->Transparent && CurView->Display)
 			FillRectPoly (CurView->hDC,&Rect,WindowColor);
     	if (From < 2)
     		goto Exit;
