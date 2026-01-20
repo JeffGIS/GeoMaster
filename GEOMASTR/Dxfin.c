@@ -237,7 +237,7 @@ BOOL AddPolyToMap2 (int nPolyIn, LPINT lpnPntsIn,LPHANDLE phDPoints,int Type, lo
   
 	if (LinesOnly && nPolyIn == 1)
 	{   
-		hPoints = GSSiGlobAlloc ( 989,GMEM_MOVEABLE,2*sizeof(DPOINT));
+		hPoints = GSSiGlobAlloc(GAIDNO 989,GMEM_MOVEABLE,2*sizeof(DPOINT));
 		nPnts = *lpnPntsIn;
 		pDpoints = (LPDPOINT)GlobalLock (*phDPoints);   
 		nPnts--;
@@ -284,7 +284,7 @@ typedef LSREC	FAR	*LPLSREC;
 		_fstrcpy (Type,InType); 
 	if (!hLayerSym)
 	{
-		hLayerSym = GSSiGlobAlloc ( 990,GHND,USHRT_MAX);
+		hLayerSym = GSSiGlobAlloc(GAIDNO 990,GHND,USHRT_MAX);
 		nLayerSym = 0; 
 		pRec = (LPLSREC)GlobalLock (hLayerSym);
 		while (SendDlgItemMessage(DXFhWndDlg,IDC_LAYER_LIST,LB_GETTEXT,Choice++,(DWORD)str)!=LB_ERR)
@@ -368,7 +368,7 @@ void DxfIn(void)
      ItemBegin=0;
      NumDXFLayers = 0;
      GSSiGlobFree (&hDXFLayers);
-     hDXFLayers = GSSiGlobAlloc ( 993,GHND,USHRT_MAX);
+     hDXFLayers = GSSiGlobAlloc(GAIDNO 993,GHND,USHRT_MAX);
      
       lpMSG = &msg;
       DxfInitActions() ;// get memory for all the variables;
@@ -697,30 +697,30 @@ lpDxfOptions DxfInitActions(void)
 short i;
     for(i = 0;i < 12;i++){hDxf[i] = 0; }
     
-    hDxf[0] = GSSiGlobAlloc(1766,GHND,(long)sizeof(DxfOptions));
+    hDxf[0] = GSSiGlobAlloc(GAIDNO 1766,GHND,(long)sizeof(DxfOptions));
 
-    hDxf[1] = GSSiGlobAlloc(1766,GHND,(long)sizeof(DxfToPC));
+    hDxf[1] = GSSiGlobAlloc(GAIDNO 1766,GHND,(long)sizeof(DxfToPC));
     lpDxf2GM = (lpDxfToPC) GlobalLock(hDxf[1]);
     lpDxf2GM->EtRcl = ET_RCL;
     GlobalUnlock(hDxf[1]);
     
-    hDxf[2] = GSSiGlobAlloc(1766,GHND,(long)sizeof(DxfOutData));
+    hDxf[2] = GSSiGlobAlloc(GAIDNO 1766,GHND,(long)sizeof(DxfOutData));
     
-    hDxf[3] = GSSiGlobAlloc(1766,GHND,(long)sizeof(DxfOutData));
+    hDxf[3] = GSSiGlobAlloc(GAIDNO 1766,GHND,(long)sizeof(DxfOutData));
 
-    hDxf[4] = GSSiGlobAlloc(1766,GHND,(long)sizeof(MSDict));
+    hDxf[4] = GSSiGlobAlloc(GAIDNO 1766,GHND,(long)sizeof(MSDict));
 
-    hDxf[5] = GSSiGlobAlloc(1766,GHND,6400);
+    hDxf[5] = GSSiGlobAlloc(GAIDNO 1766,GHND,6400);
 
-    hDxf[6] = GSSiGlobAlloc(1766,GHND,7800);
+    hDxf[6] = GSSiGlobAlloc(GAIDNO 1766,GHND,7800);
 
-    hDxf[7] = GSSiGlobAlloc(1766,GHND,6400);
+    hDxf[7] = GSSiGlobAlloc(GAIDNO 1766,GHND,6400);
 
-    hDxf[8] = GSSiGlobAlloc(1766,GHND,6400);
+    hDxf[8] = GSSiGlobAlloc(GAIDNO 1766,GHND,6400);
 
-    hDxf[9] = GSSiGlobAlloc(1766,GHND,12800);
+    hDxf[9] = GSSiGlobAlloc(GAIDNO 1766,GHND,12800);
     
-    hDxf[10] = GSSiGlobAlloc(1766,GHND,(long)(3900*(sizeof(lpSymDict->EDSC))));
+    hDxf[10] = GSSiGlobAlloc(GAIDNO 1766,GHND,(long)(3900*(sizeof(lpSymDict->EDSC))));
        
     return lpDxfOpts;
 }
@@ -808,7 +808,7 @@ void dxfin_cmd_processor(char far *COMMAND,BOOL FLAG, long *IST)
    {
           size = sizeof(DPOINT)*(2);
           heap_ptr = 0; 
-          heap_ptr = (HANDLE) GSSiGlobAlloc ( 994, GHND, size); 
+          heap_ptr = (HANDLE) GSSiGlobAlloc(GAIDNO 994, GHND, size); 
           lpDpoint = (LPDPOINT) GlobalLock(heap_ptr);
           lpPoly = lpDpoint;
          dxfin_doline();
@@ -882,7 +882,7 @@ R121:               lpDpoint->x = lpDxf2GM->XY[1][1] ;
          Store = TRUE;
           size = sizeof(DPOINT)*(4);
           heap_ptr = 0; 
-          heap_ptr = (HANDLE)GSSiGlobAlloc ( 995, GHND, size); 
+          heap_ptr = (HANDLE)GSSiGlobAlloc(GAIDNO 995, GHND, size); 
           lpDpoint = (LPDPOINT) GlobalLock(heap_ptr);
           lpPoly = lpDpoint;
           dxfin_dopoint(lpDpoint);
@@ -970,7 +970,7 @@ T121:        if(!lpDxf2GM->Ignore)
            st = 0;
           size = USHRT_MAX;
           heap_ptr = 0; 
-          heap_ptr = (HANDLE)  GSSiGlobAlloc ( 996, GHND, size); 
+          heap_ptr = (HANDLE)  GSSiGlobAlloc(GAIDNO 996, GHND, size); 
           lpDpoint = (LPDPOINT) GlobalLock(heap_ptr);
           lpPoly = lpDpoint;
           nPoints = 0;
@@ -1017,7 +1017,7 @@ T121:        if(!lpDxf2GM->Ignore)
           if(fabs(Lines.lngth) > 20e0)
            st = 0;  */
           size = 1024;
-          heap_ptr = GSSiGlobAlloc ( 997, GMEM_MOVEABLE, size); 
+          heap_ptr = GSSiGlobAlloc(GAIDNO 997, GMEM_MOVEABLE, size); 
           lpDpoint = (LPDPOINT) GlobalLock(heap_ptr);
           lpPoly = lpDpoint;  
           
@@ -1069,7 +1069,7 @@ T121:        if(!lpDxf2GM->Ignore)
 
           size = sizeof(DPOINT)* 6;
           heap_ptr = 0; 
-          heap_ptr = GSSiGlobAlloc ( 998, GHND, size+1); 
+          heap_ptr = GSSiGlobAlloc(GAIDNO 998, GHND, size+1); 
           lpDpoint = (LPDPOINT) GlobalLock(heap_ptr);
           lpPoly = lpDpoint;
 
@@ -1114,7 +1114,7 @@ T121:        if(!lpDxf2GM->Ignore)
 
           size = sizeof(DPOINT)* 7;
           heap_ptr = 0; 
-          heap_ptr = GSSiGlobAlloc ( 999, GHND, size); 
+          heap_ptr = GSSiGlobAlloc(GAIDNO 999, GHND, size); 
           lpDpoint = (LPDPOINT) GlobalLock(heap_ptr);
           lpPoly = lpDpoint;
 
@@ -1186,7 +1186,7 @@ T121:        if(!lpDxf2GM->Ignore)
                 {
                     if ((idesc = GetLayerSymNum2 (lpDxf2GM)))
                     {
-						HANDLE	hGRText=GSSiGlobAlloc (1000,GHND,sizeof(GRTEXT)); 
+						HANDLE	hGRText=GSSiGlobAlloc(GAIDNO 1000,GHND,sizeof(GRTEXT)); 
 						LPGRTEXT	lpGRText = (LPGRTEXT)GlobalLock (hGRText); 
 						
 		            	lpGRText->version = 1;    
@@ -1285,7 +1285,7 @@ T121:        if(!lpDxf2GM->Ignore)
           Store = TRUE;
           size = sizeof(DPOINT)*(4);
           heap_ptr = 0; 
-          heap_ptr = (HANDLE)GSSiGlobAlloc (1001, GHND, size); 
+          heap_ptr = (HANDLE)GSSiGlobAlloc(GAIDNO 1001, GHND, size); 
           lpDpoint = (LPDPOINT) GlobalLock(heap_ptr);
           lpPoly = lpDpoint;
           
@@ -1434,7 +1434,7 @@ G11:      SYM_TYPE = 'A';
                 {      
           size = sizeof(DPOINT)* 6;
           heap_ptr = 0; 
-          heap_ptr = GSSiGlobAlloc (1002, GHND, size); 
+          heap_ptr = GSSiGlobAlloc(GAIDNO 1002, GHND, size); 
           lpDpoint = (LPDPOINT) GlobalLock(heap_ptr);
           
           if(_fstricmp(LastDxfSymName,lpDxf2GM->ATTAG) == 0)goto S122;
@@ -1572,7 +1572,7 @@ S121:        lpDxf2GM->Ignore = 0; //dxfin_set_symbol('L'); currently
                          }
                          else
                          {
-                             hPoly = GSSiGlobAlloc (1003,GMEM_MOVEABLE,(DWORD)(1+nPoints)*sizeof(DPOINT));
+                             hPoly = GSSiGlobAlloc(GAIDNO 1003,GMEM_MOVEABLE,(DWORD)(1+nPoints)*sizeof(DPOINT));
                              lpDPoint = (LPDPOINT)GlobalLock (hPoly); 
                              lpDPoints = lpDPoint;
                          } 
@@ -2868,7 +2868,7 @@ void  DxfInTableProcessor(char *COMMAND,BOOL FLAG,long *IST)
     GSSiGlobFree (&LineMem);
     GSSiGlobFree (&PointMem);
 
-    LineMem = GSSiGlobAlloc(1766,GHND, sizeof(lType)*NumLines);
+    LineMem = GSSiGlobAlloc(GAIDNO 1766,GHND, sizeof(lType)*NumLines);
     lpLT = (lplType) GlobalLock(LineMem); 
     lpLT->NumLines = NumLines;
     for(i = 0,lpLT->Num49s = 0; i < NumLines;i++,lpLT++)
@@ -3512,7 +3512,7 @@ BOOL FAR PASCAL LOADDXFMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM
                	 	MessageBox( GetFocus(),"No layers selected",0, MB_ICONEXCLAMATION);
 				 	break;
 				 }  
-                 hLayers = GSSiGlobAlloc ( 991,GMEM_MOVEABLE,nItems*4+4);
+                 hLayers = GSSiGlobAlloc(GAIDNO 991,GMEM_MOVEABLE,nItems*4+4);
                  lpItems = (LPINT)GlobalLock(hLayers);
 		         *lpItems = nItems;
                  SendDlgItemMessage(hWndDlg,IDC_LAYER_LIST,LB_GETSELITEMS,nItems,(LPARAM)lpItems); 
@@ -3564,7 +3564,7 @@ BOOL FAR PASCAL LOADDXFMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM
                	 	MessageBox( GetFocus(),"No layers selected",0, MB_ICONEXCLAMATION);
 				 	break;
 				 }  
-                 hLayers = GSSiGlobAlloc ( 992,GMEM_MOVEABLE,nItems*4+4);
+                 hLayers = GSSiGlobAlloc(GAIDNO 992,GMEM_MOVEABLE,nItems*4+4);
                  lpItems = (LPINT)GlobalLock(hLayers);
                  SendDlgItemMessage(hWndDlg,IDC_LAYER_LIST,LB_GETSELITEMS,nItems,(LPARAM)lpItems); 
 	             while (nItems--)

@@ -250,7 +250,7 @@ HDIB FAR CreateDIB(DWORD dwWidth, DWORD dwHeight, WORD wBitCount)
    dwLen = bi.biSize + PaletteSize((LPSTR)&bi) + (dwBytesPerLine * dwHeight);
 
    // alloc memory block to store our bitmap
-   hDIB = GSSiGlobAlloc(1761,GHND, dwLen);
+   hDIB = GSSiGlobAlloc(GAIDNO 1761,GHND, dwLen);
 
    // major bummer if we couldn't get memory block
    if (!hDIB)
@@ -563,7 +563,7 @@ HPALETTE FAR CreateDIBPalette(HDIB hDIB)
    if (wNumColors)
    {
       /* allocate memory block for logical palette */
-      hLogPal = GSSiGlobAlloc(1762,GHND, sizeof(LOGPALETTE) + sizeof(PALETTEENTRY) *
+      hLogPal = GSSiGlobAlloc(GAIDNO 1762,GHND, sizeof(LOGPALETTE) + sizeof(PALETTEENTRY) *
                 wNumColors);
 
       /* if not enough memory, clean up and return NULL */
@@ -865,7 +865,7 @@ HDIB FAR BitmapToDIB(HBITMAP hBitmap, HPALETTE hPal,LPINT plbitmap)
    RealizePalette(hDC);
 
    /* alloc memory block to store our bitmap */
-   hDIB = GSSiGlobAlloc(1763,GHND, dwLen);
+   hDIB = GSSiGlobAlloc(GAIDNO 1763,GHND, dwLen);
 
    /* if we couldn't get memory block */
    if (!hDIB)
@@ -1009,7 +1009,7 @@ HDIB FAR BitmapToDIB2(HBITMAP hBitmap, HPALETTE hPal,LPINT piScanLine,LPINT pnSc
    RealizePalette(hDC);
 
    /* alloc memory block to store our bitmap */
-   hDIB = GSSiGlobAlloc(1764,GHND, dwLen);
+   hDIB = GSSiGlobAlloc(GAIDNO 1764,GHND, dwLen);
 
    /* if we couldn't get memory block */
    if (!hDIB)
@@ -1181,7 +1181,7 @@ HPALETTE FAR GetSystemPalette(void)
    if (nColors <= 0)
    	return NULL;
    /* Allocate room for the palette and lock it. */
-   hLogPal = GSSiGlobAlloc(1765,GHND, sizeof(LOGPALETTE) + nColors * sizeof(
+   hLogPal = GSSiGlobAlloc(GAIDNO 1765,GHND, sizeof(LOGPALETTE) + nColors * sizeof(
              PALETTEENTRY));
 
    /* if we didn't get a logical palette, return NULL */
@@ -1826,7 +1826,7 @@ GSSiExitProg (399);
 }
         nRead = BigRead (Fid,(HPSTR)&bmfHead,sizeof(BITMAPFILEHEADER));
         nBytes = bmfHead.bfSize-sizeof(BITMAPFILEHEADER);
-        *phDib = GSSiGlobAlloc (1401,GMEM_MOVEABLE,nBytes);
+        *phDib = GSSiGlobAlloc(GAIDNO 1401,GMEM_MOVEABLE,nBytes);
         pDibInfo = GetDibHeader (*phDib);
     
         BigRead (Fid,pDibInfo,nBytes);   
@@ -1871,7 +1871,7 @@ GSSiExitProg (400);
     nRead = BigRead (Fid,(HPSTR)&bmfHead,sizeof(BITMAPFILEHEADER));
 	if (bmfHead.bfType == 0x4d42)
 	{
-		*phDibInfo = GSSiGlobAlloc(1402, GMEM_MOVEABLE,
+		*phDibInfo = GSSiGlobAlloc(GAIDNO 1402, GMEM_MOVEABLE,
 			bmfHead.bfOffBits - sizeof(BITMAPFILEHEADER));
 		pDibInfo = (LPBITMAPINFO)GlobalLock(*phDibInfo);
 
@@ -2800,7 +2800,7 @@ HANDLE ConvertBitmap16To24 (LPBITMAPINFOHEADER  lpbi)
 		RowLenOrig += 4 - (RowLenOrig % 4);
 		
 	Sizeimage =	lpbi->biHeight * RowLenNew;
-	NewDIB = GSSiGlobAlloc (1403,GHND, sizeof(BITMAPINFOHEADER) + Sizeimage);
+	NewDIB = GSSiGlobAlloc(GAIDNO 1403,GHND, sizeof(BITMAPINFOHEADER) + Sizeimage);
 	lpNewbi = (LPBITMAPINFOHEADER)GlobalLock (NewDIB);
 	*lpNewbi = *lpbi;  
 	lpNewbi->biPlanes=1;
@@ -2865,7 +2865,7 @@ HANDLE ConvertBitmap8To24 (LPBITMAPINFOHEADER  lpbi)
 		RowLenOrig += 4 - (RowLenOrig % 4);
 		
 	Sizeimage =	lpbi->biHeight * RowLenNew;
-	NewDIB = GSSiGlobAlloc (1405,GHND, sizeof(BITMAPINFOHEADER) + Sizeimage);
+	NewDIB = GSSiGlobAlloc(GAIDNO 1405,GHND, sizeof(BITMAPINFOHEADER) + Sizeimage);
 	lpNewbi = (LPBITMAPINFOHEADER)GlobalLock (NewDIB);
 	*lpNewbi = *lpbi;  
 	lpNewbi->biPlanes=1;
@@ -3045,7 +3045,7 @@ BOOL SplitBitmap (LPSTR Infile,int numRows,int numCols,LPSTR OutDir,LPSTR OutExt
 		GSSillseek (FidIn,ImageOffset,0);
 		CreateStatusWind (hWndMain,1,"Split Bitmap");
 
-		hRow = GSSiGlobAlloc (0,GMEM_MOVEABLE,origRowLen);
+		hRow = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,origRowLen);
 		pRow = GlobalLock (hRow);
 		for (iRow=0;iRow<numRows;iRow++)
 		{

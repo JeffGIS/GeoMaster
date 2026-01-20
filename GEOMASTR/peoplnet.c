@@ -281,7 +281,7 @@ BOOL MakeMap (LPSTR Args)
 	GSSiGlobFree (&hMemMapColorMap);		
 	if (!(ParLoc = MatchLev (Args,',')))
 		goto Exit;
-	hMem = GSSiGlobAlloc ( 625,GMEM_MOVEABLE,2048*6);
+	hMem = GSSiGlobAlloc(GAIDNO 625,GMEM_MOVEABLE,2048*6);
 	Arg1 = GlobalLock(hMem);
 	Arg2 = Arg1 + 2048; 
 	Arg3 = Arg2 + 2048; 
@@ -351,7 +351,7 @@ BOOL MakeMap (LPSTR Args)
 		{   
 			LPSTR	pName;
 			
-			hMemMapColorMap = GSSiGlobAlloc (0,GMEM_MOVEABLE,256);  
+			hMemMapColorMap = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,256);  
 			pName = GlobalLock (hMemMapColorMap);
 			_fstrcpy (pName,Arg6);
 			GlobalUnlock (hMemMapColorMap);
@@ -363,7 +363,7 @@ BOOL MakeMap (LPSTR Args)
 			{   
 				LPSTR	pName;
 				
-				hMemMapColorMap = GSSiGlobAlloc (0,GMEM_MOVEABLE,256);  
+				hMemMapColorMap = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,256);  
 				pName = GlobalLock (hMemMapColorMap);
 				_fstrcpy (pName,str);
 				GlobalUnlock (hMemMapColorMap);
@@ -419,7 +419,7 @@ BOOL MakeMap (LPSTR Args)
 			{   
 				LPSTR	pName;
 				
-				hMemMapColorMap = GSSiGlobAlloc (0,GMEM_MOVEABLE,256);  
+				hMemMapColorMap = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,256);  
 				pName = GlobalLock (hMemMapColorMap);
 				_fstrcpy (pName,Arg4);
 				GlobalUnlock (hMemMapColorMap);
@@ -890,7 +890,7 @@ BOOL WhereAt (LPSTR Args)
 		else
 			_fmemset (PNFormat,0,16);
 	}
-	hMem = GSSiGlobAlloc ( 626,GMEM_MOVEABLE,2048*6);
+	hMem = GSSiGlobAlloc(GAIDNO 626,GMEM_MOVEABLE,2048*6);
 	Arg1 = GlobalLock(hMem);
 	Arg2 = Arg1 + 2048; 
 			
@@ -1083,7 +1083,7 @@ HaveStreet:
 	    ToStreet = PickedStreets[0][6]; 
 	    if (WantAddressData)
 	    {   
-    	    hPNAddData = GSSiGlobAlloc ( 627,GHND,1024); 
+    	    hPNAddData = GSSiGlobAlloc(GAIDNO 627,GHND,1024); 
 			ProcessPickedItem (0,FALSE);
 			hAddData = DecodePNAddData (hPNAddData);
 			GSSiGlobFree (&hPNAddData); 
@@ -1622,7 +1622,7 @@ long GetNearCity (DPOINT DPoint,short Type,LPSTR InCity,LPDOUBLE MinDist, LPDOUB
  	else 
  	{
  		PLSaved=FALSE;
-        hVisList=GSSiGlobAlloc ( 628,GHND,sizeof(VISLIST));
+        hVisList=GSSiGlobAlloc(GAIDNO 628,GHND,sizeof(VISLIST));
         CurVis = CurView->pPickListManual =(LPVISLIST) GlobalLock (hVisList);
 		InitVis ();
         CurView->pPickListManual->hVisList = hVisList;   
@@ -2078,7 +2078,7 @@ HANDLE DecodePNAddData (HANDLE hPNAddData)
 {
 	LPSTR	AddData=GlobalLock (hPNAddData), pAdd;
 	LPADDRESSLENGTHS	pAddLengths;  
-	HANDLE	handle=GSSiGlobAlloc ( 629,GMEM_MOVEABLE,sizeof(PNADDRESSDATA));
+	HANDLE	handle=GSSiGlobAlloc(GAIDNO 629,GMEM_MOVEABLE,sizeof(PNADDRESSDATA));
 	LPPNADDRESSDATA		pData=(LPPNADDRESSDATA)GlobalLock (handle);
 	
 	pAddLengths = (LPADDRESSLENGTHS)(AddData+26);
@@ -2545,7 +2545,7 @@ GSSiExitProg (1422);
 	if (ld == 0 || lg == 0)
 		return -1;
 
-	hData = GSSiGlobAlloc (0,GMEM_MOVEABLE,ld+lg);
+	hData = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,ld+lg);
 	pData = GlobalLock (hData);
 	pHead = (LPSTATEGRIDHEADER)pData;
 	Fid = GSSiOpenFile (DataFile,0,OF_READ);
@@ -2575,7 +2575,7 @@ int GetPNAreaID (DPOINT Pt,LPSTR DataFile)
 	if (ld == 0)
 		goto Exit;
 
-	hData = GSSiGlobAlloc (0,GMEM_MOVEABLE,ld);
+	hData = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,ld);
 	pData = GlobalLock (hData);
 	pHead = (LPSTATEGRIDHEADER)pData;
 	Fid = GSSiOpenFile (DataFile,0,OF_READ);
@@ -2620,12 +2620,12 @@ BOOL LoadPNetStateGrid (LPSTR DataFile,LPSTR GridFile,LPSTR OutFile)
 	Fid = GSSiOpenFile (DataFile,0,OF_READ);
 	BigRead (Fid,&Head,sizeof(Head));
 	GSSiClose2 (&Fid);
-	hGrid = GSSiGlobAlloc (0,GMEM_MOVEABLE,lg);
+	hGrid = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,lg);
 	pGrid = GlobalLock (hGrid);
 	Fid = GSSiOpenFile (GridFile,0,OF_READ);
 	BigRead (Fid,pGrid,lg);
 	GSSiClose2 (&Fid);
-	hGridCmp = GSSiGlobAlloc (0,GMEM_MOVEABLE,lg);
+	hGridCmp = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,lg);
 	pGridCmp = GlobalLock (hGridCmp);
 	pGridRowOffsets = pGridCmp;
 	lGridCmp = Head.nrow;
@@ -2654,7 +2654,7 @@ BOOL LoadPNetStateGrid (LPSTR DataFile,LPSTR GridFile,LPSTR OutFile)
 		}
 	}
 
-	hData = GSSiGlobAlloc (0,GMEM_MOVEABLE,ld);
+	hData = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,ld);
 	pData = GlobalLock (hData);
 	pHead = (LPSTATEGRIDHEADER)pData;
 	Fid = GSSiOpenFile (DataFile,0,OF_READ);
@@ -2822,7 +2822,7 @@ int RemoveShortSegs (int nPntsIn,LPHANDLE hPoly,double Dis)
 
 	int	i, nPntsOut=1;
 	LPDPOINT	PointsIn = GlobalLock (*hPoly);
-	HANDLE		hPolyOut = GSSiGlobAlloc (0,GMEM_MOVEABLE,nPntsIn*sizeof(DPOINT));
+	HANDLE		hPolyOut = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,nPntsIn*sizeof(DPOINT));
 	LPDPOINT	PointsOut = GlobalLock (hPolyOut);
 
 	PointsOut[0] = PointsIn[0];
@@ -2859,9 +2859,9 @@ GSSiExitProg (1426);
 	short		n;
 	HANDLE		hPoly;
 	DPOINT		MidPoint, IntPoints[4];
-//	HANDLE		hCellPoint = GSSiGlobAlloc (0,GMEM_MOVEABLE,USHRT_MAX);
+//	HANDLE		hCellPoint = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,USHRT_MAX);
 //	HPDPOINT	CellPoint=GlobalLock (hCellPoint);
-	HANDLE		hCellPoint16 = GSSiGlobAlloc (0,GMEM_MOVEABLE,USHRT_MAX);
+	HANDLE		hCellPoint16 = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,USHRT_MAX);
 	HPPOINTS	CellPoint16=GlobalLock (hCellPoint16);
 	HFILE		FidOut=GSSiOpenFile ("c:\\pntest.bin",0,OF_CREATE);
 	HFILE		FidOutOff=GSSiOpenFile ("c:\\pntestoff.bin",0,OF_CREATE);
@@ -2892,7 +2892,7 @@ GSSiExitProg (1426);
 	double	cellh = (top - bottom)/nrow;
 
 	fac = 32000 / max (cellw,cellh);
-	hOffsets  = GSSiGlobAlloc (0,GMEM_MOVEABLE,nrow*ncol*4);
+	hOffsets  = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,nrow*ncol*4);
 	Offsets = GlobalLock (hOffsets);
 	Header.ifac = ifac;
 	Header.fac  = fac;
@@ -3209,9 +3209,9 @@ void CreatePNetStateGrid (int NumRows)
 	short		n;
 	HANDLE		hPoly;
 	DPOINT		MidPoint, IntPoints[4],	CellArea[5];
-//	HANDLE		hCellPoint = GSSiGlobAlloc (0,GMEM_MOVEABLE,USHRT_MAX);
+//	HANDLE		hCellPoint = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,USHRT_MAX);
 //	HPDPOINT	CellPoint=GlobalLock (hCellPoint);
-	HANDLE		hCellPoint16 = GSSiGlobAlloc (0,GMEM_MOVEABLE,USHRT_MAX);
+	HANDLE		hCellPoint16 = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,USHRT_MAX);
 	HPPOINTS	CellPoint16=GlobalLock (hCellPoint16);
 	HFILE		FidOut=GSSiOpenFile ("c:\\pntest.bin",0,OF_CREATE);
 	HFILE		FidOutOff=GSSiOpenFile ("c:\\pntestoff.bin",0,OF_CREATE);
@@ -3225,7 +3225,7 @@ void CreatePNetStateGrid (int NumRows)
 	int			MaxLines=0, MaxPoints=0,ii,lastoff=0;
 	short		LeftRight;
 	double		OffDis = 0.0003;
-	HANDLE		hCompressedCell = GSSiGlobAlloc (0,GMEM_MOVEABLE,USHRT_MAX);
+	HANDLE		hCompressedCell = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,USHRT_MAX);
 	LPBYTE		CompressedCell = GlobalLock (hCompressedCell);
 	char		str[256];
 	
@@ -3247,7 +3247,7 @@ void CreatePNetStateGrid (int NumRows)
 	ncol = (right - left - cellw/2) / cellw + 1;
 
 	fac = 32000 / max (cellw,cellh);
-	hOffsets  = GSSiGlobAlloc (0,GMEM_MOVEABLE,nrow*ncol*4);
+	hOffsets  = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,nrow*ncol*4);
 	Offsets = GlobalLock (hOffsets);
 	Header.ifac = ifac;
 	Header.fac  = fac;

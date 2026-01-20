@@ -74,12 +74,12 @@ HANDLE GetMultiFile (HWND hWnd,LPSTR Ext,LPSTR StartDir,LPLONG pTotFiles)
 	
   	_getcwd (CurDir,MAX_PATH); 
   	SaveDrive = _getdrive();
-	hDir = GSSiGlobAlloc ( 495,GMEM_MOVEABLE,256);
+	hDir = GSSiGlobAlloc(GAIDNO 495,GMEM_MOVEABLE,256);
 	pDir = GlobalLock (hDir);  
 	_fstrcpy (pDir,StartDir);
 	GlobalUnlock (hDir);
 	_fstrcpy (MFExt,Ext);
-	hName = GSSiGlobAlloc ( 496,GMEM_MOVEABLE,256);
+	hName = GSSiGlobAlloc(GAIDNO 496,GMEM_MOVEABLE,256);
 	pName = GlobalLock (hName);
 	GSSiGetTempFileName (0,"gmm",0,pName);
     GlobalUnlock (hName);  
@@ -605,7 +605,7 @@ void SetMainRect (HWND hWnd, HDC hDC, LPRECT RectIn,int From)
 	}
     if (Printing && !MemMap)
     {   
-    	HANDLE	hMem=GSSiGlobAlloc ( 498,GMEM_MOVEABLE,256);
+    	HANDLE	hMem=GSSiGlobAlloc(GAIDNO 498,GMEM_MOVEABLE,256);
     	LPSTR	txt = GlobalLock (hMem);
     	
     	GetGlobalCVal ("[%PRINTPROMPT]",txt,0);
@@ -1112,7 +1112,7 @@ GSSiExitProg (802);
 #endif
     	return (FALSE);
 }
-    hQuadOffsetSave=GSSiGlobAlloc ( 594,GHND,(DWORD)((MaxQuadLevel+1)*sizeof(long)));
+    hQuadOffsetSave=GSSiGlobAlloc(GAIDNO 594,GHND,(DWORD)((MaxQuadLevel+1)*sizeof(long)));
     pQuadOffsetSave=GlobalLock (hQuadOffsetSave);
 	pQuadTree = GlobalLock (hQuadTree);
 	pQuadOffset  = GlobalLock (hQuadOffset); 
@@ -1264,7 +1264,7 @@ GSSiExitProg (804);
 #endif
     	return rtn;  
 }
-    hpltBuf = GSSiGlobAlloc ( 499,GMEM_MOVEABLE,(DWORD)nBytes);
+    hpltBuf = GSSiGlobAlloc(GAIDNO 499,GMEM_MOVEABLE,(DWORD)nBytes);
     ipnt = (LPSHORT)GlobalLock (hpltBuf); 
 	BeginSeg = (LPSTR) ipnt;
     nRead = BigRead (FidMap,(HPSTR)ipnt,nBytes);  
@@ -1642,7 +1642,7 @@ ProcessPolyLine2:
 					{   
 						double	BackAZ;
 						 
-			 		    hMem = GSSiGlobAlloc ( 500,GMEM_MOVEABLE,(long)4096*16);
+			 		    hMem = GSSiGlobAlloc(GAIDNO 500,GMEM_MOVEABLE,(long)4096*16);
 			 		    lpDCurPoints = (HPDPOINT)GlobalLock (hMem);   
 			 		    pDPoint = lpDCurPoints;
 			 		    nPnts = 0;
@@ -1665,7 +1665,7 @@ ProcessPolyLine2:
 					POC.y = *ipnt++; 
 					EP.x = *ipnt++; 
 					EP.y = *ipnt++;  
-		 		    hMem = GSSiGlobAlloc ( 501,GMEM_MOVEABLE,USHRT_MAX);
+		 		    hMem = GSSiGlobAlloc(GAIDNO 501,GMEM_MOVEABLE,USHRT_MAX);
 		 		    lpCurPoints = (LPPOINTS)GlobalLock (hMem);   
 		 		    lpPoints = lpCurPoints;
 		 		    nPnts = 0;
@@ -1690,7 +1690,7 @@ ProcessPolyLine2:
 					int		nchar, ltext;
 					LPGRTEXTHEADER	pGRTextHeader;
 					LPSTR	pText; 
-					HANDLE	hText = GSSiGlobAlloc ( 502,GHND,512);
+					HANDLE	hText = GSSiGlobAlloc(GAIDNO 502,GHND,512);
 					LPSTR	pText2 = GlobalLock (hText);
 				    
 				    pGRTextHeader = (LPGRTEXTHEADER)ipnt;
@@ -1739,8 +1739,8 @@ ProcessPolyLine2:
 	        			PolyBufferLen += *(LPWORD)ipnt++; 
 	        		if (!hCurvePoints)
 	        			ln = (long)PolyBufferLen*PointSize;
-	        		hPolyBuffer = GSSiGlobAlloc ( 308,GMEM_MOVEABLE,ln);  
-	        		hPolyPartLen = GSSiGlobAlloc ( 309,GMEM_MOVEABLE,(long)nPoly*sizeof(int));  
+	        		hPolyBuffer = GSSiGlobAlloc(GAIDNO 308,GMEM_MOVEABLE,ln);  
+	        		hPolyPartLen = GSSiGlobAlloc(GAIDNO 309,GMEM_MOVEABLE,(long)nPoly*sizeof(int));  
 	        		nPolyPoints = 0;
                 }
 	        	break;
@@ -1765,8 +1765,8 @@ ProcessPolyLine2:
 					}
 	        		if (!hCurvePoints)
 	        			ln = (long)PolyBufferLen*PointSize;
-	        		hPolyBuffer = GSSiGlobAlloc ( 308,GMEM_MOVEABLE,ln);  
-	        		hPolyPartLen = GSSiGlobAlloc ( 309,GMEM_MOVEABLE,(long)nPoly*sizeof(int));  
+	        		hPolyBuffer = GSSiGlobAlloc(GAIDNO 308,GMEM_MOVEABLE,ln);  
+	        		hPolyPartLen = GSSiGlobAlloc(GAIDNO 309,GMEM_MOVEABLE,(long)nPoly*sizeof(int));  
 	        		nPolyPoints = 0;
                 }
 	        	break;
@@ -1819,7 +1819,7 @@ ProcessPolyLine2:
 				    }
 				    else 
 				    {
-				    	hCoords = GSSiGlobAlloc ( 311,GMEM_MOVEABLE,(long)nPnts*PointSize);
+				    	hCoords = GSSiGlobAlloc(GAIDNO 311,GMEM_MOVEABLE,(long)nPnts*PointSize);
 				    	nCoords = nPnts;
 				    	lCoords = 0;
 				    }
@@ -1856,7 +1856,7 @@ ProcessPolyLine2:
 	    			CurGCmdStringLoc = CurrentSeg + (long)((LPSTR) ipnt - (LPSTR)BeginSeg); 
 					lGCmdString = *ipnt++; 
 					GSSiGlobFree (&hGCmdString);   
-					hGCmdString = GSSiGlobAlloc ( 503,GMEM_MOVEABLE,4096);
+					hGCmdString = GSSiGlobAlloc(GAIDNO 503,GMEM_MOVEABLE,4096);
 					pString = GlobalLock (hGCmdString);
 					_fstrncpy (pString,(LPSTR)ipnt,lGCmdString);
 					pEnd = pString + lGCmdString;
@@ -2321,9 +2321,9 @@ GSSiExitProg (810);
 	CloseAllRequestedFiles(FALSE);
 	KeepFilesOpen = FALSE;
 	ReorgfileFID = GSSiOpenFile (ReorgName,&OFStruct,OF_CREATE);
-	hReorgBuf = GSSiGlobAlloc ( 504,GMEM_FIXED,USHRT_MAX); 
+	hReorgBuf = GSSiGlobAlloc(GAIDNO 504,GMEM_FIXED,USHRT_MAX); 
 	lReorgBuf = 0; 
-	hReorgDescFile = GSSiGlobAlloc ( 505,GMEM_MOVEABLE,256);
+	hReorgDescFile = GSSiGlobAlloc(GAIDNO 505,GMEM_MOVEABLE,256);
 	pFile = GlobalLock (hReorgDescFile);
 	GSSiGetTempFileName (0,"gm",0,pFile); 
 	ReorgDescFile=GSSiOpenFile (pFile,&OFStruct,OF_CREATE);  
@@ -2474,7 +2474,7 @@ GSSiExitProg (811);
 		GSSiGlobFree (&hFileSymList);
 		while (ContinueProcessing && BigRead (NewQuadFID,(HPSTR)&len,4))
 		{
-			hBuf = GSSiGlobAlloc ( 506,GMEM_MOVEABLE,min(len+1024,MAXREORGBUF));
+			hBuf = GSSiGlobAlloc(GAIDNO 506,GMEM_MOVEABLE,min(len+1024,MAXREORGBUF));
 			pBuf = GlobalLock (hBuf);
 			ii=GSSillseek (NewQuadFID,0,1);
 			if (ii==debugii)
@@ -2768,7 +2768,7 @@ GSSiExitProg (813);
 		{
 			NumMapSegments=0; 
 			MaxNewType=0; 
-			hbuf = GSSiGlobAlloc ( 507,GMEM_MOVEABLE,MAXREORGBUF);
+			hbuf = GSSiGlobAlloc(GAIDNO 507,GMEM_MOVEABLE,MAXREORGBUF);
 			pbuf = GlobalLock (hbuf);
 			lbuf = 0;
 		} 
@@ -2844,7 +2844,7 @@ GSSiExitProg (813);
 }
 	    PctBox (GetDlgItem(ReorghWnd,IDC_STATUS), NumQuadSegs, NumQuadSegsProcessed,1);
 		if (!hRec)
-			hRec = GSSiGlobAlloc ( 508,GMEM_MOVEABLE,MAXREORGBUF);
+			hRec = GSSiGlobAlloc(GAIDNO 508,GMEM_MOVEABLE,MAXREORGBUF);
 		lpRec = GlobalLock (hRec);
 		
 		for (n=0;n<NumDescBlocks;n++)
@@ -2918,7 +2918,7 @@ GSSiExitProg (814);
 	} 
 	if (!hReorgDesc)
 	{
-		hReorgDesc = GSSiGlobAlloc ( 509,GMEM_MOVEABLE,USHRT_MAX);
+		hReorgDesc = GSSiGlobAlloc(GAIDNO 509,GMEM_MOVEABLE,USHRT_MAX);
 		NumReorgDesc = 0;
 	}  
 	TotReorgDesc++;
@@ -2956,7 +2956,7 @@ void AllocateDescBlocks(void)
 	long		i;
 	
 	DescBlockLen = sizeof(DESCBLOCK) * NumQuadSegs * (long)MaxQuadType * (long)NumDescBlocks * 4;
-	hDescBlockReorg = GSSiGlobAlloc ( 510,GMEM_MOVEABLE,DescBlockLen); 
+	hDescBlockReorg = GSSiGlobAlloc(GAIDNO 510,GMEM_MOVEABLE,DescBlockLen); 
 	pDescBlock = (LPDESCBLOCK)GlobalLock (hDescBlockReorg);
 	for (i=0;i<NumQuadSegs*(long)MaxQuadType*(long)NumDescBlocks;i++,pDescBlock++)
 		pDescBlock->Desc=-1;
@@ -2994,7 +2994,7 @@ GSSiExitProg (816);
     	ii=1;
     if (DescBlockLen)
     {
-		hDescBlock = GSSiGlobAlloc ( 511,GMEM_MOVEABLE,DescBlockLen); 
+		hDescBlock = GSSiGlobAlloc(GAIDNO 511,GMEM_MOVEABLE,DescBlockLen); 
 		pDescBlock = (LPDESCBLOCK)GlobalLock (hDescBlock);
 		BigRead (FidMap,(HPSTR)pDescBlock,DescBlockLen);
 		GlobalUnlock (hDescBlock);
@@ -3139,7 +3139,7 @@ GSSiExitProg (819);
 	if (CurrentRefno == 1007241)
 		ii=1;
 	lBuf = len;
-	hBuf = GSSiGlobAlloc ( 512,GHND,lBuf+32);   
+	hBuf = GSSiGlobAlloc(GAIDNO 512,GHND,lBuf+32);   
 	pBuf = GlobalLock (hBuf);
 	hmemmove (pBuf,rec,len);    
 	GlobalUnlock (hBuf);
@@ -3338,9 +3338,9 @@ MaxQuad:
     BigWrite (ReorgFileFID,(HPSTR)&MaxQuadType,4,-1);
     BigWrite (ReorgFileFID,(HPSTR)&LenQuad,4,-1);    
     
-    hQuad = GSSiGlobAlloc ( 513,GHND,lMem + sizeof(QUAD));
+    hQuad = GSSiGlobAlloc(GAIDNO 513,GHND,lMem + sizeof(QUAD));
     pQuad = (LPQUAD)GlobalLock (hQuad);
-    hLadder = GSSiGlobAlloc ( 514,GHND,sizeof(LADDER)*MaxQuadLevel);
+    hLadder = GSSiGlobAlloc(GAIDNO 514,GHND,sizeof(LADDER)*MaxQuadLevel);
     pLadder = (LPLADDER)GlobalLock (hLadder); 
     pLadder->Loc = 1;  
     pLadder->Level=1;
@@ -3361,7 +3361,7 @@ MaxQuad:
 	while (BigRead (NewQuadFID,(HPSTR)&len,4))
 	{
 		BigRead (NewQuadFID,(HPSTR)&Type,2);
-		hbuf = GSSiGlobAlloc ( 515,GMEM_MOVEABLE,len);
+		hbuf = GSSiGlobAlloc(GAIDNO 515,GMEM_MOVEABLE,len);
 		buf = GlobalLock (hbuf);  
 		BigRead (NewQuadFID,buf,len);
 		if (!(Unique%Skip))
@@ -3549,7 +3549,7 @@ void SetPickGlobalsFromThemeHighlightData (LPTHEMEHIGHLIGHTKEY pThemeHighlightKe
 
 HANDLE SavePickList(void)
 {
-	HANDLE hSavedList = GSSiGlobAlloc(1869, GMEM_MOVEABLE, sizeof(int) + NumPicked * sizeof(PICKDATA) + 4);
+	HANDLE hSavedList = GSSiGlobAlloc(GAIDNO 1869, GMEM_MOVEABLE, sizeof(int) + NumPicked * sizeof(PICKDATA) + 4);
 	LPINT pNum = GlobalLock(hSavedList);
 	*pNum++ = NumPicked;
 	if (NumPicked > 0)
@@ -3761,7 +3761,7 @@ GSSiExitProg (823);
 				    	goto ErrExit;
 				    if (nBytes<=0)
 				        goto ErrExit;  
-				    hSeg = GSSiGlobAlloc ( 516,GMEM_MOVEABLE,(DWORD)nBytes);
+				    hSeg = GSSiGlobAlloc(GAIDNO 516,GMEM_MOVEABLE,(DWORD)nBytes);
 				    ipnt = (LPSHORT)GlobalLock (hSeg); 
 				    nRead = BigRead (FidMap,(HPSTR)ipnt,nBytes);  
 				    if (nRead != nBytes) 
@@ -3885,7 +3885,7 @@ GSSiExitProg (824);
 				    	goto ErrExit;
 				    if (nBytes<=0)
 				        goto ErrExit;  
-				    hSeg = GSSiGlobAlloc ( 517,GMEM_MOVEABLE,(DWORD)nBytes);
+				    hSeg = GSSiGlobAlloc(GAIDNO 517,GMEM_MOVEABLE,(DWORD)nBytes);
 				    ipnt = (LPSHORT)GlobalLock (hSeg); 
 				    nRead = BigRead (FidMap,(HPSTR)ipnt,nBytes);  
 				    if (nRead != nBytes) 

@@ -194,7 +194,7 @@ long DrawStreet(long sNum, long WantLinkID, COLORREF Color, short Width, BOOL Hi
 				GSSillseek(FidStreetPolys, Offset, 0);
 				BigRead(FidStreetPolys, (HPSTR)&Header, sizeof(STREETPOLYHEADER));
 				Size = Header.nPnts * sizeof(DPOINT);
-				hPoly = GSSiGlobAlloc(0, GMEM_MOVEABLE, Size);
+				hPoly = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, Size);
 				Points = (HPDPOINT)GlobalLock(hPoly);
 				BigRead(FidStreetPolys, (HPSTR)Points, Size);
 				if (pTotMinMax)
@@ -209,7 +209,7 @@ long DrawStreet(long sNum, long WantLinkID, COLORREF Color, short Width, BOOL Hi
 
 					if (!*phPoly)
 					{
-						*phPoly = GSSiGlobAlloc(1730, GMEM_MOVEABLE, 4 * sizeof(int) + Header.nPnts * sizeof(DPOINT));
+						*phPoly = GSSiGlobAlloc(GAIDNO 1730, GMEM_MOVEABLE, 4 * sizeof(int) + Header.nPnts * sizeof(DPOINT));
 						pPolys = GlobalLock(*phPoly);
 					}
 					else
@@ -299,7 +299,7 @@ Top:
 				GSSillseek(FidStreetPolys, Offset, 0);
 				BigRead(FidStreetPolys, (HPSTR)&Header, sizeof(STREETPOLYHEADER));
 				Size = Header.nPnts * sizeof(DPOINT);
-				hPoly = GSSiGlobAlloc(0, GMEM_MOVEABLE, Size);
+				hPoly = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, Size);
 				Points = (HPDPOINT)GlobalLock(hPoly);
 				BigRead(FidStreetPolys, (HPSTR)Points, Size);
 				if (pTotMinMax)
@@ -314,7 +314,7 @@ Top:
 
 					if (!*phPoly)
 					{
-						*phPoly = GSSiGlobAlloc(1730, GMEM_MOVEABLE, 5 * sizeof(int) + Header.nPnts * sizeof(DPOINT));
+						*phPoly = GSSiGlobAlloc(GAIDNO 1730, GMEM_MOVEABLE, 5 * sizeof(int) + Header.nPnts * sizeof(DPOINT));
 						pPolys = GlobalLock(*phPoly);
 					}
 					else
@@ -410,7 +410,7 @@ Top:
     				GSSillseek (FidStreetPolys,Offset,0);
     				BigRead (FidStreetPolys,(HPSTR)&Header,sizeof(STREETPOLYHEADER));
     				Size = Header.nPnts * sizeof(DPOINT);
-    				hPoly = GSSiGlobAlloc (0,GMEM_MOVEABLE,Size);
+    				hPoly = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,Size);
     				Points = (HPDPOINT)GlobalLock (hPoly);
     				BigRead (FidStreetPolys,(HPSTR)Points,Size); 
 					if (pBounds)
@@ -488,7 +488,7 @@ Top:
 					GSSillseek(FidStreetPolys, Offset, 0);
 					BigRead(FidStreetPolys, (HPSTR)&Header, sizeof(STREETPOLYHEADER));
 					Size = Header.nPnts * sizeof(DPOINT);
-					hPoly = GSSiGlobAlloc(0, GMEM_MOVEABLE, Size);
+					hPoly = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, Size);
 					Points = (HPDPOINT)GlobalLock(hPoly);
 					BigRead(FidStreetPolys, (HPSTR)Points, Size);
 					if (pBounds)
@@ -2731,7 +2731,7 @@ BOOL CreateADD_MATCHTable (LPSTR File,LPSTR BadNames,LPSTR KeyDef,short AddUDILe
 	LPSTR	lpDot;
 	BOOL	rtn=FALSE; 
 	char	DefStr[]=",MatchCode(B2),LocationCode(B2),StreetNum(B4),HouseNum(B4),IntID(B4),StreetNum1(B4),StreetNum2(B4),Street1MP(R8),Street2MP(R8),MunicNum(B4),ZIP(B4),X(R8),Y(R8),MunicChanged(B2),ZIPChanged(B2),NumPartsRemoved(B2),AddressTAGPrefix(C8),AddressTAGUDI(C64),OnStreetNum(B4),IntID2(B4),X2(R8),Y2(R8),Street(C80),House(C12),City(C32),ZIPCODE(C12),Symbol(C64),FromDate(B4),ToDate(B4),Note(C100)";
-	HANDLE	hStr=GSSiGlobAlloc (0,GMEM_MOVEABLE,4096);
+	HANDLE	hStr=GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,4096);
 	LPSTR	str=GlobalLock (hStr);
 
 	sprintf (str,"%s%s,FromDateC(C32),ToDateC(C32),OriginalFileKey(C100)",KeyDef,DefStr);
@@ -3820,7 +3820,7 @@ long ChangeSimilarStreets (LPSTR DestName,LPSTR OrigName,long RecNum,LPHANDLE hC
     long	nFixed=0;  
     LPLONG	pRecs;
 	
-    *hChangeRecs = GSSiGlobAlloc ( 122,GHND,USHRT_MAX);
+    *hChangeRecs = GSSiGlobAlloc(GAIDNO 122,GHND,USHRT_MAX);
     pRecs = (LPLONG)GlobalLock (*hChangeRecs); 
     *pRecs++ = RecNum;
     nFixed++;
@@ -3866,7 +3866,7 @@ void ShowStreetMatches (LPSTR StreetBuf,HWND hWndDlg,short idc_list,LPMNMXCORD p
 	                        SANSCHv,NANDCHv,NCMPNMv,ORIGNMv,SANSCPv,SANSCSv,0,0,0,0);
 	pos = BT_FIRST;  
 	SendDlgItemMessage (hWndDlg,idc_list,LB_RESETCONTENT,0,0);
-	hList = GSSiGlobAlloc ( 123,GMEM_MOVEABLE,USHRT_MAX);
+	hList = GSSiGlobAlloc(GAIDNO 123,GMEM_MOVEABLE,USHRT_MAX);
     nAdded = GetNameTypeList (1,&nList,hList,STDNAMv,NRONAMv,NMONLYv,
 	                        	SANSCHv,NANDCHv,NCMPNMv,ORIGNMv,SANSCPv,SANSCSv); 
     nAdded += GetNameTypeList (2,&nList,hList,STDNAMv,NRONAMv,NMONLYv,
@@ -3964,8 +3964,8 @@ STNDSN_INIT(FALSE);
 		goto Exit;
 	}
  	WantMunic = GetMunicFromName (City);
-	hList1 = GSSiGlobAlloc ( 124,GMEM_MOVEABLE,USHRT_MAX);
-	hList2 = GSSiGlobAlloc ( 125,GMEM_MOVEABLE,USHRT_MAX);
+	hList1 = GSSiGlobAlloc(GAIDNO 124,GMEM_MOVEABLE,USHRT_MAX);
+	hList2 = GSSiGlobAlloc(GAIDNO 125,GMEM_MOVEABLE,USHRT_MAX);
     STNDST(Street1, (short)_fstrlen(Street1),STDNAM1,NRONAM1,NMONLY1,
                              SANSCH1,NANDCH1,NCMPNM1,ORIGNM1,SANSCP1,SANSCS1,0,0,0,0); 
     nAdded1 = GetNameTypeList (1,&nList1,hList1,STDNAM1,NRONAM1,NMONLY1,
@@ -4066,8 +4066,8 @@ short INT_MATCH_DLG (HWND hWndDlg,UINT List1, UINT List2, long Munic, long ZIP, 
 	*pStreetNum1 = 0;
 	*pStreetNum2 = 0;
     item = 0;
-	hList1 = GSSiGlobAlloc ( 126,GMEM_MOVEABLE,USHRT_MAX);
-	hList2 = GSSiGlobAlloc ( 127,GMEM_MOVEABLE,USHRT_MAX); 
+	hList1 = GSSiGlobAlloc(GAIDNO 126,GMEM_MOVEABLE,USHRT_MAX);
+	hList2 = GSSiGlobAlloc(GAIDNO 127,GMEM_MOVEABLE,USHRT_MAX); 
 	pList1 = (LPLONG)GlobalLock (hList1);
     while (SendDlgItemMessage(hWndDlg,List1,LB_GETTEXT,item++,(DWORD)&str) != LB_ERR)
 	{
@@ -4193,7 +4193,7 @@ int GetMapQuestLocation(LPSTR FullAddressIN, LPSTR Quality, LPDPOINT pPoint, int
 
 		if (lFile > 0)
 		{
-			HANDLE	hMem = GSSiGlobAlloc(0, GMEM_MOVEABLE, lFile);
+			HANDLE	hMem = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, lFile);
 			LPSTR	pFile = GlobalLock(hMem);
 			HFILE	Fid = GSSiOpenFile(TempFile, 0, OF_READ);
 			DPOINT	LatLng = { 0, 0 };

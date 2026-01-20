@@ -794,7 +794,7 @@ SetGPS:
 			{
 				
 				nItems=(short)SendDlgItemMessage(hWndDlg ,IDC_GPSLIST,LB_GETSELCOUNT,0,0); 
-				hItems=GSSiGlobAlloc (1034,GMEM_MOVEABLE,nItems*4);
+				hItems=GSSiGlobAlloc(GAIDNO 1034,GMEM_MOVEABLE,nItems*4);
 				pItems=  (LPINT) GlobalLock(hItems);
 				SendDlgItemMessage(hWndDlg ,IDC_GPSLIST,LB_GETSELITEMS,nItems,(LPARAM)pItems);
 				for (i=0;i<nItems;i++)
@@ -2050,7 +2050,7 @@ short GPSLoadToDB (HWND hWndDlg, UINT Control)
 	if (!_fstricmp (AppName,"SportMap"))
 		IsSportMap = TRUE;
 	nItems=nWPSelected=(short)SendDlgItemMessage(hWndDlg ,Control,LB_GETSELCOUNT,0,0); 
-	hItems=GSSiGlobAlloc (1033,GMEM_MOVEABLE,nItems*4);
+	hItems=GSSiGlobAlloc(GAIDNO 1033,GMEM_MOVEABLE,nItems*4);
 	lpItems=(LPINT) GlobalLock(hItems);
 	SendDlgItemMessage(hWndDlg ,Control,LB_GETSELITEMS,nItems,(LPARAM)lpItems);
 	GlobalUnlock (hItems);
@@ -2074,7 +2074,7 @@ short GPSLoadToDB (HWND hWndDlg, UINT Control)
 	}
 	if (LoadWPAsRoute)
 	{
-		hRoutePoints = GSSiGlobAlloc (1032,GMEM_MOVEABLE,(long)nItems*sizeof(DPOINT));
+		hRoutePoints = GSSiGlobAlloc(GAIDNO 1032,GMEM_MOVEABLE,(long)nItems*sizeof(DPOINT));
 		RoutePoints = (HPDPOINT)GlobalLock (hRoutePoints);
 	}
 	hcurSave = GSSiSetCursor(LoadCursor(0, IDC_WAIT)); 
@@ -2768,7 +2768,7 @@ BOOL FAR PASCAL FINDWAYPOINTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, L
 				if (!nItems)
 					break;  
 				n = nItems;
-				hItems=GSSiGlobAlloc (1028,GMEM_MOVEABLE,nItems*4);
+				hItems=GSSiGlobAlloc(GAIDNO 1028,GMEM_MOVEABLE,nItems*4);
 				lpItems=  (LPINT) GlobalLock(hItems); 
 				SendDlgItemMessage(hWndDlg ,IDC_WPLIST,LB_GETSELITEMS,nItems,(LPARAM)lpItems);
 				while (nItems--)
@@ -2802,7 +2802,7 @@ BOOL FAR PASCAL FINDWAYPOINTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, L
 				if (!nItems)
 					break;  
 				n = nItems;
-				hItems=GSSiGlobAlloc (1028,GMEM_MOVEABLE,nItems*4);
+				hItems=GSSiGlobAlloc(GAIDNO 1028,GMEM_MOVEABLE,nItems*4);
 				lpItems=  (LPINT) GlobalLock(hItems); 
 				SendDlgItemMessage(hWndDlg ,IDC_WPLIST,LB_GETSELITEMS,nItems,(LPARAM)lpItems);
 				while (nItems--)
@@ -2839,7 +2839,7 @@ BOOL FAR PASCAL FINDWAYPOINTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, L
 				DBoundsInit ((LPMNMXCORD)UserBounds);	
 				if (!nItems)
 					break;
-				hItems=GSSiGlobAlloc (1029,GMEM_MOVEABLE,nItems*4);
+				hItems=GSSiGlobAlloc(GAIDNO 1029,GMEM_MOVEABLE,nItems*4);
 				lpItems=  (LPINT) GlobalLock(hItems); 
 				SendDlgItemMessage(hWndDlg ,IDC_WPLIST,LB_GETSELITEMS,nItems,(LPARAM)lpItems);
 				while (nItems--)
@@ -2886,7 +2886,7 @@ BOOL FAR PASCAL FINDWAYPOINTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, L
 					lpGWDHeadFish = (LPGWDHEADER)GlobalLock (hDBFish); 
 				hDBFoundWP = OpenGWDatabase (SelWaypntDB,BT_WRITE);
 				lpGWDHeadFound = (LPGWDHEADER)GlobalLock (hDBFoundWP); 
-				hItems=GSSiGlobAlloc (1030,GMEM_MOVEABLE,nItems*4);
+				hItems=GSSiGlobAlloc(GAIDNO 1030,GMEM_MOVEABLE,nItems*4);
 				lpItems=  (LPINT) GlobalLock(hItems); 
 				SendDlgItemMessage(hWndDlg ,IDC_WPLIST,LB_GETSELITEMS,nItems,(LPARAM)lpItems);
 				while (nItems--)
@@ -3388,7 +3388,7 @@ NextDelete:
 					
 					if (!nItems)
 						break;
-					hItems=GSSiGlobAlloc (1031,GMEM_MOVEABLE,nItems*4);
+					hItems=GSSiGlobAlloc(GAIDNO 1031,GMEM_MOVEABLE,nItems*4);
 					lpItems=  (LPINT) GlobalLock(hItems); 
 					SendDlgItemMessage(hWndDlg ,IDC_LIST,LB_GETSELITEMS,nItems,(LPARAM)lpItems);
 					while (nItems--)

@@ -347,7 +347,7 @@ BOOL GetSegDataGM (long TLID,LPSEGDATAGM pSegdata)
 		PickList[0] = SavePickData;
 		if (!rtn)
 			return FALSE; 
-		hStr = GSSiGlobAlloc ( 568,GMEM_MOVEABLE,1024);
+		hStr = GSSiGlobAlloc(GAIDNO 568,GMEM_MOVEABLE,1024);
 		str = GlobalLock (hStr);
 		_fstrcpy (str,"[%ONEWAYVAL]");
 		ExpandText (str);
@@ -800,7 +800,7 @@ short GetNumZIPsInMunic (long Munic,LPHANDLE phZIPsInMunic)
 		if (MunZIPs.Munic != Munic)
 			return n;
 		if (!n)
-			*phZIPsInMunic = GSSiGlobAlloc ( 570,GMEM_MOVEABLE,1024);
+			*phZIPsInMunic = GSSiGlobAlloc(GAIDNO 570,GMEM_MOVEABLE,1024);
 		pZIP = (LPLONG)GlobalLock (*phZIPsInMunic);
 		pZIP += n;
 		*pZIP = MunZIPs.ZIP;
@@ -934,7 +934,7 @@ BOOL MatchAddress3 (int MatchCode,long StreetNum,long House,long ZIP,long OrigZI
 
 			FillGWDData (lpGWDHead,Offset);
 			if (!*phMatch)
-				*phMatch = GSSiGlobAlloc ( 571,GHND,sizeof(ADDMATCH)); 
+				*phMatch = GSSiGlobAlloc(GAIDNO 571,GHND,sizeof(ADDMATCH)); 
 			else 
 				*phMatch = GSSiGlobalReAlloc (0,*phMatch,(*pNumMatch+1)*sizeof(ADDMATCH),GHND);
 			pMatch = pMatchTest = (LPADDMATCH)GlobalLock (*phMatch);  
@@ -1079,7 +1079,7 @@ GetCoord:
     }
 	FillGWDData (lpGWDHead,Offset);
 	if (!*phMatch)
-		*phMatch = GSSiGlobAlloc ( 571,GHND,sizeof(ADDMATCH)); 
+		*phMatch = GSSiGlobAlloc(GAIDNO 571,GHND,sizeof(ADDMATCH)); 
 	else 
 		*phMatch = GSSiGlobalReAlloc (0,*phMatch,(*pNumMatch+1)*sizeof(ADDMATCH),GHND);
 	pMatch = pMatchTest = (LPADDMATCH)GlobalLock (*phMatch);  
@@ -1939,7 +1939,7 @@ short MatchIntLists(short MatchCode, short nList1, short nList2, HANDLE hList1, 
 				if (!Munic || MunicMatch || !HaveMunics || MatchCode > 2)
 				{
 					if (!*hMatch)
-						*hMatch = GSSiGlobAlloc(572, GHND, sizeof(ADDMATCH));
+						*hMatch = GSSiGlobAlloc(GAIDNO 572, GHND, sizeof(ADDMATCH));
 					else
 						*hMatch = GSSiGlobalReAlloc(0, *hMatch, (nMatch + 1) * sizeof(ADDMATCH), GHND);
 					pMatch = (LPADDMATCH)GlobalLock(*hMatch);
@@ -2092,7 +2092,7 @@ short MatchIntLists_new(short MatchCode, short nList1, short nList2, HANDLE hLis
 					if (!haveMatch && IntIntNoKey.StreetNum != *pStreets)
 					{
 						if (!*hMatch)
-							*hMatch = GSSiGlobAlloc(572, GHND, sizeof(ADDMATCH));
+							*hMatch = GSSiGlobAlloc(GAIDNO 572, GHND, sizeof(ADDMATCH));
 						else
 							*hMatch = GSSiGlobalReAlloc(0, *hMatch, (nMatch + 1) * sizeof(ADDMATCH), GHND);
 						pMatch = (LPADDMATCH)GlobalLock(*hMatch);
@@ -2156,7 +2156,7 @@ short GetAllInts (short MatchCode, short nList1,HANDLE hList1,long Munic,LPHANDL
 					if (!Munic || MunicMatch || MatchCode > 2) 
 					{
 						if (!*hMatch)
-							*hMatch = GSSiGlobAlloc ( 572,GHND,sizeof(ADDMATCH)); 
+							*hMatch = GSSiGlobAlloc(GAIDNO 572,GHND,sizeof(ADDMATCH)); 
 						else 
 							*hMatch = GSSiGlobalReAlloc (0,*hMatch,(nMatch+1)*sizeof(ADDMATCH),GHND);
 						pMatch = (LPADDMATCH)GlobalLock (*hMatch); 
@@ -2206,7 +2206,7 @@ short ADD_MATCH (LPSTR Street, LPSTR House, LPSTR Munic, LPSTR ZIP, short MOPT,L
 	BOOL	OpenedUAA=FALSE, OpenedSeg=FALSE, OpenedSP=FALSE, BlockCenter, OpenedSM=FALSE;
 	long	IHouse, IMunic, IZIP;
 	short	nList=0, rtn=0, nAdded, NumMatch=0;  
-	HANDLE	hMem=GSSiGlobAlloc ( 573,GMEM_MOVEABLE,512);
+	HANDLE	hMem=GSSiGlobAlloc(GAIDNO 573,GMEM_MOVEABLE,512);
 	LPSTR	STDNAM1=GlobalLock (hMem);
 	LPSTR	NRONAM1=STDNAM1+50;
 	LPSTR	NMONLY1=NRONAM1+50;
@@ -2243,7 +2243,7 @@ STNDSN_INIT(FALSE);
 		NumMatch = 1;
 		goto Exit;
 	}
-	hList = GSSiGlobAlloc ( 574,GMEM_MOVEABLE,USHRT_MAX);
+	hList = GSSiGlobAlloc(GAIDNO 574,GMEM_MOVEABLE,USHRT_MAX);
     STNDST(Street, (short)_fstrlen(Street),STDNAM1,NRONAM1,NMONLY1,
                              			   SANSCH1,NANDCH1,NCMPNM1,ORIGNM1,SANSCP1,SANSCS1,NULL,NULL,NULL,NULL); 
 //	Find all type 1 matches (full standardized name), if any found return.
@@ -2551,7 +2551,7 @@ BOOL FoundUserAssignedAddress (long IHouse,LPSTR Street,long IMunic,BOOL BlockCe
 	strupr (ULAddKey.Street);
 	ULAddKey.HouseNum = IHouse;
 	ULAddKey.Munic = IMunic; 
-	*phMatch = GSSiGlobAlloc ( 575,GHND,sizeof(ADDMATCH));
+	*phMatch = GSSiGlobAlloc(GAIDNO 575,GHND,sizeof(ADDMATCH));
 	pMatch = (LPADDMATCH)GlobalLock (*phMatch); 
 	if (!BT_FIND (hBTUserDefinedAddress,(LPSTR)&ULAddKey,BT_FIRST,BT_EQ,(LPSTR)pMatch))
 	{  
@@ -2854,7 +2854,7 @@ short GetNearHouse (long StreetNum,long WantHouse,long Munic,long ZIP,LPLONG pNe
 		goto Exit; 
 	if (ZIP || !Munic)
 	{
-		hZIPs = GSSiGlobAlloc (0,GMEM_MOVEABLE,4);
+		hZIPs = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,4);
 		pZIPs = (LPLONG)GlobalLock (hZIPs);
 		*pZIPs = ZIP;
 		GlobalUnlock (hZIPs);

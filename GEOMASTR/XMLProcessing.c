@@ -13,7 +13,7 @@ HANDLE LoadXMLFile (LPSTR File)
 
 	if (lFile > 0)
 	{
-		hFile = GSSiGlobAlloc (1700,GMEM_MOVEABLE,lFile+1);
+		hFile = GSSiGlobAlloc(GAIDNO 1700,GMEM_MOVEABLE,lFile+1);
 		Fid = GSSiOpenFile (File,0,OF_READ);
 		pFile = GlobalLock (hFile);
 		BigRead (Fid,pFile,lFile);
@@ -59,7 +59,7 @@ HANDLE GetNextXMLElement (HANDLE FileHandle,LPINT pFileLoc,LPSTR TagID)
 				if (pFileLoc)
 					*pFileLoc = ((int)pEnd + strlen (search)) - (int)pFileBeg;
 
-				hTag = GSSiGlobAlloc (1701,GMEM_MOVEABLE,lTag);
+				hTag = GSSiGlobAlloc(GAIDNO 1701,GMEM_MOVEABLE,lTag);
 				pTag = GlobalLock (hTag);
 				strncpy0 (pTag,pLoc,lTag-1);
 				GlobalUnlock (hTag);
@@ -128,7 +128,7 @@ HANDLE GetXMLElementValue (HANDLE hElement)
 		if ((pEnd = strstr (pBeg,endStr)))
 		{
 			*pEnd = 0;
-			hValue = GSSiGlobAlloc (1702,GMEM_MOVEABLE,strlen (pBeg)+1);
+			hValue = GSSiGlobAlloc(GAIDNO 1702,GMEM_MOVEABLE,strlen (pBeg)+1);
 			pValue = GlobalLock (hValue);
 			strcpy (pValue,pBeg);
 			GlobalUnlock (hValue);

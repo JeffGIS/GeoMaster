@@ -114,7 +114,7 @@ BOOL CreateGCIFile (LPSTR Name,LPBITMAPINFOHEADER lpbi, HANDLE hFile,int fmt)
 		UseExternalCompression = FALSE;
 		pAVIFile->Type = TYPEGCO;
 	}
-	hHeader = GSSiGlobAlloc ( 372,GMEM_MOVEABLE,sizeof(BITMAPINFOHEADER)+256*sizeof(RGBQUAD));
+	hHeader = GSSiGlobAlloc(GAIDNO 372,GMEM_MOVEABLE,sizeof(BITMAPINFOHEADER)+256*sizeof(RGBQUAD));
 	lpbiHead = (LPBITMAPINFOHEADER)GlobalLock (hHeader);
 	if (!fmt)
 	{
@@ -186,7 +186,7 @@ BOOL InitAVIOut (LPSTR Name, LPBITMAPINFOHEADER alpbi,LPHANDLE phFile,int fmt)
 			AVIFileInit();
 		HaveInit = TRUE;
 	}
-	*phFile = GSSiGlobAlloc ( 373,GHND,sizeof(AVIFILE));
+	*phFile = GSSiGlobAlloc(GAIDNO 373,GHND,sizeof(AVIFILE));
 	pAVIFile = (LPAVIFILE)GlobalLock (*phFile); 
     if (!UserDefinedImageQuality)
 	    pAVIFile->CompressionFactor = 7200;
@@ -315,7 +315,7 @@ short AVIOut (LPSTR Name,LPBITMAPINFOHEADER lpbi,LPHANDLE hFile,LPLONG pFrame,BO
 		ULONG	NextLen; 
 		short	ii;
 		
-		hHeader = GSSiGlobAlloc ( 374,GMEM_MOVEABLE,sizeof(BITMAPINFOHEADER)+256*sizeof(RGBQUAD)+lpbi->biSizeImage);
+		hHeader = GSSiGlobAlloc(GAIDNO 374,GMEM_MOVEABLE,sizeof(BITMAPINFOHEADER)+256*sizeof(RGBQUAD)+lpbi->biSizeImage);
 		lpbiHeadOut = (LPBITMAPINFOHEADER)GlobalLock (hHeader);  
 		if (pAVIFile->Type == TYPEGCO)
 		{
@@ -346,7 +346,7 @@ short AVIOut (LPSTR Name,LPBITMAPINFOHEADER lpbi,LPHANDLE hFile,LPLONG pFrame,BO
 			}
 			else
 			{
-				hCompData = GSSiGlobAlloc(374, GMEM_MOVEABLE, lpbi->biSizeImage);
+				hCompData = GSSiGlobAlloc(GAIDNO 374, GMEM_MOVEABLE, lpbi->biSizeImage);
 				pCompressedData = GlobalLock(hCompData);
 				ICRtn = ICCompressGetFormat(pAVIFile->hIC, lpbi, lpbiHeadOut);
 				if (ICRtn != ICERR_OK)
@@ -434,7 +434,7 @@ HANDLE CopyDib (HANDLE hdib)
     DWORD cnt; 
     extern	BOOL IgnoreLock;
 
-    if (h = GSSiGlobAlloc ( 376,GMEM_MOVEABLE, cnt = GlobalSize(hdib)))
+    if (h = GSSiGlobAlloc(GAIDNO 376,GMEM_MOVEABLE, cnt = GlobalSize(hdib)))
     {   
     	IgnoreLock = TRUE;
         ps = GlobalLock(hdib);  
@@ -579,7 +579,7 @@ BOOL AVIFrameToDIB (LPSTR File, long frame,LPHANDLE NewDIB,LPSHORT ShouldDeleteB
 		BigRead (GCIFid,(HPSTR)&lRec,4); 
 		if (lRec <= 0 || lRec > MAXFRAME) 
 		{   
-			HANDLE	hMess=GSSiGlobAlloc ( 377,GMEM_MOVEABLE,1024);
+			HANDLE	hMess=GSSiGlobAlloc(GAIDNO 377,GMEM_MOVEABLE,1024);
 			LPSTR	pMess=GlobalLock (hMess);
 			static  BOOL showMessage = FALSE;
 
@@ -596,7 +596,7 @@ BOOL AVIFrameToDIB (LPSTR File, long frame,LPHANDLE NewDIB,LPSHORT ShouldDeleteB
 			}
 			return FALSE;
 		}
-		hCompressedData = GSSiGlobAlloc ( 378,GMEM_MOVEABLE,lRec+1024);
+		hCompressedData = GSSiGlobAlloc(GAIDNO 378,GMEM_MOVEABLE,lRec+1024);
 		lpbiHeadIn = (LPBIHEADER)GlobalLock (hCompressedData);
 		if (AVIFileType == TYPEGCI)
 		{
@@ -614,7 +614,7 @@ BOOL AVIFrameToDIB (LPSTR File, long frame,LPHANDLE NewDIB,LPSHORT ShouldDeleteB
 	    			rowlen += (4 - (rowlen % 4));
 				biHeadOut.biHead.biSizeImage = rowlen * (long)biHeadOut.biHead.biHeight;
 			}
-			*NewDIB = GSSiGlobAlloc ( 379,GMEM_MOVEABLE,
+			*NewDIB = GSSiGlobAlloc(GAIDNO 379,GMEM_MOVEABLE,
 									 biHeadOut.biHead.biSizeImage+DIBHeadSize((LPBITMAPINFOHEADER)&biHeadOut)); 
 									   
 			lpbi = (LPBIHEADER)GlobalLock (*NewDIB);
@@ -731,7 +731,7 @@ long NumDIBColors (HANDLE hDib)
     lpbi = (LPBITMAPINFOHEADER)GlobalLock(hDib);
     if (lpbi->biBitCount != 8)
     	return 0;
-    hHistBuf = GSSiGlobAlloc ( 380,GHND,1024);   
+    hHistBuf = GSSiGlobAlloc(GAIDNO 380,GHND,1024);   
     pHist = (LPLONG)GlobalLock (hHistBuf);
      
     BytesPerPel = 1;

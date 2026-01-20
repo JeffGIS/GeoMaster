@@ -67,7 +67,7 @@ BOOL IsGFunctionKey (int Key,BOOL SendCmd)
 {   
 	long	CurLoc,LastLoc;
 	HFILE	Fid; 
-	HANDLE	hStr = GSSiGlobAlloc (  38,GMEM_MOVEABLE,2048);
+	HANDLE	hStr = GSSiGlobAlloc(GAIDNO  38,GMEM_MOVEABLE,2048);
 	LPSTR	lpStr = GlobalLock (hStr);
 	LPSTR	pFile = lpStr + 1024;
 	LPSTR	lpBar, pGCmd, lpCarrot; 
@@ -302,7 +302,7 @@ GSSiExitProg (1338);
 			{   
 				short	pos=BT_FIRST; 
 				long	Ref,Sequence, CurLoc=0; 
-				HANDLE	hMem = GSSiGlobAlloc (1235,GMEM_MOVEABLE,sizeof(HIGHLIGHTDATA)+sizeof(PICKDATA));
+				HANDLE	hMem = GSSiGlobAlloc(GAIDNO 1235,GMEM_MOVEABLE,sizeof(HIGHLIGHTDATA)+sizeof(PICKDATA));
 				LPHIGHLIGHTDATA	pHighlightData=(LPHIGHLIGHTDATA)GlobalLock (hMem);   
 				LPPICKDATA	pSavePickList0=(LPPICKDATA)(pHighlightData+1);
 				LPVIEWPORT	SaveVP=CurView; 
@@ -426,7 +426,7 @@ GSSiExitProg (1338);
                 {
 			    	LPSTR	pCmd=GlobalLock (hAddGraphicsFun); 
 				    short	lcmd = _fstrlen (pCmd);
-				    HANDLE	hCmd2 = GSSiGlobAlloc (1236,GMEM_MOVEABLE,lcmd+1);
+				    HANDLE	hCmd2 = GSSiGlobAlloc(GAIDNO 1236,GMEM_MOVEABLE,lcmd+1);
 				    LPSTR	pCmd2 = GlobalLock (hCmd2);
 				    
 				    _fstrcpy (pCmd2,pCmd);            	
@@ -469,7 +469,7 @@ GSSiExitProg (1338);
                 {
 			    	LPSTR	pCmd=GlobalLock (hAddGraphicsFun); 
 				    short	lcmd = _fstrlen (pCmd);
-				    HANDLE	hCmd2 = GSSiGlobAlloc (1237,GMEM_MOVEABLE,lcmd+1);
+				    HANDLE	hCmd2 = GSSiGlobAlloc(GAIDNO 1237,GMEM_MOVEABLE,lcmd+1);
 				    LPSTR	pCmd2 = GlobalLock (hCmd2);
 				    
 				    _fstrcpy (pCmd2,pCmd);            	
@@ -541,7 +541,7 @@ GSSiExitProg (1338);
                 {
 			    	LPSTR	pCmd=GlobalLock (hAddGraphicsFun); 
 				    short	lcmd = _fstrlen (pCmd);
-				    HANDLE	hCmd2 = GSSiGlobAlloc (1238,GMEM_MOVEABLE,lcmd+1);
+				    HANDLE	hCmd2 = GSSiGlobAlloc(GAIDNO 1238,GMEM_MOVEABLE,lcmd+1);
 				    LPSTR	pCmd2 = GlobalLock (hCmd2);
 				    
 				    _fstrcpy (pCmd2,pCmd);            	
@@ -705,7 +705,7 @@ BOOL RunGFCommandFromFileAtLoc (LPSTR File,long CurLoc,BOOL SendCmd,short opt)
 	LPSTR	pGCmd, lpBar;  
 	HFILE	Fid; 
 	BOOL	rtn = FALSE, First=TRUE;
-	HANDLE	hStr = GSSiGlobAlloc (1240,GMEM_MOVEABLE,4096);
+	HANDLE	hStr = GSSiGlobAlloc(GAIDNO 1240,GMEM_MOVEABLE,4096);
 	LPSTR	lpStr = GlobalLock (hStr);  
 	BOOL	SaveIgnoreFileOpenError=IgnoreFileOpenError;
 	int		iStack, lcmd;
@@ -752,7 +752,7 @@ GSSiExitProg (1341);
    		AddGraphicsFunVP = CurView->ID;
    	else
    		AddGraphicsFunVP = 0;
-	hAddGraphicsFun = GSSiGlobAlloc (1239,GHND,USHRT_MAX);
+	hAddGraphicsFun = GSSiGlobAlloc(GAIDNO 1239,GHND,USHRT_MAX);
 	pGCmd = GlobalLock (hAddGraphicsFun);  
 	                     	  
 	while (fgetstring (lpStr,4090,Fid))
@@ -1074,7 +1074,7 @@ BOOL LoadGFFile (HWND hWndDlg,LPSTR InFile,short opt,BOOL FloatingTB)
 #endif
 {   
 	LPSTR	lpBar, lpCarrot, pDesc;
-	HANDLE	hStr = GSSiGlobAlloc (1241,GMEM_MOVEABLE,4096);
+	HANDLE	hStr = GSSiGlobAlloc(GAIDNO 1241,GMEM_MOVEABLE,4096);
 	LPSTR	lpStr = GlobalLock (hStr);
 	HFILE	Fid;
 	char	Title[512];

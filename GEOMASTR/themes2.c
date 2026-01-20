@@ -68,7 +68,7 @@ void SetShowValPoly (long Refno,BOOL Close)
 		goto Exit; 
 	ShowVal.Refno = Refno;
 	ShowVal.nPnts = nPnts;
-	ShowVal.hPoints = GSSiGlobAlloc (1323,GMEM_MOVEABLE,(long)sizeof(POINT) * (long)nPnts); 
+	ShowVal.hPoints = GSSiGlobAlloc(GAIDNO 1323,GMEM_MOVEABLE,(long)sizeof(POINT) * (long)nPnts); 
 	pPoint = (HPPOINT)GlobalLock (ShowVal.hPoints);
 	for (i=0;i<nPnts;i++,pPoint++) 
 	{   
@@ -83,7 +83,7 @@ void SetShowValPoly (long Refno,BOOL Close)
     	LPINT	pPartLen, pPartLen2;
     	
     	ShowVal.nPoly = nPoly;
-    	ShowVal.hPolyPartLen = GSSiGlobAlloc ( 309,GMEM_MOVEABLE,(long)nPoly*sizeof(int));
+    	ShowVal.hPolyPartLen = GSSiGlobAlloc(GAIDNO 309,GMEM_MOVEABLE,(long)nPoly*sizeof(int));
   		pPartLen = (LPINT)GlobalLock (hPolyPartLen);
    		pPartLen2 = (LPINT)GlobalLock (ShowVal.hPolyPartLen);    
    		hmemmove ((HPSTR)pPartLen2,(HPSTR)pPartLen,(long)nPoly*sizeof(int));
@@ -136,7 +136,7 @@ BOOL SwitchThemeSHPFile (void)
 		return FALSE;
 	if (strstr (DataFile,"graphic2.gmd"))
 		return FALSE;
-	hMem = GSSiGlobAlloc (1523,GMEM_MOVEABLE,1024);
+	hMem = GSSiGlobAlloc(GAIDNO 1523,GMEM_MOVEABLE,1024);
 	CurShpFile = GlobalLock (hMem);
 	SaveThemeDataFile = CurShpFile + 256;
 	DBFullPath = SaveThemeDataFile + 256;
@@ -337,7 +337,7 @@ void DisplayCityNames(void)
 	int		CityTextVJust=1;
 	int		nDisplayed=0;
 	RECT	textRect, fullRect;
-	HANDLE	hTestRect = GSSiGlobAlloc (0,GMEM_MOVEABLE,(CurTheme->CityUniqueInc+1)*sizeof(RECT));
+	HANDLE	hTestRect = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,(CurTheme->CityUniqueInc+1)*sizeof(RECT));
 	LPRECT	pTestRect = GlobalLock (hTestRect);
 	int		nTestRect=0, i;
 	double	maxPop = CityPopConvert (CurTheme->MaxCityPopOnScreen);
@@ -535,7 +535,7 @@ GSSiExitProg (1262);
 			lpProfileData = (LPPROFILETHEMEDATA)&CurTheme->ClassBM; 
 			if (Type == GF_LINE || Type == GF_POLYLINE || Type == GF_CURVE || Type == GF_AREA)
 			{   
-				HANDLE	hHLT=GSSiGlobAlloc (1325,GMEM_MOVEABLE,sizeof(HIGHLIGHTDATA));
+				HANDLE	hHLT=GSSiGlobAlloc(GAIDNO 1325,GMEM_MOVEABLE,sizeof(HIGHLIGHTDATA));
 				LPHIGHLIGHTDATA	pHighlightData=(LPHIGHLIGHTDATA)GlobalLock (hHLT);
 				
 		    	if (!BT_FIND (hHighlight,(LPSTR)&iref,BT_FIRST,BT_EQ,(LPSTR)pHighlightData))
@@ -672,7 +672,7 @@ GSSiExitProg (1262);
 			}
 			if (*pStreetData->VisMacro)
 			{
-				HANDLE	hMem=GSSiGlobAlloc (1326,GMEM_MOVEABLE,512);
+				HANDLE	hMem=GSSiGlobAlloc(GAIDNO 1326,GMEM_MOVEABLE,512);
 				LPSTR	pMem=GlobalLock (hMem);
 				
 				_fstrcpy (pMem,pStreetData->VisMacro);
@@ -686,7 +686,7 @@ GSSiExitProg (1262);
 				pStreetData->IgnoreShields = TRUE;
 			if (*pStreetData->ColorMacro)
 			{
-				HANDLE	hMem=GSSiGlobAlloc (1327,GMEM_MOVEABLE,512);
+				HANDLE	hMem=GSSiGlobAlloc(GAIDNO 1327,GMEM_MOVEABLE,512);
 				LPSTR	pMem=GlobalLock (hMem);
 				COLORREF	Color;
 				short	R,G,B,W;
@@ -738,7 +738,7 @@ GSSiExitProg (1262);
 			}
 			if (*pStreetData->DisplayNameMacro)
 			{
-				HANDLE	hMem=GSSiGlobAlloc (1328,GMEM_MOVEABLE,512);
+				HANDLE	hMem=GSSiGlobAlloc(GAIDNO 1328,GMEM_MOVEABLE,512);
 				LPSTR	pMem=GlobalLock (hMem);
 				
 				_fstrcpy (pMem,pStreetData->DisplayNameMacro);
@@ -845,7 +845,7 @@ GSSiExitProg (1262);
 						PadString (KeyVal,0,GetBTKeyLen(pStreetData->hNameFile1));
 						if (BT_FIND (pStreetData->hNameFile1,(LPSTR)KeyVal,BT_FIRST,BT_EQ,(LPSTR)&NameID))
 						{
-			   				HANDLE	hName2=GSSiGlobAlloc (1329,GMEM_MOVEABLE,256);
+			   				HANDLE	hName2=GSSiGlobAlloc(GAIDNO 1329,GMEM_MOVEABLE,256);
 			   				LPSTR	pName2 = GlobalLock (hName2);
 			   				
 							if (BT_FIND (pStreetData->hNameFile2,(LPSTR)&NameID,BT_LAST,BT_ANY,pName2))
@@ -1303,7 +1303,7 @@ SetClassChar:
 				
 				if (CurrentMidPoint (Type,Just,&MidPointAZ,&Length,&Height,TRUE, &MinMax,&WinPoint,&ShowVal.WPoint,&n,1,0,0)) 
 				{   
-					HANDLE hStr = GSSiGlobAlloc (0,GMEM_MOVEABLE,1024);
+					HANDLE hStr = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,1024);
 					LPSTR	str=GlobalLock (hStr);
 
 					ShowVal.pTheme = CurTheme;
@@ -2021,7 +2021,7 @@ void ProcessDataDisplayMacro (int id,LPVIEWPORT CurView)
 	Fid = GSSiOpenFile (CurView->DataDisplayRectFile,0,OF_READ);
 	if (Fid != HFILE_ERROR)
 	{
-		HANDLE	hMacro = GSSiGlobAlloc (1524,GMEM_MOVEABLE,pDataDisplayRect->MacroLen);
+		HANDLE	hMacro = GSSiGlobAlloc(GAIDNO 1524,GMEM_MOVEABLE,pDataDisplayRect->MacroLen);
 		LPSTR	pMacro = GlobalLock (hMacro);
 
 		GSSillseek (Fid,pDataDisplayRect->Offset,0);
@@ -2126,7 +2126,7 @@ BOOL AddDataDisplayRect (RECT ScreenRect,DPOINT WPoint,LPSTR InMacro)
 	if (!CurView->nDataDisplayRect)
 	{
 		GSSiGetTempFileName (0,"gmr",0,CurView->DataDisplayRectFile);
-		CurView->hDataDisplayRect = GSSiGlobAlloc (1503,GMEM_MOVEABLE,MAX_DATADISPLAYRECT*sizeof(DATADISPLAYRECT));
+		CurView->hDataDisplayRect = GSSiGlobAlloc(GAIDNO 1503,GMEM_MOVEABLE,MAX_DATADISPLAYRECT*sizeof(DATADISPLAYRECT));
 		Fid = GSSiOpenFile (CurView->DataDisplayRectFile,0,OF_CREATE);
 	}
 	else
@@ -2268,7 +2268,7 @@ GSSiExitProg (1275);
 	    if (*ShowVal.pTheme->ShowValueFont.lfFaceName)
 	    { 
 			DispText (0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0);
-			hSaveFont = GSSiGlobAlloc (1330,GMEM_MOVEABLE,256);  
+			hSaveFont = GSSiGlobAlloc(GAIDNO 1330,GMEM_MOVEABLE,256);  
 			pSaveFont = GlobalLock (hSaveFont);
 			GetGlobalCVal ("[%LABELFONT]",pSaveFont,0);
 			SetGlobalValue ("%LABELFONT",ShowVal.pTheme->ShowValueFont.lfFaceName);
@@ -2487,11 +2487,11 @@ TryAgain:
 				if (!ShowVal.hPoints)
 					break;  
 				mintsize = max (mintsize,0.001);
-				htxt = GSSiGlobAlloc (1331,GMEM_MOVEABLE,1024);
+				htxt = GSSiGlobAlloc(GAIDNO 1331,GMEM_MOVEABLE,1024);
 				txt = GlobalLock (htxt);
 				_fstrcpy (txt,ShowVal.Text);
 				pPoints = (HPPOINT)GlobalLock (ShowVal.hPoints);
-				hAreaPoints = GSSiGlobAlloc (1332,GMEM_MOVEABLE,(long)nPnts*sizeof(DPOINT));
+				hAreaPoints = GSSiGlobAlloc(GAIDNO 1332,GMEM_MOVEABLE,(long)nPnts*sizeof(DPOINT));
 				pAreaPoints=(HPDPOINT)GlobalLock (hAreaPoints); 
 				DBoundsInit (&AreaBounds);
 				for (i=0;i<nPnts;i++)
@@ -2623,7 +2623,7 @@ TryAgain:
 									{
 										if (AreaAZ > TWOPI) 
 										{
-											HANDLE	hInPoints=GSSiGlobAlloc (1521,GMEM_MOVEABLE,((long)nPnts)*sizeof(DPOINT));
+											HANDLE	hInPoints=GSSiGlobAlloc(GAIDNO 1521,GMEM_MOVEABLE,((long)nPnts)*sizeof(DPOINT));
 											HPDPOINT	InPoints=(HPDPOINT)GlobalLock (hInPoints);
 											HPDPOINT	AreaPoint = (HPDPOINT)GlobalLock (hAreaPoints);
 											DWORD	j;
@@ -2733,7 +2733,7 @@ BOOL CacheDisplayTheme (short from)
 #endif
 {   
 	LPVIEWPORT	SaveVP=CurView;
-	HANDLE	hMem = GSSiGlobAlloc (1333,GMEM_MOVEABLE,1024);
+	HANDLE	hMem = GSSiGlobAlloc(GAIDNO 1333,GMEM_MOVEABLE,1024);
 	LPSTR	CacheFile=GlobalLock (hMem), SaveScreenFile=CacheFile+256; 
 	LPOFSTRUCTGM	pOFStruct=(LPOFSTRUCTGM) (SaveScreenFile + 256); 
 	LPSAVESCREEN	pSaveScreen; 
@@ -3247,7 +3247,7 @@ BOOL CreateThemeHighlightFile (void)
 	if (CurTheme->ID == GF_SINGLE_VALUE_THEME)
 		len = 8;
 	CurTheme->ValueLen = len;
-	CurTheme->hHighlightFileName = GSSiGlobAlloc (1021,GMEM_MOVEABLE,MAX_PATH+2);
+	CurTheme->hHighlightFileName = GSSiGlobAlloc(GAIDNO 1021,GMEM_MOVEABLE,MAX_PATH+2);
 	pName = GlobalLock (CurTheme->hHighlightFileName);
 	GSSiGetTempFileName (0,"gml",0,pName);
 	BTVar[0].BT_VARTYP=BT_INTEGER;
@@ -3388,7 +3388,7 @@ GSSiExitProg (1326);
 			Dist = 0;
 			if (CurTheme->ClassCount[iclass])
 			{
-				handle = GSSiGlobAlloc (1025,GMEM_MOVEABLE,(CurTheme->ClassCount[iclass]+1)*sizeof(DPOINT));
+				handle = GSSiGlobAlloc(GAIDNO 1025,GMEM_MOVEABLE,(CurTheme->ClassCount[iclass]+1)*sizeof(DPOINT));
 				pPoint = (HPDPOINT)GlobalLock (handle); 
 				ThemeHighlightKey.Class = iclass;
 				ThemeHighlightKey.Refno = LONG_MIN; 
@@ -4494,7 +4494,7 @@ void ProcessDataPassBeginMacro(void)
 {
 	if (*CurTheme->BeginDataPassMacro)
 	{
-		HANDLE hMem = GSSiGlobAlloc(0, GMEM_MOVEABLE, 4096);
+		HANDLE hMem = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, 4096);
 		LPSTR pMem = GlobalLock(hMem);
 
 		strcpy(pMem, CurTheme->BeginDataPassMacro);
@@ -4507,7 +4507,7 @@ void ProcessDisplayPassBeginMacro(void)
 {
 	if (*CurTheme->BeginDisplayMacro)
 	{
-		HANDLE hMem = GSSiGlobAlloc(0, GMEM_MOVEABLE, 4096);
+		HANDLE hMem = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, 4096);
 		LPSTR pMem = GlobalLock(hMem);
 
 		strcpy(pMem, CurTheme->BeginDisplayMacro);
@@ -4520,7 +4520,7 @@ void ProcessDisplayPassEndMacro(void)
 {
 	if (*CurTheme->EndDisplayMacro)
 	{
-		HANDLE hMem = GSSiGlobAlloc(0, GMEM_MOVEABLE, 4096);
+		HANDLE hMem = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, 4096);
 		LPSTR pMem = GlobalLock(hMem);
 		int saveVPID = CurView->ID;
 
@@ -4537,7 +4537,7 @@ void ProcessGraphicsAttributeMacro(void)
 {
 	if (*CurTheme->GraphicsAttributesMacro)
 	{
-		HANDLE hMem = GSSiGlobAlloc(0, GMEM_MOVEABLE, 4096);
+		HANDLE hMem = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, 4096);
 		LPSTR pMem = GlobalLock(hMem);
 
 		strcpy(pMem, CurTheme->GraphicsAttributesMacro);
@@ -4940,7 +4940,7 @@ GetTitleSize:
 		    	{  
 		    		if (Circular) 
 		    		{
-		    			HANDLE	hPoints=GSSiGlobAlloc (1522,GMEM_MOVEABLE,360*sizeof(POINT));
+		    			HANDLE	hPoints=GSSiGlobAlloc(GAIDNO 1522,GMEM_MOVEABLE,360*sizeof(POINT));
 		    			LPPOINT	Points = (LPPOINT)GlobalLock (hPoints);
 		    			short	nPnts;
 		    			HBRUSH	OldBrush=SelectObject (CurView->hDC,CurTheme->ClassBrush[iclass]);

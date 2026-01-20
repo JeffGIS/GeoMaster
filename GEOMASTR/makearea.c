@@ -795,7 +795,7 @@ NextRec:
 			HighlightInArea (CurView->hWnd,&Bounds[iblock],TRUE,FALSE,0); 
 			if (TotHLTPoints)
 			{   
-				hLineInt = GSSiGlobAlloc ( 577,GMEM_MOVEABLE,TotHLTPoints * (long) sizeof(LINEINT));
+				hLineInt = GSSiGlobAlloc(GAIDNO 577,GMEM_MOVEABLE,TotHLTPoints * (long) sizeof(LINEINT));
 		   		hpLineInt = hpLineIntStart = (LPLINEINT)GlobalLock (hLineInt);
 			    pos = BT_FIRST;
 		        NumLines=0;
@@ -1486,7 +1486,7 @@ LPOINT AddRefToLink (LPREFCONNECT pRC,BOOL Reverse,LPLONG pNumLinkPoints,LPHANDL
 	}
 	else
 	{
-		*phLinkPoints = GSSiGlobAlloc (0,GMEM_MOVEABLE,sizeof(DPOINT)*(long)USHRT_MAX*16);
+		*phLinkPoints = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,sizeof(DPOINT)*(long)USHRT_MAX*16);
 		pLinkPoints = (HPDPOINT)GlobalLock (*phLinkPoints); 
 		hmemmove ((HPSTR)pLinkPoints,(HPSTR)pPoints,nPnts*sizeof(DPOINT)); 
 		*pNumLinkPoints = nPnts;
@@ -1664,7 +1664,7 @@ Exit:
     	{   
     		BigRead (FidLinkFile,(HPSTR)&SymNum,2);
     		BigRead (FidLinkFile,(HPSTR)&np,4); 
-    		hPoints = GSSiGlobAlloc (0,GMEM_MOVEABLE,(long)np*sizeof(DPOINT)); 
+    		hPoints = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,(long)np*sizeof(DPOINT)); 
     		pPoints = (HPDPOINT)GlobalLock (hPoints);
     		BigRead (FidLinkFile,(HPSTR)pPoints,(long)np*sizeof(DPOINT));  
     		GlobalUnlock (hPoints);
@@ -1705,7 +1705,7 @@ BOOL OutputRefConnect (void)
 	long	LinkRef=0, LastRef,n=0,NumLinks,StartRef, MinLinkRef, LoopID=1, nRecs, nLoaded;
 	LPOINT	ConnectPointFile,OpEndFile;
 	DPOINT	ConnectPointBase,OpEndBase;
-	HANDLE	hLinkPoints = GSSiGlobAlloc ( 578,GMEM_MOVEABLE,(long)USHRT_MAX*16*sizeof(DPOINT));
+	HANDLE	hLinkPoints = GSSiGlobAlloc(GAIDNO 578,GMEM_MOVEABLE,(long)USHRT_MAX*16*sizeof(DPOINT));
 	HPDPOINT	pLinkPoints;    
 	OFSTRUCTGM	OFStruct;
     BTVARDESC  Vars;  
@@ -2055,7 +2055,7 @@ NoMoreExclusions:
 		if (GetGlobalBVal2 ("[%STORESIDESYMS]",FALSE))
 		{   
 			short	lcmdstring;
-			HANDLE	hCmd=GSSiGlobAlloc ( 579,GMEM_MOVEABLE,256);
+			HANDLE	hCmd=GSSiGlobAlloc(GAIDNO 579,GMEM_MOVEABLE,256);
 			LPSTR	cmd=GlobalLock (hCmd); 
 			short	i; 
 			char	SymName[34];
@@ -2429,7 +2429,7 @@ BOOL DisplayBadArea (void)
 	i=SelectClipRgn (CurView->hDC,CurView->hRgn);
 	GSSiDeleteObject(&CurView->hRgn); 
 	BigRead (FidBad,(HPSTR)&np,2);
-	hLoop = GSSiGlobAlloc (0,GMEM_MOVEABLE,(long)np*(long)sizeof(DPOINT));
+	hLoop = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,(long)np*(long)sizeof(DPOINT));
 	pPoint = (HPDPOINT)GlobalLock (hLoop);
 	BigRead (FidBad,(LPSTR)pPoint,(long)np*(long)sizeof(DPOINT));  
 	hPen = CreatePen(PS_SOLID,0,RGB(0,0,255));
@@ -2437,7 +2437,7 @@ BOOL DisplayBadArea (void)
 	GWPolylineD (CurView->hDC,pPoint,np,idesc);
 	GSSiGlobUlFree (&hLoop);  
 	BigRead (FidBad,(HPSTR)&np,2);
-	hLoop = GSSiGlobAlloc (0,GMEM_MOVEABLE,(long)np*(long)sizeof(DPOINT));
+	hLoop = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,(long)np*(long)sizeof(DPOINT));
 	pPoint = (HPDPOINT)GlobalLock (hLoop);
 	BigRead (FidBad,(LPSTR)pPoint,(long)np*(long)sizeof(DPOINT));
 	GWPolylineD (CurView->hDC,pPoint,np,idesc);
@@ -2462,13 +2462,13 @@ HANDLE LoadLoopSides (LPINT pNumSides,int NumLinks,long Offset,BOOL Reverse,LPSH
 	if (*pNumSides == 0)
 	{   
 		MemLen = (long)sizeof(DPOINT)*(long)USHRT_MAX*16;
-		hLoop=GSSiGlobAlloc ( 580,GMEM_MOVEABLE,MemLen);
+		hLoop=GSSiGlobAlloc(GAIDNO 580,GMEM_MOVEABLE,MemLen);
 	}
 	else
-		hLoop=GSSiGlobAlloc ( 581,GMEM_MOVEABLE,MemLen);
+		hLoop=GSSiGlobAlloc(GAIDNO 581,GMEM_MOVEABLE,MemLen);
 	if (Reverse)
 	{
-		hLoop2=GSSiGlobAlloc ( 582,GMEM_MOVEABLE,MemLen);
+		hLoop2=GSSiGlobAlloc(GAIDNO 582,GMEM_MOVEABLE,MemLen);
 		pPoints = (HPDPOINT)GlobalLock (hLoop2);
 	}
 	else
@@ -2520,7 +2520,7 @@ GotSym:;
 			GSSiGlobFree (&hLoop);  
 			GSSiGlobFree (&hLoop2);
 			BigWrite (FidBad,(HPSTR)&np,4,-1); 
-			hLoop = GSSiGlobAlloc (0,GMEM_MOVEABLE,(long)np*(long)sizeof(DPOINT));
+			hLoop = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,(long)np*(long)sizeof(DPOINT));
 			pPoint = (HPDPOINT)GlobalLock (hLoop);
 			BigRead (FidLinks,(HPSTR)pPoint,(long)np*sizeof(DPOINT)); 
 			BigWrite (FidBad,(HPSTR)pPoint,(long)np*(long)sizeof(DPOINT),-1);   
@@ -2533,7 +2533,7 @@ GotSym:;
 			BigRead (FidLinks,(HPSTR)pPoints,(long)np*sizeof(DPOINT)); 
 		else
 		{   
-			HANDLE	Handle = GSSiGlobAlloc ( 583,GMEM_MOVEABLE,(long)np*sizeof(DPOINT)); 
+			HANDLE	Handle = GSSiGlobAlloc(GAIDNO 583,GMEM_MOVEABLE,(long)np*sizeof(DPOINT)); 
 			HPDPOINT	pPointsSave = pPoints;
 			
 			pPoints2 = (HPDPOINT)GlobalLock (Handle);	
@@ -2680,7 +2680,7 @@ static	long	debuglinkref=184,debugarearef=2, debugloops=146, debuglink=185;
     	int		NumLinkPoints;
     	LPOINT	ConnectPointFile,OpEndFile;
     	DPOINT	ConnectPointBase,OpEndBase;
-    	HANDLE	hLinkPoints = GSSiGlobAlloc ( 590,GMEM_MOVEABLE,(long)USHRT_MAX*(long)16);
+    	HANDLE	hLinkPoints = GSSiGlobAlloc(GAIDNO 590,GMEM_MOVEABLE,(long)USHRT_MAX*(long)16);
     	HPDPOINT	pLinkPoints;    
 		OFSTRUCTGM	OFStruct;
    	    BTVARDESC  Vars;  

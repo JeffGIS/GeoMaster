@@ -526,7 +526,7 @@ int GetCPPatternID (int npMax,LPBPOINT points,LPINT pInc)
 	int	ncurp;
 	LPBYTE	pPnt2, pPnt2Beg, pcurp;
 	
-	*phPnt2 = GSSiGlobAlloc (1768,GMEM_MOVEABLE,nPnts*sizeof(POINT));
+	*phPnt2 = GSSiGlobAlloc(GAIDNO 1768,GMEM_MOVEABLE,nPnts*sizeof(POINT));
 	pPnt2 = pPnt2Beg = GlobalLock (*phPnt2);
 	pPnt2[0] = *(LPBYTE)&pSeg[0];
 	pPnt2[1] = *(LPBYTE)&pSeg[0];
@@ -585,7 +585,7 @@ int	ConvertTGSeg (int np,LPHANDLE phSeg)
 	int	rtn=np;
 	LPBPOINT pSeg=GlobalLock (*phSeg);
 	BPOINT	ePt=pSeg[np-1];
-	HANDLE	hcSeg=GSSiGlobAlloc (1766,GMEM_MOVEABLE,(np*8+16)*sizeof(BPOINT));
+	HANDLE	hcSeg=GSSiGlobAlloc(GAIDNO 1766,GMEM_MOVEABLE,(np*8+16)*sizeof(BPOINT));
 	LPCPOINT pcSeg=GlobalLock (hcSeg);
 	int	xdiff, ydiff;
 	int	nNewPt=0;
@@ -810,7 +810,7 @@ BOOL LoadTiltFile (LPSTR TINPath)
 	if (FidTr != HFILE_ERROR)
 	{
 		int ln = GSSifilelength (FidTr);
-		HANDLE	hTr = GSSiGlobAlloc (0,GMEM_MOVEABLE,ln);
+		HANDLE	hTr = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,ln);
 		LPBYTE pTile = GlobalLock (hTr);
 
 		BigRead (FidTr,pTile,ln);
@@ -984,11 +984,11 @@ FoundDepth:
 					switch (iPass)
 					{
 					case 1:
-						hRecDepths = GSSiGlobAlloc (1774,GMEM_MOVEABLE,nRecs*sizeof(int) + 4);
-						hDepthNum = GSSiGlobAlloc (1775,GHND,nRecs*sizeof(int) + 4);
-						hNextID = GSSiGlobAlloc (1776,GHND,nRecs*sizeof(int) + 4);
-						hDepthID = GSSiGlobAlloc (1776,GHND,nRecs*sizeof(int) + 4);
-						hDepthInc = GSSiGlobAlloc (1776,GHND,nRecs*sizeof(double) + 4);
+						hRecDepths = GSSiGlobAlloc(GAIDNO 1774,GMEM_MOVEABLE,nRecs*sizeof(int) + 4);
+						hDepthNum = GSSiGlobAlloc(GAIDNO 1775,GHND,nRecs*sizeof(int) + 4);
+						hNextID = GSSiGlobAlloc(GAIDNO 1776,GHND,nRecs*sizeof(int) + 4);
+						hDepthID = GSSiGlobAlloc(GAIDNO 1776,GHND,nRecs*sizeof(int) + 4);
+						hDepthInc = GSSiGlobAlloc(GAIDNO 1776,GHND,nRecs*sizeof(double) + 4);
 						pDepths = GlobalLock (hRecDepths);
 						pDepthNum = GlobalLock (hDepthNum);
 						pNextID = GlobalLock (hNextID);
@@ -1082,7 +1082,7 @@ FoundDepth:
 				if (FidTr != HFILE_ERROR)
 				{
 					int ln = GSSifilelength (FidTr);
-					HANDLE	hTr = GSSiGlobAlloc (0,GMEM_MOVEABLE,ln);
+					HANDLE	hTr = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,ln);
 					LPSTR	pTr = GlobalLock (hTr);
 
 					BigRead (FidTr,pTr,ln);
@@ -1098,7 +1098,7 @@ FoundDepth:
 
 				if (hDIB)
 				{
-					HANDLE hTriangles = GSSiGlobAlloc (1772,GMEM_MOVEABLE,256*256*2);
+					HANDLE hTriangles = GSSiGlobAlloc(GAIDNO 1772,GMEM_MOVEABLE,256*256*2);
 					LPBYTE pTriangles = GlobalLock (hTriangles);
 					LoadDepthTriangles (hDIB,&tileGraphicsHeader.nTriangles,pTriangles);
 					BigWrite (FidSTG,(LPSTR)pTriangles,tileGraphicsHeader.nTriangles,-1);
@@ -1112,9 +1112,9 @@ FoundDepth:
 		GSSillseek (FidSTG,0,0);
 		BigWrite (FidSTG,(LPSTR)&tileGraphicsHeader,sizeof(tileGraphicsHeader),-1);
 		GSSillseek (FidSTG,0,0);
-		hMem = GSSiGlobAlloc (0,GMEM_MOVEABLE,len);
+		hMem = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,len);
 		pMem = GlobalLock (hMem);
-		hMemCmp = GSSiGlobAlloc (0,GMEM_MOVEABLE,len+1024);
+		hMemCmp = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,len+1024);
 		pMemCmp = GlobalLock (hMemCmp);
 		BigRead (FidSTG,pMem,len);
 		lcmp = CompressBinaryRecord ((LPBYTE)pMem,pMemCmp,len);
@@ -1321,7 +1321,7 @@ BPOINT ipt=pPoints[np-1];
 			pSeg = (LPBPOINT)GlobalLock (tghSegs[prePend[ipe]]);
 			if (pPoints[np-1].x == pSeg[0].x && pPoints[np-1].y == pSeg[0].y)
 			{
-				HANDLE hNewSeg = GSSiGlobAlloc (1765,GMEM_MOVEABLE,(np+tgNumSegPoints[prePend[ipe]])*sizeof(BPOINT));
+				HANDLE hNewSeg = GSSiGlobAlloc(GAIDNO 1765,GMEM_MOVEABLE,(np+tgNumSegPoints[prePend[ipe]])*sizeof(BPOINT));
 				LPBPOINT pNewSeg = (LPBPOINT)GlobalLock (hNewSeg);
 
 ipt=pSeg[tgNumSegPoints[prePend[ipe]]-1];
@@ -1361,7 +1361,7 @@ ipt=pSeg[tgNumSegPoints[prePend[ipe]]-1];
 	AddSegToContourPatterns (np,pPoints);
 	if (tgNumSegs >= TGMAXSEGS)
 		BlowOut ("Max TileGraphics segments exceeded","ERROR");
-	tghSegs[tgNumSegs] = GSSiGlobAlloc (1765,GMEM_MOVEABLE,np*sizeof(BPOINT));
+	tghSegs[tgNumSegs] = GSSiGlobAlloc(GAIDNO 1765,GMEM_MOVEABLE,np*sizeof(BPOINT));
 	tgNumSegPoints[tgNumSegs] = np;
 	pSeg = (LPBPOINT)GlobalLock (tghSegs[tgNumSegs]);
 	memmove (pSeg,pPoints,np*sizeof(BPOINT));
@@ -1374,7 +1374,7 @@ ipt = pPoints[ii];
 void SaveTileGraphics (HFILE Fid,HDC hDC,int type,LPPOINT points,int np)
 {
 #define MAXPOLYSEGS	4096
-	HANDLE hInPt = GSSiGlobAlloc (0,GMEM_MOVEABLE,(np+4) * sizeof(BPOINT));
+	HANDLE hInPt = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,(np+4) * sizeof(BPOINT));
 	LPBPOINT pInPt = GlobalLock (hInPt);
 	static	BPOINT	completeTile[4]={0,255,0,0,255,0,255,255};
 	int		nInPt=0, i;
@@ -1878,7 +1878,7 @@ char	quadKey[22];
 		return FALSE;
 	len = GSSillseek (Fid,0,2);
 	GSSillseek (Fid,0,0);
-	hTile = GSSiGlobAlloc (1769,GMEM_MOVEABLE,len);
+	hTile = GSSiGlobAlloc(GAIDNO 1769,GMEM_MOVEABLE,len);
 	pTile = GlobalLock (hTile);
 	BigRead (Fid,pTile,len);
 	GSSiClose2 (&Fid);
@@ -2580,7 +2580,7 @@ HDIB32 Create8BitBMPSixteenth (HDIB32 dibin,RGBQUAD	*rgbpal, LPLONG plPalette,in
 	inrow  = (iSixteenth / 4) * Height;
 	incol  = (iSixteenth % 4) * Width;
 	lByte2 = Height*Width;
-	hByte2  = GSSiGlobAlloc (0,GMEM_MOVEABLE,lByte2*sizeof(short));
+	hByte2  = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,lByte2*sizeof(short));
 	pByte2 = GlobalLock (hByte2);
 	for (row = 0;row < Height; row++)
 	{
@@ -2782,7 +2782,7 @@ BOOL ConvertHBirdImages (LPSTR InName, LPSTR OutName,LPSTR TitleMess,LPSTR Color
 				_fstrcpy (pDot,".gmd");	 
 				if (FidBIN != HFILE_ERROR)
 				{
-					HANDLE	hMem=GSSiGlobAlloc (0,GMEM_MOVEABLE,pMAPFILE->Size);
+					HANDLE	hMem=GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,pMAPFILE->Size);
 					HPSTR	pMem=GlobalLock (hMem);
 					
 					GSSillseek2 (FidBIN,pMAPFILE->Loc,0);
@@ -2833,7 +2833,7 @@ BOOL ConvertHBirdImages (LPSTR InName, LPSTR OutName,LPSTR TitleMess,LPSTR Color
 								LPBITMAPINFOHEADER	pbmInfoHeader;
 
 								l = GSSiLength (OutFile2);
-								hMem = GSSiGlobAlloc (0,GMEM_MOVEABLE,l);
+								hMem = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,l);
 								pMem = GlobalLock (hMem);
 								Fid  = GSSiOpenFile (OutFile2,0,OF_READ);
 								BigRead (Fid,pMem,l);
@@ -2844,9 +2844,9 @@ BOOL ConvertHBirdImages (LPSTR InName, LPSTR OutName,LPSTR TitleMess,LPSTR Color
 								l = pbmFileHeader->bfSize;
 								memset (pbmFileHeader,0,sizeof(BITMAPFILEHEADER));//zero out for compression since not used on HB side
 								memset (pbmInfoHeader,0,sizeof(BITMAPINFOHEADER));//zero out for compression since not used on HB side
-								hMembin = GSSiGlobAlloc (0,GMEM_MOVEABLE,l+1024);
+								hMembin = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,l+1024);
 								pMembin = GlobalLock (hMembin);
-								hMemCmp = GSSiGlobAlloc (0,GMEM_MOVEABLE,l+1024);
+								hMemCmp = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,l+1024);
 								pMemCmp = GlobalLock (hMemCmp);
 								lMemCmp = CompressByteArray (pMem,pMemCmp,l);
 								lbin = CompressBinaryRecord (pMemCmp,pMembin,lMemCmp); 
@@ -3351,7 +3351,7 @@ BOOL CreateLakeDepthTriangles (BOOL Init)
 			if (GetPolyPoints ((LPPICKDATAHEADER)&HighlightData.PD,FALSE,&nPnts,&hPnts, 0))
 			{  
 				HPDPOINT pPoly=GlobalLock (hPnts);
-				HANDLE	hPolyInt=GSSiGlobAlloc (1773,GMEM_MOVEABLE,nPnts*sizeof(POINT));
+				HANDLE	hPolyInt=GSSiGlobAlloc(GAIDNO 1773,GMEM_MOVEABLE,nPnts*sizeof(POINT));
 				LPPOINT	pPolyInt=GlobalLock (hPolyInt);
 
 				ConvertPolyCoord (pPoly,nPnts,1,2);

@@ -1049,7 +1049,7 @@ HANDLE	BufferToSymbol (HANDLE hBuf)
 	{ 
 		LPELEMENT	pElement;
 		
-		*phElement = GSSiGlobAlloc ( 462,GMEM_MOVEABLE,sizeof(ELEMENT)+ (long)(MAX_ELEMENT_VECTORS-1)*sizeof(VECTOR));
+		*phElement = GSSiGlobAlloc(GAIDNO 462,GMEM_MOVEABLE,sizeof(ELEMENT)+ (long)(MAX_ELEMENT_VECTORS-1)*sizeof(VECTOR));
 		pElement = (LPELEMENT)GlobalLock (*phElement); 
 		hmemmove ((HPSTR)pElement,pBuf,sizeof(ELEMENT));
 		pBuf += sizeof(ELEMENT);
@@ -1084,7 +1084,7 @@ long SymbolToBuffer (LPSYMBOL CurSymbol, LPHANDLE phBuf,short nDeleteElement,LPI
 	double	MaxLength=0;
 	SYMBOL_V1	SymV1;
 	
-	*phBuf = GSSiGlobAlloc ( 463,GMEM_MOVEABLE,MAX_SYMBOL_SIZE);
+	*phBuf = GSSiGlobAlloc(GAIDNO 463,GMEM_MOVEABLE,MAX_SYMBOL_SIZE);
 	pBuf = GlobalLock (*phBuf); 
 	if (CurSymbol->Type == SVLINE)  
 	{
@@ -1570,7 +1570,7 @@ void ConvertThemeV1toV2(LPTHEME_V4 pTheme, LPTHEME_V1 pTheme16)
 		LPSTREETTEXTDATA16	pStreetData16 = (LPSTREETTEXTDATA16)pTheme16->ClassBM;
 		LPSTREETTEXTDATA	pSDSave;
 
-		hSave = GSSiGlobAlloc(1139, GMEM_MOVEABLE, sizeof(STREETTEXTDATA));
+		hSave = GSSiGlobAlloc(GAIDNO 1139, GMEM_MOVEABLE, sizeof(STREETTEXTDATA));
 		pSDSave = (LPSTREETTEXTDATA)GlobalLock(hSave);
 		STREETTEXTDATA16ToSTREETTEXTDATA32(pSDSave, pStreetData16);
 		GlobalUnlock(hSave);
@@ -1826,7 +1826,7 @@ void ConvertThemeV4toV5(LPTHEME pTheme, LPTHEME_V4 pTheme16)
 		LPSTREETTEXTDATA	pStreetData16 = (LPSTREETTEXTDATA)pTheme16->ClassBM;
 		LPSTREETTEXTDATA	pSDSave;
 
-		hSave = GSSiGlobAlloc(1139, GMEM_MOVEABLE, sizeof(STREETTEXTDATA));
+		hSave = GSSiGlobAlloc(GAIDNO 1139, GMEM_MOVEABLE, sizeof(STREETTEXTDATA));
 		pSDSave = (LPSTREETTEXTDATA)GlobalLock(hSave);
 		memcpy(pSDSave, pStreetData16,sizeof(STREETTEXTDATA));
 		GlobalUnlock(hSave);
@@ -2448,13 +2448,13 @@ GSSiExitProg (614);
 #endif
 		return 0;
 }
-	hStr = GSSiGlobAlloc (1517,GMEM_MOVEABLE,4096);
+	hStr = GSSiGlobAlloc(GAIDNO 1517,GMEM_MOVEABLE,4096);
 	str = GlobalLock (hStr);
-	hDB = GSSiGlobAlloc ( 249,GHND,sizeof(COMBOHEADER));
+	hDB = GSSiGlobAlloc(GAIDNO 249,GHND,sizeof(COMBOHEADER));
 	pComboHeader = (LPCOMBOHEADER)GlobalLock (hDB);
-	pComboHeader->hComboFile = GSSiGlobAlloc ( 250,GHND,USHRT_MAX);
+	pComboHeader->hComboFile = GSSiGlobAlloc(GAIDNO 250,GHND,USHRT_MAX);
 	pComboFile = (LPCOMBOFILE)GlobalLock (pComboHeader->hComboFile);
-	pComboHeader->hWhere = GSSiGlobAlloc ( 252,GHND,USHRT_MAX);
+	pComboHeader->hWhere = GSSiGlobAlloc(GAIDNO 252,GHND,USHRT_MAX);
 	pWhereIndex = (LPWHEREINDEX) GlobalLock (pComboHeader->hWhere); 
 	pWhere2 = (LPSTR)pWhereIndex;
 	pWhere2 += sizeof(WHEREINDEX);
@@ -2489,9 +2489,9 @@ GSSiExitProg (614);
 			}
 		}
 	    pField = pComboFile->FldInfo; 
-		hFieldDefs = GSSiGlobAlloc ( 253,GHND,USHRT_MAX);
+		hFieldDefs = GSSiGlobAlloc(GAIDNO 253,GHND,USHRT_MAX);
 		pFieldDefs = GlobalLock (hFieldDefs);
-		hFieldIndex = GSSiGlobAlloc (254,GHND,SHRT_MAX);
+		hFieldIndex = GSSiGlobAlloc(GAIDNO 254,GHND,SHRT_MAX);
 		pFieldIndex = GlobalLock (hFieldIndex);
 		loc = 0;
 		while (fgetstring (str,4090,FidCF))
@@ -2525,8 +2525,8 @@ GSSiExitProg (614);
 				}
 			}
 		}
-		pComboHeader->hComboFields = GSSiGlobAlloc ( 251,GHND,pComboFile->NumFields*sizeof(COMBOFIELDINFO));
-		pComboHeader->hComputedFields = GSSiGlobAlloc (1518,GMEM_MOVEABLE,pComboFile->NumFields*sizeof(int)+loc);
+		pComboHeader->hComboFields = GSSiGlobAlloc(GAIDNO 251,GHND,pComboFile->NumFields*sizeof(COMBOFIELDINFO));
+		pComboHeader->hComputedFields = GSSiGlobAlloc(GAIDNO 1518,GMEM_MOVEABLE,pComboFile->NumFields*sizeof(int)+loc);
 		pLoc = GlobalLock (pComboHeader->hComputedFields);
 		memmove (pLoc,pFieldIndex,pComboFile->NumFields*sizeof(int));
 		pLoc += pComboFile->NumFields*sizeof(int);
@@ -2554,7 +2554,7 @@ GSSiExitProg (614);
 			BigRead (FidCF,(HPSTR)&FieldInfo16,sizeof(FIELDINFO16));
 			pComboFile->FldInfo[i] = Field16toField32 (&FieldInfo16);
 		}
-		pComboHeader->hComboFields = GSSiGlobAlloc ( 251,GHND,pComboFile->NumFields*sizeof(COMBOFIELDINFO));
+		pComboHeader->hComboFields = GSSiGlobAlloc(GAIDNO 251,GHND,pComboFile->NumFields*sizeof(COMBOFIELDINFO));
 		pComboField = (LPCOMBOFIELDINFO)GlobalLock (pComboHeader->hComboFields); 
 		BigRead (FidCF,(HPSTR)pComboField,pComboFile->NumFields*sizeof(COMBOFIELDINFO)); //pComboField[19]
 		GlobalUnlock (pComboHeader->hComboFields);
@@ -2562,7 +2562,7 @@ GSSiExitProg (614);
 		len = pWhereIndex->Len;
 		pWhereIndex++;
 		BigRead (FidCF,(HPSTR)pWhereIndex,(UINT)len);
-		pComboHeader->hComputedFields = GSSiGlobAlloc ( 253,GHND,USHRT_MAX);
+		pComboHeader->hComputedFields = GSSiGlobAlloc(GAIDNO 253,GHND,USHRT_MAX);
 		pCFieldIndex = (LPCFIELDINDEX)GlobalLock(pComboHeader->hComputedFields);
 		BigRead (FidCF,(HPSTR)pCFieldIndex,sizeof(CFIELDINDEX));
 		len = pCFieldIndex->Len;
@@ -2636,7 +2636,7 @@ int ReadVISLIST16 (HFILE Fid,LPVISLIST CurVis)
 {
 	int	nread;
 
-	HANDLE	hVL16 = GSSiGlobAlloc (1872,GMEM_MOVEABLE,sizeof(VISLIST16));
+	HANDLE	hVL16 = GSSiGlobAlloc(GAIDNO 1872,GMEM_MOVEABLE,sizeof(VISLIST16));
 	LPVISLIST16 pVL16 = (LPVISLIST16)GlobalLock (hVL16);
 	nread = BigRead (Fid,pVL16,sizeof(VISLIST16));
 	if (nread == sizeof(VISLIST16))
@@ -2778,11 +2778,11 @@ GSSiExitProg (1006);
 }    
 		GSSillseek (FidConfig,Offset,0);
     }
-    hSTR=GSSiGlobAlloc ( 780,GMEM_MOVEABLE,1024);
+    hSTR=GSSiGlobAlloc(GAIDNO 780,GMEM_MOVEABLE,1024);
     pStr =(LPSTR) GlobalLock (hSTR);
-    hVisList=GSSiGlobAlloc ( 781,GMEM_MOVEABLE,sizeof(VISLIST));
+    hVisList=GSSiGlobAlloc(GAIDNO 781,GMEM_MOVEABLE,sizeof(VISLIST));
     CurVis =(LPVISLIST) GlobalLock (hVisList);
-    hTAG=GSSiGlobAlloc ( 782,GMEM_MOVEABLE,sizeof(TAGBOX));
+    hTAG=GSSiGlobAlloc(GAIDNO 782,GMEM_MOVEABLE,sizeof(TAGBOX));
     pTAGBox =(LPTAGBOX) GlobalLock (hTAG);
 
     ii=GSSilread (FidConfig,pStr,256);
@@ -2805,13 +2805,13 @@ GSSiExitProg (1006);
 //	MessageBox (0,str,0,MB_OK);
     for (iv=0;iv<NumViews;iv++)
     {
-        hViewports[iv]=GSSiGlobAlloc ( 783,GHND,sizeof(VIEWPORT)+MAX_VIEWPORT_FILES*MAX_PATH);
+        hViewports[iv]=GSSiGlobAlloc(GAIDNO 783,GHND,sizeof(VIEWPORT)+MAX_VIEWPORT_FILES*MAX_PATH);
         CurView = (LPVIEWPORT)GlobalLock (hViewports[iv]);
         if (Version < 8)
         {  
-        	HANDLE	hVP6 = GSSiGlobAlloc (1529,GMEM_MOVEABLE,sizeof(VIEWPORT_V6));
+        	HANDLE	hVP6 = GSSiGlobAlloc(GAIDNO 1529,GMEM_MOVEABLE,sizeof(VIEWPORT_V6));
         	LPVIEWPORT_V6 pVP6 = (LPVIEWPORT_V6)GlobalLock (hVP6);
-        	HANDLE	hVP7 = GSSiGlobAlloc (1530,GMEM_MOVEABLE,sizeof(VIEWPORT_V7));
+        	HANDLE	hVP7 = GSSiGlobAlloc(GAIDNO 1530,GMEM_MOVEABLE,sizeof(VIEWPORT_V7));
         	LPVIEWPORT_V7 pVP7 = (LPVIEWPORT_V7)GlobalLock (hVP7);
         	
             i=GSSilread (FidConfig,pVP6,sizeof(VIEWPORT_V6)); 
@@ -2822,7 +2822,7 @@ GSSiExitProg (1006);
         }
         else if (Version < 10)
         {  
-        	HANDLE	hVP7 = GSSiGlobAlloc (1531,GMEM_MOVEABLE,sizeof(VIEWPORT_V7)); //sizeof(VIEWPORT)
+        	HANDLE	hVP7 = GSSiGlobAlloc(GAIDNO 1531,GMEM_MOVEABLE,sizeof(VIEWPORT_V7)); //sizeof(VIEWPORT)
         	LPVIEWPORT_V7 pVP7 = (LPVIEWPORT_V7)GlobalLock (hVP7);
         	
             i=GSSilread (FidConfig,pVP7,sizeof(VIEWPORT_V7)); 
@@ -3110,7 +3110,7 @@ GSSiExitProg (100);
     	short	id;
     	
 	    GSSiGlobFree (&hConfigDescription);
-    	hConfigDescription = GSSiGlobAlloc (1315,GMEM_MOVEABLE,512);
+    	hConfigDescription = GSSiGlobAlloc(GAIDNO 1315,GMEM_MOVEABLE,512);
     	pConfigDescription = GlobalLock (hConfigDescription);
 	    GSSillseek(FidConfig,(LONG)-(6+4+4),2);
 	    GSSilread (FidConfig,&CfgDescLoc,4);
@@ -3151,7 +3151,7 @@ GSSiExitProg (100);
 					BigRead (FidConfig,(HPSTR)SavedImageData,NumSavedImages*sizeof(SAVEDIMAGEDATA)); 
 					for (i=0;i<NumSavedImages;i++)
 						TotImageLen += SavedImageData[i].ImageLen;
-					hCfgImages = GSSiGlobAlloc (1534,GMEM_MOVEABLE,TotImageLen);
+					hCfgImages = GSSiGlobAlloc(GAIDNO 1534,GMEM_MOVEABLE,TotImageLen);
 					pCfgImage = GlobalLock (hCfgImages); 
 					BigRead (FidConfig,(HPSTR)pCfgImage,TotImageLen);  
 					GlobalUnlock (hCfgImages);
@@ -3160,7 +3160,7 @@ GSSiExitProg (100);
 			default:
 				if (CfgImageLen)
 				{ 
-					hCfgImages = GSSiGlobAlloc (1534,GMEM_MOVEABLE,CfgImageLen);
+					hCfgImages = GSSiGlobAlloc(GAIDNO 1534,GMEM_MOVEABLE,CfgImageLen);
 					pCfgImage = GlobalLock (hCfgImages); 
 					BigRead (FidConfig,(HPSTR)pCfgImage,CfgImageLen);  
 					if (CfgImageFormat != 1)
@@ -3208,7 +3208,7 @@ GSSiExitProg (100);
     GSSiGlobFree (&hMenuMask);
     if (NumMenuMask)
     { 
-	    hMenuMask=GSSiGlobAlloc (1316,GMEM_MOVEABLE,(NumMenuMask+1)*sizeof(short));
+	    hMenuMask=GSSiGlobAlloc(GAIDNO 1316,GMEM_MOVEABLE,(NumMenuMask+1)*sizeof(short));
 	    lpMenuMask=(LPSHORT)GlobalLock(hMenuMask); 
 	    for (imenu=0;imenu<NumMenuMask;imenu++,lpMenuMask++)
 	    {
@@ -3234,7 +3234,7 @@ GSSiExitProg (100);
 	ii=sizeof(TAGBOX_V1);
     for (iv=0;iv<NumViews;iv++)
     {
-        hViewports[iv]=GSSiGlobAlloc (1317,GHND,sizeof(VIEWPORT)+8+MAX_VIEWPORT_FILES*MAX_PATH);   
+        hViewports[iv]=GSSiGlobAlloc(GAIDNO 1317,GHND,sizeof(VIEWPORT)+8+MAX_VIEWPORT_FILES*MAX_PATH);   
         SetCurView ( (LPVIEWPORT) GlobalLock (hViewports[iv]));
         pViewports[iv]=CurView;
         pViewportsD[iv]=CurView;
@@ -3251,9 +3251,9 @@ GSSiExitProg (100);
         }
         else if (Version < 8)
         {  
-        	HANDLE	hVP6 = GSSiGlobAlloc (1535,GMEM_MOVEABLE,sizeof(VIEWPORT_V6));
+        	HANDLE	hVP6 = GSSiGlobAlloc(GAIDNO 1535,GMEM_MOVEABLE,sizeof(VIEWPORT_V6));
         	LPVIEWPORT_V6 pVP6 = (LPVIEWPORT_V6)GlobalLock (hVP6);
-        	HANDLE	hVP7 = GSSiGlobAlloc (1536,GMEM_MOVEABLE,sizeof(VIEWPORT_V7));
+        	HANDLE	hVP7 = GSSiGlobAlloc(GAIDNO 1536,GMEM_MOVEABLE,sizeof(VIEWPORT_V7));
         	LPVIEWPORT_V7 pVP7 = (LPVIEWPORT_V7)GlobalLock (hVP7);
         	
             i=GSSilread (FidConfig,pVP6,sizeof(VIEWPORT_V6)); 
@@ -3264,7 +3264,7 @@ GSSiExitProg (100);
         }
         else if (Version < 10)
         {  
-        	HANDLE	hVP7 = GSSiGlobAlloc (1537,GMEM_MOVEABLE,sizeof(VIEWPORT_V7)); //sizeof(VIEWPORT)
+        	HANDLE	hVP7 = GSSiGlobAlloc(GAIDNO 1537,GMEM_MOVEABLE,sizeof(VIEWPORT_V7)); //sizeof(VIEWPORT)
         	LPVIEWPORT_V7 pVP7 = (LPVIEWPORT_V7)GlobalLock (hVP7);
         	
             i=GSSilread (FidConfig,pVP7,sizeof(VIEWPORT_V7)); 
@@ -3321,11 +3321,11 @@ GSSiExitProg (100);
         } 
         for (i=0;i<CurView->NumVisList;i++)
         {
-            hVisList=GSSiGlobAlloc (1318,GHND,sizeof(VISLIST));
+            hVisList=GSSiGlobAlloc(GAIDNO 1318,GHND,sizeof(VISLIST));
             CurVis =(LPVISLIST) GlobalLock (hVisList);
 			if (Version < 8)
 			{
-        		HANDLE	hVL16 = GSSiGlobAlloc (1538,GMEM_MOVEABLE,sizeof(VISLIST16));
+        		HANDLE	hVL16 = GSSiGlobAlloc(GAIDNO 1538,GMEM_MOVEABLE,sizeof(VISLIST16));
         		LPVISLIST16 pVL16 = (LPVISLIST16)GlobalLock (hVL16);
 	            GSSilread (FidConfig,pVL16,sizeof(VISLIST16));
 				ConvertVislist16to32 (CurVis,pVL16);
@@ -3352,11 +3352,11 @@ GSSiExitProg (100);
         } 
         for (i=0;i<CurView->NumPickList;i++)
         {
-            hVisList=GSSiGlobAlloc (1319,GHND,sizeof(VISLIST));
+            hVisList=GSSiGlobAlloc(GAIDNO 1319,GHND,sizeof(VISLIST));
             CurVis =(LPVISLIST) GlobalLock (hVisList);
 			if (Version < 8)
 			{
-        		HANDLE	hVL16 = GSSiGlobAlloc (1539,GMEM_MOVEABLE,sizeof(VISLIST16));
+        		HANDLE	hVL16 = GSSiGlobAlloc(GAIDNO 1539,GMEM_MOVEABLE,sizeof(VISLIST16));
         		LPVISLIST16 pVL16 = (LPVISLIST16)GlobalLock (hVL16);
 	            GSSilread (FidConfig,pVL16,sizeof(VISLIST16));
 				ConvertVislist16to32 (CurVis,pVL16);
@@ -3383,11 +3383,11 @@ GSSiExitProg (100);
         } 
         if (CurView->pVisListManual)
         {
-            hVisList=GSSiGlobAlloc (1320,GHND,sizeof(VISLIST));
+            hVisList=GSSiGlobAlloc(GAIDNO 1320,GHND,sizeof(VISLIST));
             CurVis =(LPVISLIST) GlobalLock (hVisList);
 			if (Version < 8)
 			{
-        		HANDLE	hVL16 = GSSiGlobAlloc (1540,GMEM_MOVEABLE,sizeof(VISLIST16));
+        		HANDLE	hVL16 = GSSiGlobAlloc(GAIDNO 1540,GMEM_MOVEABLE,sizeof(VISLIST16));
         		LPVISLIST16 pVL16 = (LPVISLIST16)GlobalLock (hVL16);
 	            GSSilread (FidConfig,pVL16,sizeof(VISLIST16));
 				ConvertVislist16to32 (CurVis,pVL16);
@@ -3400,11 +3400,11 @@ GSSiExitProg (100);
         }
         if (CurView->pPickListManual)
         {
-            hVisList=GSSiGlobAlloc (1321,GHND,sizeof(VISLIST));
+            hVisList=GSSiGlobAlloc(GAIDNO 1321,GHND,sizeof(VISLIST));
             CurVis =(LPVISLIST) GlobalLock (hVisList);
  			if (Version < 8)
 			{
-        		HANDLE	hVL16 = GSSiGlobAlloc (1541,GMEM_MOVEABLE,sizeof(VISLIST16));
+        		HANDLE	hVL16 = GSSiGlobAlloc(GAIDNO 1541,GMEM_MOVEABLE,sizeof(VISLIST16));
         		LPVISLIST16 pVL16 = (LPVISLIST16)GlobalLock (hVL16);
 	            GSSilread (FidConfig,pVL16,sizeof(VISLIST16));
 				ConvertVislist16to32 (CurVis,pVL16);
@@ -3749,7 +3749,7 @@ BOOL SaveConfig (LPSTR Name,BOOL UseCompression)
     IgnoreSavedMenu = FALSE;
     FidConfig = GSSiOpenFile (Name,0,OF_CREATE);
     if (FidConfig == HFILE_ERROR) 
-    {   HANDLE	hMem=GSSiGlobAlloc (1322,GMEM_MOVEABLE,256);
+    {   HANDLE	hMem=GSSiGlobAlloc(GAIDNO 1322,GMEM_MOVEABLE,256);
     	LPSTR	str = GlobalLock (hMem);
         
         sprintf (str,"Unable to create config file: %s",Name);
@@ -3931,7 +3931,7 @@ GSSiExitProg (101);
 	 		BigWrite (FidConfig,(HPSTR)&id,2,-1);  
 	 		BigWrite (FidConfig,(HPSTR)&CfgImageFormat,2,-1);  
 	 		BigWrite (FidConfig,(HPSTR)&CfgImageLen,4,-1); 
-			hTempMem = GSSiGlobAlloc (0,GMEM_MOVEABLE,CfgImageLen);
+			hTempMem = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,CfgImageLen);
 	 		pCfgImage = GlobalLock (hTempMem);
 			BigRead (FidTemp,pCfgImage,CfgImageLen);
 			GSSiClose2 (&FidTemp);
@@ -4051,7 +4051,7 @@ BOOL DisplayConfigPreview (HWND hWnd,HDC hDC,LPSTR Name,LPRECT ImageRect, UINT T
     	HFONT	hFont, OldFont;
     	
 	    GSSiGlobFree (&hConfigDescription);
-    	hConfigDescription = GSSiGlobAlloc (1315,GMEM_MOVEABLE,512);
+    	hConfigDescription = GSSiGlobAlloc(GAIDNO 1315,GMEM_MOVEABLE,512);
     	pConfigDescription = GlobalLock (hConfigDescription);
 	    GSSillseek(FidConfig,(LONG)-(6+4+4),2);
 	    GSSilread (FidConfig,&CfgDescLoc,4);
@@ -4114,7 +4114,7 @@ BOOL DisplayConfigPreview (HWND hWnd,HDC hDC,LPSTR Name,LPRECT ImageRect, UINT T
 							neardiff = fabs (NearAspect - ImageAspect);
 						}
 					}
-					hCfgImages = GSSiGlobAlloc (1534,GMEM_MOVEABLE,TotImageLen);
+					hCfgImages = GSSiGlobAlloc(GAIDNO 1534,GMEM_MOVEABLE,TotImageLen);
 					pCfgImage = GlobalLock (hCfgImages); 
 					BigRead (FidConfig,(HPSTR)pCfgImage,TotImageLen);  
 					CfgImageLen = SavedImageData[nearimage].ImageLen;
@@ -4128,7 +4128,7 @@ BOOL DisplayConfigPreview (HWND hWnd,HDC hDC,LPSTR Name,LPRECT ImageRect, UINT T
 				if (CfgImageLen)
 				{ 
 
-					hCfgImage = GSSiGlobAlloc (1544,GMEM_MOVEABLE,CfgImageLen);
+					hCfgImage = GSSiGlobAlloc(GAIDNO 1544,GMEM_MOVEABLE,CfgImageLen);
 					pCfgImage = GlobalLock (hCfgImage); 
 					BigRead (FidConfig,(HPSTR)pCfgImage,CfgImageLen);  
 					if (CfgImageFormat != 1)
@@ -4243,7 +4243,7 @@ int	CreateTestConfig (void)
     BigWrite (FidConfig,(HPSTR)&WindowColor,4,-1);
    	BigWrite (FidConfig,(HPSTR)&TAGBox,sizeof(TAGBOX),-1);
 
-	hViewports[0]=GSSiGlobAlloc ( 128,GHND,sizeof(VIEWPORT_V6));
+	hViewports[0]=GSSiGlobAlloc(GAIDNO 128,GHND,sizeof(VIEWPORT_V6));
 	CurView6 = (LPVIEWPORT_V6)GlobalLock (hViewports[0]);
 	
 	CurView6->ID = 1;  
@@ -4282,7 +4282,7 @@ int	CreateTestConfig (void)
 	CurView6->NumVisList = 1;
 	
 	GSSiGlobUlFree (&hVisList);
-	hVisList=GSSiGlobAlloc ( 129,GHND,sizeof(VISLIST));
+	hVisList=GSSiGlobAlloc(GAIDNO 129,GHND,sizeof(VISLIST));
 	CurVis = (LPVISLIST)GlobalLock (hVisList); 
 	CurVis->hVisList=hVisList;
 	InitVis ();
@@ -4341,7 +4341,7 @@ int	CreateTestConfig (void)
 	_fstrcpy (CurView6->VisName,"vislists\\index.vis");
 	
 	GSSiGlobUlFree (&hVisList);
-	hVisList=GSSiGlobAlloc ( 130,GHND,sizeof(VISLIST));
+	hVisList=GSSiGlobAlloc(GAIDNO GAIDNO 130,GHND,sizeof(VISLIST));
 	CurVis = (LPVISLIST)GlobalLock (hVisList); 
 	CurVis->hVisList=hVisList;
 	InitVis ();
@@ -4378,7 +4378,7 @@ int	CreateTestConfig (void)
     	handle=NULL;
     }
 
-	handle=GSSiGlobAlloc ( 131,GHND,sizeof(THEME));
+	handle=GSSiGlobAlloc(GAIDNO 131,GHND,sizeof(THEME));
 	CurTheme = (LPTHEME)GlobalLock(handle);
 	CurView6->pTheme = CurTheme;
 	CurTheme->ID=GF_SINGLE_VALUE_THEME; 
@@ -4455,7 +4455,7 @@ int	CreateTestConfig (void)
 	CurView6->VisName[0]='\0';
 	
 	GSSiGlobUlFree (&hVisList);
-	hVisList=GSSiGlobAlloc ( 132,GHND,sizeof(VISLIST));
+	hVisList=GSSiGlobAlloc(GAIDNO 132,GHND,sizeof(VISLIST));
 	CurVis = (LPVISLIST)GlobalLock (hVisList);
 	CurVis->hVisList=hVisList;
 	InitVis ();
@@ -4514,7 +4514,7 @@ int	CreateTestConfig (void)
     	handle=NULL;
     }
 
-	handle=GSSiGlobAlloc ( 133,GHND,sizeof(COORDINATEDISPLAY));
+	handle=GSSiGlobAlloc(GAIDNO 133,GHND,sizeof(COORDINATEDISPLAY));
 	CD = (LPCOORDINATEDISPLAY)GlobalLock(handle);
 	CurView6->pTheme = (LPTHEME)CD; 
 	CD->Version = 103;
@@ -4566,7 +4566,7 @@ int	CreateTestConfig (void)
     BigWrite (FidConfig,(HPSTR)&NumMenuMask,sizeof(NumMenuMask),-1);
     BigWrite (FidConfig,(HPSTR)&WindowColor,4,-1);
    	BigWrite (FidConfig,(HPSTR)&TAGBox,sizeof(TAGBOX),-1);
-	hViewports[0]=GSSiGlobAlloc ( 134,GHND,sizeof(VIEWPORT_V6));
+	hViewports[0]=GSSiGlobAlloc(GAIDNO 134,GHND,sizeof(VIEWPORT_V6));
 	CurView6 = (LPVIEWPORT_V6)GlobalLock (hViewports[0]);
 	
 	CurView6->ID = 1;
@@ -4652,7 +4652,7 @@ int	CreateTestConfig (void)
 	
 	
 	GSSiGlobUlFree (&hVisList);
-	hVisList=GSSiGlobAlloc ( 135,GHND,sizeof(VISLIST));
+	hVisList=GSSiGlobAlloc(GAIDNO 135,GHND,sizeof(VISLIST));
 	CurVis = (LPVISLIST)GlobalLock (hVisList);
 	CurVis->hVisList=hVisList;
 	InitVis ();
@@ -4715,7 +4715,7 @@ int	CreateTestConfig (void)
 	_fstrcpy (CurView6->PickMacroFile,"pikmacro.txt");
 	CurView6->PickMacroFile[0]=0;
 	GSSiGlobUlFree (&hVisList);
-	hVisList=GSSiGlobAlloc ( 136,GHND,sizeof(VISLIST));
+	hVisList=GSSiGlobAlloc(GAIDNO 136,GHND,sizeof(VISLIST));
 	CurVis = (LPVISLIST)GlobalLock (hVisList); 
 	CurVis->hVisList=hVisList;
 	InitVis ();
@@ -4750,7 +4750,7 @@ int	CreateTestConfig (void)
     	GSSiGlobFree (&handle);
     	handle=NULL;
     }
-	handle=GSSiGlobAlloc ( 137,GHND,sizeof(THEME));
+	handle=GSSiGlobAlloc(GAIDNO 137,GHND,sizeof(THEME));
 	CurTheme = (LPTHEME)GlobalLock(handle);
 	CurView6->pTheme = CurTheme;
 	CurTheme->ID=GF_SINGLE_VALUE_THEME; 
@@ -4829,7 +4829,7 @@ int	CreateTestConfig (void)
 	CurView6->PickMacroFile[0]=0;
 	
 	GSSiGlobUlFree (&hVisList);
-	hVisList=GSSiGlobAlloc ( 138,GHND,sizeof(VISLIST));
+	hVisList=GSSiGlobAlloc(GAIDNO 138,GHND,sizeof(VISLIST));
 	CurVis = (LPVISLIST)GlobalLock (hVisList);
 	CurVis->hVisList=hVisList;
 	InitVis ();
@@ -4889,7 +4889,7 @@ int	CreateTestConfig (void)
     	GSSiGlobFree (&handle);
     	handle=NULL;
     }
-	handle=GSSiGlobAlloc ( 139,GHND,sizeof(COORDINATEDISPLAY));
+	handle=GSSiGlobAlloc(GAIDNO 139,GHND,sizeof(COORDINATEDISPLAY));
 	CD = (LPCOORDINATEDISPLAY)GlobalLock(handle);
 	CurView6->pTheme = (LPTHEME)CD;
 	CD->Version = 103;
@@ -4934,7 +4934,7 @@ int	CreateTestConfig (void)
     BigWrite (FidConfig,(HPSTR)&NumMenuMask,sizeof(NumMenuMask),-1);
     BigWrite (FidConfig,(HPSTR)&WindowColor,4,-1);
    	BigWrite (FidConfig,(HPSTR)&TAGBox,sizeof(TAGBOX),-1);
-	hViewports[0]=GSSiGlobAlloc ( 140,GHND,sizeof(VIEWPORT_V6));
+	hViewports[0]=GSSiGlobAlloc(GAIDNO 140,GHND,sizeof(VIEWPORT_V6));
 	CurView6 = (LPVIEWPORT_V6)GlobalLock (hViewports[0]);
 	
 	CurView6->ID = 1;
@@ -5003,14 +5003,14 @@ long BoundsDisplayRead (LPVOID *lpV,int Fid)
 			short		version;
 			} BV;
 #pragma pack()
-	Handle = GSSiGlobAlloc (  69,GHND,sizeof(BOUNDSDISPLAY));
+	Handle = GSSiGlobAlloc(GAIDNO  69,GHND,sizeof(BOUNDSDISPLAY));
 	lpBoundsDisplay = (LPBOUNDSDISPLAY)GlobalLock(Handle);
 	*lpV = lpBoundsDisplay;
 	iread = 0;
 	iread += GSSilread (Fid,&BV,sizeof(BV));
 	if (BV.version == 1)
 	{
-		HANDLE	hMem=GSSiGlobAlloc (0,GMEM_MOVEABLE,SizeBOUNDSDISPLAY16);
+		HANDLE	hMem=GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,SizeBOUNDSDISPLAY16);
 		LPSTR	pbd16 = GlobalLock (hMem);
 
 		iread += GSSilread (Fid,pbd16,(UINT)BV.nbytes-6);

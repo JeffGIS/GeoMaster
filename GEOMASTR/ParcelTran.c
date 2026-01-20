@@ -173,11 +173,11 @@ static BOOL loadParcelPoints(int npnts1, int npnts2, HANDLE hPoly1, HANDLE hPoly
 	int i,j,nGood=0, lastGood = -1, nLoops = 0;
 	MNMXCORD bounds1, bounds2;
 	HANDLE hTran;
-	HANDLE hMatchedPoints = GSSiGlobAlloc(0, GHND, npnts2 * (sizeof(int)+sizeof(double)+npnts1*sizeof(int)));
+	HANDLE hMatchedPoints = GSSiGlobAlloc(GAIDNO 0, GHND, npnts2 * (sizeof(int)+sizeof(double)+npnts1*sizeof(int)));
 	LPINT pMatchedPoints = GlobalLock(hMatchedPoints);
 	LPINT pMatchedOldToNew = &pMatchedPoints[npnts2];
 	LPDOUBLE pMatchedDist = (LPDOUBLE)&pMatchedOldToNew[npnts1];
-	HANDLE hGoodPoints = GSSiGlobAlloc(0, GMEM_MOVEABLE, npnts1 * 2 * sizeof(DPOINT));
+	HANDLE hGoodPoints = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, npnts1 * 2 * sizeof(DPOINT));
 	LPDPOINT goodPointsFrom = GlobalLock(hGoodPoints), goodPointsTo = &goodPointsFrom[npnts1];
 	float RSQMIN;
 	int nTran = 0;
@@ -281,14 +281,14 @@ BOOL ParcelTranFunction(int nArgs, LPSTR *Arg, LPSTR OutLoc)
 		int nParcels = atoi(Arg[2]);
 		if (nParcels > 0)
 		{
-			HANDLE hParTran = GSSiGlobAlloc(1793, GHND, sizeof(PARCELTRAN));
+			HANDLE hParTran = GSSiGlobAlloc(GAIDNO 1793, GHND, sizeof(PARCELTRAN));
 			LPPARCELTRAN pParTran = GlobalLock(hParTran);
 
 			strcpy(pParTran->ID, "PARCELTRAN");
-			pParTran->hParNumPt = GSSiGlobAlloc(1794, GHND, nParcels*sizeof(int));
-			pParTran->hpParPnts = GSSiGlobAlloc(1794, GHND, nParcels*sizeof(HANDLE));
-			pParTran->hFromPt = GSSiGlobAlloc(1794, GMEM_MOVEABLE, MAX_PARTRAN_POINTS * sizeof(DPOINT));
-			pParTran->hToPt = GSSiGlobAlloc(1794, GMEM_MOVEABLE, MAX_PARTRAN_POINTS * sizeof(DPOINT));
+			pParTran->hParNumPt = GSSiGlobAlloc(GAIDNO 1794, GHND, nParcels*sizeof(int));
+			pParTran->hpParPnts = GSSiGlobAlloc(GAIDNO 1794, GHND, nParcels*sizeof(HANDLE));
+			pParTran->hFromPt = GSSiGlobAlloc(GAIDNO 1794, GMEM_MOVEABLE, MAX_PARTRAN_POINTS * sizeof(DPOINT));
+			pParTran->hToPt = GSSiGlobAlloc(GAIDNO 1794, GMEM_MOVEABLE, MAX_PARTRAN_POINTS * sizeof(DPOINT));
 			GlobalUnlock(hParTran);
 			itoa((int)hParTran, OutLoc, 10);
 			rtn = TRUE;

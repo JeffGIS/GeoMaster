@@ -226,7 +226,7 @@ BOOL CopyCurViewToNew (LPSTR NewName)
 	HANDLE	hVisList; 
 	LPVISLIST	FromVis, LastVisList, SaveVis;
 	
-	hViewports[*pNumViewports]=GSSiGlobAlloc (1303,GHND,sizeof(VIEWPORT)+MAX_VIEWPORT_FILES*MAX_PATH);
+	hViewports[*pNumViewports]=GSSiGlobAlloc(GAIDNO 1303,GHND,sizeof(VIEWPORT)+MAX_VIEWPORT_FILES*MAX_PATH);
 	pViewports[*pNumViewports] = (LPVIEWPORT) GlobalLock (hViewports[*pNumViewports]);
 	pViewportsD[*pNumViewports]=pViewports[*pNumViewports];  
 	*pViewports[*pNumViewports] = *CurView;
@@ -241,7 +241,7 @@ BOOL CopyCurViewToNew (LPSTR NewName)
 				    		
 	for (i=0;i<CurView->NumVisList;i++)
 	{
-		hVisList=GSSiGlobAlloc (1304,GHND,sizeof(VISLIST));
+		hVisList=GSSiGlobAlloc(GAIDNO 1304,GHND,sizeof(VISLIST));
 		CurVis =(LPVISLIST) GlobalLock (hVisList);
 		if (!i)
 		{   
@@ -267,7 +267,7 @@ BOOL CopyCurViewToNew (LPSTR NewName)
 	} 
 	for (i=0;i<CurView->NumPickList;i++)
 	{
-		hVisList=GSSiGlobAlloc (1305,GHND,sizeof(VISLIST));
+		hVisList=GSSiGlobAlloc(GAIDNO 1305,GHND,sizeof(VISLIST));
 		CurVis =(LPVISLIST) GlobalLock (hVisList);
 		if (!i)
 		{
@@ -298,7 +298,7 @@ BOOL CopyCurViewToNew (LPSTR NewName)
 	} 
 	if (CurView->pVisListManual)
 	{
-		hVisList=GSSiGlobAlloc (1306,GHND,sizeof(VISLIST));
+		hVisList=GSSiGlobAlloc(GAIDNO 1306,GHND,sizeof(VISLIST));
 		CurVis =(LPVISLIST) GlobalLock (hVisList);    
 		*CurVis = *EditView->pVisListManual;
 		CurVis->hVisList = hVisList;   
@@ -306,7 +306,7 @@ BOOL CopyCurViewToNew (LPSTR NewName)
 	}
 	if (CurView->pPickListManual)
 	{
-		hVisList=GSSiGlobAlloc (1307,GHND,sizeof(VISLIST));
+		hVisList=GSSiGlobAlloc(GAIDNO 1307,GHND,sizeof(VISLIST));
 		CurVis =(LPVISLIST) GlobalLock (hVisList);
 		*CurVis = *EditView->pPickListManual;
 		CurVis->hVisList = hVisList;   
@@ -525,7 +525,7 @@ BOOL LoadFormatCfg (LPSTR Name)
 	} 
 	if (OldFormatVP < 0)
 	{
-        hViewports[*pNumViewports]=GSSiGlobAlloc (1312,GHND,sizeof(VIEWPORT)+MAX_VIEWPORT_FILES*MAX_PATH);
+        hViewports[*pNumViewports]=GSSiGlobAlloc(GAIDNO 1312,GHND,sizeof(VIEWPORT)+MAX_VIEWPORT_FILES*MAX_PATH);
         ToView = (LPVIEWPORT) GlobalLock (hViewports[*pNumViewports]); 
         pViewports[*pNumViewports]=ToView;
         pViewportsD[*pNumViewports]=ToView; 
@@ -542,7 +542,7 @@ BOOL LoadFormatCfg (LPSTR Name)
     	LPVISLIST	SaveVis=CurVis;
 				    	
 		ToView->NumVisList = 1;
-		hVisList=GSSiGlobAlloc (1313,GHND,sizeof(VISLIST));
+		hVisList=GSSiGlobAlloc(GAIDNO 1313,GHND,sizeof(VISLIST));
 		CurVis = (LPVISLIST)GlobalLock (hVisList); 
 		CurVis->hVisList=hVisList;
 		InitVis ();
@@ -589,7 +589,7 @@ BOOL LoadFormatCfg (LPSTR Name)
 		pVP = (LPVIEWPORT)GlobalLock (hFMTViewports[j]);
 		if (AddVP[j])
 		{
-	        hViewports[*pNumViewports]=GSSiGlobAlloc (1314,GHND,sizeof(VIEWPORT)+MAX_VIEWPORT_FILES*MAX_PATH);
+	        hViewports[*pNumViewports]=GSSiGlobAlloc(GAIDNO 1314,GHND,sizeof(VIEWPORT)+MAX_VIEWPORT_FILES*MAX_PATH);
 	        pViewports[*pNumViewports]=(LPVIEWPORT) GlobalLock (hViewports[*pNumViewports]);
 	        pViewportsD[*pNumViewports]=pViewports[*pNumViewports]; 
 	        *pViewports[*pNumViewports] = *pVP; 
@@ -874,7 +874,7 @@ HFILE DecompressCfgFile (HFILE FidConfig, int Version)
 	
 	if (IsMemFile (FidConfig))
 		return FidConfig;
-	hTemp = GSSiGlobAlloc (1532,GMEM_MOVEABLE,lenCfg*2);
+	hTemp = GSSiGlobAlloc(GAIDNO 1532,GMEM_MOVEABLE,lenCfg*2);
 	pTemp = GlobalLock (hTemp);
     if (Version < 9)
 	{
@@ -888,7 +888,7 @@ HFILE DecompressCfgFile (HFILE FidConfig, int Version)
 		ii=GSSillseek(FidConfig,lenCfg,0);
 		GSSilread (FidConfig,&UncompLen,4);
 	}
-	handle = GSSiGlobAlloc (1533,GMEM_MOVEABLE,UncompLen*2+1024);
+	handle = GSSiGlobAlloc(GAIDNO 1533,GMEM_MOVEABLE,UncompLen*2+1024);
 	pCfg   = GlobalLock (handle);
     GSSilread (FidConfig,&ConfigDesc,2);
     GSSilread (FidConfig,&Signature,2);
@@ -943,7 +943,7 @@ BOOL LoadMenuConfig (LPSTR Name, long Offset,HFILE OpenFid,short Version)
 HFILE CompressConfig (HFILE Fid,LPSTR Name)
 {
 	long	ln=GSSillseek(Fid,0,2);
-	HANDLE	hTemp = GSSiGlobAlloc (1542,GMEM_MOVEABLE,ln*2+32);
+	HANDLE	hTemp = GSSiGlobAlloc(GAIDNO 1542,GMEM_MOVEABLE,ln*2+32);
 	HPSTR	pTemp = GlobalLock (hTemp); 
 	HPSTR	pCompressedRec = pTemp + ln;
 	long	CompressedLength;
@@ -1016,7 +1016,7 @@ void EmbedMenusInConfig (HFILE Fid, LPSTR TempName)
 		{
 			GSSillseek(FidTemp, 0, 0);
 			BigWrite(Fid, (HPSTR)&Length, 4, -1);
-			hTemp = GSSiGlobAlloc(1543, GMEM_MOVEABLE, Length);
+			hTemp = GSSiGlobAlloc(GAIDNO 1543, GMEM_MOVEABLE, Length);
 			pTemp = GlobalLock(hTemp);
 			BigRead(FidTemp, pTemp, Length);
 			BigWrite(Fid, pTemp, Length, -1);
@@ -1064,7 +1064,7 @@ BOOL CreateAllSizes (HWND hWndDlg)
 	NumSavedImages = min (NumSavedImages,MAXSAVEDIMAGES);
 	SaveViewports (0);
 	GSSiGlobFree (&hSaveCfgImagesFileName);
-	hSaveCfgImagesFileName = GSSiGlobAlloc (1670,GMEM_MOVEABLE,MAX_PATH);
+	hSaveCfgImagesFileName = GSSiGlobAlloc(GAIDNO 1670,GMEM_MOVEABLE,MAX_PATH);
 	pTempFile = GlobalLock (hSaveCfgImagesFileName);
 	GSSiGetTempFileName (0,"gmc",0,(LPSTR)pTempFile); 
 	FidTemp = GSSiOpenFile (pTempFile,0,OF_CREATE);
@@ -2182,7 +2182,7 @@ LPVIEWPORT CreateNullViewport (LPHANDLE phViewport,LPSTR Name,int ID,LPSTR Paren
 	HANDLE		hVis;
 	BOOL		Err;
 	
-	*phViewport=GSSiGlobAlloc ( 128,GHND,sizeof(VIEWPORT)+MAX_VIEWPORT_FILES*MAX_PATH);
+	*phViewport=GSSiGlobAlloc(GAIDNO 128,GHND,sizeof(VIEWPORT)+MAX_VIEWPORT_FILES*MAX_PATH);
 	pCurView = (LPVIEWPORT)GlobalLock (*phViewport);
 	
 	pCurView->ID = ID;  
@@ -2226,7 +2226,7 @@ LPVIEWPORT CreateNullViewport (LPHANDLE phViewport,LPSTR Name,int ID,LPSTR Paren
 	pCurView->lpFiles[0]=0;
 	pCurView->NumVisList = 1;
 	
-	hVis = GSSiGlobAlloc ( 129,GHND,sizeof(VISLIST));
+	hVis = GSSiGlobAlloc(GAIDNO 129,GHND,sizeof(VISLIST));
 
 	CurVis = pCurView->pVisList1 = (LPVISLIST)GlobalLock (hVis); 
 	CurVis->hVisList = hVis;
@@ -2431,7 +2431,7 @@ BOOL ProcessConnectedCommand(UINT ID)
 	HaltMapDisplay(TRUE, FALSE);
 	lMem = llFileSeek(Fid, 0, 2);
 	llFileSeek(Fid, 0, 0);
-	hMem = GSSiGlobAlloc(0, GMEM_MOVEABLE, lMem+4);
+	hMem = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, lMem+4);
 	pMem = GlobalLock(hMem);
 	BigRead64(Fid, pMem, lMem);
 	GSSiClose64(&Fid);

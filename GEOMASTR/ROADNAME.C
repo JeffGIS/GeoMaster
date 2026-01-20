@@ -141,7 +141,7 @@ BOOL AddToStreetSegmentList (HPFPOINT Points, int np,int Width,int Order,COLORRE
 //		return TRUE;
 	CurStreetNumbers[3] = CurState;
 	if (!CurTheme->hhLabelLines)
-		CurTheme->hhLabelLines = GSSiGlobAlloc (1729,GHND,sizeof(HANDLE)*MAXLABELLINES);
+		CurTheme->hhLabelLines = GSSiGlobAlloc(GAIDNO 1729,GHND,sizeof(HANDLE)*MAXLABELLINES);
 	phLabelLines = GlobalLock (CurTheme->hhLabelLines);
 	for (i=0;i<CurTheme->nLabelLines;i++)
 	{   
@@ -257,7 +257,7 @@ BOOL AddToStreetSegmentList (HPFPOINT Points, int np,int Width,int Order,COLORRE
 	} 
 	if (ConnectedTo == -1 && CurTheme->nLabelLines < MAXLABELLINES && np < MAXPOINTSINLABEL)
 	{
-		phLabelLines[CurTheme->nLabelLines] = GSSiGlobAlloc (1818,GHND,sizeof(STREETHEADER) + sizeof(FPOINT) * np);
+		phLabelLines[CurTheme->nLabelLines] = GSSiGlobAlloc(GAIDNO 1818,GHND,sizeof(STREETHEADER) + sizeof(FPOINT) * np);
 		pStreet = (LPSTREETHEADER)GlobalLock (phLabelLines[CurTheme->nLabelLines]);
 		pStreet->NumPoints = np; 
 	//	pStreets = (LPLONG)(pNumPoints+1);  
@@ -794,7 +794,7 @@ void ClipLabellinesToViewport (void)
 	BOOL	OutReverse[3];
 	double  SegDist[16];
 	int		numNewLabelLines = 0;
-	HANDLE  hhNewLabelLines = GSSiGlobAlloc(1816, GHND, MAXLABELLINES * sizeof(HANDLE) + 4);
+	HANDLE  hhNewLabelLines = GSSiGlobAlloc(GAIDNO 1816, GHND, MAXLABELLINES * sizeof(HANDLE) + 4);
 	LPHANDLE phNewLabelLines = GlobalLock(hhNewLabelLines);
 	MNMXCORD ScreenBounds;
 
@@ -842,7 +842,7 @@ void ClipLabellinesToViewport (void)
 					{
 						if (inBounds)
 						{
-							hNewStreet = GSSiGlobAlloc(1820, GMEM_MOVEABLE, sizeof(STREETHEADER) + pStreet->NumPoints * 3 * sizeof(DPOINT) + 4);
+							hNewStreet = GSSiGlobAlloc(GAIDNO 1820, GMEM_MOVEABLE, sizeof(STREETHEADER) + pStreet->NumPoints * 3 * sizeof(DPOINT) + 4);
 							pNewStreet = GlobalLock(hNewStreet);
 							newPoints = (LPDPOINT)(pNewStreet + 1);
 							*pNewStreet = *pStreet;
@@ -865,7 +865,7 @@ void ClipLabellinesToViewport (void)
 					}
 					else if (inBounds)
 					{
-						hNewStreet = GSSiGlobAlloc(1821, GMEM_MOVEABLE, sizeof(STREETHEADER) + pStreet->NumPoints * 3 * sizeof(DPOINT) + 4);
+						hNewStreet = GSSiGlobAlloc(GAIDNO 1821, GMEM_MOVEABLE, sizeof(STREETHEADER) + pStreet->NumPoints * 3 * sizeof(DPOINT) + 4);
 						pNewStreet = GlobalLock(hNewStreet);
 						newPoints = (LPDPOINT)(pNewStreet + 1);
 						*pNewStreet = *pStreet;
@@ -970,7 +970,7 @@ BOOL DisplayStreetLabels (BOOL Clear)
 	debugaddress=&pStreetData->IgnoreShields;
 			DisplayStreetCenterlines ();
 			{
-			HANDLE	hMem=GSSiGlobAlloc (1822,GMEM_MOVEABLE,256+256+sizeof(double)*MAXTEXTPOINTS+sizeof(double)*MAXTEXTPOINTS+sizeof(DPOINT)*MAXTEXTPOINTS);
+			HANDLE	hMem=GSSiGlobAlloc(GAIDNO 1822,GMEM_MOVEABLE,256+256+sizeof(double)*MAXTEXTPOINTS+sizeof(double)*MAXTEXTPOINTS+sizeof(DPOINT)*MAXTEXTPOINTS);
 			LPSTR	StreetsText=GlobalLock (hMem);
 			LPSTR	StreetsText2 = StreetsText + 256; 
 			LPDOUBLE	TxtAZ = (LPDOUBLE)(StreetsText2 + 256);   
@@ -1039,7 +1039,7 @@ BOOL DisplayStreetLabels (BOOL Clear)
 						short	NumNewPoints = pStreet->NumPoints - BegLine;
 
 						pStreet->NumPoints = BegLine + 2;
-						phLabelLines[CurTheme->nLabelLines] = GSSiGlobAlloc(1823, GHND, sizeof(STREETHEADER) + sizeof(FPOINT) * NumNewPoints);
+						phLabelLines[CurTheme->nLabelLines] = GSSiGlobAlloc(GAIDNO 1823, GHND, sizeof(STREETHEADER) + sizeof(FPOINT) * NumNewPoints);
 						pStreet2 = (LPSTREETHEADER)GlobalLock(phLabelLines[CurTheme->nLabelLines]);
 						*pStreet2 = *pStreet;
 						pStreet2->NumPoints = NumNewPoints;
@@ -1055,9 +1055,9 @@ BOOL DisplayStreetLabels (BOOL Clear)
 			}
 			*/
 			ii=CurTheme->nLabelLines;
-			HANDLE hSortedStreets = GSSiGlobAlloc(1824, GMEM_MOVEABLE, sizeof(int) * CurTheme->nLabelLines + 4);
+			HANDLE hSortedStreets = GSSiGlobAlloc(GAIDNO 1824, GMEM_MOVEABLE, sizeof(int) * CurTheme->nLabelLines + 4);
 			int* sortedStreets = GlobalLock(hSortedStreets);
-			HANDLE hSortedStreetLengths = GSSiGlobAlloc(1824, GMEM_MOVEABLE, sizeof(float) * CurTheme->nLabelLines + 4);
+			HANDLE hSortedStreetLengths = GSSiGlobAlloc(GAIDNO 1824, GMEM_MOVEABLE, sizeof(float) * CurTheme->nLabelLines + 4);
 			float* sortedStreetLengths = GlobalLock(hSortedStreetLengths);
 			int nSortedStreets = 0;
 			for (int i = 0; i < CurTheme->nLabelLines; i++)
@@ -1504,7 +1504,7 @@ void LinkLabelLines (short Line1,short Line2,short Type2, short Type1)
 	}
 	if (Type1 == 1 && Type2 == 1)
 	{
-		hTemp = GSSiGlobAlloc (1817,GHND,sizeof(STREETHEADER) + NewNumPoints * sizeof(FPOINT));
+		hTemp = GSSiGlobAlloc(GAIDNO 1817,GHND,sizeof(STREETHEADER) + NewNumPoints * sizeof(FPOINT));
 		pTempStreet = (LPSTREETHEADER)GlobalLock (hTemp);
 		*pTempStreet = *pStreet1;
 //		pTempStreets = (LPLONG) (pTempNumPoints+1);

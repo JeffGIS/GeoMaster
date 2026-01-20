@@ -142,7 +142,7 @@ BOOL CopyMapFile (LPSTR Name, LPSTR FromName,long Offset,FILEINDEXENTRY CurFileI
 				BigRead (FromFid,(HPSTR)biHead,lhead);
 				BigWrite (GCIFid,(HPSTR)biHead,lhead,-1);
 	            GSSiClose2 (&FromFid);
-				hlpFI = GSSiGlobAlloc(1743,GHND,sizeof(FILEINDEX)+sizeof(FILEINDEXENTRY)); 
+				hlpFI = GSSiGlobAlloc(GAIDNO 1743,GHND,sizeof(FILEINDEX)+sizeof(FILEINDEXENTRY)); 
 				lpFI = (LPFILEINDEX) GlobalLock(hlpFI);    
 				lpFI->CurrentEntry=(FILEINDEXENTRY *) &lpFI->FirstIndex;
 				lpFI->Type = 5;   
@@ -195,7 +195,7 @@ BOOL CopyMapFile (LPSTR Name, LPSTR FromName,long Offset,FILEINDEXENTRY CurFileI
             BigWrite (FidIndex,(HPSTR)pEntry,pEntry->Len,-1);       
                                      
 			BigWrite (GCIFid,(HPSTR)&lRec,4,-1);  
-			hData = GSSiGlobAlloc (1234,GMEM_MOVEABLE,lRec+1024);
+			hData = GSSiGlobAlloc(GAIDNO 1234,GMEM_MOVEABLE,lRec+1024);
 			pData = GlobalLock (hData);
 			BigRead (FromFid,pData,lRec); 
 			BigWrite (GCIFid,(HPSTR)pData,lRec,-1);

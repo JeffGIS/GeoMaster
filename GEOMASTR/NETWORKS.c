@@ -150,7 +150,7 @@ long PointsBetweenMP (long Path,double FromMP, double ToMP,LPHANDLE phPoints)
 	}
 	if (!OpenNetLinkAndRef (NetworkID,FALSE,&Opened))
 		return 0;  
-	*phPoints = GSSiGlobAlloc (0,GMEM_MOVEABLE,USHRT_MAX);      
+	*phPoints = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,USHRT_MAX);      
 	OutPoints = (HPDPOINT)GlobalLock (*phPoints);
 	NetRefsKey.Path = Path;
 	NetRefsKey.MP = FromMP; 
@@ -921,8 +921,8 @@ void AddChain (long Ref,LPLONG pJoinRef)
     if (!hBTChained)
     	return;    
     ChainID++;
-    hChain1 = GSSiGlobAlloc ( 533,GMEM_MOVEABLE,USHRT_MAX);
-    hChain2 = GSSiGlobAlloc ( 534,GMEM_MOVEABLE,USHRT_MAX);
+    hChain1 = GSSiGlobAlloc(GAIDNO 533,GMEM_MOVEABLE,USHRT_MAX);
+    hChain2 = GSSiGlobAlloc(GAIDNO 534,GMEM_MOVEABLE,USHRT_MAX);
     if (pJoinRef)
     {
     	hChain = hChain1;
@@ -2244,7 +2244,7 @@ long GetStreetSegsBetweenMPs (HANDLE hDBDestSegs,long OnStreet,STREETMP FromMP,S
 	BOOL	First=TRUE; 
 	NETREFINTKEY	NetRefIntKey;
 	NETREFINTDATA	NetRefIntData;  
-	HANDLE	hSegs=GSSiGlobAlloc (0,GMEM_MOVEABLE,USHRT_MAX); 
+	HANDLE	hSegs=GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,USHRT_MAX); 
 	LPSTREETSEGMENT	pSegs= (LPSTREETSEGMENT)GlobalLock (hSegs);
     LPGWDHEADER lpGWDHead; 
 	BOOL	Opened=FALSE, Opened2=FALSE;

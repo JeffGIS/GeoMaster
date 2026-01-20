@@ -837,9 +837,9 @@ long SplinePointsD (long Startp,long np, HPDPOINT PointsIn, LPLONG nPnts, HPDPOI
 	short	idsw=0;  
 	double	f=GetGlobalDVal2 ("[%SPLINEF]",1);
 	
-	HANDLE	hHP=GSSiGlobAlloc (1408,GMEM_MOVEABLE,8+(np-Startp+1)*sizeof(DPOINT));
+	HANDLE	hHP=GSSiGlobAlloc(GAIDNO 1408,GMEM_MOVEABLE,8+(np-Startp+1)*sizeof(DPOINT));
 	HANDLE	hVP;
-//	HANDLE	hOutPoint=GSSiGlobAlloc (GMEM_MOVEABLE,npout*sizeof(DPOINT));
+//	HANDLE	hOutPoint=GSSiGlobAlloc(GAIDNO GMEM_MOVEABLE,npout*sizeof(DPOINT));
 	HPDOUBLE	HP=(HPDOUBLE)GlobalLock (hHP);
 	HPDOUBLE	VP; 
 	HPDOUBLE	pOutArray;
@@ -873,7 +873,7 @@ long SplinePointsD (long Startp,long np, HPDPOINT PointsIn, LPLONG nPnts, HPDPOI
     npout = TotDist / CurveExpansionFactor; 
     npout = min (npout,(double)USHRT_MAX/(2*sizeof(DPOINT))-1);
     npout = min (npout,MaxPoints);
-    hVP = GSSiGlobAlloc (1409,GMEM_MOVEABLE,(1+npout)*sizeof(double)); 
+    hVP = GSSiGlobAlloc(GAIDNO 1409,GMEM_MOVEABLE,(1+npout)*sizeof(double)); 
     VP=(HPDOUBLE)GlobalLock (hVP); 
     nVP=(LPLONG)VP;
 //    for (i=Startp-1;i<np;i++)
@@ -902,7 +902,7 @@ long SplinePointsD (long Startp,long np, HPDPOINT PointsIn, LPLONG nPnts, HPDPOI
 
 long SplinePoints (long Startp,long np, HANDLE hPoints, LPLONG nPnts, HPPOINT Points,double CurveExpansionFactor,long MaxPoints) 
 {   
-	HANDLE		hDPoints=GSSiGlobAlloc (1410,GMEM_MOVEABLE,MaxPoints*sizeof(DPOINT));
+	HANDLE		hDPoints=GSSiGlobAlloc(GAIDNO 1410,GMEM_MOVEABLE,MaxPoints*sizeof(DPOINT));
 	HPDPOINT	pDPoints=(HPDPOINT)GlobalLock(hDPoints); 
 	HPDPOINT	pOrigPoints = (HPDPOINT)GlobalLock (hPoints);
 	long		i;

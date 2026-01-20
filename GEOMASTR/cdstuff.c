@@ -157,7 +157,7 @@ void OpenCDLookUpTable (void)
 	char	str[128], CDnum[32]="CD1";   
 	LPSTR	Prefix, VolLabel, pBegin, pPar, pEndPar;
 	
-	hCDLookUpTable = GSSiGlobAlloc (1279,GHND,USHRT_MAX);
+	hCDLookUpTable = GSSiGlobAlloc(GAIDNO 1279,GHND,USHRT_MAX);
 	Prefix = pBegin = GlobalLock (hCDLookUpTable);
 	while (GetPrivateProfileString ("CDList",CDnum,"",str,128,"geomastr.ini"))
 	{   
@@ -312,7 +312,7 @@ void AddCDToCancelledList (LPSTR CD)
 	LPSTR	pList;
 	
 	if (!hCancelledCDList)
-		hCancelledCDList = GSSiGlobAlloc (1280,GHND,1024);
+		hCancelledCDList = GSSiGlobAlloc(GAIDNO 1280,GHND,1024);
 	pList = GlobalLock (hCancelledCDList);
 	while (*pList)
 	{

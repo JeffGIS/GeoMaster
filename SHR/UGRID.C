@@ -151,7 +151,7 @@ BOOL FAR PASCAL GMNGRID1DlgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARA
 			rowloc=BigRead(fptr,(HPSTR)&l,4);  
 			rowloc=BigRead(fptr,(HPSTR)&maxrowlen,4);
 			startindex=GSSillseek(fptr,-(8+l*4),2);
-			hData=GSSiGlobAlloc ( 389,GMEM_MOVEABLE,8192*2);
+			hData=GSSiGlobAlloc(GAIDNO 389,GMEM_MOVEABLE,8192*2);
 			pData=GlobalLock(hData);
 			pOutData = pData + 8192;
 			GSSillseek(fptr,0,0);
@@ -169,7 +169,7 @@ BOOL FAR PASCAL GMNGRID1DlgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARA
 			Delim = *DLTDelim; 
 			{
 				int		ivar, bu, row=0;
-				HANDLE	hTabStops = GSSiGlobAlloc (0,GHND,sizeof(int)*nDLTvar);
+				HANDLE	hTabStops = GSSiGlobAlloc(GAIDNO 0,GHND,sizeof(int)*nDLTvar);
 				LPINT	TabStops = GlobalLock (hTabStops);
 
 				bu = GetDialogBaseUnits ();
@@ -442,7 +442,7 @@ HWND ShowGrid(HWND hWnd,LPSTR SavePosVName,LPSTR VPName){
 			rowloc=BigRead(fptr,(HPSTR)&l,4);  
 			rowloc=BigRead(fptr,(HPSTR)&maxrowlen,4);
 			startindex=GSSillseek(fptr,-(8+l*4),2);
-			hData=GSSiGlobAlloc ( 389,GMEM_MOVEABLE,4096);
+			hData=GSSiGlobAlloc(GAIDNO 389,GMEM_MOVEABLE,4096);
 			pData=GlobalLock(hData);
 			GSSillseek(fptr,0,0);
 			fgetstring(pData,2044,fptr);
@@ -456,7 +456,7 @@ HWND ShowGrid(HWND hWnd,LPSTR SavePosVName,LPSTR VPName){
 			//set up the table    
 			if (hGridSize)
 			{
-				hSize = GSSiGlobAlloc ( 390,GHND,4096);
+				hSize = GSSiGlobAlloc(GAIDNO 390,GHND,4096);
 				lpSizeStr = GlobalLock (hSize);
 				lpSize = (LPSHORT)&WindRect;
 				GetGlobalVal (hGridSize,lpSizeStr,0);
@@ -531,7 +531,7 @@ NoSize:
 			GSSiDeleteObject(&hbrush);  
 			if (hGridSize)
 			{
-				hSize = GSSiGlobAlloc ( 391,GHND,4096);
+				hSize = GSSiGlobAlloc(GAIDNO 391,GHND,4096);
 				lpSizeStr = GlobalLock (hSize);
 				lpSize = (LPSHORT)&WindRect;
 				n = 4;
@@ -606,7 +606,7 @@ NoSize:
 							// if not then get a new record from the database
 							// (this way a record doesnt need to be read in each time
 							// a cell within the table needs to be drawn)
-							hData=GSSiGlobAlloc ( 392,GMEM_MOVEABLE,4096);
+							hData=GSSiGlobAlloc(GAIDNO 392,GMEM_MOVEABLE,4096);
 							pData=GlobalLock(hData);
 							if(ti->row!=lastrow){
 								//find the record that coresponds to the row given
@@ -683,12 +683,12 @@ NoSize:
 								GSSillseek(fptr,startindex+ti->row*4,0);
 								BigRead(fptr,(HPSTR)&rowloc,4);
 								GSSillseek(fptr,rowloc,0);
-								hData=GSSiGlobAlloc ( 393,GMEM_MOVEABLE,4096);
+								hData=GSSiGlobAlloc(GAIDNO 393,GMEM_MOVEABLE,4096);
 								pData=GlobalLock(hData);
 								fgetstring (pData,(short)maxrowlen,fptr);
 								GetDelimTextData(pData,hDLT); 
 								GSSiGlobUlFree (&hData);
-								hStr = GSSiGlobAlloc ( 394,GMEM_MOVEABLE,4096);
+								hStr = GSSiGlobAlloc(GAIDNO 394,GMEM_MOVEABLE,4096);
 								pStr = GlobalLock (hStr);
 								_fstrcpy (pStr,UGridPickMacro);
 								ExpandText(pStr);	

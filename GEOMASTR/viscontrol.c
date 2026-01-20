@@ -418,7 +418,7 @@ void SortLayerSymbols (int nSyms,HANDLE hSyms,LPHANDLE phSymOrder)
 	if (!nSyms)
 		return;
 	pSyms = GlobalLock (hSyms);
-	*phSymOrder = GSSiGlobAlloc (1682,GMEM_MOVEABLE,nSyms*sizeof(WORD));
+	*phSymOrder = GSSiGlobAlloc(GAIDNO 1682,GMEM_MOVEABLE,nSyms*sizeof(WORD));
 	pOrder = GlobalLock (*phSymOrder);
 	pOrder[0] = 0;
 
@@ -495,7 +495,7 @@ int AddSymbolToLayer (int layer,int symnum,int type,int level,LPINT pnSyms,LPHAN
 		*phSyms = GSSiGlobalReAlloc (1681,*phSyms,(*pnSyms+1)*sizeof(VCSYMBOL),GMEM_ZEROINIT);
 	}
 	else
-		*phSyms = GSSiGlobAlloc (1704,GHND,sizeof(VCSYMBOL));
+		*phSyms = GSSiGlobAlloc(GAIDNO 1704,GHND,sizeof(VCSYMBOL));
 
 	pSyms = GlobalLock (*phSyms);
 	pSyms[*pnSyms].level = level;
@@ -541,7 +541,7 @@ BOOL AddModifier (int viewport,int layer,int symnum,int type)
 		modnum++;
 
 	if (!pVCHeader->hModifiers)
-		pVCHeader->hModifiers = GSSiGlobAlloc (1686,GHND,MAXMODSLEN);
+		pVCHeader->hModifiers = GSSiGlobAlloc(GAIDNO 1686,GHND,MAXMODSLEN);
 	
 	pMods = GlobalLock (pVCHeader->hModifiers);	
 
@@ -632,7 +632,7 @@ void AddVCRect (LPRECT prect,int level,int viewport,int layer,int symnum,int rec
 	if (pVCHeader->nRectangles)
 		pVCHeader->hRectangles = GSSiGlobalReAlloc (1705,pVCHeader->hRectangles,(pVCHeader->nRectangles+1)*sizeof(VCRECTANGLE),GMEM_ZEROINIT);
 	else
-		pVCHeader->hRectangles = GSSiGlobAlloc (1706,GHND,sizeof(VCRECTANGLE));
+		pVCHeader->hRectangles = GSSiGlobAlloc(GAIDNO 1706,GHND,sizeof(VCRECTANGLE));
 	pVCRect = GlobalLock (pVCHeader->hRectangles);
 	pVCRect[pVCHeader->nRectangles].rect = *prect;
 	InflateRect (&pVCRect[pVCHeader->nRectangles].rect,1,1);
@@ -653,7 +653,7 @@ void AddAVRect (LPRECT prect,int iAV,BOOL AllowDoubleClick)
 	if (pAVHeader->nRectangles)
 		pAVHeader->hRectangles = GSSiGlobalReAlloc (1707,pAVHeader->hRectangles,(pAVHeader->nRectangles+1)*sizeof(VCRECTANGLE),GMEM_ZEROINIT);
 	else
-		pAVHeader->hRectangles = GSSiGlobAlloc (1708,GHND,sizeof(VCRECTANGLE));
+		pAVHeader->hRectangles = GSSiGlobAlloc(GAIDNO 1708,GHND,sizeof(VCRECTANGLE));
 	pAVRect = GlobalLock (pAVHeader->hRectangles);
 	pAVRect[pAVHeader->nRectangles].rect = *prect;
 	InflateRect (&pAVRect[pAVHeader->nRectangles].rect,1,1);
@@ -669,7 +669,7 @@ void AddCMDRect (LPRECT prect,int iCMD,BOOL AllowDoubleClick)
 	if (pCMDHeader->nRectangles)
 		pCMDHeader->hRectangles = GSSiGlobalReAlloc (1707,pCMDHeader->hRectangles,(pCMDHeader->nRectangles+1)*sizeof(CMDRECTANGLE),GMEM_ZEROINIT);
 	else
-		pCMDHeader->hRectangles = GSSiGlobAlloc (1708,GHND,sizeof(CMDRECTANGLE));
+		pCMDHeader->hRectangles = GSSiGlobAlloc(GAIDNO 1708,GHND,sizeof(CMDRECTANGLE));
 	pCMDRect = GlobalLock (pCMDHeader->hRectangles);
 	pCMDRect[pCMDHeader->nRectangles].rect = *prect;
 	InflateRect (&pCMDRect[pCMDHeader->nRectangles].rect,1,1);
@@ -1761,7 +1761,7 @@ LONG FAR PASCAL AutoVisMenuWndProc(HWND hWnd, UINT Message, WPARAM wParam, LONG 
 			long	loc;
 			int		n=0;
 
-			pWMH->menuHandle[pWMH->currentMenu]=GSSiGlobAlloc (1687,GHND,sizeof(AUTOVISHEADER));
+			pWMH->menuHandle[pWMH->currentMenu]=GSSiGlobAlloc(GAIDNO 1687,GHND,sizeof(AUTOVISHEADER));
 			pAVHeader = (LPAUTOVISHEADER)GlobalLock (pWMH->menuHandle[pWMH->currentMenu]);
 			strcpy (str,CurView->VisName);
 			if ((pBS = strrchr (str,'.')))
@@ -2697,7 +2697,7 @@ BOOL InitCatalogData (HANDLE hInitData,BOOL Pickability)
 	LPWINDOWMENUHEADER pWMH = (LPWINDOWMENUHEADER)GlobalLock (hInitData);
 	if (pWMH)
 	{
-		pWMH->menuHandle[pWMH->currentMenu] = GSSiGlobAlloc(1684, GHND, sizeof(VISCONTROLHEADER));
+		pWMH->menuHandle[pWMH->currentMenu] = GSSiGlobAlloc(GAIDNO 1684, GHND, sizeof(VISCONTROLHEADER));
 		pVCHeader = GlobalLock(pWMH->menuHandle[pWMH->currentMenu]);
 		pVCHeader->iCurrentRect = -1;
 		pVCHeader->Config = CurrentConfig;
@@ -3059,7 +3059,7 @@ SingleClick:
 						break;
 					case 2://float
 /*						{
-							HANDLE	hMem =  GSSiGlobAlloc (1683,GHND,sizeof(VISCONTROLHEADER)+MAXMODSLEN);
+							HANDLE	hMem =  GSSiGlobAlloc(GAIDNO 1683,GHND,sizeof(VISCONTROLHEADER)+MAXMODSLEN);
 							LPVISCONTROLHEADER	pHead=GlobalLock (hMem);
 
 							*pHead = *pVCHeader;
@@ -3081,7 +3081,7 @@ SingleClick:
 							PostMessage (hWnd,WM_CLOSE,1,(LPARAM)hMem);
 						}*/
 						{
-/*							HANDLE	hMem =  GSSiGlobAlloc (1683,GHND,sizeof(WINDOWMENUHEADER));
+/*							HANDLE	hMem =  GSSiGlobAlloc(GAIDNO 1683,GHND,sizeof(WINDOWMENUHEADER));
 							LPWINDOWMENUHEADER	pHead=GlobalLock (hMem);
 
 							*pHead = *pWMH;
@@ -3977,7 +3977,7 @@ HWND VisibilityControl (HWND hWnd,HINSTANCE hInst,LPSTR ConnectToVP,LPRECT pRect
 
 	if (!hInit)
 	{
-		hInit = hInitData= GSSiGlobAlloc (1683,GHND,sizeof(WINDOWMENUHEADER));
+		hInit = hInitData= GSSiGlobAlloc(GAIDNO 1683,GHND,sizeof(WINDOWMENUHEADER));
 		pWMH = (LPWINDOWMENUHEADER)GlobalLock (hInit);
 		pWMH->Factor = 0.8;
 		pWMH->ScreenStartPoint.x = pRect->left;
@@ -4008,21 +4008,21 @@ HWND VisibilityControl (HWND hWnd,HINSTANCE hInst,LPSTR ConnectToVP,LPRECT pRect
 			pWMH->Flat = FALSE;
 			pWMH->xpad = pWMH->ypad = 3;
 			pWMH->menuType[pWMH->nMenus]=MT_CMDMENU;
-			pWMH->menuHandle[pWMH->nMenus]=GSSiGlobAlloc (1709,GHND,sizeof(CMDMENUHEADER));
+			pWMH->menuHandle[pWMH->nMenus]=GSSiGlobAlloc(GAIDNO 1709,GHND,sizeof(CMDMENUHEADER));
 			pCMDHeader = (LPCMDMENUHEADER)GlobalLock (pWMH->menuHandle[pWMH->nMenus]);
 /*	strcpy (pCMDHeader->CMDFile,"[%DL]fundir\\base.txt");
 			LoadGFFile (hWnd,pCMDHeader->CMDFile,4,FALSE);
 			GlobalUnlock (pWMH->menuHandle[pWMH->nMenus]);
 			strcpy (pWMH->menuTitle[pWMH->nMenus++],"Base Menu");
 			pWMH->menuType[pWMH->nMenus]=MT_CMDMENU;
-			pWMH->menuHandle[pWMH->nMenus]=GSSiGlobAlloc (1709,GHND,sizeof(CMDMENUHEADER));
+			pWMH->menuHandle[pWMH->nMenus]=GSSiGlobAlloc(GAIDNO 1709,GHND,sizeof(CMDMENUHEADER));
 			pCMDHeader = (LPCMDMENUHEADER)GlobalLock (pWMH->menuHandle[pWMH->nMenus]);*/
 	strcpy (pCMDHeader->CMDFile,"[%DL]fundir\\sewersetup.txt");
 			LoadGFFile (hWnd,pCMDHeader->CMDFile,4,FALSE);
 			GlobalUnlock (pWMH->menuHandle[pWMH->nMenus]);
 			strcpy (pWMH->menuTitle[pWMH->nMenus++],"Sewer Menu");
 			pWMH->menuType[pWMH->nMenus]=MT_CMDMENU;
-			pWMH->menuHandle[pWMH->nMenus]=GSSiGlobAlloc (1709,GHND,sizeof(CMDMENUHEADER));
+			pWMH->menuHandle[pWMH->nMenus]=GSSiGlobAlloc(GAIDNO 1709,GHND,sizeof(CMDMENUHEADER));
 			pCMDHeader = (LPCMDMENUHEADER)GlobalLock (pWMH->menuHandle[pWMH->nMenus]);
 	strcpy (pCMDHeader->CMDFile,"[%DL]fundir\\makearea.txt");
 			LoadGFFile (hWnd,pCMDHeader->CMDFile,4,FALSE);

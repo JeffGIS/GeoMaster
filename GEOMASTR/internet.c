@@ -205,7 +205,7 @@ BOOL FTPGetFile(HANDLE hConnect,LPCTSTR lpszRemoteFile,LPCTSTR lpszNewFile,BOOL 
 				DestroyStatusWindow(0);
 				return FALSE;
 			}
-			hBuffer = GSSiGlobAlloc (0,GMEM_MOVEABLE,dwNumberOfBytesToRead+32);
+			hBuffer = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,dwNumberOfBytesToRead+32);
 			pBuffer = GlobalLock (hBuffer);
 			rtn = TRUE;
 			while (rtn && Done < Tot &&	StatusWindowUpdate (leafName,0,Tot,Done))
@@ -293,7 +293,7 @@ BOOL FTPPutFile(HANDLE hConnect,LPCTSTR lpszRemoteFile,LPCTSTR lpszLocalfile,BOO
 				InternetCloseHandle(handle);
 				return FALSE;
 			}
-			hBuffer = GSSiGlobAlloc(0, GMEM_MOVEABLE, dwNumberOfBytesToRead + 32);
+			hBuffer = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, dwNumberOfBytesToRead + 32);
 			pBuffer = GlobalLock(hBuffer);
 			rtn = TRUE;
 			CreateStatusWind(0, 1, leafName);

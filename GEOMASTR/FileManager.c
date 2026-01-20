@@ -33,7 +33,7 @@ static LPSTR FMFixPath(LPSTR path)
 static void AddFMSource(LPSTR Name)
 {
 	int groupID;
-	HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, 4096);
+	HANDLE hCmd = GSSiGlobAlloc(GAIDNO 1796, GMEM_MOVEABLE, 4096);
 	LPSTR  pCmd = GlobalLock(hCmd);
 	char *error = NULL;
 	sqlite3_stmt *statement;
@@ -47,7 +47,7 @@ static void AddFMSource(LPSTR Name)
 static void ListFMSource(HWND hWndDlg)
 {
 	int groupID;
-	HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, 4096);
+	HANDLE hCmd = GSSiGlobAlloc(GAIDNO 1796, GMEM_MOVEABLE, 4096);
 	LPSTR  pCmd = GlobalLock(hCmd);
 	char *error = NULL;
 
@@ -75,7 +75,7 @@ static void ListFMSource(HWND hWndDlg)
 static void AddGroup(LPSTR Name)
 {
 	int groupID=0;
-	HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, 4096);
+	HANDLE hCmd = GSSiGlobAlloc(GAIDNO 1796, GMEM_MOVEABLE, 4096);
 	LPSTR  pCmd = GlobalLock(hCmd);
 	char *error = NULL;
 	sqlite3_stmt *statement;
@@ -99,7 +99,7 @@ static void AddGroup(LPSTR Name)
 static void ListGroups(HWND hWndDlg)
 {
 	int groupID;
-	HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, 4096);
+	HANDLE hCmd = GSSiGlobAlloc(GAIDNO 1796, GMEM_MOVEABLE, 4096);
 	LPSTR  pCmd = GlobalLock(hCmd);
 	char *error = NULL;
 
@@ -135,7 +135,7 @@ static void ListGroups(HWND hWndDlg)
 static int FMGroup2(LPSTR path)
 {
 	int st = 0;
-	HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, 4096);
+	HANDLE hCmd = GSSiGlobAlloc(GAIDNO 1796, GMEM_MOVEABLE, 4096);
 	LPSTR  pCmd = GlobalLock(hCmd);
 	char *error = NULL;
 	LPSTR fixedPath = FMFixPath(path);
@@ -157,7 +157,7 @@ static int FMGroup2(LPSTR path)
 static int FMGroup(LPSTR path)
 {
 	int st = 0;
-	HANDLE hTestPath = GSSiGlobAlloc(1796, GMEM_MOVEABLE, 512);
+	HANDLE hTestPath = GSSiGlobAlloc(GAIDNO 1796, GMEM_MOVEABLE, 512);
 	LPSTR  pTestPath = GlobalLock(hTestPath);
 	LPSTR  pBS;
 
@@ -184,7 +184,7 @@ BOOL OpenFileManagerDB(LPSTR path)
 
 	if (rtn)
 	{
-		HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX);
+		HANDLE hCmd = GSSiGlobAlloc(GAIDNO 1796, GMEM_MOVEABLE, USHRT_MAX);
 		LPSTR  pCmd = GlobalLock(hCmd);
 
 		sprintf(pCmd, "CREATE TABLE IF NOT EXISTS PATHS (Path CHAR(256) PRIMARY KEY,GroupID INT,UpdateTime INT,Size INT)");
@@ -218,7 +218,7 @@ BOOL FMClose()
 
 static BOOL SetFMCode(int code, LPSTR path)
 {
-	HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, 1024);
+	HANDLE hCmd = GSSiGlobAlloc(GAIDNO 1796, GMEM_MOVEABLE, 1024);
 	LPSTR  pCmd = GlobalLock(hCmd);
 	char *error = NULL;
 	LPSTR fixedPath = FMFixPath(path);
@@ -233,7 +233,7 @@ static BOOL SetFMCode(int code, LPSTR path)
 }
 BOOL FMIncludeFile(LPSTR path,int group, long lastUpdateTime, long fileSize)
 {
-	HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, 1024);
+	HANDLE hCmd = GSSiGlobAlloc(GAIDNO 1796, GMEM_MOVEABLE, 1024);
 	LPSTR  pCmd = GlobalLock(hCmd);
 	char *error = NULL;
 	LPSTR fixedPath = FMFixPath(path);
@@ -253,7 +253,7 @@ BOOL FMDeleteItem(LPSTR path)
 
 	if (rtn)
 	{
-		HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, 1024);
+		HANDLE hCmd = GSSiGlobAlloc(GAIDNO 1796, GMEM_MOVEABLE, 1024);
 		LPSTR  pCmd = GlobalLock(hCmd);
 		sprintf(pCmd, "%s%s", currentSource,path);
 		fputstring(pCmd, fidDeleteList);
@@ -271,7 +271,7 @@ static BOOL FMRollBack(HWND hWnd)
 	UINT opt = MessageBox(hWnd, "Do you really want to cancel all changes?", "", MB_YESNO);
 	if (opt == IDYES)
 	{
-		HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX);
+		HANDLE hCmd = GSSiGlobAlloc(GAIDNO 1796, GMEM_MOVEABLE, USHRT_MAX);
 		LPSTR  pCmd = GlobalLock(hCmd);
 		char *error = NULL;
 
@@ -296,7 +296,7 @@ static BOOL FMRollBack(HWND hWnd)
 static BOOL FMCommit(void)
 {
 	BOOL rtn;
-	HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX);
+	HANDLE hCmd = GSSiGlobAlloc(GAIDNO 1796, GMEM_MOVEABLE, USHRT_MAX);
 	LPSTR  pCmd = GlobalLock(hCmd);
 	char *error = NULL;
 
@@ -465,7 +465,7 @@ static BOOL FMScan(HWND hWndDlg)
 };
 static void ListFMSavedFiles(HWND hWndDlg)
 {
-	HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, 4096);
+	HANDLE hCmd = GSSiGlobAlloc(GAIDNO 1796, GMEM_MOVEABLE, 4096);
 	LPSTR  pCmd = GlobalLock(hCmd);
 	char *error = NULL;
 	char str[MAX_ENTRY];

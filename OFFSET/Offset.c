@@ -1672,7 +1672,7 @@ BOOL OffsetHighlightedLines (int NumPoints,HANDLE hPoints, double Dist)
   
   lpA->NumPts = (UINT)NumPoints * 2 - 2;
   size = (long)sizeof(DLine)*(long)(lpA->NumPts+1); 
-  heap_ptr = GSSiGlobAlloc ( 326, GHND, size); 
+  heap_ptr = GSSiGlobAlloc(GAIDNO 326, GHND, size); 
   lpA->lpDLineBase = (lpDLine) GlobalLock(heap_ptr);
   lpLda = lpA->lpDLineBase; 
   lpDpoint = (HPDPOINT)GlobalLock (hPoints);
@@ -1770,7 +1770,7 @@ GSSiExitProg (715);
   	NumCrvPts = 0;	
   size = (long)sizeof(POINT)*((long)OutArea->NumSides + NumCrvPts + 10);
   heap_ptr = NULL; 
-  heap_ptr = GSSiGlobAlloc ( 327, GHND, size); 
+  heap_ptr = GSSiGlobAlloc(GAIDNO 327, GHND, size); 
   lpPoint = (HPPOINT) GlobalLock(heap_ptr);
   lpPoly = lpPoint; 
   
@@ -1808,7 +1808,7 @@ GSSiExitProg (715);
 		     TestPoint  = BasePtToWinPt(&BasePoint);
 		  }
 		  {
-			  HANDLE hDP = GSSiGlobAlloc (0,GMEM_MOVEABLE,USHRT_MAX);
+			  HANDLE hDP = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,USHRT_MAX);
 			  LPDPOINT	 pPointD = GlobalLock (hDP);
 			  long	ndp=0;
               st =  CURVPLT(OutArea->Lines, &ndp,  &pPointD);
@@ -1825,7 +1825,7 @@ GSSiExitProg (715);
    lpPoint = lpPoly;
    np++;
                      
-    hDPoints = GSSiGlobAlloc ( 328,GMEM_MOVEABLE,(long)np*sizeof(DPOINT));
+    hDPoints = GSSiGlobAlloc(GAIDNO 328,GMEM_MOVEABLE,(long)np*sizeof(DPOINT));
     lpDPoints = (HPDPOINT)GlobalLock (hDPoints);
     for (i=0;i<np;i++,lpPoint++,lpDPoints++)
 		*lpDPoints = WinPtToBasePt(*lpPoint);
@@ -2013,7 +2013,7 @@ HANDLE OffsetPickedArea2 (int Item, double Dist,LPLONG pNumPoints)
             lpA->NumPts = nPnts ; 
  		  lpDpoint = (HPDPOINT)GlobalLock (hPoly);
           size = (long)sizeof(DLine)*(long)(lpA->NumPts); 
-          heap_ptr = GSSiGlobAlloc ( 324, GMEM_MOVEABLE, size); 
+          heap_ptr = GSSiGlobAlloc(GAIDNO 324, GMEM_MOVEABLE, size); 
           lpA->lpDLineBase = (lpDLine) GlobalLock(heap_ptr);
           lpLda = lpA->lpDLineBase; 
           lpDNext = lpDpoint + 1;
@@ -2090,7 +2090,7 @@ GSSiExitProg (714);
 		  }
 		  else
 		  	NumCrvPts = 0;	
-          hDPoints = GSSiGlobAlloc ( 325,GMEM_MOVEABLE,(long)USHRT_MAX*sizeof(DPOINT));
+          hDPoints = GSSiGlobAlloc(GAIDNO 325,GMEM_MOVEABLE,(long)USHRT_MAX*sizeof(DPOINT));
           lpDPoints = (HPDPOINT)GlobalLock (hDPoints);
           OutArea->Lines = lpLineBase + 1;   
           

@@ -88,7 +88,7 @@ HWND	TraceWnd2=0;
 
 void DoTCPTrace (int InOut,LPSTR str,int len)
 {
-	HANDLE hStr = GSSiGlobAlloc (0,GHND,len*5+3);
+	HANDLE hStr = GSSiGlobAlloc(GAIDNO 0,GHND,len*5+3);
 	LPSTR  pStr = GlobalLock (hStr);
 	int		i,j=2;
 	char	str2[32];
@@ -396,7 +396,7 @@ BOOL FAR PASCAL VEHICLE_TIMEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, L
 			SetScrollPos(GetDlgItem(hWndDlg,IDC_SCROLLTIME), SB_CTL,CurReplayPos, TRUE);
 			pCommand = GlobalLock (hSocketProcessString[0]);
 			lTmp = strlen (pCommand);
-			hTmp = GSSiGlobAlloc (0,GMEM_MOVEABLE,lTmp+1);
+			hTmp = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,lTmp+1);
 			pTmp = GlobalLock (hTmp);
 			strcpy (pTmp,pCommand);
 			GlobalUnlock (hSocketProcessString[0]);
@@ -727,7 +727,7 @@ BOOL RestartSocket (SOCKET sock)
     	int lMacro = _fstrlen (pRestartString);   
     	if (lMacro)
     	{
-    		HANDLE	hMacro = GSSiGlobAlloc (0,GMEM_MOVEABLE,lMacro+1);   
+    		HANDLE	hMacro = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,lMacro+1);   
     		LPSTR	pMacro = GlobalLock (hMacro);
     		_fstrcpy (pMacro,pRestartString);  
 			GlobalUnlock (hSocketRestartString[i]);
@@ -854,7 +854,7 @@ BOOL SetupSocketTimer (SOCKET socket,long Seconds,LPSTR TimerString)
 		SocketTimerDelay[i] = Seconds * 1000;    
 		l = _fstrlen (TimerString);
 		GSSiGlobFree (&hSocketTimerString[i]);
-		hSocketTimerString[i] = GSSiGlobAlloc (1738,GMEM_MOVEABLE,l+1);
+		hSocketTimerString[i] = GSSiGlobAlloc(GAIDNO 1738,GMEM_MOVEABLE,l+1);
 		pString = GlobalLock (hSocketTimerString[i]); 
 		_fstrcpy (pString,TimerString);
 		GlobalUnlock (hSocketTimerString[i]);   
@@ -990,7 +990,7 @@ Restart:
     			int lMacro = _fstrlen (pRestartString);   
     			if (lMacro)
     			{
-    				HANDLE	hMacro = GSSiGlobAlloc (0,GMEM_MOVEABLE,lMacro+1);   
+    				HANDLE	hMacro = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,lMacro+1);   
     				LPSTR	pMacro = GlobalLock (hMacro);
     				_fstrcpy (pMacro,pRestartString);  
 					GlobalUnlock (hSocketRestartString[i]);
@@ -1418,7 +1418,7 @@ GotID:
 	}
 
 	err = WSAAsyncSelect (OpenSockets[i],hWnd,GF_TCPIPMESSAGE,FD_READ|FD_CLOSE);
-	hSocketBuffer[i] = GSSiGlobAlloc (0,GHND,MAX_SOCKET_BUFFER_SIZE);  
+	hSocketBuffer[i] = GSSiGlobAlloc(GAIDNO 0,GHND,MAX_SOCKET_BUFFER_SIZE);  
 	if (UpdateServer)
 	{
 		LenSocketInputTerminator[i] = 1;
@@ -1480,7 +1480,7 @@ GotID:
 	OpenSockethWnd[i] = hWnd;
 	if (Notify)
 		err = WSAAsyncSelect (sock,hWnd,GF_TCPIPMESSAGE,FD_READ|FD_CLOSE);
-	hSocketBuffer[i] = GSSiGlobAlloc (0,GHND,MAX_SOCKET_BUFFER_SIZE);  
+	hSocketBuffer[i] = GSSiGlobAlloc(GAIDNO 0,GHND,MAX_SOCKET_BUFFER_SIZE);  
 	_fstrcpy (SocketInputTerminator[i],InputTerminator);   
 	LenSocketInputTerminator[i] = _fstrlen (SocketInputTerminator[i]);
 	if (InputProcessString)
@@ -1490,7 +1490,7 @@ GotID:
 		l=_fstrlen (InputProcessString);
 		if (l)
 		{
-			hSocketProcessString[i] = GSSiGlobAlloc (1749,GMEM_MOVEABLE,l+1);
+			hSocketProcessString[i] = GSSiGlobAlloc(GAIDNO 1749,GMEM_MOVEABLE,l+1);
 			pString = GlobalLock (hSocketProcessString[i]); 
 			_fstrcpy (pString,InputProcessString);
 			GlobalUnlock (hSocketProcessString[i]);   
@@ -1503,7 +1503,7 @@ GotID:
 		l=_fstrlen (CloseProcessString);
 		if (l)
 		{
-			hSocketCloseString[i] = GSSiGlobAlloc (1750,GMEM_MOVEABLE,l+1);
+			hSocketCloseString[i] = GSSiGlobAlloc(GAIDNO 1750,GMEM_MOVEABLE,l+1);
 			pString = GlobalLock (hSocketCloseString[i]); 
 			_fstrcpy (pString,CloseProcessString);
 			GlobalUnlock (hSocketCloseString[i]);   
@@ -1516,7 +1516,7 @@ GotID:
 		l=_fstrlen (RestartProcessString);
 		if (l)
 		{
-			hSocketRestartString[i] = GSSiGlobAlloc (1751,GMEM_MOVEABLE,l+1);
+			hSocketRestartString[i] = GSSiGlobAlloc(GAIDNO 1751,GMEM_MOVEABLE,l+1);
 			pString = GlobalLock (hSocketRestartString[i]); 
 			_fstrcpy (pString,RestartProcessString);
 			GlobalUnlock (hSocketRestartString[i]);   
@@ -1709,7 +1709,7 @@ BOOL StartBackgroundFileSend (LPSTR FilePath,LONGLONG StartLoc,SOCKET sock)
 	u_long	iMode=0;
 
 	
-	hArgs = GSSiGlobAlloc (9999,GMEM_MOVEABLE,MAX_PATH*4);
+	hArgs = GSSiGlobAlloc(GAIDNO 9999,GMEM_MOVEABLE,MAX_PATH*4);
 	arg1=GlobalLock (hArgs);
 	arg2=arg1+MAX_PATH;
 	arg3=arg2+MAX_PATH;
@@ -1979,7 +1979,7 @@ Top:
 				SetGlobalValue ("%TCPINPUT",Cmd);
 				pCommand = GlobalLock (hSocketProcessString[i]);
 				lTmp = strlen (pCommand);
-				hTmp = GSSiGlobAlloc (0,GMEM_MOVEABLE,lTmp+1);
+				hTmp = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,lTmp+1);
 				pTmp = GlobalLock (hTmp);
 				strcpy (pTmp,pCommand);
 				GlobalUnlock (hSocketProcessString[i]);
@@ -1998,7 +1998,7 @@ Top:
 				*CmdMess = 0;  
 				GlobalUnlock (hCmdMess);
 				{
-					HANDLE	hCmd = GSSiGlobAlloc (0,GMEM_MOVEABLE,lCmd+1);   
+					HANDLE	hCmd = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,lCmd+1);   
 					LPSTR	pCmd = GlobalLock ((HANDLE)hCmd);
 
 					strcpy (pCmd,Cmd);  
@@ -2166,7 +2166,7 @@ BOOL DeleteFileTransferRecord (long ID)
 
 BOOL RequestNextFileTransferSegment (long ID,SOCKET socket)
 {
-	HANDLE	hStr=GSSiGlobAlloc (0,GMEM_MOVEABLE,1024);
+	HANDLE	hStr=GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,1024);
 	LPSTR	str=GlobalLock (hStr);   
 	long	Len=MAX_FT_SEG_SIZE;
 	
@@ -2187,7 +2187,7 @@ BOOL ServerFile (LPSTR Option,SOCKET socket,LPSTR ServerFile,LPSTR Arg1,LPSTR Ar
 	MSG	msg;   
 	UINT	WaitSeconds=20;      
 	short	rtn=0;  
-	HANDLE	hStr=GSSiGlobAlloc (0,GMEM_MOVEABLE,1024);
+	HANDLE	hStr=GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,1024);
 	LPSTR	str=GlobalLock (hStr);   
 	long	FileTransferRequestID; 
 	DWORD	Flen, Loc;
@@ -2254,7 +2254,7 @@ BOOL ServerFile (LPSTR Option,SOCKET socket,LPSTR ServerFile,LPSTR Arg1,LPSTR Ar
 		}   
 		else
 		{   
-			hSegRec = GSSiGlobAlloc (0,GMEM_MOVEABLE,SegLen);
+			hSegRec = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,SegLen);
 			pRec = GlobalLock (hSegRec);
 			GSSillseek (Fid,Loc,0);
 			BigRead (Fid,pRec,SegLen); 
@@ -2322,7 +2322,7 @@ BOOL ProcessFTSegment (SOCKET socket,long ID,LPBYTE pSeg,short SegLen)
     		lMacro = _fstrlen (FTRecord.CompletionMacro);   
     		if (lMacro)
     		{
-    			hMacro = GSSiGlobAlloc (0,GMEM_MOVEABLE,lMacro+1);   
+    			hMacro = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,lMacro+1);   
     			pMacro = GlobalLock (hMacro);
     			_fstrcpy (pMacro,FTRecord.CompletionMacro);  
     			GlobalUnlock (hMacro);  

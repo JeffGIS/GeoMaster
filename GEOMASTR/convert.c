@@ -15,7 +15,7 @@ BOOL ConvertThemeV0toV1 (LPTHEME_V1 pTheme32,LPTHEME_v0 pTheme_v0)
 		{
 		    LPSTREETTEXTDATA	pStreetData=(LPSTREETTEXTDATA)pTheme_v0->ClassBM,pSDSave;   
 		    
-		    hSave = GSSiGlobAlloc (1139,GMEM_MOVEABLE,sizeof(STREETTEXTDATA));
+		    hSave = GSSiGlobAlloc(GAIDNO 1139,GMEM_MOVEABLE,sizeof(STREETTEXTDATA));
 		    pSDSave = (LPSTREETTEXTDATA)GlobalLock(hSave);
 		    *pSDSave = *pStreetData;
 		    GlobalUnlock (hSave);
@@ -26,7 +26,7 @@ BOOL ConvertThemeV0toV1 (LPTHEME_V1 pTheme32,LPTHEME_v0 pTheme_v0)
 		{
 			LPBOUNDSDISPLAY lpBoundsDisplay=(LPBOUNDSDISPLAY)&pTheme_v0->ClassBM, pBDSave; 
 
-		    hSave = GSSiGlobAlloc (1140,GMEM_MOVEABLE,sizeof(BOUNDSDISPLAY));
+		    hSave = GSSiGlobAlloc(GAIDNO 1140,GMEM_MOVEABLE,sizeof(BOUNDSDISPLAY));
 		    pBDSave = (LPBOUNDSDISPLAY)GlobalLock(hSave);
 		    *pBDSave = *lpBoundsDisplay;
 		    GlobalUnlock (hSave);

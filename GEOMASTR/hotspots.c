@@ -280,7 +280,7 @@ void DisplayHotSpotThemeLegend(short From)
     {   
     	pMask = (HPSHORT)GlobalLock (pHSData->hMask);
     	pMask += (long)pHSData->MaskWidth/2 * (long)pHSData->MaskWidth;  
-    	hPoints = GSSiGlobAlloc (0,GMEM_MOVEABLE,sizeof(POINT)*w);
+    	hPoints = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,sizeof(POINT)*w);
     	Points = (LPPOINT)GlobalLock (hPoints);
     	j=0;  
     	factor =  (double)pHSData->MaskWidth/w; 
@@ -340,7 +340,7 @@ BOOL SetHotSpotMaskWidth(LPHOTSPOTDATA	pHSData)
 	HotSpotPoint[0] = TranPoint(&dp1, pHSData->hTranBaseToHotSpot);
 	HotSpotPoint[1] = TranPoint(&dp2, pHSData->hTranBaseToHotSpot);
 	pHSData->MaskWidth = max(1, ldistp(HotSpotPoint[0], HotSpotPoint[1]));
-	pHSData->hMask = GSSiGlobAlloc(1024, GMEM_MOVEABLE, (long)pHSData->MaskWidth * (long)pHSData->MaskWidth * 4);
+	pHSData->hMask = GSSiGlobAlloc(GAIDNO 1024, GMEM_MOVEABLE, (long)pHSData->MaskWidth * (long)pHSData->MaskWidth * 4);
 	SetupHotSpotMask(pHSData->MaskWidth, pHSData->hMask, pHSData->DecayOpt);
 
 	return TRUE;
@@ -490,7 +490,7 @@ void AddItemToHotSpot (int Type)
 			Weight = atof (CWeight);
 			HaveWeight = TRUE;
 		}	
-		hPoints = GSSiGlobAlloc (0,GMEM_MOVEABLE,(long)nPnts * (long)sizeof(DPOINT));
+		hPoints = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,(long)nPnts * (long)sizeof(DPOINT));
 		pArea = (HPDPOINT)GlobalLock (hPoints); 
 		for (i=0;i<nPnts;i++)
 		{
@@ -726,11 +726,11 @@ GSSiExitProg (1322);
 #endif
 		return FALSE;	
 }
-	handle = GSSiGlobAlloc (1334,GMEM_MOVEABLE,sizeof(HOTSPOTDATA));
+	handle = GSSiGlobAlloc(GAIDNO 1334,GMEM_MOVEABLE,sizeof(HOTSPOTDATA));
 	pHSData = (LPHOTSPOTDATA)GlobalLock (handle);  
 	BigRead (Fid,(HPSTR)pHSData,sizeof(HOTSPOTDATA));
 	GridSize =  (long)pHSData->GridWidth * (long)pHSData->GridHeight * 4;   
-	pHSData->hGrid = GSSiGlobAlloc (1335,GMEM_MOVEABLE,GridSize);
+	pHSData->hGrid = GSSiGlobAlloc(GAIDNO 1335,GMEM_MOVEABLE,GridSize);
 	pGrid =  (HPLONG)GlobalLock (pHSData->hGrid); 
 	BigRead (Fid,(HPSTR)pGrid,GridSize);   
 	GlobalUnlock (pHSData->hGrid);

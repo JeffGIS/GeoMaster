@@ -531,9 +531,9 @@ BOOL BT_CREATE (LPSTR FNAME, int DATLEN, BOOL DATED, int NVARIn, int NVAR2,
 //      READ_SECIDX = FALSE;
       for (i=0,pBtVarDesc=pVarDesc,keylen=0;i<NVAR;pBtVarDesc++,i++)
           keylen += pBtVarDesc->BT_VARLEN;
-      hBTree = GSSiGlobAlloc ( 100,GHND,sizeof(BTREE) + (MAX_BTREE_LEVELS * 2 + 2) * keylen);
+      hBTree = GSSiGlobAlloc(GAIDNO 100,GHND,sizeof(BTREE) + (MAX_BTREE_LEVELS * 2 + 2) * keylen);
       pBTree = (LPBTREE)GlobalLock(hBTree);
-      //pBTree->hBT_HEAD = GSSiGlobAlloc ( 101,GHND,1024);
+      //pBTree->hBT_HEAD = GSSiGlobAlloc(GAIDNO 101,GHND,1024);
       //BT_HEAD = (LPBTHEAD)GlobalLock(pBTree->hBT_HEAD);
       pBTree->BT_HEAD.BT_HEADLEN = /*sizeof(BTHEAD)+(NVAR-1)*sizeof(BTVARDESC);*/ 1024;
       /*BT_HEAD = MS_$CRMAPL (FNAME,FNLEN,32,1024,MS_$COWRITERS,ST)
@@ -705,7 +705,7 @@ HGLOBAL BT_OPEN (LPSTR FNAME, time_t TIME, int ACCESS, int DATE)
       //BT_UPDATE   = TRUE;
       //READ_SECIDX = FALSE;
 
-      hBTHEADER = GSSiGlobAlloc ( 102,GHND,1024);
+      hBTHEADER = GSSiGlobAlloc(GAIDNO 102,GHND,1024);
       BT_HEAD = (LPBTHEAD)GlobalLock(hBTHEADER);
 	  if (!ACCESS)
 	      Fid = GSSiOpenFile (FNAME,(LPOFSTRUCTGM) &OFStruct,OF_READ);
@@ -716,7 +716,7 @@ HGLOBAL BT_OPEN (LPSTR FNAME, time_t TIME, int ACCESS, int DATE)
 	  {   
 		 if (OFStruct.nErrCode>3)
 		 {  
-		 	HANDLE	hMess=GSSiGlobAlloc ( 103,GMEM_MOVEABLE,512);
+		 	HANDLE	hMess=GSSiGlobAlloc(GAIDNO 103,GMEM_MOVEABLE,512);
 		 	LPSTR	pMess=GlobalLock (hMess);
 			sprintf (pMess,"Error number %i on open (mode %i) in BT_OPEN",
 					 (int)OFStruct.nErrCode,ACCESS);
@@ -736,7 +736,7 @@ HGLOBAL BT_OPEN (LPSTR FNAME, time_t TIME, int ACCESS, int DATE)
       	goto Error;
       ii = BigRead (Fid,(LPSTR)BT_HEAD,1024); 
       BT_HEAD->BT_HEADLEN =1024;
-      hBTree = GSSiGlobAlloc ( 104,GHND,sizeof(BTREE) +
+      hBTree = GSSiGlobAlloc(GAIDNO 104,GHND,sizeof(BTREE) +
       				       (MAX_BTREE_LEVELS * 2 + 2) * BT_HEAD->BT_KEYLEN);
       pBTree = (LPBTREE)GlobalLock(hBTree);
 	  pBTree->BT_HEAD = *BT_HEAD;
@@ -791,7 +791,7 @@ BOOL BT_ALLOCATE_BUFFERS(LPBTREE pBTree)
 	  if (pBTree->BT_HEAD.BT_BLKSIZE)
 	  {
 		  NumBTBuffers = 64000L / pBTree->BT_HEAD.BT_BLKSIZE;
-		  pBTree->hBT_BLOCK = GSSiGlobAlloc ( 105,GHND,
+		  pBTree->hBT_BLOCK = GSSiGlobAlloc(GAIDNO 105,GHND,
       			   2 + 4 + (long)pBTree->BT_HEAD.BT_BLKSIZE * NumBTBuffers + 2 + 2 + 4 + sizeof (BTBUFINDEX) * NumBTBuffers);
 
 
@@ -1037,7 +1037,7 @@ BOOL BT_CLOSEANDDELETE (LPHANDLE pIBTID)
 #endif
 { 
 	LPBTREE	pBTree;
-	HANDLE	hmem=GSSiGlobAlloc ( 106,GMEM_MOVEABLE,256);
+	HANDLE	hmem=GSSiGlobAlloc(GAIDNO 106,GMEM_MOVEABLE,256);
 	LPSTR	DeleteName=GlobalLock (hmem);
 	
 	if (!*pIBTID)
@@ -1142,7 +1142,7 @@ GSSiExitProg (478);
       ST = 0;
 	  if (TraceOn)
       {
-      	HANDLE	hmem=GSSiGlobAlloc ( 107,GMEM_MOVEABLE,256);
+      	HANDLE	hmem=GSSiGlobAlloc(GAIDNO 107,GMEM_MOVEABLE,256);
       	LPSTR	str=GlobalLock (hmem);
 	  	sprintf (str,"Close BTree: %s  ID: %ld",pBTree->BT_FNAME,(long)IBTID);
 	  	GSSiTrace(str,0); 
@@ -1279,7 +1279,7 @@ GSSiExitProg (480);
 }
 	if (!*SmallName)
 		GSSiGetTempFileName (0,"GMS",0,(LPSTR)SmallName);
-	hMem = GSSiGlobAlloc(108, GMEM_MOVEABLE, sizeof(OFSTRUCTGM));
+	hMem = GSSiGlobAlloc(GAIDNO 108, GMEM_MOVEABLE, sizeof(OFSTRUCTGM));
 	pOFStruct = (LPOFSTRUCTGM)GlobalLock (hMem);	
 //   	FidSmall = OpenFile (SmallName,pOFStruct,OF_CREATE);
    	FidSmall = _open (SmallName,_O_CREAT,_S_IREAD | _S_IWRITE);
@@ -1507,7 +1507,7 @@ GSSiExitProg (487);
 	  	{
 	  		CheckSecIndexEQ = TRUE;
 	  		COND = BT_GE; 
-	  		hInKey = GSSiGlobAlloc (0,GMEM_MOVEABLE,pBTree->BT_HEAD.BT_KYLEN);
+	  		hInKey = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,pBTree->BT_HEAD.BT_KYLEN);
 	  		InKey = GlobalLock (hInKey);
 	  		_fmemmove (InKey,KEY,pBTree->BT_HEAD.BT_KYLEN);
 	  	}
@@ -2453,7 +2453,7 @@ S110:     if (pBTree->POS.POSB == 1 && pBTree->CI_PNT->LASTCI != BT_NIL)
           pBTree->CI_PNT->LNCI = pBTree->BT_HEAD.SPLIT_DAT_1;
           IB     = pBTree->BT_HEAD.SPLIT_DAT_1 * pBTree->BT_HEAD.BT_RECLEN + 1;
           LN     = pBTree->BT_HEAD.SPLIT_DAT_2 * pBTree->BT_HEAD.BT_RECLEN; 
-          hSAVE_AREA = GSSiGlobAlloc ( 109,GMEM_MOVEABLE,pBTree->BT_HEAD.CI_LENGTH_2);
+          hSAVE_AREA = GSSiGlobAlloc(GAIDNO 109,GMEM_MOVEABLE,pBTree->BT_HEAD.CI_LENGTH_2);
           SAVE_AREA = GlobalLock (hSAVE_AREA);
           _fmemmove (SAVE_AREA,IADDR((LPSTR)&pBTree->CI_PNT->CIDATA,IB),(UINT)LN);
           SNEXT  = pBTree->CI_PNT->NEXTCI;
@@ -2663,7 +2663,7 @@ void PROPAGATE_SPLIT(LPBTREE pBTree)
 S10:  if (pBTree->CI_PNT->UPCI == BT_NIL)
 	  {
           UMDB_WRITE_JOURNAL (pBTree,TRUE);
-          hSAVE_AREA = GSSiGlobAlloc ( 110,GMEM_MOVEABLE,(pBTree->BT_HEAD.BT_PNTLEN-4));
+          hSAVE_AREA = GSSiGlobAlloc(GAIDNO 110,GMEM_MOVEABLE,(pBTree->BT_HEAD.BT_PNTLEN-4));
           SAVE_AREA = GlobalLock (hSAVE_AREA);
           _fmemmove (SAVE_AREA,
           			 (LPSTR)&pBTree->INDEX_ITEM_PNT->INDEX_ENTRY,
@@ -2774,7 +2774,7 @@ GSSiExitProg (504);
           pBTree->CI_PNT->LNCI   = pBTree->BT_HEAD.SPLIT_PNT_1;
           IB     = pBTree->BT_HEAD.SPLIT_PNT_1 * pBTree->BT_HEAD.BT_PNTLEN + 1;
           LN     = pBTree->BT_HEAD.SPLIT_PNT_2 * pBTree->BT_HEAD.BT_PNTLEN;
-          hSAVE_AREA = GSSiGlobAlloc ( 111,GMEM_MOVEABLE,pBTree->BT_HEAD.CI_LENGTH_2);
+          hSAVE_AREA = GSSiGlobAlloc(GAIDNO 111,GMEM_MOVEABLE,pBTree->BT_HEAD.CI_LENGTH_2);
           SAVE_AREA = GlobalLock (hSAVE_AREA);
           _fmemmove(SAVE_AREA,IADDR(&pBTree->CI_PNT->CIDATA,IB),(size_t)LN);
           SNEXT  = pBTree->CI_PNT->NEXTCI;
@@ -3047,7 +3047,7 @@ int BT_DELETE_internal(LPBTREE pBTree,LPSTR KEY,LPSTR DATA,BOOL SECIDX)
 	      LPSTR	PROP_KEY; 
 	      HANDLE hPROP_KEY;
 	      
-	 	  hPROP_KEY = GSSiGlobAlloc ( 112,GMEM_MOVEABLE,256);
+	 	  hPROP_KEY = GSSiGlobAlloc(GAIDNO 112,GMEM_MOVEABLE,256);
 	 	  PROP_KEY = GlobalLock (hPROP_KEY);
           UMDB_WRITE_JOURNAL (pBTree,TRUE);
           pBTree->CI_PNT->LNCI = pBTree->CI_PNT->LNCI - 1;
@@ -3171,7 +3171,7 @@ GSSiExitProg (509);
       {   LPSTR KEY;
       	  HANDLE hKEY;
       	  
-      	  hKEY = GSSiGlobAlloc ( 113,GMEM_MOVEABLE,256);
+      	  hKEY = GSSiGlobAlloc(GAIDNO 113,GMEM_MOVEABLE,256);
       	  KEY = GlobalLock(hKEY);
           UMDB_WRITE_JOURNAL (pBTree,TRUE);
           LN = pBTree->CI_PNT->LNCI * pBTree->BT_HEAD.BT_PNTLEN;
@@ -3278,9 +3278,9 @@ GSSiExitProg (511);
 	hBT2 = BT_OPEN (NewName, 0, BT_WRITE, 0); 
 	pos = BT_FIRST;
 	Done = 0; 
-	hKey  = GSSiGlobAlloc ( 114,GHND,1024);
+	hKey  = GSSiGlobAlloc(GAIDNO 114,GHND,1024);
 	pKey = GlobalLock (hKey);
-	hData  = GSSiGlobAlloc ( 115,GHND,1024);
+	hData  = GSSiGlobAlloc(GAIDNO 115,GHND,1024);
 	pData = GlobalLock (hData);    
 	TotRecs = pBTree->BT_HEAD.BT_NUMRECS;
 	while (ContinueProcessing && !BT_FIND (hBT,pKey,pos,BT_ANY,pData))
@@ -3345,7 +3345,7 @@ GSSiExitProg (512);
 }
     if (!pBTree->BT_HEAD.TrackCount)
     	goto Exit; 
-    hMem = GSSiGlobAlloc ( 116,GMEM_MOVEABLE,pBTree->BT_HEAD.BT_KEYLEN+pBTree->BT_HEAD.BT_DATLEN);
+    hMem = GSSiGlobAlloc(GAIDNO 116,GMEM_MOVEABLE,pBTree->BT_HEAD.BT_KEYLEN+pBTree->BT_HEAD.BT_DATLEN);
     pKey = GlobalLock (hMem);
     pData = pKey + pBTree->BT_HEAD.BT_KEYLEN;
     if (BT_FIND_internal (pBTree,pKey, BT_FIRST, BT_ANY, pData, &LASTRC) == BT_NOT_FOUND)
@@ -3510,7 +3510,7 @@ HANDLE BT_FormKey(HANDLE hKeyList, LPSTR val)
 	{
 		LPBTVARDESC pFldInfo = &btHead.BT_VARDESC;
 
-		hKey = GSSiGlobAlloc(0, GMEM_MOVEABLE, btHead.BT_KEYLEN + 2);
+		hKey = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, btHead.BT_KEYLEN + 2);
 		pKey = GlobalLock(hKey);
 		for (i = 0; i < btHead.BT_NVARS; i++, pFldInfo++)
 		{

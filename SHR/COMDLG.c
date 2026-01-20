@@ -1224,7 +1224,7 @@ LPSTR AllocAndLockMem (HANDLE *hChunk, WORD wSize)
 {
    LPSTR lpChunk;
 
-   *hChunk = GSSiGlobAlloc ( 117,GHND, wSize);
+   *hChunk = GSSiGlobAlloc(GAIDNO 117,GHND, wSize);
    if (*hChunk)
    {
       lpChunk = GlobalLock(*hChunk);

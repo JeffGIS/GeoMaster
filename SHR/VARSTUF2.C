@@ -478,7 +478,7 @@ BOOL GetTXTUniqueFieldValues (HANDLE hDB, LPSTR SQL,LPSTR FldName,short FieldLen
 	LPOPENSQLDATA	SQLPtr;
 	LPFIELDINFO	lpFieldInfo;
 	LPOPENFILEDATA	FilePtr;
-	HANDLE	hMem=GSSiGlobAlloc (0,GMEM_MOVEABLE,4096+2048);
+	HANDLE	hMem=GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,4096+2048);
 	LPSTR	str=GlobalLock (hMem); 
 	LPSTR	Value = str+4096;
 	LPSTR	pSQL = Value + 512;
@@ -547,16 +547,16 @@ BOOL GetFieldIDsFromNames(LPSTR DBName, LPHANDLE phFieldIDs, LPHANDLE phFieldTyp
 		return TRUE;
     if (!OpenDataFile (DBName,"",BT_READ,&hDB))
     	return FALSE;
-	hMem = GSSiGlobAlloc (0,GMEM_MOVEABLE,lMem);
+	hMem = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,lMem);
 	FieldList = GlobalLock (hMem);
 	strcpy (FieldList,FieldListIN);
     SQLPtr = (LPOPENSQLDATA)GlobalLock (hDB);
     FilePtr = (LPOPENFILEDATA)GlobalLock (SQLPtr->OFHandle);
-    *phFieldIDs = GSSiGlobAlloc ( 243,GHND,USHRT_MAX);
+    *phFieldIDs = GSSiGlobAlloc(GAIDNO 243,GHND,USHRT_MAX);
     if (phFieldTypes)
     {
     	if (!*phFieldTypes)
-    		*phFieldTypes = GSSiGlobAlloc ( 243,GHND,USHRT_MAX); 
+    		*phFieldTypes = GSSiGlobAlloc(GAIDNO 243,GHND,USHRT_MAX); 
     	pFieldTypes = (LPGWFLDINFO)GlobalLock (*phFieldTypes);
 		while (*pFieldTypes->Name)
 		{
@@ -590,7 +590,7 @@ BOOL GetFieldIDsFromNames(LPSTR DBName, LPHANDLE phFieldIDs, LPHANDLE phFieldTyp
 					{
 						int id = 1;
 						if (!*phValues)
-							*phValues = GSSiGlobAlloc(1791, GHND, USHRT_MAX);
+							*phValues = GSSiGlobAlloc(GAIDNO 1791, GHND, USHRT_MAX);
 						pHandle = GlobalLock(*phValues);
 						while (*pHandle)
 						{
@@ -599,7 +599,7 @@ BOOL GetFieldIDsFromNames(LPSTR DBName, LPHANDLE phFieldIDs, LPHANDLE phFieldTyp
 						}
 						pFieldTypes->ValueID = id;
 						ln = strlen(pEq);
-						*pHandle = GSSiGlobAlloc(1792, GMEM_MOVEABLE, ln + 1);
+						*pHandle = GSSiGlobAlloc(GAIDNO 1792, GMEM_MOVEABLE, ln + 1);
 						pValue = GlobalLock(*pHandle);
 						strcpy(pValue, pEq);
 						GlobalUnlock(*pHandle);
@@ -759,7 +759,7 @@ BOOL ProcessMacroFile (LPSTR Name,LPSTR RtnVal,LPHANDLE phArgs,short NumArgs)
 {GSSiEnterProg (608);
 #endif
 {   
-	HANDLE	hSTR=GSSiGlobAlloc ( 244,GMEM_MOVEABLE,4096+USHRT_MAX);
+	HANDLE	hSTR=GSSiGlobAlloc(GAIDNO 244,GMEM_MOVEABLE,4096+USHRT_MAX);
 	LPSTR	str = GlobalLock (hSTR);
     LPSTR	RtnValue=&str[4096];   
 	HANDLE	hMacro = 0, hTemp=0;
@@ -815,7 +815,7 @@ BOOL ProcessMacroFile (LPSTR Name,LPSTR RtnVal,LPHANDLE phArgs,short NumArgs)
 		//Sleep(5000);
 	    if (!_fstricmp (Name,"INLINE"))
 	    {
-			hMacro = GSSiGlobAlloc ( 245,GMEM_MOVEABLE,USHRT_MAX);
+			hMacro = GSSiGlobAlloc(GAIDNO 245,GMEM_MOVEABLE,USHRT_MAX);
 	    	pMacro = GlobalLock (hMacro);
 	    	*pMacro = 0;
 	    	if (phArgs)
@@ -828,7 +828,7 @@ BOOL ProcessMacroFile (LPSTR Name,LPSTR RtnVal,LPHANDLE phArgs,short NumArgs)
 	    		_fstrcpy (pMacro,pStr);
 	    		pStr += 4096; 
 	    		l -= 4096;
-	    		hNewArgs=GSSiGlobAlloc ( 246,GMEM_MOVEABLE,l);
+	    		hNewArgs=GSSiGlobAlloc(GAIDNO 246,GMEM_MOVEABLE,l);
 				pNewArgs = GlobalLock (hNewArgs);
                 _fmemmove (pNewArgs,pStr,(size_t)l);
 	    		GSSiGlobUlFree (phArgs);
@@ -885,12 +885,12 @@ BOOL ProcessMacroFile (LPSTR Name,LPSTR RtnVal,LPHANDLE phArgs,short NumArgs)
 			{
 				i = OldestID;
 				GSSiGlobFree (&hBufferedMacros[i]);
-				hMacro = GSSiGlobAlloc(245, GMEM_MOVEABLE, lm + 1);
+				hMacro = GSSiGlobAlloc(GAIDNO 245, GMEM_MOVEABLE, lm + 1);
 				hBufferedMacros[i] = hMacro;
 			}
 			else 
 			{
-				hMacro = GSSiGlobAlloc ( 245,GMEM_MOVEABLE,lm+1); 
+				hMacro = GSSiGlobAlloc(GAIDNO 245,GMEM_MOVEABLE,lm+1); 
 				if (!GetDebug())
 				{
 					i = NumBufferedMacros++;
@@ -899,7 +899,7 @@ BOOL ProcessMacroFile (LPSTR Name,LPSTR RtnVal,LPHANDLE phArgs,short NumArgs)
 				else
 				{
 					DeleteMacro = TRUE;
-					hBreakPoints = GSSiGlobAlloc(2451, GHND, sizeof(BREAKPOINT)*(lm + 1));
+					hBreakPoints = GSSiGlobAlloc(GAIDNO 2451, GHND, sizeof(BREAKPOINT)*(lm + 1));
 					pBreakPoints = (LPBREAKPOINT)GlobalLock(hBreakPoints);
 					setMacroBrkPtHandle(macroID, hBreakPoints,lm);
 				}
@@ -932,7 +932,7 @@ BOOL ProcessMacroFile (LPSTR Name,LPSTR RtnVal,LPHANDLE phArgs,short NumArgs)
 	    }
 ProcessMacro:
 		lMacro = strlen (pMacro);
-		hTemp = GSSiGlobAlloc (1825,GMEM_MOVEABLE,lMacro+1);
+		hTemp = GSSiGlobAlloc(GAIDNO 1825,GMEM_MOVEABLE,lMacro+1);
 		pTemp = GlobalLock (hTemp);
 		strcpy (pTemp,pMacro);
 		pMacro = pTemp;
@@ -940,7 +940,7 @@ ProcessMacro:
     	SaveRtnPointer = pMacroReturnValue;
     	pMacroReturnValue = RtnValue;
     	*pMacroReturnValue = 0;
-		hCmd = GSSiGlobAlloc ( 247,GMEM_MOVEABLE,USHRT_MAX);
+		hCmd = GSSiGlobAlloc(GAIDNO 247,GMEM_MOVEABLE,USHRT_MAX);
 		pCmd = GlobalLock (hCmd);     
 		if (!*pMacro)
 	   		rtn = FALSE;
@@ -1056,7 +1056,7 @@ long ConvertPoint (LPSTR CvtFile,LPDPOINT Point,int Direction)
 	 LPSTR	lpDot, lpEnd;
 	 short	SaveUnits;
 	 long	rtn=0;
-	 HANDLE hMem = GSSiGlobAlloc (0,GMEM_MOVEABLE,1024);
+	 HANDLE hMem = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,1024);
 	 LPSTR	SaveProj=GlobalLock (hMem);
 	 LPSTR	project=SaveProj+512;
 	 BOOL	ProjChanged = FALSE, Err;
@@ -1301,7 +1301,7 @@ BOOL GetFieldTypeAndLenFromChar (LPSTR str,LPGWFLDINFO pGWFldInfo,LPHANDLE phSet
 			pEnd = MatchLev(pPar, ',');
 			if (pEnd)
 				*pEnd = 0;
-			*phSetClause = GSSiGlobAlloc (0,GMEM_MOVEABLE,1024);
+			*phSetClause = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,1024);
 			pSetClause = GlobalLock (*phSetClause);
 			_fstrcpy (pSetClause,pPar);
 			GlobalUnlock (*phSetClause);

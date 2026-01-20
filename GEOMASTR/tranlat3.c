@@ -38,7 +38,7 @@ double GetTextSizeInBounds (short nchar,double rot,LPMNMXCORD pBounds)
 
 void ConvertUMText (LPSTR Text,LPSHORT plTxt)
 {   
-	HANDLE	hNew=GSSiGlobAlloc ( 915,GHND,512);
+	HANDLE	hNew=GSSiGlobAlloc(GAIDNO 915,GHND,512);
 	LPSTR	NewText=GlobalLock(hNew);
 	LPSTR	pBeg, pEnd, pNew=NewText;
 	short	ii;
@@ -109,11 +109,11 @@ long ConvertAndTranCoord (LPDPOINT pDPoint,HANDLE hTranFile)
 BOOL ImportSSURGOTables (LPSTR CompFile,LPSTR CompGMD)
 {   
 	char	AttFile[128], TextFile[128];
-	HANDLE	hStr=GSSiGlobAlloc ( 920,GMEM_MOVEABLE,4096);  
+	HANDLE	hStr=GSSiGlobAlloc(GAIDNO 920,GMEM_MOVEABLE,4096);  
 	LPSTR	str=GlobalLock (hStr);
-	HANDLE	hVal=GSSiGlobAlloc ( 921,GMEM_MOVEABLE,4096);  
+	HANDLE	hVal=GSSiGlobAlloc(GAIDNO 921,GMEM_MOVEABLE,4096);  
 	LPSTR	vals=GlobalLock (hVal);
-	HANDLE	hLoc=GSSiGlobAlloc ( 922,GMEM_MOVEABLE,4096);  
+	HANDLE	hLoc=GSSiGlobAlloc(GAIDNO 922,GMEM_MOVEABLE,4096);  
 	LPSTR	*loc=(LPSTR*)GlobalLock (hLoc);
 	HFILE	Fid;
 	OFSTRUCTGM	OFStruct;
@@ -461,7 +461,7 @@ BOOL LoadTIN (LPSTR FromFile, LPSTR ToPlt)
     }
     CreateNewMap (ToPlt,&Bounds,0,NULL,0,NULL,0,0,TRUE);
     GSSillseek (FidTIN,0,0);   
-    hPoints = GSSiGlobAlloc ( 950,GMEM_MOVEABLE,4*sizeof(DPOINT3D));    
+    hPoints = GSSiGlobAlloc(GAIDNO 950,GMEM_MOVEABLE,4*sizeof(DPOINT3D));    
     TINSym =  GetDictSymbolNumber ("TINTRIANGLE");
 	AddToSymList (TINSym,&NumSyms,&hSymDesc); 
 	StatusWindowUpdate (NULL,"Loading Areas",TotLen,0);
@@ -537,7 +537,7 @@ BOOL CreateVideoPolys (LPSTR InFile,LPSTR PltFile)
 	    	short	rtn;
 	    	long	Refno;
 	    	int		nPoints=0;
-	    	HANDLE	hPoints=GSSiGlobAlloc ( 951,GMEM_MOVEABLE,(long)sizeof(DPOINT)*USHRT_MAX); 
+	    	HANDLE	hPoints=GSSiGlobAlloc(GAIDNO 951,GMEM_MOVEABLE,(long)sizeof(DPOINT)*USHRT_MAX); 
 			HPDPOINT	pPoints = (HPDPOINT)GlobalLock (hPoints);    
 
 		    fgetstring (str,256,Fid2);
@@ -599,7 +599,7 @@ BOOL OpenChronoIndex (LPSTR PName,LPMNMXCORD pMinMaxCoord)
 		goto Exit; 
 	rtn = TRUE;
 	nChronoFiles = 0;
-	hChronoIndex = GSSiGlobAlloc ( 952,GHND,USHRT_MAX);
+	hChronoIndex = GSSiGlobAlloc(GAIDNO 952,GHND,USHRT_MAX);
 	pChronoDir = GlobalLock (hChronoIndex);
 	sprintf (pChronoDir,"%s%s",Drive,Dir);
 	
@@ -750,7 +750,7 @@ HANDLE ReversePoints (long NumPoints,HANDLE hPoints)
 	
 	if (!NumPoints)
 		return 0;  
-	hNewPoints = GSSiGlobAlloc ( 953,GMEM_MOVEABLE,NumPoints * sizeof(DPOINT));
+	hNewPoints = GSSiGlobAlloc(GAIDNO 953,GMEM_MOVEABLE,NumPoints * sizeof(DPOINT));
 	pNewPoint = (HPDPOINT)GlobalLock (hNewPoints); 
 	pPoint = (HPDPOINT)GlobalLock (hPoints);
 	pPoint += (NumPoints-1);
@@ -769,7 +769,7 @@ HANDLE ReversePoints3D (long NumPoints,HANDLE hPoints)
 	
 	if (!NumPoints)
 		return 0;  
-	hNewPoints = GSSiGlobAlloc ( 953,GMEM_MOVEABLE,NumPoints * sizeof(DPOINT3D));
+	hNewPoints = GSSiGlobAlloc(GAIDNO 953,GMEM_MOVEABLE,NumPoints * sizeof(DPOINT3D));
 	pNewPoint = (HPDPOINT3D)GlobalLock (hNewPoints); 
 	pPoint = (HPDPOINT3D)GlobalLock (hPoints);
 	pPoint += (NumPoints-1);
@@ -787,7 +787,7 @@ void ReversePoints2 (long NumPoints,HPDPOINT pPoint)
 	if (!NumPoints)
 		return;  
 	{
-		HANDLE hNewPoints=GSSiGlobAlloc ( 954,GMEM_MOVEABLE,NumPoints * sizeof(DPOINT));
+		HANDLE hNewPoints=GSSiGlobAlloc(GAIDNO 954,GMEM_MOVEABLE,NumPoints * sizeof(DPOINT));
 		HPDPOINT	pNewPoint = (HPDPOINT)GlobalLock (hNewPoints); 
 		
 		for (i=0;i<NumPoints;i++)
@@ -805,7 +805,7 @@ void ReversePoints3D2 (long NumPoints,HPDPOINT3D pPoint)
 	if (!NumPoints)
 		return;  
 	{
-		HANDLE hNewPoints=GSSiGlobAlloc ( 954,GMEM_MOVEABLE,NumPoints * sizeof(DPOINT3D));
+		HANDLE hNewPoints=GSSiGlobAlloc(GAIDNO 954,GMEM_MOVEABLE,NumPoints * sizeof(DPOINT3D));
 		HPDPOINT3D	pNewPoint = (HPDPOINT3D)GlobalLock (hNewPoints); \
 		
 		for (i=0;i<NumPoints;i++)
@@ -824,7 +824,7 @@ HANDLE ReversePoints3 (long NumPoints,HPDPOINT pPoint)
 	
 	if (!NumPoints)
 		return 0;  
-	hNewPoints = GSSiGlobAlloc ( 953,GMEM_MOVEABLE,NumPoints * sizeof(DPOINT));
+	hNewPoints = GSSiGlobAlloc(GAIDNO 953,GMEM_MOVEABLE,NumPoints * sizeof(DPOINT));
 	pNewPoint = (HPDPOINT)GlobalLock (hNewPoints); 
 	pPoint += (NumPoints-1);
 	while (NumPoints--)
@@ -846,13 +846,13 @@ HANDLE LoadDLGPoints (LPINT pNumSides,LPSHORT *pLineID,HANDLE hLineIndex,HFILE F
 	BOOL	First=TRUE;
 	long	NumSides = 1;
 	
-	hPoints = GSSiGlobAlloc ( 960,GMEM_MOVEABLE,(long)USHRT_MAX*(long)sizeof(DPOINT));
+	hPoints = GSSiGlobAlloc(GAIDNO 960,GMEM_MOVEABLE,(long)USHRT_MAX*(long)sizeof(DPOINT));
 	pPoints = (HPDPOINT)GlobalLock (hPoints); 
 	while (**pLineID)
 	{
 		if (**pLineID < 0)
 		{
-			hPoints2 = GSSiGlobAlloc ( 961,GMEM_MOVEABLE,(long)USHRT_MAX*(long)sizeof(DPOINT)); 
+			hPoints2 = GSSiGlobAlloc(GAIDNO 961,GMEM_MOVEABLE,(long)USHRT_MAX*(long)sizeof(DPOINT)); 
 			pPoints2 = pPoints;
 			pPoints = (HPDPOINT)GlobalLock (hPoints2);
 		} 

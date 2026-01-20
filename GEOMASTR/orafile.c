@@ -64,7 +64,7 @@ static char				ORAazm[32]="[ORA.AZM]";
 long ORATypeFromName (LPSTR InName)
 {
 	long	Type = 0;
-	HANDLE	hName = GSSiGlobAlloc (0,GMEM_MOVEABLE,256);
+	HANDLE	hName = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,256);
 	LPSTR	Name=GlobalLock (hName);
 	short	l;
 	
@@ -286,7 +286,7 @@ long SortQuadLinks (HFILE FidSorted,ULONG NumRecs,USHORT XMid,HPLONG Offsets,HPQ
 	ULONG	iRec;
 	USHORT	i, FirstUpperQuad=0, FirstLowerQuad, UpperQuadID=0, NumUpperQuads=1, NumLowerQuads, NextQuadID=1;
 	short	QuadID;
-	HANDLE	hQuads=GSSiGlobAlloc (0,GHND,USHRT_MAX); 
+	HANDLE	hQuads=GSSiGlobAlloc(GAIDNO 0,GHND,USHRT_MAX); 
     USHORT	LevelNext[MAXLEVELS], LevelSplitVal[MAXLEVELS], LevelUseX[MAXLEVELS];
     USHORT	SplitVal, NextLevelSplitVals[MAXLEVELS][2];
 	LPQUADS	Quads = (LPQUADS)GlobalLock (hQuads); 
@@ -397,8 +397,8 @@ HFILE SortORASpatially (HFILE Fid)
 	
 	HPQUADLINK	QuadLink;					 
 	
-	hQuadLink = GSSiGlobAlloc (0,GMEM_MOVEABLE,MaxRecs * sizeof(QUADLINK));
-	hOffsets = GSSiGlobAlloc ( 0,GMEM_MOVEABLE,MaxRecs * sizeof(long));
+	hQuadLink = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,MaxRecs * sizeof(QUADLINK));
+	hOffsets = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,MaxRecs * sizeof(long));
 	QuadLink = (HPQUADLINK)GlobalLock (hQuadLink);
 	Offsets = (LPLONG)GlobalLock (hOffsets);
 	
@@ -489,7 +489,7 @@ HFILE CreateORAFileIndex (HFILE FidORAFile,LPSTR IndexName,LPSTR ORAFileName,LPS
 	CreateStatusWind (CurView->hWnd,2,mess);      
 	DisableHalt = FALSE;
 	FidSortedOffsets = SortORASpatially (FidORAFile); 
-	hIndexBlocks = GSSiGlobAlloc (0,GMEM_MOVEABLE,NumIndexBlocks*sizeof(mnmxCor));
+	hIndexBlocks = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,NumIndexBlocks*sizeof(mnmxCor));
 	BlockMinMax = (LPMINMAX)GlobalLock (hIndexBlocks); 
 	for (i=0;i<NumIndexBlocks;i++)
 		MinMaxInit (&BlockMinMax[i]);
@@ -654,7 +654,7 @@ BOOL ReorgORAFile ()
 		GSSillseek (ORAIDXFid,2,0);
 		GSSilread (ORAIDXFid,(HPSTR)&NumBlocks,4);
 		GSSilread (ORAIDXFid,(HPSTR)&RecsPerBlock,4);
-		hBlocks = GSSiGlobAlloc (1417,GMEM_MOVEABLE,NumBlocks*sizeof(mnmxCor));
+		hBlocks = GSSiGlobAlloc(GAIDNO 1417,GMEM_MOVEABLE,NumBlocks*sizeof(mnmxCor));
 		BlockMinMax = (LPMINMAX)GlobalLock (hBlocks); 
 		GSSilread (ORAIDXFid,(HPSTR)BlockMinMax,NumBlocks*sizeof(mnmxCor));
         GlobalUnlock (hBlocks); 
@@ -692,7 +692,7 @@ long GetORARecordOffset (long record,BOOL UseBounds)
 		GSSillseek (ORAIDXFid,2,0);
 		GSSilread (ORAIDXFid,(HPSTR)&NumBlocks,4);
 		GSSilread (ORAIDXFid,(HPSTR)&RecsPerBlock,4);
-		hBlocks = GSSiGlobAlloc (1417,GMEM_MOVEABLE,NumBlocks*sizeof(mnmxCor));
+		hBlocks = GSSiGlobAlloc(GAIDNO 1417,GMEM_MOVEABLE,NumBlocks*sizeof(mnmxCor));
 		BlockMinMax = (LPMINMAX)GlobalLock (hBlocks); 
 		GSSilread (ORAIDXFid,(HPSTR)BlockMinMax,NumBlocks*sizeof(mnmxCor));
         GlobalUnlock (hBlocks); 
@@ -719,7 +719,7 @@ Top:
 	if (!hOffsets || loc < FirstLoc || loc > LastLoc)
 	{   
 		GSSiGlobFree (&hOffsets);
-		hOffsets = GSSiGlobAlloc (1417,GMEM_MOVEABLE,RecsPerBlock*sizeof(ORACLEINDEXRECORD));
+		hOffsets = GSSiGlobAlloc(GAIDNO 1417,GMEM_MOVEABLE,RecsPerBlock*sizeof(ORACLEINDEXRECORD));
 		pLoc = (LPSTR)GlobalLock (hOffsets);
 		GSSillseek (ORAIDXFid,loc,0);
 		Len = GSSilread (ORAIDXFid,(HPSTR)pLoc,RecsPerBlock*sizeof(ORACLEINDEXRECORD));
@@ -917,9 +917,9 @@ BOOL ProcessORARecord (HDC hDC,HFILE FidORA,long RecordNumber)
 		default:
 			break;  
 		case 3004:
-			hElemInfo = GSSiGlobAlloc (1418,GMEM_MOVEABLE,ORARecordHeader.NumInfo*4);
+			hElemInfo = GSSiGlobAlloc(GAIDNO 1418,GMEM_MOVEABLE,ORARecordHeader.NumInfo*4);
 			pElemInfo = (LPLONG)GlobalLock (hElemInfo);
-			hOrd = GSSiGlobAlloc (1418,GMEM_MOVEABLE,ORARecordHeader.NumOrd*8);
+			hOrd = GSSiGlobAlloc(GAIDNO 1418,GMEM_MOVEABLE,ORARecordHeader.NumOrd*8);
 			pOrd = (LPDOUBLE)GlobalLock (hOrd);
 			GSSillseek (FidORA,ORARecOffset+sizeof(ORARecordHeader),0);
 			GSSilread (FidORA,(HPSTR)pElemInfo,ORARecordHeader.NumInfo*4);
@@ -1061,9 +1061,9 @@ BOOL ProcessORARecord (HDC hDC,HFILE FidORA,long RecordNumber)
 		    if (CurrentDesc > 0 && CurrentDesc < 3201)
 				CurView->CurVisType[CurrentDesc]=3; 
 DoPoly:      
-			hElemInfo = GSSiGlobAlloc (1418,GMEM_MOVEABLE,ORARecordHeader.NumInfo*4);
+			hElemInfo = GSSiGlobAlloc(GAIDNO 1418,GMEM_MOVEABLE,ORARecordHeader.NumInfo*4);
 			pElemInfo = (LPLONG)GlobalLock (hElemInfo);   
-			hOrd = GSSiGlobAlloc (1418,GMEM_MOVEABLE,ORARecordHeader.NumOrd*8);
+			hOrd = GSSiGlobAlloc(GAIDNO 1418,GMEM_MOVEABLE,ORARecordHeader.NumOrd*8);
 			pOrd = (LPDOUBLE)GlobalLock (hOrd);
 			GSSillseek (FidORA,ORARecOffset+sizeof(ORARecordHeader),0);
 			GSSilread (FidORA,(HPSTR)pElemInfo,ORARecordHeader.NumInfo*4);
@@ -1126,9 +1126,9 @@ DoPoly:
 	        NumPoints = ORARecordHeader.NumOrd/nOrdPerPoint; 
 //	        if (SHPHeader.ShapeType == SHPT_POLYGON)
 //	        	NumPoints = NumPoints+nPoly-1;
-//	        hPartIndex = GSSiGlobAlloc (1418,GMEM_MOVEABLE,sizeof(long)*(nPoly+1));
-	        hPolyPartLen = GSSiGlobAlloc (1419,GHND,sizeof(INT)*(nPoly+1));
-			hPoints = GSSiGlobAlloc (1420,GMEM_MOVEABLE,(long)MAX_POLY_POINTS*(long)sizeof(DPOINT)); 
+//	        hPartIndex = GSSiGlobAlloc(GAIDNO 1418,GMEM_MOVEABLE,sizeof(long)*(nPoly+1));
+	        hPolyPartLen = GSSiGlobAlloc(GAIDNO 1419,GHND,sizeof(INT)*(nPoly+1));
+			hPoints = GSSiGlobAlloc(GAIDNO 1420,GMEM_MOVEABLE,(long)MAX_POLY_POINTS*(long)sizeof(DPOINT)); 
 //	        pPartIndex = (LPLONG)GlobalLock (hPartIndex); 
 //	        _lread (FidSHP,pPartIndex,nPoly*sizeof(long));
 	                    

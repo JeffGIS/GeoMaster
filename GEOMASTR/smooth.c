@@ -25,7 +25,7 @@ void TestSmooth(void)
 { int i;
 HGLOBAL h;
 LPDPOINT lpdp;
-  h = GSSiGlobAlloc(1746,GHND,sizeof(DPOINT) * 12);
+  h = GSSiGlobAlloc(GAIDNO 1746,GHND,sizeof(DPOINT) * 12);
   lpdp = (LPDPOINT) GlobalLock(h);
   lpdp->x = 11.04;//int part is number of points. fraction part is iterations
   lpdp->y = 5.00; //max deviation from plotted point
@@ -83,7 +83,7 @@ void SmoothPolyLine(HGLOBAL HPP)
  GlobNumPts = NumPts = (unsigned int) lpDPFirst->x;//how many points in this polyline 
  MAXITERATIONS = (lpDPFirst->x - GlobNumPts) * 100;
  GlobMaxDev = MaxDev = lpDPFirst->y;
- HPOINTS = GSSiGlobAlloc(1747,GHND,(long) sizeof(PolyPt)*NumPts);
+ HPOINTS = GSSiGlobAlloc(GAIDNO 1747,GHND,(long) sizeof(PolyPt)*NumPts);
  lpPP = (lpPolyPt) GlobalLock(HPOINTS);
  debug = FALSE;
  if(debug) MyFile = fopen("c:\\curves.txt","wt");

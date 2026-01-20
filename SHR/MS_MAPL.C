@@ -41,7 +41,7 @@ BOOL written;
    Mfile[i].total = (DWORD) array_len + Ioff + 1;  
    total = (DWORD) Mfile[i].total;
    _fstrncpy( Mfile[i].filename,  STND_PATH, (size_t) STNDLN) ;   
-   Mfile[i].heap_ptr = GSSiGlobAlloc ( 295, GHND, (size_t)    (Mfile[i].total) ); 
+   Mfile[i].heap_ptr = GSSiGlobAlloc(GAIDNO 295, GHND, (size_t)    (Mfile[i].total) ); 
    Mfile[i].mem_ptr  = GlobalLock(Mfile[i].heap_ptr); 
    if(Mfile[i].mem_ptr == NULL) return Mfile[i].mem_ptr; 
    hf = GSSiOpenFile ( Mfile[i].filename, lpOpenBuff, OF_READ);
@@ -88,7 +88,7 @@ BOOL written;
       for (i = 0; i < 128, Mfile[i].heap_ptr != NULL; i++);
        if(i == 128) return NULL;
      _fstrncpy( Mfile[i].filename, FNAME, (size_t) NMLEN );
-      Mfile[i].heap_ptr =  GSSiGlobAlloc ( 296, GHND,  AR ); 
+      Mfile[i].heap_ptr =  GSSiGlobAlloc(GAIDNO 296, GHND,  AR ); 
       Mfile[i].total = (DWORD) AR;
       Mfile[i].mem_ptr  = GlobalLock(Mfile[i].heap_ptr);   
      

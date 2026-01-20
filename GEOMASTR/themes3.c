@@ -642,7 +642,7 @@ BOOL DisplayPointInAreaThemes (short CurrentVPID)
         	    PointTheme=pViewports[CurrentVPID-1]->pTheme;
 	        	if (!CurTheme->Pass)
 	        	{   
-	        		HANDLE		hAreas=GSSiGlobAlloc (0,GHND,sizeof(THEMEAREAHEADER)*(CurTheme->NumAreas+1));
+	        		HANDLE		hAreas=GSSiGlobAlloc(GAIDNO 0,GHND,sizeof(THEMEAREAHEADER)*(CurTheme->NumAreas+1));
 	        		LPTHEMEAREAHEADER	pAreaHeader=(LPTHEMEAREAHEADER)GlobalLock (hAreas);    
 	        		UINT		iarea;   
 	        		HANDLE		hMaskAccelerator=0;      
@@ -661,7 +661,7 @@ BOOL DisplayPointInAreaThemes (short CurrentVPID)
 		        		{ 
 		        			BigRead (CurTheme->FidAreas,(HPSTR)&pAreaHeader[iarea].Refno,4);
 		        			BigRead (CurTheme->FidAreas,(HPSTR)&pAreaHeader[iarea].NumPoints,4);  
-		        			pAreaHeader[iarea].hPoints = GSSiGlobAlloc (0,GMEM_MOVEABLE,pAreaHeader[iarea].NumPoints * sizeof(DPOINT));
+		        			pAreaHeader[iarea].hPoints = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,pAreaHeader[iarea].NumPoints * sizeof(DPOINT));
 		        			pAreaPoints = (HPDPOINT)GlobalLock (pAreaHeader[iarea].hPoints);
 		        			BigRead (CurTheme->FidAreas,(HPSTR)pAreaPoints,pAreaHeader[iarea].NumPoints * sizeof(DPOINT));   
 				      		GlobalUnlock (pAreaHeader[iarea].hPoints);
@@ -1116,7 +1116,7 @@ BOOL CreatePointDispersionFile (void)
 	
 	if (CurTheme->hDisperseFileName)
 		GSSiGlobFree(&CurTheme->hDisperseFileName);
-	CurTheme->hDisperseFileName = GSSiGlobAlloc (1022,GMEM_MOVEABLE,256);
+	CurTheme->hDisperseFileName = GSSiGlobAlloc(GAIDNO 1022,GMEM_MOVEABLE,256);
 	pName = GlobalLock (CurTheme->hDisperseFileName);
 	GSSiGetTempFileName (0,"gmp",0,pName);
 	BTVar[0].BT_VARTYP=BT_INTEGER;
@@ -1531,7 +1531,7 @@ GSSiExitProg (620);
 					nItems = GetLBSelectedItems (hWndDlg,IDC_FIELDS,&hItems); 
 					if (!nItems)
 						break;   
-           	        hText = GSSiGlobAlloc ( 263,GHND,USHRT_MAX);
+           	        hText = GSSiGlobAlloc(GAIDNO 263,GHND,USHRT_MAX);
 	                pText = GlobalLock (hText);  
 					lpItems = (LPINT)GlobalLock (hItems); 
 					if (wParam == IDC_COMPUTETITLE)
@@ -2181,7 +2181,7 @@ GSSiExitProg (620);
 			
 			  case IDC_SHOWDATA:
 			  {
-					  HANDLE	hStr = GSSiGlobAlloc (0,GMEM_MOVEABLE,4096*2);
+					  HANDLE	hStr = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,4096*2);
 					  LPSTR pstr=GlobalLock (hStr);
 
 					if (FirstShow)
@@ -2258,7 +2258,7 @@ GSSiExitProg (620);
 	            	
 	            	
 	            	KeepMemLength = TRUE;  
-	            	hText = GSSiGlobAlloc ( 261,GHND,USHRT_MAX); 
+	            	hText = GSSiGlobAlloc(GAIDNO 261,GHND,USHRT_MAX); 
            	        KeepMemLength = KeepMemLengthSave;
 	                nItems=SendDlgItemMessage(hWndDlg,IDC_FIELDS,LB_GETSELCOUNT,0,0);  
 					if (!nItems)
@@ -2266,7 +2266,7 @@ GSSiExitProg (620);
 						GSSiGlobUlFree(&hText);
 						break;
 					}
-	                hFields = GSSiGlobAlloc ( 262,GHND,nItems*4);
+	                hFields = GSSiGlobAlloc(GAIDNO 262,GHND,nItems*4);
 	                lpItems = (LPINT)GlobalLock(hFields);
 	                SendDlgItemMessage(hWndDlg,IDC_FIELDS,LB_GETSELITEMS,nItems,(LPARAM)lpItems); 
 					pText = GlobalLock (hText);  

@@ -846,7 +846,7 @@ short LoadTranFilePoints (LPSTR Name,LPDOUBLE XFROM, LPDOUBLE YFROM, LPDOUBLE XT
 	HFILE Fid;
 	OFSTRUCTGM OFStruct;
 	char	str[260]; 
-	HANDLE	handle=0, hcoord=GSSiGlobAlloc ( 584,GMEM_MOVEABLE,4096); 
+	HANDLE	handle=0, hcoord=GSSiGlobAlloc(GAIDNO 584,GMEM_MOVEABLE,4096); 
 	float	RSQMIN;
 	short	N=0;
 	
@@ -881,7 +881,7 @@ Exit:
 	GetPickName (Item); 
 	_fstrcpy (PltName,PickName);
 	DeletePickedItem (Item,OldType,NewType);
-	hNewPolyPoints = GSSiGlobAlloc ( 585,GMEM_MOVEABLE,sizeof(DPOINT)*(long)NumNewPolyPoints);
+	hNewPolyPoints = GSSiGlobAlloc(GAIDNO 585,GMEM_MOVEABLE,sizeof(DPOINT)*(long)NumNewPolyPoints);
 	pNewPoints = GlobalLock (hNewPolyPoints);
 	*pNewPoints++ = PickList[Item].BeginPoint;
 	*pNewPoints = PickList[Item].PickedPoint;
@@ -925,8 +925,8 @@ BOOL SplitCurve (short Item, LPLONG pNewRef1, LPLONG pNewRef2)
 	}
 	else
 		_fstrcpy (PltName,EditName);
-	hSeg1 = GSSiGlobAlloc ( 586,GMEM_MOVEABLE,lmem);
-	hSeg2 = GSSiGlobAlloc ( 587,GMEM_MOVEABLE,lmem);  
+	hSeg1 = GSSiGlobAlloc(GAIDNO 586,GMEM_MOVEABLE,lmem);
+	hSeg2 = GSSiGlobAlloc(GAIDNO 587,GMEM_MOVEABLE,lmem);  
     Dpoint1 = (HPDPOINT)GlobalLock (hSeg1);
     Dpoint2 = (HPDPOINT)GlobalLock (hSeg2);
 	st = RCURVE(&PickList[Item].BeginPoint.x,&PickList[Item].BeginPoint.y,&PickList[Item].NodePoint.x,&PickList[Item].NodePoint.y,&PickList[Item].EndPoint.x,&PickList[Item].EndPoint.y,&RP.x,&RP.y,&CLEN); 
@@ -966,7 +966,7 @@ BOOL AddContourSplitLines (LPMNMXCORD pBounds,int nGrid)
 	double		GridWidth = maxd / nGrid, GridHeight;
 	int			nGridCols = BoundsWidth (pBounds) / GridWidth + 1;
 	int			nGridRows = BoundsHeight (pBounds) / GridWidth + 1;
-	HANDLE		hPnts = GSSiGlobAlloc (0,GMEM_MOVEABLE,2*sizeof(DPOINT));
+	HANDLE		hPnts = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,2*sizeof(DPOINT));
 	int			irow, icol;
 	int			SymNum = GetSymbolNum ("SPLITLINE");
 	int			SymNum2 = GetSymbolNum ("SPLITLINE2");
@@ -1069,9 +1069,9 @@ BOOL SplitContourLines (int iOpt)
 	if (!nRecs || !*EditName)
 		goto Exit;
 	_fstrcpy (PltName,EditName);
-	hSLRef = GSSiGlobAlloc (1710,GMEM_MOVEABLE,nRecs*sizeof(int));
-	hSLnp  = GSSiGlobAlloc (1711,GMEM_MOVEABLE,nRecs*sizeof(int));
-	hSLhPoly = GSSiGlobAlloc (1712,GMEM_MOVEABLE,nRecs*sizeof(HANDLE));
+	hSLRef = GSSiGlobAlloc(GAIDNO 1710,GMEM_MOVEABLE,nRecs*sizeof(int));
+	hSLnp  = GSSiGlobAlloc(GAIDNO 1711,GMEM_MOVEABLE,nRecs*sizeof(int));
+	hSLhPoly = GSSiGlobAlloc(GAIDNO 1712,GMEM_MOVEABLE,nRecs*sizeof(HANDLE));
 	RefnoSplitLine = GlobalLock (hSLRef);
 	npntsSplitLine = GlobalLock (hSLnp);
 	hPolySplitLine = GlobalLock (hSLhPoly);
@@ -1095,8 +1095,8 @@ BOOL SplitContourLines (int iOpt)
 		GetPolyBoundsD (hPolySplitLine[iSplitLine],npntsSplitLine[iSplitLine],&Bounds,2);
 		ExpandBounds (&Bounds,P_TOL*100);
 		pPolyPoints[0] = (HPDPOINT)GlobalLock (hPolySplitLine[iSplitLine]);
-		hSLSplitDist = GSSiGlobAlloc (1713,GMEM_MOVEABLE,USHRT_MAX*sizeof(double));
-		hSLConSym = GSSiGlobAlloc (1714,GHND,USHRT_MAX*sizeof(int));
+		hSLSplitDist = GSSiGlobAlloc(GAIDNO 1713,GMEM_MOVEABLE,USHRT_MAX*sizeof(double));
+		hSLConSym = GSSiGlobAlloc(GAIDNO 1714,GHND,USHRT_MAX*sizeof(int));
 		SLSplitDist = GlobalLock (hSLSplitDist);
 		SLConSym = GlobalLock (hSLConSym);
 		nSLDist = 2;
@@ -1105,10 +1105,10 @@ BOOL SplitContourLines (int iOpt)
 		nConLines = 0;
 		if ((nRecs=HighlightInArea (CurView->hWnd,&Bounds,TRUE,FALSE,0)) > 0)
 		{
-			hConRef = GSSiGlobAlloc (1716,GMEM_MOVEABLE,nRecs*sizeof(int));
-			hConnp  = GSSiGlobAlloc (1717,GMEM_MOVEABLE,nRecs*sizeof(int));
-			hConPoly = GSSiGlobAlloc (1718,GMEM_MOVEABLE,nRecs*sizeof(HANDLE));
-			hConSym = GSSiGlobAlloc (1715,GMEM_MOVEABLE,nRecs*sizeof(int));
+			hConRef = GSSiGlobAlloc(GAIDNO 1716,GMEM_MOVEABLE,nRecs*sizeof(int));
+			hConnp  = GSSiGlobAlloc(GAIDNO 1717,GMEM_MOVEABLE,nRecs*sizeof(int));
+			hConPoly = GSSiGlobAlloc(GAIDNO 1718,GMEM_MOVEABLE,nRecs*sizeof(HANDLE));
+			hConSym = GSSiGlobAlloc(GAIDNO 1715,GMEM_MOVEABLE,nRecs*sizeof(int));
 			RefnoCon = GlobalLock (hConRef);
 			npntsCon = GlobalLock (hConnp);
 			hPolyCon = GlobalLock (hConPoly);
@@ -1128,7 +1128,7 @@ BOOL SplitContourLines (int iOpt)
 		}
 		for (iCon=0;iCon<nConLines;iCon++)
 		{
-			HANDLE	hConSplitDist = GSSiGlobAlloc (1719,GMEM_MOVEABLE,USHRT_MAX*sizeof(double));
+			HANDLE	hConSplitDist = GSSiGlobAlloc(GAIDNO 1719,GMEM_MOVEABLE,USHRT_MAX*sizeof(double));
 			LPDOUBLE	ConSplitDist = GlobalLock (hConSplitDist);
 
 			DistAlongSplitLine = 0;
@@ -1279,8 +1279,8 @@ BOOL SplitPoly (short Item, LPLONG pNewRef1, LPLONG pNewRef2)
 	        lpRect = (LPMNMXCORD) GlobalLock (hSavePoly);
 	        lpRect++;
 	        lpDpoint = (HPDPOINT) lpRect;
-			hSeg1 = GSSiGlobAlloc ( 586,GMEM_MOVEABLE,lmem);
-			hSeg2 = GSSiGlobAlloc ( 587,GMEM_MOVEABLE,lmem);  
+			hSeg1 = GSSiGlobAlloc(GAIDNO 586,GMEM_MOVEABLE,lmem);
+			hSeg2 = GSSiGlobAlloc(GAIDNO 587,GMEM_MOVEABLE,lmem);  
 	        pDpoint = (HPDPOINT)GlobalLock (hSeg1);
 	        LastPoint = *lpDpoint;
 	        *pDpoint++ = *lpDpoint++;   
@@ -1504,7 +1504,7 @@ BOOL SplitHighlightedPolys (int MaxPolyPoints)
 							NumNewPoints = RemPoints / 2;
 						else
 							NumNewPoints = MaxPolyPoints;
-						hNewPoly = GSSiGlobAlloc (0,GMEM_MOVEABLE,((long)NumNewPoints)*sizeof(DPOINT)); 
+						hNewPoly = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,((long)NumNewPoints)*sizeof(DPOINT)); 
 						pNewPoints = (HPDPOINT)GlobalLock (hNewPoly);
 						hmemmove ((HPSTR)pNewPoints,(HPSTR)pOrigPoints,((long)NumNewPoints)*sizeof(DPOINT));
 						GlobalUnlock (hNewPoly);

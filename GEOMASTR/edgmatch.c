@@ -24,7 +24,7 @@ BOOL LoadEdge (LPSTR JoinLineFile,LPSTR CornerCoordFile,LPSTR OrigTranPointFile,
 	short		nEdge=0,i;
 	LPEDGE		pEdge; 
 	LPCORNER	pCorner;  
-	HANDLE		hMem=GSSiGlobAlloc (1044,GMEM_MOVEABLE,4096);
+	HANDLE		hMem=GSSiGlobAlloc(GAIDNO 1044,GMEM_MOVEABLE,4096);
 	LPSTR		pFile = GlobalLock (hMem);
 	LPSTR		lpstr = pFile + 512;   
 	HFILE		Fid1, Fid2, Fid3;  
@@ -37,7 +37,7 @@ BOOL LoadEdge (LPSTR JoinLineFile,LPSTR CornerCoordFile,LPSTR OrigTranPointFile,
 	Fid1 = GSSiOpenFile (CornerCoordFile,0,OF_READ);
 	if (Fid1 == HFILE_ERROR)
 		goto RtnFalse; 
-	hCorner = GSSiGlobAlloc (1045,GHND,USHRT_MAX);
+	hCorner = GSSiGlobAlloc(GAIDNO 1045,GHND,USHRT_MAX);
 	pCorner = (LPCORNER)GlobalLock (hCorner);
 	fgetstring (lpstr,1020,Fid1);
 	ProcessDelimTextHeader(lpstr, 0, Fid1, &hDLT, 0, 0);
@@ -170,9 +170,9 @@ short LoadEdgeFile (LPSTR File,LPHANDLE hEdge)
 	Fid1 = GSSiOpenFile (File,&OFStruct,OF_READ);
 	if (Fid1 == HFILE_ERROR)
 		return 0;   
-	*hEdge = GSSiGlobAlloc (1046,GHND,USHRT_MAX);
+	*hEdge = GSSiGlobAlloc(GAIDNO 1046,GHND,USHRT_MAX);
 	pEdge = (LPEDGE)GlobalLock (*hEdge);   
-	hStr = GSSiGlobAlloc (1047,GMEM_MOVEABLE,1024);
+	hStr = GSSiGlobAlloc(GAIDNO 1047,GMEM_MOVEABLE,1024);
 	lpstr = GlobalLock (hStr);
 	fgetstring (lpstr,1020,Fid1);
 	ProcessDelimTextHeader(lpstr, 0, Fid1, &hDLT, 0, 0);
@@ -257,9 +257,9 @@ short LoadEdgeFromCorners (LPSTR File,LPHANDLE hEdge)
 	Fid1 = GSSiOpenFile (File,&OFStruct,OF_READ);
 	if (Fid1 == HFILE_ERROR)
 		return 0;   
-	*hEdge = GSSiGlobAlloc (1048,GHND,2048);
+	*hEdge = GSSiGlobAlloc(GAIDNO 1048,GHND,2048);
 	pEdge = (LPEDGE)GlobalLock (*hEdge);   
-	hStr = GSSiGlobAlloc (1049,GMEM_MOVEABLE,1024);
+	hStr = GSSiGlobAlloc(GAIDNO 1049,GMEM_MOVEABLE,1024);
 	lpstr = GlobalLock (hStr);
 	while (fgetstring (lpstr,1020,Fid1))
 	{   
@@ -370,7 +370,7 @@ BOOL UseEdgePoint (DPOINT InPoint,LPDPOINT pOutPoint,LPSTR EdgeID,
 	if (!hUseEdgePoint)
 	{
 		nPoints = 0;
-		hUseEdgePoint = GSSiGlobAlloc (1050,GHND,USHRT_MAX);
+		hUseEdgePoint = GSSiGlobAlloc(GAIDNO 1050,GHND,USHRT_MAX);
 	}                   
 	pPoints = (LPDPOINT)GlobalLock (hUseEdgePoint);
 	for (i=0;i<nPoints;i++,pPoints++)
@@ -541,7 +541,7 @@ BOOL MatchTranFunction (LPSTR Arg1,LPSTR Arg2,LPSTR Arg3)
 	MATCHKEY	MatchKey, MatchKeyLast;
 	typedef	struct	{long	FileNameLoc, TranDataLoc;} MATCHDATA;
 	MATCHDATA	MatchData, MatchDataLast;      
-	HANDLE	hMem = GSSiGlobAlloc (1051,GMEM_MOVEABLE,3*2048);   
+	HANDLE	hMem = GSSiGlobAlloc(GAIDNO 1051,GMEM_MOVEABLE,3*2048);   
 	BOOL	rtn=FALSE; 
 	HFILE	Fid1, Fid2;
 	

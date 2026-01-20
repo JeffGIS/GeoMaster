@@ -49,7 +49,7 @@ GSSiExitProg (1135);
 		return 0;  
 }
 	*pEnd = 0;
-	hMem =  GSSiGlobAlloc (1077,GMEM_MOVEABLE,2048*4);
+	hMem =  GSSiGlobAlloc(GAIDNO 1077,GMEM_MOVEABLE,2048*4);
 	Arg1 = GlobalLock (hMem);
 	Arg2 = Arg1 + 2048;
 	Arg3 = Arg2 + 2048;
@@ -139,7 +139,7 @@ GSSiExitProg (1136);
 		return 0;  
 }
 	*pEnd = 0;
-	hMem =  GSSiGlobAlloc (1078,GMEM_MOVEABLE,2048*4);
+	hMem =  GSSiGlobAlloc(GAIDNO 1078,GMEM_MOVEABLE,2048*4);
 	Arg1 = GlobalLock (hMem);
 	Arg2 = Arg1 + 2048;
 	Arg3 = Arg2 + 2048;
@@ -453,7 +453,7 @@ HANDLE LoadColorMap (LPSTR Name,LPSHORT pnPalColors)
 	*pnPalColors = 0;
 	if (Fid == HFILE_ERROR)
 		return 0;
-	hMapColors = GSSiGlobAlloc (0,GHND,256*sizeof(COLORREF));
+	hMapColors = GSSiGlobAlloc(GAIDNO 0,GHND,256*sizeof(COLORREF));
     pMapColors = (RGBQUAD *)GlobalLock (hMapColors);
 	BigRead (Fid,(HPSTR)pnPalColors,2);
 	BigRead (Fid,(HPSTR)MapColors,256*sizeof(COLORREF)); 
@@ -520,7 +520,7 @@ BOOL CreateColorMap (LPSTR Name)
 	
 	if (Fid == HFILE_ERROR)
 		return FALSE;     
-	hMapColors = GSSiGlobAlloc (0,GHND,256*sizeof(COLORREF));
+	hMapColors = GSSiGlobAlloc(GAIDNO 0,GHND,256*sizeof(COLORREF));
 	AddColorToMap (CurView->BackGroundColor,&NumMapColors,hMapColors);
 	CreateRandomBrushes (CurView,0);
 	for (i=0;i<NumRandomColors;i++)
@@ -652,7 +652,7 @@ GSSiExitProg (75);
     { 
     	First = FALSE;
 	    srand(1);
-		hRandBrushes = GSSiGlobAlloc (  55,GMEM_MOVEABLE,NumRandomColors*(sizeof(HPEN)+sizeof(HBRUSH)));
+		hRandBrushes = GSSiGlobAlloc(GAIDNO  55,GMEM_MOVEABLE,NumRandomColors*(sizeof(HPEN)+sizeof(HBRUSH)));
 		pRandBrush = (LPHBRUSH)GlobalLock (hRandBrushes); 
 		for (i=0;i<NumRandomColors;i++,pRandBrush++)
 		{   
@@ -1133,7 +1133,7 @@ BOOL SaveMemMap (void)
 		    
 		    sprintf (pDot,"%i.bin",MemMapSubDir);
    			{
-				HANDLE	hMem=GSSiGlobAlloc (0,GMEM_MOVEABLE,sizeMM);
+				HANDLE	hMem=GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,sizeMM);
 				HPSTR	pMem=GlobalLock (hMem);
 				HFILE	FidBIN=GSSiOpenFile (MemMapName,0,OF_READWRITE);
 				DWORD	loc;
@@ -1199,7 +1199,7 @@ int MapImageToFile (LPSTR MapImageFile,long MapID,LPSTR OutFile,LPMNMXCORD pBoun
 				_fstrcpy (pDot,".gmd");	 
 				if (FidBIN != HFILE_ERROR)
 				{
-					HANDLE	hMem=GSSiGlobAlloc (1588,GMEM_MOVEABLE,pMAPFILE->Size);
+					HANDLE	hMem=GSSiGlobAlloc(GAIDNO 1588,GMEM_MOVEABLE,pMAPFILE->Size);
 					HPSTR	pMem=GlobalLock (hMem);
 					
 					GSSillseek2 (FidBIN,pMAPFILE->Loc,0);
@@ -1229,8 +1229,8 @@ int MapImageToFile (LPSTR MapImageFile,long MapID,LPSTR OutFile,LPMNMXCORD pBoun
 							int	lbin;
 							int	lMemDeCmp;
 							RGBQUAD	Pallet[256];
-				//			HANDLE	hMemCmp = GSSiGlobAlloc (1586,GMEM_MOVEABLE,pbi->biHeight * pbi->biWidth);
-				//			HANDLE	hMemCmp = GSSiGlobAlloc (1586,GMEM_MOVEABLE,USHRT_MAX*32);
+				//			HANDLE	hMemCmp = GSSiGlobAlloc(GAIDNO 1586,GMEM_MOVEABLE,pbi->biHeight * pbi->biWidth);
+				//			HANDLE	hMemCmp = GSSiGlobAlloc(GAIDNO 1586,GMEM_MOVEABLE,USHRT_MAX*32);
 							LPSTR	pMemCmp = (LPSTR)malloc (USHRT_MAX*32);//GlobalLock (hMemCmp);
 							HANDLE	hMem2;
 							LPSTR	pMem2;
@@ -1252,7 +1252,7 @@ int MapImageToFile (LPSTR MapImageFile,long MapID,LPSTR OutFile,LPMNMXCORD pBoun
 							BigWrite (FidOut,Pallet,pbi->biClrUsed*sizeof(RGBQUAD),-1);*/
 							lbin = DecompressBinaryRecordUnsafe (pMemCmp,pMem,pMAPFILE->Size);
 							WriteToHBird (pMem,pMAPFILE->Size);
-						//	hMem2 = GSSiGlobAlloc (1587,GMEM_MOVEABLE,lbin);
+						//	hMem2 = GSSiGlobAlloc(GAIDNO 1587,GMEM_MOVEABLE,lbin);
 							pMem2 = malloc (lbin);//GlobalLock (hMem2);
 							memmove (pMem2,pMemCmp,lbin);
 							lMemDeCmp = DeCompressByteArray (pMem2,pMemCmp,lbin);
@@ -1447,7 +1447,7 @@ BOOL MapImageExport (LPSTR MapImageFile,LPSTR Type,LPSTR OutFile,long GridID,LPM
 				}
 				if (FidBIN != HFILE_ERROR)
 				{
-					HANDLE	hMem=GSSiGlobAlloc (1588,GMEM_MOVEABLE,pMAPFILE->Size);
+					HANDLE	hMem=GSSiGlobAlloc(GAIDNO 1588,GMEM_MOVEABLE,pMAPFILE->Size);
 					HPSTR	pMem=GlobalLock (hMem);
 					
 					GSSillseek2 (FidBIN,pMAPFILE->Loc,0);
@@ -1598,7 +1598,7 @@ BOOL MapExtractExport (LPSTR MapImageFile,LPSTR Type,LPSTR OutFile,long GridID)
 				GSSillseek2 (FidBIN,Offset,0);
 				BigRead (FidBIN,(LPSTR)&lenTile,sizeof(int));
 				{
-					HANDLE	hMem=GSSiGlobAlloc (1588,GMEM_MOVEABLE,lenTile);
+					HANDLE	hMem=GSSiGlobAlloc(GAIDNO 1588,GMEM_MOVEABLE,lenTile);
 					HPSTR	pMem=GlobalLock (hMem);
 					
 					BigRead (FidBIN,pMem,lenTile);
@@ -2004,7 +2004,7 @@ BOOL ContourTextExport (LPSTR ContourTextFile,LPSTR Type,LPSTR OutFile,long Grid
 	{
 	    LPGWDHEADER lpGWDHead = (LPGWDHEADER)GlobalLock (hDB);
 		LPSAVECONTEXT	pSaveC = (LPSAVECONTEXT)&lpGWDHead->GWDData; 
-		HANDLE	hMem = GSSiGlobAlloc (1591,GMEM_MOVEABLE,MAX_CTEXT_PER_CELL * sizeof(CTEXTOUTREC));
+		HANDLE	hMem = GSSiGlobAlloc(GAIDNO 1591,GMEM_MOVEABLE,MAX_CTEXT_PER_CELL * sizeof(CTEXTOUTREC));
 		LPSTR	pMem = GlobalLock (hMem);
 		int		nInRec=0, nSkip=1, n=0;
 
@@ -2296,7 +2296,7 @@ BOOL MapImagePointExport (LPSTR PointFile,LPSTR Type,LPSTR OutFile,long GridID)
 	{
 	    LPGWDHEADER lpGWDHead = (LPGWDHEADER)GlobalLock (hDB);
 		LPMAPPOINTS	pMapPoints = (LPMAPPOINTS)&lpGWDHead->GWDData; 
-		HANDLE	hMem = GSSiGlobAlloc (1591,GMEM_MOVEABLE,MAX_POINT_PER_CELL * sizeof(MAPPOINTOUTREC));
+		HANDLE	hMem = GSSiGlobAlloc(GAIDNO 1591,GMEM_MOVEABLE,MAX_POINT_PER_CELL * sizeof(MAPPOINTOUTREC));
 		LPSTR	pMem = GlobalLock (hMem);
 
 		FidOut = GSSiOpenFile (OutFile,0,OF_CREATE);
@@ -2431,7 +2431,7 @@ BOOL MapImageCityLakeNameExport (LPSTR PointFile,LPSTR Type,LPSTR OutFile,long G
 	int		i, FirstIndex, RecSize, nCellRecs=0,ii,maxname=0;
 	char	GridName[16];
 	BOOL	Done = FALSE,limitReached = FALSE;
-	HANDLE	hGridDef = GSSiGlobAlloc (0,GMEM_MOVEABLE,SHRT_MAX);
+	HANDLE	hGridDef = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,SHRT_MAX);
 	LPSTR	pGridDef = GlobalLock (hGridDef);
 	LPCITYLAKENAMEOUTREC 	pMapPointOutRec;
 	BOOL	Google = FALSE;
@@ -2460,7 +2460,7 @@ BOOL MapImageCityLakeNameExport (LPSTR PointFile,LPSTR Type,LPSTR OutFile,long G
 	{
 	    LPGWDHEADER lpGWDHead = (LPGWDHEADER)GlobalLock (hDB);
 		LPCITYLAKENAMES	pCLNames = (LPCITYLAKENAMES)&lpGWDHead->GWDData; 
-		HANDLE	hMem = GSSiGlobAlloc (1591,GMEM_MOVEABLE,(MAX_NAMES_PER_CELL+1) * sizeof(CITYLAKENAMEOUTREC));
+		HANDLE	hMem = GSSiGlobAlloc(GAIDNO 1591,GMEM_MOVEABLE,(MAX_NAMES_PER_CELL+1) * sizeof(CITYLAKENAMEOUTREC));
 		LPSTR	pMem = GlobalLock (hMem);
 
 		FidOut = GSSiOpenFile (OutFile,0,OF_CREATE);
@@ -2902,7 +2902,7 @@ Exit:
 	if (Final && !ConfigLevel && CurrentConfig && hEndDisplayCommand)
 	{
 		HANDLE	hCmd=hEndDisplayCommand;  
-		HANDLE	hTemp=GSSiGlobAlloc (1589,GMEM_MOVEABLE,4096);
+		HANDLE	hTemp=GSSiGlobAlloc(GAIDNO 1589,GMEM_MOVEABLE,4096);
 		LPSTR	pCmd=GlobalLock (hCmd);
 		LPSTR	pTemp=GlobalLock (hTemp);
 		BOOL	DeleteCommand = TRUE;

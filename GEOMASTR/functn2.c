@@ -61,7 +61,7 @@ short GetFunArgs(LPSTR	Args, LPSTR *Arg, short MaxArgs, LPHANDLE phMem, LPBREAKP
 	LPSTR	*pArg=Arg, LastArg, ParLoc, begArgs; 
 	UINT	i;
 	                 
-	*phMem = GSSiGlobAlloc (1141,GMEM_MOVEABLE,abs(MaxArgs) * MAXARGLENGTH); 
+	*phMem = GSSiGlobAlloc(GAIDNO 1141,GMEM_MOVEABLE,abs(MaxArgs) * MAXARGLENGTH); 
 	pArg++;
 	LastArg = begArgs = *pArg = GlobalLock (*phMem);   
 	pArg++;  
@@ -199,7 +199,7 @@ GSSiExitProg (1350);
 	}
 	if (TraceOn)
 	{
-		hMem=GSSiGlobAlloc (1142,GMEM_MOVEABLE,4096);
+		hMem=GSSiGlobAlloc(GAIDNO 1142,GMEM_MOVEABLE,4096);
 		lpstr = GlobalLock (hMem);
 		sprintf (lpstr,"GFV:%s(%s)",LastFunctionName,Args);
 		GSSiTraceLev (lpstr,1,2);
@@ -284,7 +284,7 @@ GSSiExitProg (1350);
 			}
 			else
 			{
-				hCmd = GSSiGlobAlloc(1145, GMEM_MOVEABLE, 1024);
+				hCmd = GSSiGlobAlloc(GAIDNO 1145, GMEM_MOVEABLE, 1024);
 				cmd = GlobalLock(hCmd);
 				_fstrcpy(cmd, "[%TEXT_EDITOR]");
 				ExpandText(cmd);
@@ -316,7 +316,7 @@ GSSiExitProg (1350);
 			mindist = atof (Arg[4]);
 			if ((Fid = GSSiOpenFile (Arg[1],0,OF_READ))==HFILE_ERROR)
 				goto RtnFalse;  
-			hTemp = GSSiGlobAlloc (1147,GMEM_MOVEABLE,1024);
+			hTemp = GSSiGlobAlloc(GAIDNO 1147,GMEM_MOVEABLE,1024);
 			TmpName = GlobalLock (hTemp);
 			str = TmpName + 256;
 			GSSiGetTempFileName (0,"gmt",0,(LPSTR)TmpName);
@@ -438,7 +438,7 @@ GSSiExitProg (1350);
 			if ((Fid = GSSiOpenFile (Arg[1],0,OF_READ))==HFILE_ERROR)
 				goto RtnFalse;  
 			ipt = 0; 
-			hTemp = GSSiGlobAlloc (1149,GMEM_MOVEABLE,512);
+			hTemp = GSSiGlobAlloc(GAIDNO 1149,GMEM_MOVEABLE,512);
 			str = GlobalLock (hTemp);
 			while (fgetstring (str,128,Fid))
 			{   
@@ -495,7 +495,7 @@ GSSiExitProg (1350);
 				    Fid=GSSiOpenFile (lpCLFile,0,OF_READ);  
 	    			if (Fid==HFILE_ERROR)
 	    				goto RtnFalse; 
-	    			hTemp = GSSiGlobAlloc (1151,GMEM_MOVEABLE,1024);
+	    			hTemp = GSSiGlobAlloc(GAIDNO 1151,GMEM_MOVEABLE,1024);
 	    			str = GlobalLock (hTemp);
 					if (!GetVal (lpCLGlob, str))
 						_fstrcpy (str,"-1");
@@ -643,7 +643,7 @@ GSSiExitProg (1350);
 			nArgs = GetFunArgs(Args, Arg, 1, &hMem, pBrkPt, bpOffset, bpLen);
 			if (!*Arg[1])
 				goto RtnFalse;
-			hMem = GSSiGlobAlloc(1142, GMEM_MOVEABLE, 4096);
+			hMem = GSSiGlobAlloc(GAIDNO 1142, GMEM_MOVEABLE, 4096);
 			lpstr = GlobalLock(hMem);
 			sprintf(lpstr, "[%s]", Arg[1]);
 			Color = GetGlobalLVal (lpstr);
@@ -722,7 +722,7 @@ GSSiExitProg (1350);
 		 
 		case 814: //$TCPCLOSE(socket)
 		{				
-			hMem = GSSiGlobAlloc (1155,GMEM_MOVEABLE,4096);
+			hMem = GSSiGlobAlloc(GAIDNO 1155,GMEM_MOVEABLE,4096);
 			Arg1 = GlobalLock(hMem);
 			
 			_fstrcpy (Arg1,Args);
@@ -1088,7 +1088,7 @@ GSSiExitProg (1350);
           LPSTR		pReorgParms;
           
 		  nArgs = GetFunArgs(Args, Arg, 4, &hMem, pBrkPt, bpOffset, bpLen);
-          hReorgParms = GSSiGlobAlloc (1166,GMEM_MOVEABLE,1024);
+          hReorgParms = GSSiGlobAlloc(GAIDNO 1166,GMEM_MOVEABLE,1024);
           pReorgParms = GlobalLock (hReorgParms);  
           sprintf (pReorgParms,"%s\t%s\t%s\t%s",Arg[1],Arg[2],Arg[3],Arg[4]);
           GlobalUnlock (hReorgParms);
@@ -1311,7 +1311,7 @@ GSSiExitProg (1350);
 			{
 				int	Level=40960*2;
 				MNMXCORL FileBounds;
-				HANDLE	hFiles=GSSiGlobAlloc (0,GMEM_MOVEABLE,1024);
+				HANDLE	hFiles=GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,1024);
 				LPSTR	pFile=GlobalLock (hFiles), pOutFile=pFile+512;
 				char	Subfile='A';
 				HFILE	FidOut;
@@ -1455,7 +1455,7 @@ GSSiExitProg (1350);
 				if (ld > 0)
 
 				GSSiGlobUlFree (&hPNGrid);
-				hPNGrid = GSSiGlobAlloc (0,GMEM_MOVEABLE,ld);
+				hPNGrid = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,ld);
 				pDataInit = GlobalLock (hPNGrid);
 				Fid = GSSiOpenFile (Arg[2],0,OF_READ);
 				BigRead (Fid,pDataInit,ld);
@@ -1736,7 +1736,7 @@ GSSiExitProg (1350);
 
 					if (l > 0)
 					{
-						HANDLE handle = GSSiGlobAlloc(1853, GHND, l + 4);
+						HANDLE handle = GSSiGlobAlloc(GAIDNO 1853, GHND, l + 4);
 						LPSTR pMem = GlobalLock(handle);
 
 						BigRead(fid, pMem, l);
@@ -1770,7 +1770,7 @@ GSSiExitProg (1350);
 					int whichat = 0;
 					GSSillseek(fid, 0, SEEK_SET);
 					int lFile = GSSifilelength(fid);
-					HANDLE hFile = GSSiGlobAlloc(0, GMEM_MOVEABLE, lFile+4);
+					HANDLE hFile = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, lFile+4);
 					LPSTR pFile = GlobalLock(hFile);
 					LPSTR pAt = pFile, pBeg, pEnd;
 					LPSTR pStart = pFile;
@@ -2194,7 +2194,7 @@ GSSiExitProg (1350);
               	goto RtnFalse;
         }
 		case 915: // $ORTHOSIZE() shows size of orthos plotted since last call  
-			hMem = GSSiGlobAlloc (1176,GMEM_MOVEABLE,2048);
+			hMem = GSSiGlobAlloc(GAIDNO 1176,GMEM_MOVEABLE,2048);
 			Arg1 = GlobalLock(hMem);  
 			sprintf (Arg1,"%ld Records, %lu bytes",nOrthoBlocks,nOrthoBytes); 
 			MessageBox (GetFocus(),Arg1,"",MB_OK);
@@ -2234,9 +2234,9 @@ GSSiExitProg (1350);
 				{
 					BTVARDESC	BTVar[2];
 					HANDLE	hBTTemp;
-					HANDLE hTmp = GSSiGlobAlloc(0, GMEM_MOVEABLE, MAX_PATH);
+					HANDLE hTmp = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, MAX_PATH);
 					LPSTR pTempFile = GlobalLock(hTmp);
-					HANDLE hLine = GSSiGlobAlloc(0, GMEM_MOVEABLE, 4096);
+					HANDLE hLine = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, 4096);
 					LPSTR pLine = GlobalLock(hLine);
 					int offset=0;
 					int pos = BT_FIRST;
@@ -2954,7 +2954,7 @@ GSSiExitProg (1350);
 			nArgs = GetFunArgs(Args, Arg, 5, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 3)
 				goto RtnFalse;
-			hDCPSetup = GSSiGlobAlloc (1179,GMEM_MOVEABLE,1024);
+			hDCPSetup = GSSiGlobAlloc(GAIDNO 1179,GMEM_MOVEABLE,1024);
 			lpstr = GlobalLock (hDCPSetup);
 			_fstrcpy (lpstr,Arg[1]);
 			lpstr = _fstrchr (lpstr,0);
@@ -2986,7 +2986,7 @@ GSSiExitProg (1350);
 				goto RtnTrue;
 			if (atob (Arg[2]))
 			{   
-				HANDLE	hTemp=GSSiGlobAlloc (1181,GMEM_MOVEABLE,512);
+				HANDLE	hTemp=GSSiGlobAlloc(GAIDNO 1181,GMEM_MOVEABLE,512);
 				LPSTR	Mess=GlobalLock (hTemp);
              	sprintf (Mess,"Delete file '%s'?",Arg[1]);
              	st = MessageBox (GetFocus(),Mess,"Verify Delete",MB_YESNO); 
@@ -3774,7 +3774,7 @@ GSSiExitProg (1350);
         {   
         	short	Layer;
         	BOOL	rtn; 
-        	HANDLE	hSaveVis = GSSiGlobAlloc (1194,GMEM_MOVEABLE,sizeof(VISLIST));
+        	HANDLE	hSaveVis = GSSiGlobAlloc(GAIDNO 1194,GMEM_MOVEABLE,sizeof(VISLIST));
         	LPVISLIST	pSaveVis = (LPVISLIST)GlobalLock (hSaveVis);
         	
 			nArgs = GetFunArgs(Args, Arg, 1, &hMem, pBrkPt, bpOffset, bpLen);
@@ -3895,7 +3895,7 @@ GSSiExitProg (1350);
 			int		nLinesProcessed = 0;
 
 			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
-			hMem = GSSiGlobAlloc(1200, GMEM_MOVEABLE, MAXARGLENGTH * 2 + 4096 + 1024);
+			hMem = GSSiGlobAlloc(GAIDNO 1200, GMEM_MOVEABLE, MAXARGLENGTH * 2 + 4096 + 1024);
 			Arg1 = GlobalLock(hMem);
 			Arg2 = Arg1 + 1024;
 			Arg3 = Arg2 + MAXARGLENGTH;
@@ -4163,7 +4163,7 @@ GSSiExitProg (1350);
 			nArgs = GetFunArgs(Args, Arg, 6, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 4)
 				goto RtnFalse;
-			hSelectItemsArgs = GSSiGlobAlloc (1203,GHND,1024);
+			hSelectItemsArgs = GSSiGlobAlloc(GAIDNO 1203,GHND,1024);
 			Arg5 = GlobalLock (hSelectItemsArgs);   
 			*Arg5 = *Arg[3]; 
 			Arg5[1] = *Arg[5];
@@ -4207,7 +4207,7 @@ GSSiExitProg (1350);
 		case 1113: //$FONTDISPLAY(FontName)
 		{   
 			
-			hMem = GSSiGlobAlloc (1205,GMEM_MOVEABLE,4*2048);
+			hMem = GSSiGlobAlloc(GAIDNO 1205,GMEM_MOVEABLE,4*2048);
 			Arg1 = GlobalLock(hMem); 
 			_fstrcpy (Arg1,Args);       
 			ExpandText(Arg1);
@@ -4218,7 +4218,7 @@ GSSiExitProg (1350);
 		case 1114: // $WETLANDDESC(wetsymname,Compressed COW)
 		{   
 			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
-			hMem = GSSiGlobAlloc (1206,GMEM_MOVEABLE,2*2048);
+			hMem = GSSiGlobAlloc(GAIDNO 1206,GMEM_MOVEABLE,2*2048);
 			Arg1 = GlobalLock(hMem);
 			Arg2 = Arg1 + 2048; 
 			
@@ -4249,7 +4249,7 @@ GSSiExitProg (1350);
 		case 1116:  // $BLOCKEDREFS(OPEN) 
 					// $BLOCKEDREFS(CLOSE,outpath)
 		{	 
-			hMem = GSSiGlobAlloc (1208,GMEM_MOVEABLE,2*2048);
+			hMem = GSSiGlobAlloc(GAIDNO 1208,GMEM_MOVEABLE,2*2048);
 			Arg1 = GlobalLock(hMem);
 			Arg2 = Arg1 + 2048; 
 			
@@ -4267,7 +4267,7 @@ GSSiExitProg (1350);
 			{
 				if (!hBlockedRefFile)                                   
 				{
-					hBlockedRefFile = GSSiGlobAlloc (1209,GMEM_MOVEABLE,256);
+					hBlockedRefFile = GSSiGlobAlloc(GAIDNO 1209,GMEM_MOVEABLE,256);
 		    		pFile = GlobalLock (hBlockedRefFile);
 		        	GSSiGetTempFileName (0,"gm",0,pFile);  
 		        }
@@ -4296,7 +4296,7 @@ GSSiExitProg (1350);
 		case 1117: //$LOADNEWDATA(dir)
 		{   
 			
-			hMem = GSSiGlobAlloc (1210,GMEM_MOVEABLE,4*2048);
+			hMem = GSSiGlobAlloc(GAIDNO 1210,GMEM_MOVEABLE,4*2048);
 			Arg1 = GlobalLock(hMem); 
 			_fstrcpy (Arg1,Args);       
 			ExpandText(Arg1);
@@ -4320,7 +4320,7 @@ GSSiExitProg (1350);
 		case 1119: //$SETREDEFINE()
 		{   
 			
-			hMem = GSSiGlobAlloc (1212,GMEM_MOVEABLE,sizeof(HIGHLIGHTDATA)); 
+			hMem = GSSiGlobAlloc(GAIDNO 1212,GMEM_MOVEABLE,sizeof(HIGHLIGHTDATA)); 
 			pHighlightData = (LPHIGHLIGHTDATA)GlobalLock (hMem);
 			if (!BT_FIND (hHighlight,(LPSTR)&Refno,BT_FIRST,BT_ANY,(LPSTR)pHighlightData))
 				SetRedefineData (&pHighlightData->PD);  
@@ -4627,7 +4627,7 @@ GSSiExitProg (1350);
 				LPSTR	pName;
 
 				nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
-				hName = GSSiGlobAlloc(17, GHND, 1024);
+				hName = GSSiGlobAlloc(GAIDNO 17, GHND, 1024);
 				pName = GlobalLock(hName);
 				strcpy(pName, Arg[2]);
 				GlobalUnlock(hName);
@@ -4775,7 +4775,7 @@ GSSiExitProg (1350);
 			Bounds = atobounds (Arg[1],&Err);
 			if (Err)
 				goto RtnFalse;  
-			hPnts = GSSiGlobAlloc (1214,GMEM_MOVEABLE,4 * sizeof(DPOINT));  
+			hPnts = GSSiGlobAlloc(GAIDNO 1214,GMEM_MOVEABLE,4 * sizeof(DPOINT));  
 			Points = (HPDPOINT)GlobalLock (hPnts);
 			Points[0].x = Bounds.xmn;
 			Points[0].y = Bounds.ymn;
@@ -5224,7 +5224,7 @@ GSSiExitProg (1350);
 			SaveZooms (&Bounds); 
 	        ForceBounds = FALSE;
 			GSSiGlobFree (&hSavedConfig[ConfigLevel]);
-	    	hSavedConfig[ConfigLevel] = GSSiGlobAlloc (1216,GMEM_MOVEABLE,256);  
+	    	hSavedConfig[ConfigLevel] = GSSiGlobAlloc(GAIDNO 1216,GMEM_MOVEABLE,256);  
 	    	ConfigRect[ConfigLevel] = Rect;   
 	    	NextCFGTAG[ConfigLevel] = TBNum+1;
     		pFile = GlobalLock (hSavedConfig[ConfigLevel]);
@@ -5251,7 +5251,7 @@ GSSiExitProg (1350);
         
         case 1302: //$NUMNONCONTROL (text)
         {   
-			hMem = GSSiGlobAlloc (1217,GMEM_MOVEABLE,3*2048);
+			hMem = GSSiGlobAlloc(GAIDNO 1217,GMEM_MOVEABLE,3*2048);
 			Arg1 = GlobalLock(hMem); 
 			_fstrcpy (Arg1,Args);
 			ExpandText (Arg1);
@@ -5284,7 +5284,7 @@ GSSiExitProg (1350);
 		{   BOOL SaveSaveZoom = SaveZoom, SaveSaveGlobals = SaveGlobals, rtn;
 
 			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
-			hMem = GSSiGlobAlloc (1218,GMEM_MOVEABLE,4*2048);
+			hMem = GSSiGlobAlloc(GAIDNO 1218,GMEM_MOVEABLE,4*2048);
 			Arg1 = GlobalLock(hMem);
 			Arg2 = Arg1 + 2048; 
 			Arg3 = Arg2 + 2048; 
@@ -5320,7 +5320,7 @@ GSSiExitProg (1350);
 		case 1305: // $SPLITXFERFILE(xfername,xferdir,numparts)
 		{   
 			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
-			hMem = GSSiGlobAlloc (1219,GMEM_MOVEABLE,3*2048);
+			hMem = GSSiGlobAlloc(GAIDNO 1219,GMEM_MOVEABLE,3*2048);
 			Arg1 = GlobalLock(hMem);
 			Arg2 = Arg1 + 2048; 
 			Arg3 = Arg2 + 2048;
@@ -5351,7 +5351,7 @@ GSSiExitProg (1350);
 			nArgs = GetFunArgs(Args, Arg, 9, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 7)
 				goto RtnFalse;
-			hSelectItemsArgs = GSSiGlobAlloc (1220,GHND,128+1024+256+1024+256+64+64+256+256);
+			hSelectItemsArgs = GSSiGlobAlloc(GAIDNO 1220,GHND,128+1024+256+1024+256+64+64+256+256);
 			Arg1 = GlobalLock (hSelectItemsArgs);   
 			_fstrcpy (&Arg1[0],Arg[1]); //database
 			_fstrcpy (&Arg1[128],Arg[2]);//SQL
@@ -5425,7 +5425,7 @@ GSSiExitProg (1350);
 
 		case 1312: // $PARENTSYMBOLS(underparent)  //displays list of parents to select from
 		{				
-			hMem = GSSiGlobAlloc (1178,GMEM_MOVEABLE,4096);
+			hMem = GSSiGlobAlloc(GAIDNO 1178,GMEM_MOVEABLE,4096);
 			Arg1 = GlobalLock(hMem);
 			
 			_fstrcpy (Arg1,Args);
@@ -5525,7 +5525,7 @@ GSSiExitProg (1350);
 			
 			GSSiGlobFree (&hTextString);  
     		GSSiGlobFree (&hPickedTextHeader);
-		    hPickedTextHeader = GSSiGlobAlloc (1221,GMEM_MOVEABLE,sizeof(GRTEXTHEADER)+512); 
+		    hPickedTextHeader = GSSiGlobAlloc(GAIDNO 1221,GMEM_MOVEABLE,sizeof(GRTEXTHEADER)+512); 
         	if (GetNextHLTListItem (TRUE,TRUE)) 
         	{   
         		if (hPickedTextHeader)
@@ -5563,7 +5563,7 @@ GSSiExitProg (1350);
 		{   
 			 
 			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
-			hMem = GSSiGlobAlloc (1222,GMEM_MOVEABLE,2*2048);
+			hMem = GSSiGlobAlloc(GAIDNO 1222,GMEM_MOVEABLE,2*2048);
 			Arg1 = GlobalLock(hMem);
 			Arg2 = Arg1 + 2048; 
 			
@@ -5597,7 +5597,7 @@ GSSiExitProg (1350);
         {   
         	LPLOGFONT pLogFont;
         	
-			hMem = GSSiGlobAlloc (1224,GMEM_MOVEABLE,2048+sizeof(LOGFONT));
+			hMem = GSSiGlobAlloc(GAIDNO 1224,GMEM_MOVEABLE,2048+sizeof(LOGFONT));
 			Arg1 = GlobalLock(hMem);
 			pLogFont = (LPLOGFONT)(Arg1+2048);
 			
@@ -5620,7 +5620,7 @@ GSSiExitProg (1350);
 			Bounds = atobounds (Arg[1],&Err);
 			if (!Err)
 			{    
-				hPoints = GSSiGlobAlloc (1225,GMEM_MOVEABLE,4*sizeof(DPOINT));
+				hPoints = GSSiGlobAlloc(GAIDNO 1225,GMEM_MOVEABLE,4*sizeof(DPOINT));
 				pPoint = (HPDPOINT)GlobalLock (hPoints);
 				BoundsToPoints (&Bounds,pPoint,0);  
 				if (*Arg[2])
@@ -5700,7 +5700,7 @@ GSSiExitProg (1350);
 			if (Fid != HFILE_ERROR)
 			{
 				int	ln = GSSifilelength (Fid);
-				HANDLE	hMem = GSSiGlobAlloc (0,GMEM_MOVEABLE,ln+1);
+				HANDLE	hMem = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,ln+1);
 
 				if (hMem)
 				{
@@ -5736,7 +5736,7 @@ GSSiExitProg (1350);
 				int i;
 				char replaceChar='0x1';
 				int	ln = GSSifilelength (Fid);
-				HANDLE	hMem = GSSiGlobAlloc (0,GMEM_MOVEABLE,ln+1);
+				HANDLE	hMem = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,ln+1);
 
 				if (*Arg[3])
 					replaceChar = *Arg[3];
@@ -5777,7 +5777,7 @@ GSSiExitProg (1350);
 		}
         case 1501: //$OPENVEHICLEFILE(filename,Delay) 
         {
-			hMem = GSSiGlobAlloc (1226,GMEM_MOVEABLE,3*2048);
+			hMem = GSSiGlobAlloc(GAIDNO 1226,GMEM_MOVEABLE,3*2048);
 			Arg1 = GlobalLock(hMem);
 			Arg2 = Arg1 + 2048; 
 			Arg3 = Arg2 + 2048;
@@ -5905,7 +5905,7 @@ GSSiExitProg (1350);
 				BOOL	KeepMemLengthSave=KeepMemLength;
 				
 	           	KeepMemLength = TRUE;  
-		        hStr = GSSiGlobAlloc (1228,GHND,4096);  
+		        hStr = GSSiGlobAlloc(GAIDNO 1228,GHND,4096);  
 	   	        KeepMemLength = KeepMemLengthSave;
 	   	       	str = GlobalLock (hStr);  
 	   	       	_fstrcpy (str,Arg[1]);
@@ -6008,7 +6008,7 @@ GSSiExitProg (1350);
 				goto RtnFalse;
 			if (atob (Arg[2]))
 			{   
-				HANDLE	hTemp=GSSiGlobAlloc (1181,GMEM_MOVEABLE,512);
+				HANDLE	hTemp=GSSiGlobAlloc(GAIDNO 1181,GMEM_MOVEABLE,512);
 				LPSTR	Mess=GlobalLock (hTemp);
              	sprintf (Mess,"Delete directory '%s'?",Arg[1]);
 				ExpandText(Mess);
@@ -6100,7 +6100,7 @@ GSSiExitProg (1350);
 		case 1601: //$CREATESPORTMAPCD(orderfile,outdir) 
         {
 			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
-			hMem = GSSiGlobAlloc (1229,GMEM_MOVEABLE,3*2048);
+			hMem = GSSiGlobAlloc(GAIDNO 1229,GMEM_MOVEABLE,3*2048);
 			Arg1 = GlobalLock(hMem);
 			Arg2 = Arg1 + 2048; 
 			Arg3 = Arg2 + 2048;
@@ -6180,7 +6180,7 @@ GSSiExitProg (1350);
 					HPDPOINT	pPoints=GlobalLock (hPoints), pNewPoints;
 
 					if (!NumNewPolyPoints)
-						hNewPolyPoints = GSSiGlobAlloc (0,GMEM_MOVEABLE,USHRT_MAX*sizeof(DPOINT));
+						hNewPolyPoints = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,USHRT_MAX*sizeof(DPOINT));
 
 					pNewPoints=GlobalLock (hNewPolyPoints);
 					for (i=0;i<nlong;i++)
@@ -6261,7 +6261,7 @@ GSSiExitProg (1350);
 			{
 				int loc = GSSillseek (Fid1,0,2);
 				int	ln;
-				HANDLE	hBuf = GSSiGlobAlloc (0,GMEM_MOVEABLE,lBuf);
+				HANDLE	hBuf = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,lBuf);
 				LPSTR	pBuf = GlobalLock (hBuf);
 
 				Fid2 = GSSiOpenFile (Arg[2],0,OF_READ);
@@ -6441,7 +6441,7 @@ GSSiExitProg (1350);
 
         case 1801: //$LOADBLOCKINGPOINTS (file)
         {   
-			hMem = GSSiGlobAlloc (1230,GMEM_MOVEABLE,3*2048);
+			hMem = GSSiGlobAlloc(GAIDNO 1230,GMEM_MOVEABLE,3*2048);
 			Arg1 = GlobalLock(hMem); 
 			_fstrcpy (Arg1,Args);
 			ExpandText (Arg1); 
@@ -6451,7 +6451,7 @@ GSSiExitProg (1350);
         }
         case 1802: //$NEWELEMENTSETTINGS(type) A,PorL
         {   
-			hMem = GSSiGlobAlloc (1231,GMEM_MOVEABLE,2048);
+			hMem = GSSiGlobAlloc(GAIDNO 1231,GMEM_MOVEABLE,2048);
 			Arg1 = GlobalLock(hMem); 
 			_fstrcpy (Arg1,Args);
 			ExpandText (Arg1); 
@@ -6511,7 +6511,7 @@ GSSiExitProg (1350);
 		}
 		case 1901: //$CONVERTTEXTPOINTERS ()
 		{
-			hMem = GSSiGlobAlloc(1232, GMEM_MOVEABLE, 3 * 2048);
+			hMem = GSSiGlobAlloc(GAIDNO 1232, GMEM_MOVEABLE, 3 * 2048);
 			Arg1 = GlobalLock(hMem);
 			_fstrcpy(Arg1, Args);
 			ExpandText(Arg1);
@@ -6642,7 +6642,7 @@ Exit:
 	GSSiGlobUlFree (&hMem);
 	if (TraceOn)
 	{
-		hMem=GSSiGlobAlloc (1233,GMEM_MOVEABLE,4096);
+		hMem=GSSiGlobAlloc(GAIDNO 1233,GMEM_MOVEABLE,4096);
 		lpstr = GlobalLock (hMem);
 		sprintf (lpstr,"GFV:%s",Args);
 		GSSiTraceLev (lpstr,-1,2);

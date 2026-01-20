@@ -1114,7 +1114,7 @@ BOOL MergeDocImageIntoViewport(HBITMAP hNewBitmap, LPRECT pRect, LPSTR title, in
 			n++;
 		}
 	}
-	hArgs = GSSiGlobAlloc(9999, GMEM_MOVEABLE, 4096 * 5);
+	hArgs = GSSiGlobAlloc(GAIDNO 9999, GMEM_MOVEABLE, 4096 * 5);
 	arg1 = GlobalLock(hArgs);
 	arg2 = arg1 + 4096;
 	arg3 = arg2 + 4096;

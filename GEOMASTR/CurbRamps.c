@@ -3482,7 +3482,7 @@ BOOL GetFileFromServer(LPSTR fromFile, LPSTR toFileName, LPSTR fromDir, LPSTR to
 }
 HANDLE OpenServerFTP (LPSTR serverDir, int serverNumber, LPSTR errorVar)
 {
-	HANDLE hFTPStruct = GSSiGlobAlloc(1781, GHND, sizeof(FTPSTRUCT));
+	HANDLE hFTPStruct = GSSiGlobAlloc(GAIDNO 1781, GHND, sizeof(FTPSTRUCT));
 	LPFTPSTRUCT pFTPStruct = GlobalLock(hFTPStruct);
 	char server[32];
 	char loginID[] = "GSSiProfessionalServer";

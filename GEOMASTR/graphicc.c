@@ -768,7 +768,7 @@ LPJLBPDATA	pData;
 			YTO[0] = NewBP.y;
 			YTO[1] = NewEP.y;
 			hTran = STRAN2 (1635,XFROM,YFROM,XTO,YTO,2,&RSQMIN,1,0);  
-			hOutPoints = GSSiGlobAlloc (1549,GMEM_MOVEABLE,sizeof(DPOINT)*(1+np));
+			hOutPoints = GSSiGlobAlloc(GAIDNO 1549,GMEM_MOVEABLE,sizeof(DPOINT)*(1+np));
 			Points = (LPDPOINT)GlobalLock (hPoints);
 			OutPoints = (LPDPOINT)GlobalLock (hOutPoints);
 			for (i=0;i<np;i++)
@@ -823,9 +823,9 @@ void RunTransferFileCommand (void)
 BOOL AddFileToTransferFile (HWND hWndStatus,HANDLE FidTF,LPSTR FileToAdd,long MaxLength,LPSTR sourceDir,BOOL useGZip)
 {   
 	long	lRec;
-    HANDLE	hRec = GSSiGlobAlloc (1550,GMEM_MOVEABLE,MaxLength);
+    HANDLE	hRec = GSSiGlobAlloc(GAIDNO 1550,GMEM_MOVEABLE,MaxLength);
     HPSTR	pRec = GlobalLock (hRec); 
-    HANDLE	hCompressedRec = GSSiGlobAlloc (1551,GMEM_MOVEABLE,MaxLength*2);
+    HANDLE	hCompressedRec = GSSiGlobAlloc(GAIDNO 1551,GMEM_MOVEABLE,MaxLength*2);
     HPSTR	pCompressedRec = GlobalLock (hCompressedRec); 
     long	CompressedLength;  
 	HFILE	Fid;
@@ -870,9 +870,9 @@ Exit:
 BOOL GetFileFromTransferFile(HWND hWndStatus, HANDLE FidTF, LPSTR FileToGet, long LenToRead, LONGLONG MaxLength, BOOL zlibCompressed)
 {
 	long	lRec;
-	HANDLE	hRec = GSSiGlobAlloc(1552, GMEM_MOVEABLE, MaxLength);
+	HANDLE	hRec = GSSiGlobAlloc(GAIDNO 1552, GMEM_MOVEABLE, MaxLength);
 	HPSTR	pRec = GlobalLock(hRec);
-	HANDLE	hCompressedRec = GSSiGlobAlloc(1553, GMEM_MOVEABLE, MaxLength * 2);
+	HANDLE	hCompressedRec = GSSiGlobAlloc(GAIDNO 1553, GMEM_MOVEABLE, MaxLength * 2);
 	HPSTR	pCompressedRec = GlobalLock(hCompressedRec);
 	long	CompressedLength;
 	LONGLONG LenRead = 0;
@@ -907,9 +907,9 @@ BOOL GetFileFromTransferFile(HWND hWndStatus, HANDLE FidTF, LPSTR FileToGet, lon
 INT64 GetFileLenFromTransferFile(HANDLE FidTF,LONGLONG LenToRead, long MaxLength, BOOL zlibCompressed)
 {
 	long	lRec;
-	HANDLE	hRec = GSSiGlobAlloc(1552, GMEM_MOVEABLE, MaxLength);
+	HANDLE	hRec = GSSiGlobAlloc(GAIDNO 1552, GMEM_MOVEABLE, MaxLength);
 	HPSTR	pRec = GlobalLock(hRec);
-	HANDLE	hCompressedRec = GSSiGlobAlloc(1553, GMEM_MOVEABLE, MaxLength * 2);
+	HANDLE	hCompressedRec = GSSiGlobAlloc(GAIDNO 1553, GMEM_MOVEABLE, MaxLength * 2);
 	HPSTR	pCompressedRec = GlobalLock(hCompressedRec);
 	long	CompressedLength;
 	LONGLONG LenRead = 0;
@@ -1364,7 +1364,7 @@ BOOL FAR PASCAL SETGMDPARAMMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LP
 				 rtn = SelectPointSymbol (hWndDlg,1,SymName,"All",cWidth,cRot,cColor,FALSE);
                  if (!rtn)
                  	break;
-                 hMem = GSSiGlobAlloc (1421,GHND,4096);
+                 hMem = GSSiGlobAlloc(GAIDNO 1421,GHND,4096);
                  lpStr = GlobalLock (hMem);
                  if (GetSQLWhereClause (hWndDlg, hSHPDBF, lpStr))
                  {  
@@ -1423,7 +1423,7 @@ BOOL FAR PASCAL SETGMDPARAMMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LP
 		         	 HANDLE	hMem;
 		         	 LPSTR	lpStr;
 		         	 
-	                 hMem = GSSiGlobAlloc (1422,GHND,4096);
+	                 hMem = GSSiGlobAlloc(GAIDNO 1422,GHND,4096);
 	                 lpStr = GlobalLock (hMem);
                 	 SendDlgItemMessage(hWndDlg,IDC_SQL_LIST,LB_GETTEXT,Choice,(DWORD)lpStr); 
             		if (!hSHPDBF)
@@ -2846,7 +2846,7 @@ BOOL FixDupRef (void)
 	char	mess[256], Name[256];    
 	long	MaxRef, Refno, SaveFPFN, SaveFPFII;
 	short	pos = BT_FIRST, PickFile; 
-	HANDLE	hBTDup=hDupRef,hSaveVP=GSSiGlobAlloc ( 962,GMEM_MOVEABLE,sizeof(VIEWPORT));
+	HANDLE	hBTDup=hDupRef,hSaveVP=GSSiGlobAlloc(GAIDNO 962,GMEM_MOVEABLE,sizeof(VIEWPORT));
 	LPVIEWPORT	pSaveVP = CurView, SaveVP=(LPVIEWPORT)GlobalLock (hSaveVP);
 	LPSTR	lpDot;
 	REFINDEXDATA	RefIdxData;
@@ -2979,7 +2979,7 @@ long PickByRefno (long Refno,LPSTR InPrefix, LPSTR InUDI,short PickFile)
 	long	Sequence=LONG_MIN;
 	LPSTR	pBrace;   
 	HFILE	FidFL; 
-	HANDLE	hMem=GSSiGlobAlloc ( 963,GMEM_MOVEABLE,2*sizeof(REFINDEXDATA)+64);
+	HANDLE	hMem=GSSiGlobAlloc(GAIDNO 963,GMEM_MOVEABLE,2*sizeof(REFINDEXDATA)+64);
 	LPSTR	UDI=GlobalLock (hMem);
 	LPREFINDEXDATA	pRefIdxData=(LPREFINDEXDATA)(UDI+64);
 	LPREFINDEXDATA	pRefIdxDataTest=pRefIdxData+1;
@@ -3007,7 +3007,7 @@ long PickByRefno (long Refno,LPSTR InPrefix, LPSTR InUDI,short PickFile)
     NumPicked = 0; 
 	if (PickFile >= -100) 
 	{
-		hVisList=GSSiGlobAlloc ( 964,GHND,sizeof(VISLIST));
+		hVisList=GSSiGlobAlloc(GAIDNO 964,GHND,sizeof(VISLIST));
 		CurVis = (LPVISLIST)GlobalLock (hVisList);
 		CurVis->hVisList=hVisList;
 		InitVis ();
@@ -4521,7 +4521,7 @@ DoSid:
 	    if (LoadCompiledTran)
 	    {   
 	    	HFILE	TranFid;
-	    	HANDLE	hTranName=GSSiGlobAlloc ( 984,GMEM_MOVEABLE,256);
+	    	HANDLE	hTranName=GSSiGlobAlloc(GAIDNO 984,GMEM_MOVEABLE,256);
 	    	LPSTR	pDot,TranName=GlobalLock (hTranName);
 	    	
 			CloseTRANS2 (&hTranProjection);
@@ -4650,7 +4650,7 @@ DoSid:
 		        NewPrimeOffs.MaxTime=MaxFileTime;
 		        GSSillseek(FidMap,UsedDescOffset,0);
 		        BigRead (FidMap,(HPSTR)&nbytes,2);
-		        hSpace = GSSiGlobAlloc ( 985,GMEM_MOVEABLE,(DWORD)nbytes);
+		        hSpace = GSSiGlobAlloc(GAIDNO 985,GMEM_MOVEABLE,(DWORD)nbytes);
 		        Space = GlobalLock (hSpace);
 		        BigRead (FidMap,Space,(WORD)nbytes);  
 		        GlobalUnlock (hSpace);
@@ -4665,7 +4665,7 @@ DoSid:
 		        
 		        GSSillseek(FidMap,TranPointOffset,0);
 		        BigRead (FidMap,(HPSTR)&nbytes,2);
-		        hSpace = GSSiGlobAlloc ( 986,GMEM_MOVEABLE,(DWORD)nbytes);
+		        hSpace = GSSiGlobAlloc(GAIDNO 986,GMEM_MOVEABLE,(DWORD)nbytes);
 		        Space = GlobalLock (hSpace);
 		        BigRead (FidMap,Space,(WORD)nbytes);
 		        NewPrimeOffs.TranPointOffset = ReorgOut (Space,nbytes);
@@ -4673,7 +4673,7 @@ DoSid:
 		        
 		        GSSillseek(FidMap,ColorPaletteOffset,0);
 		        BigRead (FidMap,(HPSTR)&nbytes,2);
-		        hSpace = GSSiGlobAlloc ( 987,GMEM_MOVEABLE,(DWORD)nbytes);
+		        hSpace = GSSiGlobAlloc(GAIDNO 987,GMEM_MOVEABLE,(DWORD)nbytes);
 		        Space = GlobalLock (hSpace);
 		        BigRead (FidMap,Space,(WORD)nbytes);
 		        NewPrimeOffs.ColorPaletteOffset = ReorgOut (Space,nbytes);
@@ -4681,7 +4681,7 @@ DoSid:
 		        
 		        GSSillseek(FidMap,GraphicsOffset+14,0);
 		        BigRead (FidMap,(HPSTR)&lnquad,4);
-		        hSpace = GSSiGlobAlloc ( 988,GMEM_MOVEABLE,lnquad+16);
+		        hSpace = GSSiGlobAlloc(GAIDNO 988,GMEM_MOVEABLE,lnquad+16);
 		        Space = GlobalLock (hSpace);
 		        GSSillseek(FidMap,GraphicsOffset+2,0);
 		        BigRead (FidMap,Space,lnquad+16);
@@ -5589,7 +5589,7 @@ BOOL GetPolyPoints (LPPICKDATAHEADER PickData,BOOL Reverse,LPLONG pnPnts, LPHAND
 	short	SavePass;
 	int		nPolys, iPoly;
     LPVISLIST	SaveVis = CurVis;
-	HANDLE		hVisList=GSSiGlobAlloc ( 964,GHND,sizeof(VISLIST));
+	HANDLE		hVisList=GSSiGlobAlloc(GAIDNO 964,GHND,sizeof(VISLIST));
 	BOOL wasReordered;
 
 	if (PickData->Refno == 19047504)
@@ -5634,7 +5634,7 @@ BOOL GetPolyPoints (LPPICKDATAHEADER PickData,BOOL Reverse,LPLONG pnPnts, LPHAND
 					*pHandle = GSSiGlobalReAlloc(623, *pHandle, (nSavePoly+*pnPnts+1)*sizeof(DPOINT), GMEM_MOVEABLE);
 				}
 				else
-					*pHandle = GSSiGlobAlloc(623, GMEM_MOVEABLE, (nSavePoly + 1)*sizeof(DPOINT));
+					*pHandle = GSSiGlobAlloc(GAIDNO 623, GMEM_MOVEABLE, (nSavePoly + 1)*sizeof(DPOINT));
 				pPolyPoints = (HPDPOINT)GlobalLock(*pHandle);
 				hmemmove((HPSTR)&pPolyPoints[*pnPnts], (HPSTR)lpDpoint, nSavePoly*sizeof(DPOINT));
 				*pnPnts += nSavePoly;
@@ -5693,7 +5693,7 @@ BOOL GetPolyPoints3D (LPPICKDATAHEADER PickData,BOOL Reverse,LPLONG pnPnts, LPHA
             lpRect = (LPMNMXCORD) GlobalLock (hSavePoly);
             lpRect++;
             lpDpoint = (LPDPOINT) lpRect;  
-            *pHandle = GSSiGlobAlloc ( 623,GMEM_MOVEABLE,(nSavePoly+1)*sizeof(DPOINT3D));
+            *pHandle = GSSiGlobAlloc(GAIDNO 623,GMEM_MOVEABLE,(nSavePoly+1)*sizeof(DPOINT3D));
             pPolyPoints = (HPDPOINT3D)GlobalLock (*pHandle); 
             if (hSavePolyElev)
             	pElev = (HPFLOAT)GlobalLock (hSavePolyElev);
@@ -5777,7 +5777,7 @@ short GetPolyPoints2 (LPPICKDATAHEADER PickData,LPINT pNumPoints, LPHANDLE phPoi
 	            	HPDPOINT	pNewPoint;
 								                        	
 	            	*pNumPoints = *pPolyParts;
-	            	*phPoints= GSSiGlobAlloc ( 421,GMEM_MOVEABLE,(long)*pPolyParts*sizeof(DPOINT));
+	            	*phPoints= GSSiGlobAlloc(GAIDNO 421,GMEM_MOVEABLE,(long)*pPolyParts*sizeof(DPOINT));
 	            	pNewPoint = (HPDPOINT)GlobalLock (*phPoints);
 	                while ((*pPolyParts)--)
 	                    *pNewPoint++ = *lpDpoint++;
@@ -5888,7 +5888,7 @@ int GetPolyPointsWithParts (LPPICKDATAHEADER PickData,LPLONG pnPnts,LPHANDLE phP
 						}
 						else
 						{
-							*phPolyPartLen = GSSiGlobAlloc(1803, GMEM_MOVEABLE, (nLoops + 2)*sizeof(int));
+							*phPolyPartLen = GSSiGlobAlloc(GAIDNO 1803, GMEM_MOVEABLE, (nLoops + 2)*sizeof(int));
 							pPolyParts = GlobalLock (*phPolyPartLen);
 							pPolyParts[0] = 2;//npoly
 							pPolyParts[1] = nPntsLast;
@@ -6104,7 +6104,7 @@ BOOL CreateNewMap (LPSTR NewName,LPMNMXCORD MinMaxCoord,short NumSyms,HANDLE hSy
 	WriteSymList (Fid, NumParent, NumSyms,hSymDesc);
 	    
     lMem = NumPens*10+2+2;
-    hMem = GSSiGlobAlloc ( 445,GHND,lMem);
+    hMem = GSSiGlobAlloc(GAIDNO 445,GHND,lMem);
     pInt = (LPSHORT)GlobalLock (hMem);
     *pInt++ = NumPens*10+2;  
     while (NumPens--)
@@ -6271,7 +6271,7 @@ Top:if (*hSymDesc)
     else                                        
     {
         *NumSyms=1;
-        *hSymDesc = GSSiGlobAlloc ( 446,GMEM_MOVEABLE,3200*sizeof(SYMDESC));
+        *hSymDesc = GSSiGlobAlloc(GAIDNO 446,GMEM_MOVEABLE,3200*sizeof(SYMDESC));
     }
     pSymDesc = (LPSYMDESC)GlobalLock(*hSymDesc);
     pSymDesc += *NumSyms-1;
@@ -6341,7 +6341,7 @@ HRGN GetVPRgn (BOOL Invert,LPRECT pClipRect)
 		{ 
 			lpRect++;
 			lpBasePoint = (LPDPOINT) lpRect;
-		    hPoints = GSSiGlobAlloc (  44,GMEM_MOVEABLE,(Nump+1)*sizeof(POINT));
+		    hPoints = GSSiGlobAlloc(GAIDNO  44,GMEM_MOVEABLE,(Nump+1)*sizeof(POINT));
 		    Points = (HPPOINT) GlobalLock (hPoints);
 		    for (i=0;i<Nump;i++,lpBasePoint++)
 				Points[i] = BasePtToWinPt(lpBasePoint);
@@ -7286,7 +7286,7 @@ BOOL AddPolyToBuffer (int nPolyIn, LPINT lpnPntsIn,LPHANDLE phDPoints,short Type
 	nPoly = abs (nPolyIn);
 	if (Type == 1 && nPoly > 1)
 		nPoly = ReducePoly(nPoly, lpnPntsIn, phDPoints);
-	hPnts = GSSiGlobAlloc (0,GMEM_MOVEABLE,max (1,nPoly) * sizeof (int));
+	hPnts = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,max (1,nPoly) * sizeof (int));
 	lpnPnts = GlobalLock (hPnts);
 	for (i=0;i<max (1,nPoly);i++)
 	{
@@ -7307,13 +7307,13 @@ BOOL AddPolyToBuffer (int nPolyIn, LPINT lpnPntsIn,LPHANDLE phDPoints,short Type
 			lpnPnts = &TotPoints;   
 		}
 		lphDPoints = phDPoints;
-		hhPoints = GSSiGlobAlloc ( 347,GHND,(nPoly+1)*sizeof(HANDLE));
+		hhPoints = GSSiGlobAlloc(GAIDNO 347,GHND,(nPoly+1)*sizeof(HANDLE));
 		phPoints = (LPHANDLE)GlobalLock (hhPoints);
-		hnPoints = GSSiGlobAlloc ( 348,GHND,nPoly*sizeof(int));
+		hnPoints = GSSiGlobAlloc(GAIDNO 348,GHND,nPoly*sizeof(int));
 		pnPoints = (LPINT)GlobalLock (hnPoints);
 		for (i=0,pnPnts=lpnPnts;i<nPoly;i++,pnPnts++,phPoints++,phDPoints++,pnPoints++) 
 		{
-			*phPoints = GSSiGlobAlloc ( 349,GHND,(long)*pnPnts*sizeof(POINT));
+			*phPoints = GSSiGlobAlloc(GAIDNO 349,GHND,(long)*pnPnts*sizeof(POINT));
 			lpPoints = (LPPOINT) GlobalLock(*phPoints);
 			lpPoint = lpPoints; 
 			if (HiPrecis == 2) 
@@ -7322,7 +7322,7 @@ BOOL AddPolyToBuffer (int nPolyIn, LPINT lpnPntsIn,LPHANDLE phDPoints,short Type
 				long	np = *pnPnts; 
 				
 				nElevPts = np;
-				hTemp = GSSiGlobAlloc ( 350,GMEM_MOVEABLE,np*sizeof(DPOINT));
+				hTemp = GSSiGlobAlloc(GAIDNO 350,GMEM_MOVEABLE,np*sizeof(DPOINT));
 				lpDPoint = (HPDPOINT)GlobalLock(hTemp);
 				while (np--)
 				{
@@ -7561,9 +7561,9 @@ BOOL AddPolyToBuffer (int nPolyIn, LPINT lpnPntsIn,LPHANDLE phDPoints,short Type
 			{
 				HPDPOINT3D	lpDPoint3D = (HPDPOINT3D)GlobalLock(*phDPoints); 
 				long	np = *pnPnts;
-				hTemp = GSSiGlobAlloc ( 352,GMEM_MOVEABLE,np*sizeof(DPOINT));
+				hTemp = GSSiGlobAlloc(GAIDNO 352,GMEM_MOVEABLE,np*sizeof(DPOINT));
 				lpDPoint = (HPDPOINT)GlobalLock(hTemp);
-				hElev= GSSiGlobAlloc ( 353,GMEM_MOVEABLE,np*sizeof(float));
+				hElev= GSSiGlobAlloc(GAIDNO 353,GMEM_MOVEABLE,np*sizeof(float));
 				pElev = (HPFLOAT)GlobalLock(hElev);
 				while (np--)
 				{
@@ -7930,7 +7930,7 @@ BOOL  WINAPI GSSiRoundRect(_In_ HDC hdc, _In_ int left, _In_ int top, _In_ int r
 	int np = 0, n;
 	DPOINT PC, POC, PT, RP;
 	double radius;
-	HANDLE hPoints = GSSiGlobAlloc(1839, GMEM_MOVEABLE, sizeof(POINT)* 4096);
+	HANDLE hPoints = GSSiGlobAlloc(GAIDNO 1839, GMEM_MOVEABLE, sizeof(POINT)* 4096);
 	LPPOINT pPoints = GlobalLock(hPoints);
 	LPPOINT pPnts = pPoints;
 	int t = top;
@@ -8004,7 +8004,7 @@ BOOL  RoundRctWithPointer(HDC hdc, int left, int top,int right,int bottom, int w
 	int np = 0, n;
 	DPOINT PC, POC, PT, RP;
 	double radius;
-	HANDLE hPoints = GSSiGlobAlloc(1839, GMEM_MOVEABLE, sizeof(POINT) * 4096);
+	HANDLE hPoints = GSSiGlobAlloc(GAIDNO 1839, GMEM_MOVEABLE, sizeof(POINT) * 4096);
 	HANDLE hNewPoints = 0;
 	LPPOINT pPoints = GlobalLock(hPoints);
 	LPPOINT pPnts = pPoints;
@@ -8070,8 +8070,8 @@ BOOL  RoundRctWithPointer(HDC hdc, int left, int top,int right,int bottom, int w
 			pPnts[i].y += flipy;
 	}
 
-	HANDLE hPolyDP = GSSiGlobAlloc(1849, GMEM_MOVEABLE, np * sizeof(DPOINT) + 4);
-	HANDLE hPointer = GSSiGlobAlloc(1850, GMEM_MOVEABLE, 3 * sizeof(DPOINT));
+	HANDLE hPolyDP = GSSiGlobAlloc(GAIDNO 1849, GMEM_MOVEABLE, np * sizeof(DPOINT) + 4);
+	HANDLE hPointer = GSSiGlobAlloc(GAIDNO 1850, GMEM_MOVEABLE, 3 * sizeof(DPOINT));
 
 	LPDPOINT pPolyDPoints=GlobalLock (hPolyDP);
 	LPDPOINT pPolyPointer=GlobalLock (hPointer);
@@ -8136,7 +8136,7 @@ BOOL  RoundRctWithPointer(HDC hdc, int left, int top,int right,int bottom, int w
 					ipt++;
 				}
 				iRestart = ipt;
-				hNewPoints = GSSiGlobAlloc(1851, GMEM_MOVEABLE, sizeof(POINT) * (np+3));
+				hNewPoints = GSSiGlobAlloc(GAIDNO 1851, GMEM_MOVEABLE, sizeof(POINT) * (np+3));
 				pPnts = GlobalLock(hNewPoints);
 				for (int i = 0; i < iEnd; i++)
 				{
@@ -8171,7 +8171,7 @@ BOOL  RoundRctWithPointer(HDC hdc, int left, int top,int right,int bottom, int w
 					dist += ldistpp(&pPolyDPoints[ipt++], &pPolyDPoints[ipt]);
 				}
 				iEnd = ipt;
-				hNewPoints = GSSiGlobAlloc(1851, GMEM_MOVEABLE, sizeof(POINT) * (np + 3));
+				hNewPoints = GSSiGlobAlloc(GAIDNO 1851, GMEM_MOVEABLE, sizeof(POINT) * (np + 3));
 				pPnts = GlobalLock(hNewPoints);
 				for (int i = iStart; i < iEnd; i++)
 					pPnts[npNew++] = DPointToPoint(pPolyDPoints[i]);

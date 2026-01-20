@@ -72,7 +72,7 @@ void OpenOrthos ()
 	if (hOrthos) return; 
 	MaxORTHOBUFS = GetGlobalLVal ("[%ORTHO_BUFFERS]"); 
 	MaxORTHOBUFS = min (max (MaxORTHOBUFS,1),MAXORTHOBUFS);
-	hOrthos = (HANDLE) GSSiGlobAlloc (1108,GHND,MaxORTHOBUFS*(long)sizeof(ORTHO));
+	hOrthos = (HANDLE) GSSiGlobAlloc(GAIDNO 1108,GHND,MaxORTHOBUFS*(long)sizeof(ORTHO));
 	UsedOrthoBufs = 0;
 	CurOrtho = (LPORTHO) GlobalLock (hOrthos);
 	for (i=0;i<MaxORTHOBUFS;i++,CurOrtho++)
@@ -1980,7 +1980,7 @@ HANDLE CreateGrayScalePallette (void)
 	BYTE	red, green, blue; 
 	HANDLE	handle;
 
-	handle = GSSiGlobAlloc (1111,GMEM_MOVEABLE,sizeof(LOGPALETTE) + NUMENTRIES * sizeof(PALETTEENTRY));
+	handle = GSSiGlobAlloc(GAIDNO 1111,GMEM_MOVEABLE,sizeof(LOGPALETTE) + NUMENTRIES * sizeof(PALETTEENTRY));
     
     plgpl = (LPLOGPALETTE)GlobalLock (handle);
 	plgpl->palNumEntries = NUMENTRIES;
@@ -2140,7 +2140,7 @@ BOOL CreateMapIndex (LPSTR Dir,LPSTR FileListName,short itype,BOOL UsesTimes,LPS
 			                 
 		FidIndex = GSSiOpenFile (Index,(LPOFSTRUCTGM) &OFStruct,OF_CREATE); 
 			
-		hlpFI = GSSiGlobAlloc(1744,GHND,sizeof(FILEINDEX)+sizeof(FILEINDEXENTRY)); 
+		hlpFI = GSSiGlobAlloc(GAIDNO 1744,GHND,sizeof(FILEINDEX)+sizeof(FILEINDEXENTRY)); 
 		lpFI = (LPFILEINDEX) GlobalLock(hlpFI);    
 		lpFI->CurrentEntry=(FILEINDEXENTRY *) &lpFI->FirstIndex;
 		lpFI->Type = min (5,itype + 3);   
@@ -2317,7 +2317,7 @@ BOOL CreateMapIndex (LPSTR Dir,LPSTR FileListName,short itype,BOOL UsesTimes,LPS
 	if (itype == 1 && hWndDlg)
 	{  
 		long	lmem=sizeof(VIEWPORT)+128*MAX_VIEWPORT_FILES; 
-		HANDLE	hVP=GSSiGlobAlloc (1117,GHND,lmem);
+		HANDLE	hVP=GSSiGlobAlloc(GAIDNO 1117,GHND,lmem);
 		LPVIEWPORT	pSaveVP = (LPVIEWPORT)GlobalLock (hVP);  
 		HANDLE		hSymDesc;
 		short		NumParent=0, NumSyms=0;
@@ -2345,11 +2345,11 @@ BOOL CreateMapIndex (LPSTR Dir,LPSTR FileListName,short itype,BOOL UsesTimes,LPS
 		*CurVis = SaveVis;
 		IgnoreBounds = FALSE; 
 		FidSyms = GSSiOpenFile (VisName,&OFStruct,OF_CREATE);
-		hSymDesc = GSSiGlobAlloc (1118,GMEM_MOVEABLE,USHRT_MAX);
+		hSymDesc = GSSiGlobAlloc(GAIDNO 1118,GMEM_MOVEABLE,USHRT_MAX);
 		pSymDesc = (LPSYMDESC)GlobalLock (hSymDesc);
 		while (SendDlgItemMessage (hWndDlg,SYM_VIS_LB,LB_GETTEXT,NumSyms++,(LPARAM)str)!=LB_ERR) 
 		{   
-			pSymDesc->Handle = GSSiGlobAlloc (1119,GHND,sizeof(SYMBOL));
+			pSymDesc->Handle = GSSiGlobAlloc(GAIDNO 1119,GHND,sizeof(SYMBOL));
 		    pSymbol = (LPSYMBOL)GlobalLock (pSymDesc->Handle); 
 		    lpTAB = _fstrrchr (str,'\t');
 		    *lpTAB++ = 0;
@@ -2367,7 +2367,7 @@ BOOL CreateMapIndex (LPSTR Dir,LPSTR FileListName,short itype,BOOL UsesTimes,LPS
 		while (SendDlgItemMessage (hWndDlg,PAR_VIS_LB,LB_GETTEXT,NumParent++,(LPARAM)str)!=LB_ERR) 
 		{   
 			NumSyms++;
-			pSymDesc->Handle = GSSiGlobAlloc (1120,GHND,sizeof(SYMBOL));
+			pSymDesc->Handle = GSSiGlobAlloc(GAIDNO 1120,GHND,sizeof(SYMBOL));
 		    pSymbol = (LPSYMBOL)GlobalLock (pSymDesc->Handle); 
 		    lpTAB = _fstrrchr (str,'\t');
 		    *lpTAB++ = 0;
@@ -2426,7 +2426,7 @@ BOOL TransformImage (LPSTR TIFFile,LPSTR TranFile,LPSTR BMPFile,LPSTR BPWFile,LP
 	{   
 		HFILE FidArea = GSSiOpenFile (AreaFileOrTAG,NULL,OF_READ);
 		
-		hAreaPts = GSSiGlobAlloc (0,GMEM_MOVEABLE,USHRT_MAX);
+		hAreaPts = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,USHRT_MAX);
 		AreaPoints = (LPDPOINT)GlobalLock (hAreaPts);
 		if (FidArea != HFILE_ERROR)
 		{   
@@ -2859,7 +2859,7 @@ HRGN SetOrthoMask (LPSTR MaskAreaFileName)
 	if (Fid == HFILE_ERROR)
 		return FALSE;  
 	BigRead (Fid,(HPSTR)&nPnts,4); 
-	hPnts = GSSiGlobAlloc (0,GMEM_MOVEABLE,nPnts*sizeof(DPOINT));
+	hPnts = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,nPnts*sizeof(DPOINT));
 	lpPoints = lpPointsIn = (HPDPOINT)GlobalLock (hPnts); 
 	BigRead (Fid,(HPSTR)lpPoints,nPnts*sizeof(DPOINT));
 	GSSiClose2 (&Fid);
@@ -2884,7 +2884,7 @@ HRGN SetOrthoMask (LPSTR MaskAreaFileName)
 			POINT	FirstPoint,LastPoint;
 			long	np=1;   
 	
-			Handle = GSSiGlobAlloc ( 770,GMEM_MOVEABLE,(nPnts+1) * sizeof(POINT)); 
+			Handle = GSSiGlobAlloc(GAIDNO 770,GMEM_MOVEABLE,(nPnts+1) * sizeof(POINT)); 
 			lpPntNew = lpNewPoints = (HPPOINT)GlobalLock (Handle);  
 			*lpPntNew = BasePtToWinPt (lpPoints++);  
 			if (abs(lpPntNew->x) == INT_MAX ||
@@ -2921,7 +2921,7 @@ HRGN SetOrthoMask (LPSTR MaskAreaFileName)
 	{
 DoReduce:   
 		BoundsRect = CurView->Rect;
-		Handle = GSSiGlobAlloc ( 771,GMEM_MOVEABLE,(long)(nPnts+1) * sizeof(POINT)); 
+		Handle = GSSiGlobAlloc(GAIDNO 771,GMEM_MOVEABLE,(long)(nPnts+1) * sizeof(POINT)); 
 		lpNewPoints = (HPPOINT)GlobalLock (Handle);  
 TryAgain: 
 		iPoly = 1;
@@ -3320,7 +3320,7 @@ BOOL ConvertOrthoToJP2 (LPSTR Name,LPSTR NewName,int fmt)
     FirstIndex.EndOffset = EndOffset; 
     FirstIndex.FirstFoundFile=TRUE;
     _fstrcpy(FirstIndex.FileName,OFStruct.szPathName);
-    Handle = GSSiGlobAlloc (  51,GMEM_MOVEABLE,sizeof(FILEINDEX)+FirstIndex.Length);
+    Handle = GSSiGlobAlloc(GAIDNO  51,GMEM_MOVEABLE,sizeof(FILEINDEX)+FirstIndex.Length);
     lpIndex = (LPFILEINDEX)GlobalLock(Handle);
     *lpIndex = FirstIndex;
     lpIndex->FirstIndexFileOffset = GSSillseek (FidIndex,0,1);

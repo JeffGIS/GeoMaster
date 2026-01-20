@@ -124,7 +124,7 @@ BOOL LoadLIDARDTMFromLAS (LPSTR Infiles,LPSTR OutFile,LPSTR CBounds)
     
     if (!hProjectionFile)
     {
-    	hProjectionFile = GSSiGlobAlloc (0,GMEM_MOVEABLE,256); 
+    	hProjectionFile = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,256); 
     	pName = GlobalLock (hProjectionFile);
 		GSSiGetTempFileName(0,"gma",0,pName); 
 	}	

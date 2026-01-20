@@ -69,14 +69,14 @@ HANDLE CreateVarSpace(int type)
 	switch (type)
 	{
 	case VARSPACE_GLOBAL:
-		hSpace = GSSiGlobAlloc(2000, GHND, sizeof(VARSPACE) + MAXGLOBALS*sizeof(HANDLE));
+		hSpace = GSSiGlobAlloc(GAIDNO 2000, GHND, sizeof(VARSPACE) + MAXGLOBALS*sizeof(HANDLE));
 		pVarSpace = GlobalLock(hSpace);
 		pVarSpace->MaxVars = MAXGLOBALS;
 		GlobalUnlock(hSpace);
 		hGlobalVarSpace = hSpace;
 		break;
 	case VARSPACE_LOCAL:
-		hSpace = GSSiGlobAlloc(2001, GHND, sizeof(VARSPACE) + MAX_LOCAL_VARS*sizeof(HANDLE));
+		hSpace = GSSiGlobAlloc(GAIDNO 2001, GHND, sizeof(VARSPACE) + MAX_LOCAL_VARS*sizeof(HANDLE));
 		pVarSpace = GlobalLock(hSpace);
 		pVarSpace->MaxVars = MAX_LOCAL_VARS;
 		GlobalUnlock(hSpace);
@@ -194,7 +194,7 @@ BOOL UpdateGlobalFile (LPSTR RptFileIn,LPSTR VName,LPSTR Value)
 {GSSiEnterProg (515);
 #endif
 {   
-	HANDLE	hStr=GSSiGlobAlloc ( 183,GMEM_MOVEABLE,4096);
+	HANDLE	hStr=GSSiGlobAlloc(GAIDNO 183,GMEM_MOVEABLE,4096);
 	LPSTR	str=GlobalLock (hStr);
 	HFILE	Fid; 
 	LPSTR	lpEq,lpDot;
@@ -360,7 +360,7 @@ BOOL LoadGlobalInit (LPSTR File,BOOL First)
 {GSSiEnterProg (518);
 #endif
 {   
-	HANDLE	hMem=GSSiGlobAlloc (1504,GMEM_MOVEABLE,4096*3);
+	HANDLE	hMem=GSSiGlobAlloc(GAIDNO 1504,GMEM_MOVEABLE,4096*3);
 	LPSTR	str=GlobalLock (hMem), str2=str+4096, mess=str2+4096;
 	HFILE	Fid;  
 	int		n=0; 
@@ -495,7 +495,7 @@ BOOL GetCurrentPNDBName (LPSTR Name)
 {
 	short	NumFields=0, NumIndexFields=1; 
 	short	CurrentVersion=1; 
-	HANDLE	hStr=GSSiGlobAlloc ( 184,GMEM_MOVEABLE,1024);
+	HANDLE	hStr=GSSiGlobAlloc(GAIDNO 184,GMEM_MOVEABLE,1024);
 	LPSTR	DefStr = GlobalLock (hStr); 
 	USHORT	StringID=IDS_PNDEF;
 	BOOL	doDelete=FALSE;
@@ -532,7 +532,7 @@ BOOL GetCurrentGraphicsDBName (LPSTR Name,short Type)
 {
 	short	NumFields=0, NumIndexFields=1; 
 	short	CurrentVersion=1006; 
-	HANDLE	hStr=GSSiGlobAlloc ( 184,GMEM_MOVEABLE,1024);
+	HANDLE	hStr=GSSiGlobAlloc(GAIDNO 184,GMEM_MOVEABLE,1024);
 	LPSTR	DefStr = GlobalLock (hStr); 
 	USHORT	StringID=IDS_GRAPHICSDEF;
 	BOOL	doDelete=FALSE;
@@ -698,7 +698,7 @@ HANDLE	OpenSQLDatabase (LPSTR Name,LPSTR SQL)
     Fid = GSSiOpenFile (Name,0,OF_READ);
     if (Fid == HFILE_ERROR)
     	return 0; 
-    hDB = GSSiGlobAlloc (1505,GHND,USHRT_MAX);
+    hDB = GSSiGlobAlloc(GAIDNO 1505,GHND,USHRT_MAX);
     pDB = (LPSQLDATABASE)GlobalLock (hDB);
     fgetstring (pDB->DBName,126,Fid);
     ReadMultiLine (Fid,pDB->Select);
@@ -724,7 +724,7 @@ HANDLE	OpenSQLDatabase (LPSTR Name,LPSTR SQL)
     	pDB->NumFields++;
     }
 	GSSiClose2 (&Fid);  
-	hMem = GSSiGlobAlloc (1506,GMEM_MOVEABLE,USHRT_MAX);
+	hMem = GSSiGlobAlloc(GAIDNO 1506,GMEM_MOVEABLE,USHRT_MAX);
 	pMem = GlobalLock (hMem);  
 	_fstrcpy (pMem,pDB->Select);
 	_fstrcat (pMem,pDB->From); 
@@ -773,7 +773,7 @@ HANDLE	OpenLISTVARDatabase (LPSTR Name)
 	char	str[260];
 	int		savePos, maxlen=0;
 	
-    hDB = GSSiGlobAlloc (1672,GHND,USHRT_MAX);
+    hDB = GSSiGlobAlloc(GAIDNO 1672,GHND,USHRT_MAX);
     pDB = (LPLISTVARDATABASE)GlobalLock (hDB);
 	GetGlobalCVal (&Name[1],pDB->Value,0);
 	if (*pDB->Value != '|')
@@ -860,7 +860,7 @@ GSSiExitProg (520);
 		Access = BT_READ;
 		RetrieveFields = TRUE;
 	}
-	hMem=GSSiGlobAlloc ( 185,GHND,USHRT_MAX);
+	hMem=GSSiGlobAlloc(GAIDNO 185,GHND,USHRT_MAX);
 	str = GlobalLock (hMem);
 	IDName = str + 256;
 	cName = IDName + 256;
@@ -1168,7 +1168,7 @@ GSSiExitProg (520);
 		    	break;  
 		    NumSHPDBFRecs = pDBF->nRecords; 
 		    CurrentSHPRec = 0;
-		    FileHandle = GSSiGlobAlloc ( 186,GMEM_MOVEABLE,sizeof(pDBF));
+		    FileHandle = GSSiGlobAlloc(GAIDNO 186,GMEM_MOVEABLE,sizeof(pDBF));
 		    pDBFAddress = (LPDWORD)GlobalLock (FileHandle);
 		    *pDBFAddress = (DWORD)pDBF;  
 		    GlobalUnlock (FileHandle);
@@ -1197,7 +1197,7 @@ GSSiExitProg (520);
 		    	break;  
 		    NumDBFRecs = pDBF->nRecords; 
 		    CurrentDBFRec = 0;
-		    FileHandle = GSSiGlobAlloc ( 186,GMEM_MOVEABLE,sizeof(pDBF));
+		    FileHandle = GSSiGlobAlloc(GAIDNO 186,GMEM_MOVEABLE,sizeof(pDBF));
 		    pDBFAddress = (LPDWORD)GlobalLock (FileHandle);
 		    *pDBFAddress = (DWORD)pDBF;  
 		    GlobalUnlock (FileHandle);
@@ -1280,7 +1280,7 @@ GMTEXT_ERROR:
 	nf = NumFields;
 	if (!nf || Type == SLT_DATAFILE)
 		nf = MAXFIELDS;
-    handle = GSSiGlobAlloc (1753,GHND,sizeof(OPENFILEDATA)+nf*sizeof(FIELDINFO));
+    handle = GSSiGlobAlloc(GAIDNO 1753,GHND,sizeof(OPENFILEDATA)+nf*sizeof(FIELDINFO));
     FilePtr = (LPOPENFILEDATA)GlobalLock (handle);
     FilePtr->myhandle = handle;  
     FilePtr->Type = Type;  
@@ -1344,7 +1344,7 @@ GMTEXT_ERROR:
     	GlobalUnlock (FilePtr->FileHandle);
     }
 ProcessSQL: 
-    handle = GSSiGlobAlloc(1754,GHND,sizeof(OPENSQLDATA)+MAXFIELDINSQL*sizeof(SQLFIELD));
+    handle = GSSiGlobAlloc(GAIDNO 1754,GHND,sizeof(OPENSQLDATA)+MAXFIELDINSQL*sizeof(SQLFIELD));
     SQLPtr = (LPOPENSQLDATA)GlobalLock (handle); 
     _fstrcpy (SQLPtr->IDName,IDName);
     FilePtr->SQLHandles[FilePtr->NumSQLs++] = handle;
@@ -1438,7 +1438,7 @@ GSSiExitProg (520);
 int GetFieldDefs(HANDLE FileHandle, int Type,LPHANDLE phFields, LPBOOL pHaveNonStandardFields)
 {
 	int NumFields = 0;
-	*phFields = GSSiGlobAlloc(1752, GMEM_MOVEABLE, MAXFIELDS*sizeof(FIELDINFO));
+	*phFields = GSSiGlobAlloc(GAIDNO 1752, GMEM_MOVEABLE, MAXFIELDS*sizeof(FIELDINFO));
 	LPFIELDINFO lpFieldInfoSave = (LPFIELDINFO)GlobalLock(*phFields);
 	int index = 0;
 	LPFIELDINFO lpFieldInfo = GetFieldInfo(FileHandle, TRUE, Type, pHaveNonStandardFields);
@@ -1463,7 +1463,7 @@ void ExpandSYMATTRKEY(LPSTR str)
 
 	if (pLoc)
 	{
-		HANDLE hMem = GSSiGlobAlloc(0, GMEM_MOVEABLE, 4096*2);
+		HANDLE hMem = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, 4096*2);
 		LPSTR  pMem = GlobalLock(hMem);
 		LPSTR  pRest = pMem + 4096;
 
@@ -1489,10 +1489,10 @@ void ProcessFileSQL (LPOPENSQLDATA SQLPtr,LPOPENFILEDATA FilePtr,LPSTR SQLIN)
 #endif
 {
     short	NumFieldInSQL = 0; 
-    HANDLE	hMem=GSSiGlobAlloc ( 187,GMEM_MOVEABLE,4096*2);
+    HANDLE	hMem=GSSiGlobAlloc(GAIDNO 187,GMEM_MOVEABLE,4096*2);
     LPSTR	str=GlobalLock (hMem);
 	LPSTR	SQL = str + 4096;
-    HANDLE	hFields = GSSiGlobAlloc (1755,GHND,MAXFIELDINSQL*sizeof(SQLFIELD));
+    HANDLE	hFields = GSSiGlobAlloc(GAIDNO 1755,GHND,MAXFIELDINSQL*sizeof(SQLFIELD));
     LPSQLFIELD	SQLField = (LPSQLFIELD)GlobalLock(hFields);     
 	LPSQLFIELD	lpSQLField; 
     LPSTR	lpFieldStart = str;  
@@ -1563,11 +1563,11 @@ void ProcessFileSQL (LPOPENSQLDATA SQLPtr,LPOPENFILEDATA FilePtr,LPSTR SQLIN)
 		BOOL				Err;
 		BOOL				HaveOR=FALSE;
 
-    	hLogicPStatements = GSSiGlobAlloc ( 188,GMEM_MOVEABLE,1024);
+    	hLogicPStatements = GSSiGlobAlloc(GAIDNO 188,GMEM_MOVEABLE,1024);
     	nLogicPStatements = 0;
     	if ((pMacro = _fstrstr (SQLPtr->SQL,"=@$MACRO"))) 
     	{
-    		hSaveMacro = GSSiGlobAlloc (1507,GMEM_MOVEABLE,1024);   
+    		hSaveMacro = GSSiGlobAlloc(GAIDNO 1507,GMEM_MOVEABLE,1024);   
     		pSaveMacro = GlobalLock (hSaveMacro);
     		
     		_fstrcpy (pSaveMacro,&pMacro[1]);
@@ -2008,7 +2008,7 @@ BOOL LoadTAGDef (void)
 		if (TDFid != HFILE_ERROR)
 		{   
 		    GSSiGlobFree (&hTAGDef);  
-			hTAGDef=GSSiGlobAlloc ( 189,GHND,USHRT_MAX);
+			hTAGDef=GSSiGlobAlloc(GAIDNO 189,GHND,USHRT_MAX);
 			pTAGDef = 0; 
 	NextLine: 
 			lineno++;
@@ -2112,7 +2112,7 @@ GSSiExitProg (528);
     	return; 
 } 
 	lnValue = max (lnValue+1,4096*4);
-    hVal = GSSiGlobAlloc ( 190,GMEM_MOVEABLE,lnValue+256);
+    hVal = GSSiGlobAlloc(GAIDNO 190,GMEM_MOVEABLE,lnValue+256);
     Value = GlobalLock (hVal); 
     Name = Value + lnValue;
    	_fstrcpy (Value,InValue);
@@ -2280,7 +2280,7 @@ void LinkIncludedVars (HANDLE hVar,LPSTR Value)
 {GSSiEnterProg (531);
 #endif
 {   
-	HANDLE	hMem = GSSiGlobAlloc ( 191,GMEM_MOVEABLE,4096);
+	HANDLE	hMem = GSSiGlobAlloc(GAIDNO 191,GMEM_MOVEABLE,4096);
 	LPSTR	pMem = GlobalLock (hMem);
 	
 	_fstrcpy (pMem,Value);
@@ -3193,7 +3193,7 @@ GSSiExitProg (532);
         	GSSiGlobFree (&hEndDisplayCommand);  
         	if (*Value)
         	{
-	        	hEndDisplayCommand = GSSiGlobAlloc (1508,GMEM_MOVEABLE,4096);
+	        	hEndDisplayCommand = GSSiGlobAlloc(GAIDNO 1508,GMEM_MOVEABLE,4096);
 	        	pCmd = GlobalLock (hEndDisplayCommand);
 	        	_fstrcpy (pCmd,Value);
 	        	GlobalUnlock (hEndDisplayCommand); 
@@ -4196,7 +4196,7 @@ GSSiExitProg (533);
 		case 0: 
 			if (VarPnt->ContainsGorF) 
 			{
-				HANDLE	hMem = GSSiGlobAlloc ( 192,GMEM_MOVEABLE,4096);
+				HANDLE	hMem = GSSiGlobAlloc(GAIDNO 192,GMEM_MOVEABLE,4096);
 				LPSTR	pMem = GlobalLock (hMem);  
 				
 				_fstrcpy(pMem,VarPnt->Value); 
@@ -5465,8 +5465,8 @@ short Expandicmp (LPSTR String1, LPSTR String2)
 {GSSiEnterProg (534);
 #endif
 {
-	HANDLE	h1=GSSiGlobAlloc ( 193,GMEM_MOVEABLE,4096);
-	HANDLE	h2=GSSiGlobAlloc ( 194,GMEM_MOVEABLE,4096);
+	HANDLE	h1=GSSiGlobAlloc(GAIDNO 193,GMEM_MOVEABLE,4096);
+	HANDLE	h2=GSSiGlobAlloc(GAIDNO 194,GMEM_MOVEABLE,4096);
 	LPSTR	pString1=GlobalLock (h1);
 	LPSTR	pString2=GlobalLock (h2); 
 	short	rtn;
@@ -5772,13 +5772,13 @@ int SetGlobalFromTextBox (HWND hWndDlg,UINT Control,LPSTR VarName,BOOL ConvertRe
 #endif
 {   
 	int	rtn;
-	HANDLE	hText = GSSiGlobAlloc (0,GMEM_MOVEABLE,4098);
+	HANDLE	hText = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,4098);
 	LPSTR	pStr  = GlobalLock (hText);
 
 	rtn = GetWindowText (GetDlgItem (hWndDlg,Control),pStr,4000);
 	if (ConvertReturns)
 	{
-		HANDLE hCvt = GSSiGlobAlloc (0,GMEM_MOVEABLE,rtn*2+2);
+		HANDLE hCvt = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,rtn*2+2);
 		LPSTR	pCvt2, pCvt = pCvt2 = GlobalLock (hCvt);
 
 		while (*pStr)
@@ -5828,7 +5828,7 @@ short ProcessDelimTextHeader(LPSTR INstr, LPSTR File, HFILE Fid, LPHANDLE phDLT,
 	LPSHORT	nDLTvar;
 	LPHANDLE	DLTVar; 
 	LPSHORT	DLTStart,DLTLen,DLTType; 
-	HANDLE	hHead = GSSiGlobAlloc ( 195,GMEM_MOVEABLE,USHRT_MAX);
+	HANDLE	hHead = GSSiGlobAlloc(GAIDNO 195,GMEM_MOVEABLE,USHRT_MAX);
 	LPSTR	str = GlobalLock (hHead);  
 	LPSTR	DLTDelim;     
 	HFILE	FidHdr;
@@ -5884,7 +5884,7 @@ short ProcessDelimTextHeader(LPSTR INstr, LPSTR File, HFILE Fid, LPHANDLE phDLT,
 	}	                                 
 	_fstrcpy (str,INstr);
 	nDLTvar = 0; 
-	*phDLT = GSSiGlobAlloc ( 196,GHND,2 + 1 + MAXDLTVAR * (3*sizeof(short)+sizeof(HANDLE)));
+	*phDLT = GSSiGlobAlloc(GAIDNO 196,GHND,2 + 1 + MAXDLTVAR * (3*sizeof(short)+sizeof(HANDLE)));
 	nDLTvar = (LPSHORT)GlobalLock (*phDLT);
 	DLTDelim = (LPSTR)(nDLTvar + 1);
 	DLTVar = (LPHANDLE)(DLTDelim + 1);
@@ -6376,7 +6376,7 @@ GSSiExitProg (550);
 #endif
 		return (NULL);
 	}
-	handle = GSSiGlobAlloc(197, GHND, sizeof(VARINFO));
+	handle = GSSiGlobAlloc(GAIDNO 197, GHND, sizeof(VARINFO));
 	pVarSpace->VarHandles[pVarSpace->NumVars++] = handle;
 	if (*Name == '~')
 		ii = 1;
@@ -6483,7 +6483,7 @@ void AddToVarNameTable (LPSTR Name)
 	if (_fstrlen (Name) > MAX_VARNAME_LEN)
 		GSSiMsgBox (GetFocus(),"Length of variable name exceeds 61 characters",Name,MB_ICONEXCLAMATION,0);
 	if (!pVarSpace->hVarNameTable)
-		pVarSpace->hVarNameTable = GSSiGlobAlloc(198, GMEM_MOVEABLE, (long)sizeof(VARNAMEINDEXITEM)*pVarSpace->MaxVars);
+		pVarSpace->hVarNameTable = GSSiGlobAlloc(GAIDNO 198, GMEM_MOVEABLE, (long)sizeof(VARNAMEINDEXITEM)*pVarSpace->MaxVars);
 	lpVN = (LPVARNAMEINDEXITEM)GlobalLock(pVarSpace->hVarNameTable);
 	for (i = 0; i<pVarSpace->NumVars; i++, lpVN++)
 	{
@@ -6549,7 +6549,7 @@ GSSiExitProg (554);
 	}
 	AddToVarNameTable (Name);
 	
-	handle = GSSiGlobAlloc ( 199,GHND,sizeof(VARINFO));
+	handle = GSSiGlobAlloc(GAIDNO 199,GHND,sizeof(VARINFO));
 	pVarSpace->VarHandles[pVarSpace->NumVars++] = handle;
 	VarPnt = (VARPNT)GlobalLock(handle);  
 	VarPnt->Type = Type; 
@@ -6599,7 +6599,7 @@ void ProcessTextDB(LPSTR InText, LPBREAKPOINT pBrkPt, int bpOffset, int bpLen)
 	{
 		if (*InText)
 		{
-			HANDLE	handle = GSSiGlobAlloc(200, GMEM_MOVEABLE, (long)4096 * 4);
+			HANDLE	handle = GSSiGlobAlloc(GAIDNO 200, GMEM_MOVEABLE, (long)4096 * 4);
 			LPSTR	Text = GlobalLock(handle);
 
 			_fstrcpy(Text, InText);
@@ -6624,7 +6624,7 @@ void ProcessText (LPSTR InText)
 {
 	if (*InText)
 	{
-		HANDLE	handle=GSSiGlobAlloc ( 200,GMEM_MOVEABLE,(long)4096*4);
+		HANDLE	handle=GSSiGlobAlloc(GAIDNO 200,GMEM_MOVEABLE,(long)4096*4);
 		LPSTR	Text=GlobalLock (handle);
 		
 		_fstrcpy (Text,InText);
@@ -6647,7 +6647,7 @@ void ProcessGlobal (LPSTR Global)
 {GSSiEnterProg (557);
 #endif
 {
-	HANDLE	handle=GSSiGlobAlloc ( 201,GMEM_MOVEABLE,(long)4096);
+	HANDLE	handle=GSSiGlobAlloc(GAIDNO 201,GMEM_MOVEABLE,(long)4096);
 	LPSTR	str=GlobalLock (handle);
 	
 	GetGlobalCVal (Global,str,0);
@@ -6694,7 +6694,7 @@ HANDLE ProcessIF (LPSTR InLoc,LPBOOL pErr)
 		goto IfError; 
 	lTHEN = pEnd++ - pTHEN;
 	InLoc = pEnd;
-	hIF = GSSiGlobAlloc ( 202,GMEM_MOVEABLE,4096);
+	hIF = GSSiGlobAlloc(GAIDNO 202,GMEM_MOVEABLE,4096);
 	pIF2 = GlobalLock (hIF);
 	strncpy0 (pIF2,pIF,(size_t)lIF); 
 	IfRtn = LogicP (pIF2,pErr); 
@@ -6703,7 +6703,7 @@ HANDLE ProcessIF (LPSTR InLoc,LPBOOL pErr)
 		goto IfError; 
 	if (IfRtn)
 	{   
-		hMem = GSSiGlobAlloc ( 203,GMEM_MOVEABLE,lTHEN+1);
+		hMem = GSSiGlobAlloc(GAIDNO 203,GMEM_MOVEABLE,lTHEN+1);
 		OutLoc = GlobalLock(hMem);
 		strncpy0 (OutLoc,pTHEN,(size_t)lTHEN);
 		GlobalUnlock (hMem);
@@ -6717,7 +6717,7 @@ HANDLE ProcessIF (LPSTR InLoc,LPBOOL pErr)
 			lELSE = pEndIF - InLoc;
 			if (lELSE)
 			{
-				hMem = GSSiGlobAlloc ( 204,GMEM_MOVEABLE,lELSE+1);
+				hMem = GSSiGlobAlloc(GAIDNO 204,GMEM_MOVEABLE,lELSE+1);
 				OutLoc = GlobalLock(hMem);
 				strncpy0 (OutLoc,InLoc,(size_t)lELSE);
 				GlobalUnlock (hMem);
@@ -6832,9 +6832,9 @@ LPSTR ExpandTextDB(LPSTR InText, LPBREAKPOINT pBrkPt, int bpOffset, int bpLen)
 		return ExpandTextDB2(InText, pBrkPt, bpOffset, bpLen);
 
 //	int lIn = strlen(InText);
-//	HANDLE hInput = GSSiGlobAlloc(0, GMEM_MOVEABLE, l + 2);
+//	HANDLE hInput = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, l + 2);
 //	LPSTR  pInput = GlobalLock(hInput);
-	HANDLE hMem = GSSiGlobAlloc (0, GMEM_MOVEABLE, USHRT_MAX);
+	HANDLE hMem = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, USHRT_MAX);
 	
 	nRaw = 0;
 	LPSTR pMem = GlobalLock(hMem);
@@ -6858,7 +6858,7 @@ LPSTR ExpandTextDB(LPSTR InText, LPBREAKPOINT pBrkPt, int bpOffset, int bpLen)
 		{
 			LPSTR pRaw;
 			int l = pEnd - pBeg;
-			hMemRaw[nRaw] = GSSiGlobAlloc(0, GMEM_MOVEABLE, l + 2);
+			hMemRaw[nRaw] = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, l + 2);
 			pRaw = GlobalLock(hMemRaw[nRaw]);
 			strcpy(pRaw, pBeg);
 			GlobalUnlock(hMemRaw[nRaw]);
@@ -6996,7 +6996,7 @@ GSSiExitProg (558);
 			    else
 			    	FoundSemiC=TRUE;
 			    *SemiCLoc = '\0';
-				hMemEq = GSSiGlobAlloc ( 209,GMEM_MOVEABLE,USHRT_MAX);
+				hMemEq = GSSiGlobAlloc(GAIDNO 209,GMEM_MOVEABLE,USHRT_MAX);
 				EqText = GlobalLock(hMemEq);
 				l = (SemiCLoc - EqLoc);
 				if (l > 0)
@@ -7076,7 +7076,7 @@ GSSiExitProg (558);
 				goto WhileError;
 			}
 			lLoop = pEnd++ - InLoc;
-			hLoop = GSSiGlobAlloc(210, GHND, lLoop + 1);
+			hLoop = GSSiGlobAlloc(GAIDNO 210, GHND, lLoop + 1);
 			pLoop = GlobalLock(hLoop);
 			if (pBrkPt)
 				loopBPOffset = bpOffset + (int)(InLoc - startLoc);
@@ -7084,13 +7084,13 @@ GSSiExitProg (558);
 			_fstrncpy(pLoop, InLoc, lLoop);
 			GlobalUnlock (hLoop);
 			InLoc = pEnd;
-			hWhile = GSSiGlobAlloc ( 211,GHND,lWhile+1);
+			hWhile = GSSiGlobAlloc(GAIDNO 211,GHND,lWhile+1);
 			pWhile2 = GlobalLock (hWhile);
 			_fstrncpy (pWhile2,pWhile,(size_t)lWhile); 
 			GlobalUnlock (hWhile); 
 			if (pBrkPt)
 				whileBpOffset = bpOffset + (int)(pWhile - startLoc);
-			hStr = GSSiGlobAlloc(212, GMEM_MOVEABLE, USHRT_MAX);
+			hStr = GSSiGlobAlloc(GAIDNO 212, GMEM_MOVEABLE, USHRT_MAX);
 			pStr = GlobalLock (hStr); 
 			nLoops = 0;
 	NextWhileLoop: 
@@ -7174,7 +7174,7 @@ GSSiExitProg (558);
 			}
 			lTHEN = pEnd++ - pTHEN;
 			InLoc = pEnd;
-			hIF = GSSiGlobAlloc ( 214,GMEM_MOVEABLE,USHRT_MAX);
+			hIF = GSSiGlobAlloc(GAIDNO 214,GMEM_MOVEABLE,USHRT_MAX);
 			pIF2 = GlobalLock (hIF);
 			strncpy0 (pIF2,pIF,(size_t)lIF); 
 			lIFOffset = bpOffset + (int)(pIF - startLoc);
@@ -7346,7 +7346,7 @@ OutChar:	if (NewText)
 	FoundLiteral = FoundLit;
 	if (TraceOn)
 	{
-		hMemTrace=GSSiGlobAlloc ( 217,GMEM_MOVEABLE,USHRT_MAX);
+		hMemTrace=GSSiGlobAlloc(GAIDNO 217,GMEM_MOVEABLE,USHRT_MAX);
 		pStr = GlobalLock (hMemTrace); 
 		if (NewText)   
 		{
@@ -7420,7 +7420,7 @@ double GetGlobalDVal (LPSTR Global)
 #endif
 {   
 	double	rtn=0;
-	HANDLE	hStr=GSSiGlobAlloc ( 218,GMEM_MOVEABLE,256);
+	HANDLE	hStr=GSSiGlobAlloc(GAIDNO 218,GMEM_MOVEABLE,256);
 	LPSTR	str=GlobalLock (hStr);
 	
 	_fstrcpy (str,Global);
@@ -7445,7 +7445,7 @@ double GetGlobalDVal2 (LPSTR Global,double Default)
 #endif
 {
 	double	rtn=Default;
-	HANDLE	hStr=GSSiGlobAlloc ( 219,GMEM_MOVEABLE,256);
+	HANDLE	hStr=GSSiGlobAlloc(GAIDNO 219,GMEM_MOVEABLE,256);
 	LPSTR	str=GlobalLock (hStr);
 	
 	_fstrcpy (str,Global);
@@ -7509,7 +7509,7 @@ BOOL GetGlobalCVal (LPSTR Global,LPSTR Val,LPSTR Default)
 {GSSiEnterProg (562);
 #endif
 {
-	HANDLE	hStr=GSSiGlobAlloc ( 220,GMEM_MOVEABLE,4096);
+	HANDLE	hStr=GSSiGlobAlloc(GAIDNO 220,GMEM_MOVEABLE,4096);
 	LPSTR	str=GlobalLock (hStr);
 	
 	if (*Global != '[')
@@ -7553,7 +7553,7 @@ RECT GetGlobalRectVal (LPSTR Global,LPRECT pDefault)
 {GSSiEnterProg (563);
 #endif
 {
-	HANDLE	hStr=GSSiGlobAlloc ( 221,GMEM_MOVEABLE,256);
+	HANDLE	hStr=GSSiGlobAlloc(GAIDNO 221,GMEM_MOVEABLE,256);
 	LPSTR	str=GlobalLock (hStr);
 	RECT	Rect,RectReverse;
 	BOOL	Err;
@@ -7604,7 +7604,7 @@ MNMXCORD3D GetGlobalBounds3DVal(LPSTR Global, LPMNMXCORD3D pDefault)
 	GSSiEnterProg(563);
 #endif
 	{
-		HANDLE	hStr = GSSiGlobAlloc(221, GMEM_MOVEABLE, 256);
+		HANDLE	hStr = GSSiGlobAlloc(GAIDNO 221, GMEM_MOVEABLE, 256);
 		LPSTR	str = GlobalLock(hStr);
 		MNMXCORD3D	Rect;
 		BOOL	Err;
@@ -7644,7 +7644,7 @@ MNMXCORD GetGlobalBoundsVal (LPSTR Global,LPMNMXCORD pDefault)
 {GSSiEnterProg (563);
 #endif
 {
-	HANDLE	hStr=GSSiGlobAlloc ( 221,GMEM_MOVEABLE,256);
+	HANDLE	hStr=GSSiGlobAlloc(GAIDNO 221,GMEM_MOVEABLE,256);
 	LPSTR	str=GlobalLock (hStr);
 	MNMXCORD	Rect;
 	BOOL	Err;
@@ -7683,7 +7683,7 @@ long GetGlobalLVal (LPSTR Global)
 {GSSiEnterProg (564);
 #endif
 {
-	HANDLE	hStr=GSSiGlobAlloc ( 222,GMEM_MOVEABLE,256);
+	HANDLE	hStr=GSSiGlobAlloc(GAIDNO 222,GMEM_MOVEABLE,256);
 	LPSTR	str=GlobalLock (hStr);
 	long	rtn=0;
 	
@@ -7708,7 +7708,7 @@ long GetGlobalLVal3 (LPSTR Global,long Default)
 {GSSiEnterProg (565);
 #endif
 {
-	HANDLE	hStr=GSSiGlobAlloc ( 223,GMEM_MOVEABLE,256);
+	HANDLE	hStr=GSSiGlobAlloc(GAIDNO 223,GMEM_MOVEABLE,256);
 	LPSTR	str=GlobalLock (hStr);
     long	rtn;
     
@@ -7731,7 +7731,7 @@ long GetGlobalLVal2 (LPSTR Global,long Default)
 {GSSiEnterProg (566);
 #endif
 {
-	HANDLE	hStr=GSSiGlobAlloc ( 224,GMEM_MOVEABLE,256);
+	HANDLE	hStr=GSSiGlobAlloc(GAIDNO 224,GMEM_MOVEABLE,256);
 	LPSTR	str=GlobalLock (hStr);
     long	rtn=Default;
 	
@@ -7760,7 +7760,7 @@ BOOL GetGlobalPVal (LPSTR Global,LPDPOINT Default,LPDPOINT pPoint)
 {GSSiEnterProg (567);
 #endif
 {
-	HANDLE	hStr=GSSiGlobAlloc ( 225,GMEM_MOVEABLE,256);
+	HANDLE	hStr=GSSiGlobAlloc(GAIDNO 225,GMEM_MOVEABLE,256);
 	LPSTR	str=GlobalLock (hStr);
 	DPOINT	DPoint;
 	
@@ -7807,7 +7807,7 @@ BOOL GetGlobalBVal (LPSTR Global)
 {GSSiEnterProg (568);
 #endif
 {
-	HANDLE	hStr=GSSiGlobAlloc ( 226,GMEM_MOVEABLE,256);
+	HANDLE	hStr=GSSiGlobAlloc(GAIDNO 226,GMEM_MOVEABLE,256);
 	LPSTR	str=GlobalLock (hStr);
 	BOOL	rtn;
 	
@@ -7831,7 +7831,7 @@ BOOL GetGlobalBVal2 (LPSTR Global,BOOL Default)
 {GSSiEnterProg (569);
 #endif
 {
-	HANDLE	hStr=GSSiGlobAlloc ( 227,GMEM_MOVEABLE,256);
+	HANDLE	hStr=GSSiGlobAlloc(GAIDNO 227,GMEM_MOVEABLE,256);
 	LPSTR	str=GlobalLock (hStr);
 	BOOL	rtn=Default;
 	
@@ -8348,7 +8348,7 @@ GSSiExitProg (573);
 		
     	case GMTEXT_DATAFILE: 
     	{
-			hStr = GSSiGlobAlloc(228, GMEM_MOVEABLE, MAXTEXTLINE);
+			hStr = GSSiGlobAlloc(GAIDNO 228, GMEM_MOVEABLE, MAXTEXTLINE);
     		str=GlobalLock (hStr);
 			if (NeedRead (SQLPtr)) 
 			{
@@ -8414,7 +8414,7 @@ NextTextRec:
 				{   
 		    		int	i, j, n;  
 		    		BOOL	FieldSet[8]; 
-		    		HANDLE	hMem=GSSiGlobAlloc ( 229,GMEM_MOVEABLE,256);
+		    		HANDLE	hMem=GSSiGlobAlloc(GAIDNO 229,GMEM_MOVEABLE,256);
 		    		LPSTR	str=GlobalLock (hMem);
 		    		
 		    		if (SQLPtr->NumGlobals)
@@ -8526,8 +8526,8 @@ NextTextRec:
 
 					if (!hIntData)
 					{
-						hIntData = GSSiGlobAlloc ( 674,GHND,1024); 
-						hPNAddData = GSSiGlobAlloc ( 675,GHND,1024); 
+						hIntData = GSSiGlobAlloc(GAIDNO 674,GHND,1024); 
+						hPNAddData = GSSiGlobAlloc(GAIDNO 675,GHND,1024); 
 						doRemove = TRUE;
 					}
 					ProcessPickedItem (0,FALSE);
@@ -8719,7 +8719,7 @@ GSSiExitProg (574);
 }
 	}   
 	AllVarEqQuestionMark = FALSE;
-	hStr = GSSiGlobAlloc ( 230,GMEM_MOVEABLE,2048);
+	hStr = GSSiGlobAlloc(GAIDNO 230,GMEM_MOVEABLE,2048);
 	str = GlobalLock (hStr);
 	pVal = str + 1024;
 	if (FillGWDData (lpGWDHead,SQLPtr->Offset) < 0)
@@ -8951,7 +8951,7 @@ GSSiExitProg (577);
 
 short CompressCensusString (LPSTR pStr)
 {   
-	HANDLE	hStr=GSSiGlobAlloc ( 231,GMEM_MOVEABLE,4096);
+	HANDLE	hStr=GSSiGlobAlloc(GAIDNO 231,GMEM_MOVEABLE,4096);
 	LPSTR	pNewStr = GlobalLock (hStr); 
 	LPSTR	pNewStrBeg = pNewStr;
 	LPSTR	pValBeg=pStr; 
@@ -8959,7 +8959,7 @@ short CompressCensusString (LPSTR pStr)
 	LPSTR	pLastVal=0;
 	short	iCmpCode=0, l,ii;
 	
-	HANDLE	hOrig = GSSiGlobAlloc ( 232,GMEM_MOVEABLE,4096);
+	HANDLE	hOrig = GSSiGlobAlloc(GAIDNO 232,GMEM_MOVEABLE,4096);
 	LPSTR	pOrigStr = GlobalLock (hOrig);
 	_fstrcpy (pOrigStr,pStr);      
 	
@@ -9002,7 +9002,7 @@ short CompressCensusString (LPSTR pStr)
 
 short ExpandCensusString (LPSTR pStr)
 {   
-	HANDLE	hStr=GSSiGlobAlloc ( 233,GMEM_MOVEABLE,4096);
+	HANDLE	hStr=GSSiGlobAlloc(GAIDNO 233,GMEM_MOVEABLE,4096);
 	LPSTR	pNewStr = GlobalLock (hStr); 
 	LPSTR	pNewStrBeg = pNewStr;
 	LPSTR	pStrBeg = pStr;
@@ -9250,7 +9250,7 @@ int GetValFromOpenFiles (LPSTR VarName,LPSTR Value,int maxlval)
     	IDName[0]=0;  
 	if (!FilePathHandle)
 		goto GetOut; 
-	hStr=GSSiGlobAlloc ( 234,GMEM_MOVEABLE,maxlval+256+4096);
+	hStr=GSSiGlobAlloc(GAIDNO 234,GMEM_MOVEABLE,maxlval+256+4096);
 	{
 		LPSTR		str=GlobalLock (hStr);
 		LPSTR		TempValue = str + maxlval;
@@ -9580,7 +9580,7 @@ int GetValFromOpenFiles (LPSTR VarName,LPSTR Value,int maxlval)
 				fromfile = pComboField->fromfile;
 				if (fromfile < 0)
 				{
-					hStr = GSSiGlobAlloc(235, GMEM_MOVEABLE,maxlval);
+					hStr = GSSiGlobAlloc(GAIDNO 235, GMEM_MOVEABLE,maxlval);
 					pStr = GlobalLock(hStr);
 					pCFieldIndex = (LPCFIELDINDEX)GlobalLock(pComboHeader->hComputedFields);
 					if (pComboFile->Version < 2)
@@ -9611,7 +9611,7 @@ int GetValFromOpenFiles (LPSTR VarName,LPSTR Value,int maxlval)
 					SQLPtr2 = (LPOPENSQLDATA)GlobalLock(pComboFile->hSQL[fromfile]);
 					FilePtr2 = (LPOPENFILEDATA)GlobalLock(SQLPtr2->OFHandle);
 					pFileField = &FilePtr2->FldInfo + pComboField->fromfileindex;
-					hStr = GSSiGlobAlloc(236, GMEM_MOVEABLE, 1024);
+					hStr = GSSiGlobAlloc(GAIDNO 236, GMEM_MOVEABLE, 1024);
 					pStr = GlobalLock(hStr);
 					pStr2 = pStr + 512;
 					sprintf(pStr, "%s.%s", SQLPtr2->IDName, pFileField->name);
@@ -9808,7 +9808,7 @@ int GetValFromOpenFiles (LPSTR VarName,LPSTR Value,int maxlval)
 						_fstrcpy(Value, "0");
 						if (len)
 						{
-							HANDLE	hCensusString = GSSiGlobAlloc(237, GMEM_MOVEABLE, maxlval);
+							HANDLE	hCensusString = GSSiGlobAlloc(GAIDNO 237, GMEM_MOVEABLE, maxlval);
 							LPSTR	pComma, pEnd, pCensusString = GlobalLock(hCensusString);
 							USHORT	field = SFFieldData.Field;
 
@@ -9855,7 +9855,7 @@ int GetValFromOpenFiles (LPSTR VarName,LPSTR Value,int maxlval)
 				if (SQLPtr->st)
 					goto NotFound;
 				{
-					HANDLE hsql = GSSiGlobAlloc(1831, GMEM_MOVEABLE, maxlval);
+					HANDLE hsql = GSSiGlobAlloc(GAIDNO 1831, GMEM_MOVEABLE, maxlval);
 					LPSTR sql = GlobalLock(hsql);
 					strcpy(sql, SQLPtr->SQL);
 					ExpandText(sql);
@@ -10214,7 +10214,7 @@ BOOL AddToOpenFileList (HANDLE hSQL)
     else
     {  
 	    SaveHandle = FilePathHandle;
-	    FilePathHandle = GSSiGlobAlloc (1756,GHND,sizeof(HANDLE)+sizeof(int)+MAXFILESINPATH*sizeof(HANDLE));
+	    FilePathHandle = GSSiGlobAlloc(GAIDNO 1756,GHND,sizeof(HANDLE)+sizeof(int)+MAXFILESINPATH*sizeof(HANDLE));
 	    FilePathPtr = (LPFILEPATH)GlobalLock (FilePathHandle);
 	    FilePathPtr->LastPathHandle = SaveHandle;
 	    FilePathPtr->FileHandle=hSQL;
@@ -10706,7 +10706,7 @@ GSSiExitProg (593);
 		return FALSE;
 }
 	}
-	handle = GSSiGlobAlloc ( 238,GMEM_MOVEABLE,l+10);
+	handle = GSSiGlobAlloc(GAIDNO 238,GMEM_MOVEABLE,l+10);
 	pCommand = GlobalLock (handle); 
 	_fstrcpy (pCommand,pCmd);
 	GlobalUnlock (*phWhichCmdList);    
@@ -10746,7 +10746,7 @@ GSSiExitProg (594);
 #endif
 		return TRUE;
 }
-	hCmd = GSSiGlobAlloc ( 239,GMEM_MOVEABLE,lc+1);
+	hCmd = GSSiGlobAlloc(GAIDNO 239,GMEM_MOVEABLE,lc+1);
 	pCommand = GlobalLock (hCmd);  
 	_fstrcpy (pCommand,pCmd);
 //	CurView = pViewports[CommandViewport-1]; //tempdebu
@@ -10794,7 +10794,7 @@ BOOL DoUserCommand (LPSTR Cmd)
 {   
 	UINT	CmdID;
 	long	lCmdID; 
-	HANDLE	hStr=GSSiGlobAlloc ( 240,GMEM_MOVEABLE,256);
+	HANDLE	hStr=GSSiGlobAlloc(GAIDNO 240,GMEM_MOVEABLE,256);
 	LPSTR	cmd=GlobalLock (hStr); 
 	BOOL	rtn=TRUE;
 	
@@ -10935,12 +10935,12 @@ void SaveGlobalVals (HFILE Fid)
 	unsigned short	i = pVarSpace->NumVars;
 	LPSTR	pstr;
 	VARPNT	VarPtr;
-    HANDLE	hMem=GSSiGlobAlloc ( 241,GMEM_MOVEABLE,USHRT_MAX);
+    HANDLE	hMem=GSSiGlobAlloc(GAIDNO 241,GMEM_MOVEABLE,USHRT_MAX);
     LPSTR	pMem = GlobalLock (hMem);
     long	lMem=0; 
     short	nVars=0,l;
  	short	Length, Version=1, id=OB_SAVEGLOBALS; 
- 	HANDLE	hStr=GSSiGlobAlloc ( 242,GMEM_MOVEABLE,USHRT_MAX);
+ 	HANDLE	hStr=GSSiGlobAlloc(GAIDNO 242,GMEM_MOVEABLE,USHRT_MAX);
  	LPSTR	str=GlobalLock (hStr); 
  	short	ii;  
 
@@ -11102,7 +11102,7 @@ BOOL GetUpdateFieldValue (HWND hWndDlg,LPSTR SetFieldName,LPSTR NewValue)
 				HMENU	Menu = CreatePopupMenu(); 
 				POINT	position;
 				int		Choice=1, lv;
-				HANDLE	hValues = GSSiGlobAlloc (0,GHND,USHRT_MAX);
+				HANDLE	hValues = GSSiGlobAlloc(GAIDNO 0,GHND,USHRT_MAX);
 				LPSTR	Values = GlobalLock (hValues);
 			    
 				ploc += l + 1;

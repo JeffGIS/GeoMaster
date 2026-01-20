@@ -349,7 +349,7 @@ static int ConvertOffsetsToIDs(LPINT pOffsets, LPGWDHEADER lpGWDHead)
 
 double GetSQLITESumCol(sqlite3 *db, LPSTR tableName,LPSTR Column, LPSTR where)
 {
-	HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX);
+	HANDLE hCmd = GSSiGlobAlloc(GAIDNO 1796, GMEM_MOVEABLE, USHRT_MAX);
 	LPSTR  pCmd = GlobalLock(hCmd);
 	if (*where)
 		sprintf(pCmd, "SELECT SUM (%s) FROM %s WHERE %s", tableName, Column, where);
@@ -374,7 +374,7 @@ double GetSQLITESumCol(sqlite3 *db, LPSTR tableName,LPSTR Column, LPSTR where)
 }
 LONGLONG GetSQLITENumRows(sqlite3 *db, LPSTR tableName, LPSTR where, LONGLONG limit)
 {
-	HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX);
+	HANDLE hCmd = GSSiGlobAlloc(GAIDNO 1796, GMEM_MOVEABLE, USHRT_MAX);
 	LPSTR  pCmd = GlobalLock(hCmd);
 	sqlite3_stmt *statement;
 	LONGLONG rtn = 0;
@@ -419,10 +419,10 @@ LONGLONG GetSQLITENumRows(sqlite3 *db, LPSTR tableName, LPSTR where, LONGLONG li
 
 int GetSQLITEDistinct(sqlite3 *db, LPSTR tableName, LPSTR fieldsIN, LPSTR where, LPSTR OutFile)
 {
-	HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX);
+	HANDLE hCmd = GSSiGlobAlloc(GAIDNO 1796, GMEM_MOVEABLE, USHRT_MAX);
 	LPSTR  pCmd = GlobalLock(hCmd);
 	sqlite3_stmt *statement;
-	HANDLE hOutstr = GSSiGlobAlloc(0, GMEM_MOVEABLE, USHRT_MAX);
+	HANDLE hOutstr = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, USHRT_MAX);
 	LPSTR outstr = GlobalLock(hOutstr);
 	int rtn = -1;
 	HFILE Fid;
@@ -485,10 +485,10 @@ int GetSQLITEDistinct(sqlite3 *db, LPSTR tableName, LPSTR fieldsIN, LPSTR where,
 int SQLITEQuery(sqlite3 *db, LPSTR tableName, LPSTR fieldsIN, LPSTR where, LPSTR OutFile, LPSTR orderBy,LPSTR errorFile)
 {
 #define NO_FILE	(HFILE_ERROR - 1)
-	HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX);
+	HANDLE hCmd = GSSiGlobAlloc(GAIDNO 1796, GMEM_MOVEABLE, USHRT_MAX);
 	LPSTR  pCmd = GlobalLock(hCmd);
 	sqlite3_stmt *statement;
-	HANDLE hOutstr = GSSiGlobAlloc(0, GMEM_MOVEABLE, USHRT_MAX);
+	HANDLE hOutstr = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, USHRT_MAX);
 	LPSTR outstr = GlobalLock(hOutstr);
 	int rtn = -1;
 	HFILE Fid=NO_FILE;
@@ -585,7 +585,7 @@ int SQLITEQuery(sqlite3 *db, LPSTR tableName, LPSTR fieldsIN, LPSTR where, LPSTR
 
 LONGLONG GetSQLITERowID(sqlite3 *db, LPSTR tableName, LPSTR where)
 {
-	HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX);
+	HANDLE hCmd = GSSiGlobAlloc(GAIDNO 1796, GMEM_MOVEABLE, USHRT_MAX);
 	LPSTR  pCmd = GlobalLock(hCmd);
 	sqlite3_stmt *statement;
 	LONGLONG rtn = -1;
@@ -608,7 +608,7 @@ LONGLONG GetSQLITERowID(sqlite3 *db, LPSTR tableName, LPSTR where)
 }
 BOOL GetSQLITEBounds(sqlite3 *db, LPSTR tableName, LPMNMXCORD pfileMNMX)
 {
-	HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX);
+	HANDLE hCmd = GSSiGlobAlloc(GAIDNO 1796, GMEM_MOVEABLE, USHRT_MAX);
 	LPSTR  pCmd = GlobalLock(hCmd);
 	sqlite3_stmt *statement;
 	BOOL rtn = FALSE;
@@ -758,7 +758,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 		db = (sqlite3*)atoi(ARG[2]);
 		if (fid != HFILE_ERROR)
 		{
-			HANDLE hstr = GSSiGlobAlloc(0, GMEM_MOVEABLE, MAXSTR);
+			HANDLE hstr = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, MAXSTR);
 			LPSTR cmd = GlobalLock(hstr);
 			int totLen = GSSifilelength(fid);
 			int curPos = 0;
@@ -775,7 +775,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 				{
 					MAXSTR = atol(&cmd[4]) + 2;
 					GSSiGlobUlFree(&hstr);
-					hstr = GSSiGlobAlloc(0, GMEM_MOVEABLE, MAXSTR);
+					hstr = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, MAXSTR);
 					cmd = GlobalLock(hstr);
 
 					continue;
@@ -953,7 +953,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 			db = (sqlite3*)atoi(ARG[2]);
 			if (db)
 			{ 
-				HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX * 8);
+				HANDLE hCmd = GSSiGlobAlloc(GAIDNO 1796, GMEM_MOVEABLE, USHRT_MAX * 8);
 				LPSTR  pCmd = GlobalLock(hCmd);
 				LPGWFLDINFO lpFieldInfo;
 				char delim[2] = { 0 };
@@ -1027,7 +1027,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 				{
 					int pos = BT_FIRST;
 					long Offset;
-					HANDLE hVal = GSSiGlobAlloc(1797, GMEM_MOVEABLE, 4096);
+					HANDLE hVal = GSSiGlobAlloc(GAIDNO 1797, GMEM_MOVEABLE, 4096);
 					LPSTR val = GlobalLock(hVal);
 					int nRecs = BT_NUM_IN_INDEX(lpGWDHead->BTHandle[0]);
 					int nLoaded = 0;
@@ -1142,9 +1142,9 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 				update = TRUE;
 			if (fid != HFILE_ERROR)
 			{
-				HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX * 8);
+				HANDLE hCmd = GSSiGlobAlloc(GAIDNO 1796, GMEM_MOVEABLE, USHRT_MAX * 8);
 				LPSTR  pCmd = GlobalLock(hCmd);
-				HANDLE hCmdIndex = GSSiGlobAlloc(1796, GMEM_MOVEABLE, 4096);
+				HANDLE hCmdIndex = GSSiGlobAlloc(GAIDNO 1796, GMEM_MOVEABLE, 4096);
 				LPSTR  pCmdIndex = GlobalLock(hCmdIndex);
 				LPGWFLDINFO lpFieldInfo;
 				char delim[2] = { 0 };
@@ -1288,7 +1288,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 				if (fidDef != HFILE_ERROR)
 				{
 					int i = 0;
-					hFldDefs = GSSiGlobAlloc(1805, GMEM_MOVEABLE, SHRT_MAX + 4);
+					hFldDefs = GSSiGlobAlloc(GAIDNO 1805, GMEM_MOVEABLE, SHRT_MAX + 4);
 					fldDefs = GlobalLock(hFldDefs);
 					while (i++ < 5 && fgetstring(fldDefs, SHRT_MAX, fidDef))
 					{
@@ -1301,7 +1301,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 				{
 					int pos = BT_FIRST, cond = BT_ANY;
 					long Offset;
-					HANDLE hVal = GSSiGlobAlloc(1797, GMEM_MOVEABLE, 4096);
+					HANDLE hVal = GSSiGlobAlloc(GAIDNO 1797, GMEM_MOVEABLE, 4096);
 					LPSTR val = GlobalLock(hVal);
 					int nRecs = BT_NUM_IN_INDEX(lpGWDHead->BTHandle[0]);
 					int nLoaded = 0;
@@ -1618,7 +1618,7 @@ NextCrimeRec:
 				fid = GSSiOpenFile(ARG[2], 0, openOpt);
 				if (fid != HFILE_ERROR)
 				{
-					HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX * 8);
+					HANDLE hCmd = GSSiGlobAlloc(GAIDNO 1796, GMEM_MOVEABLE, USHRT_MAX * 8);
 					LPSTR  pCmd = GlobalLock(hCmd);
 					LPGWFLDINFO lpFieldInfo;
 					char delim[2] = { 0 };
@@ -1763,7 +1763,7 @@ NextCrimeRec:
 					{
 						int pos = BT_FIRST, cond = BT_ANY;
 						long Offset;
-						HANDLE hVal = GSSiGlobAlloc(1797, GMEM_MOVEABLE, 4096);
+						HANDLE hVal = GSSiGlobAlloc(GAIDNO 1797, GMEM_MOVEABLE, 4096);
 						LPSTR val = GlobalLock(hVal);
 						int nRecs = BT_NUM_IN_INDEX(lpGWDHead->BTHandle[0]);
 						int nLoaded = 0;
@@ -2112,7 +2112,7 @@ NextCrimeRec:
 
 			if (Fid != HFILE_ERROR)
 			{
-				HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX * 64*4);
+				HANDLE hCmd = GSSiGlobAlloc(GAIDNO 1796, GMEM_MOVEABLE, USHRT_MAX * 64*4);
 				LPSTR  pCmd = GlobalLock(hCmd);
 
 				if (createFile)
@@ -2268,9 +2268,9 @@ NextCrimeRec:
 							pDPoints = (HPDPOINT)(pBounds + 1);
 							pDPoints += offsetPoints;
 							sqMeters = ComputeAreaAreaD(pDPoints, nPnts, &perimeter);
-							hPoints = GSSiGlobAlloc(0, GMEM_MOVEABLE, nPnts * sizeof(POINT));
+							hPoints = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, nPnts * sizeof(POINT));
 							pPoints = GlobalLock(hPoints);
-							hPointsCVT = GSSiGlobAlloc(0, GMEM_MOVEABLE, nPnts * sizeof(DPOINT));
+							hPointsCVT = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, nPnts * sizeof(DPOINT));
 							pPointsCVT = GlobalLock(hPointsCVT);
 							midPt = MinMaxMidPointD(pBounds);
 							nTotal++;
@@ -2427,7 +2427,7 @@ NextCrimeRec:
 				Fid = GSSiOpenFile(ARG[2], 0, OF_READWRITE);
 			if (Fid != HFILE_ERROR)
 			{
-				HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX * 32);
+				HANDLE hCmd = GSSiGlobAlloc(GAIDNO 1796, GMEM_MOVEABLE, USHRT_MAX * 32);
 				LPSTR  pCmd = GlobalLock(hCmd);
 
 				GSSillseek(Fid, 0, 2);
@@ -2514,7 +2514,7 @@ NextCrimeRec:
 								GlobalUnlock(hPolyPartLen);
 							}
 							pDPoints = (HPDPOINT)(pBounds + 1);
-							hPoints = GSSiGlobAlloc(0, GMEM_MOVEABLE, nPnts * sizeof(POINT));
+							hPoints = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, nPnts * sizeof(POINT));
 							pPoints = GlobalLock(hPoints);
 							midPt = MinMaxMidPointD(pBounds);
 							nTotal++;
@@ -2626,7 +2626,7 @@ NextCrimeRec:
 				Fid = GSSiOpenFile(ARG[2], 0, OF_READWRITE);
 			if (Fid != HFILE_ERROR)
 			{
-				HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX * 8);
+				HANDLE hCmd = GSSiGlobAlloc(GAIDNO 1796, GMEM_MOVEABLE, USHRT_MAX * 8);
 				LPSTR  pCmd = GlobalLock(hCmd);
 
 				GSSillseek(Fid, 0, 2);
@@ -2700,9 +2700,9 @@ int SQLITEOpenPrj(LPSTR SQLITEFileName, int projectionID)
 		if (fid != HFILE_ERROR)
 		{
 			int len = GSSifilelength(fid);
-			HANDLE hMem = GSSiGlobAlloc(0, GMEM_MOVEABLE, len + 1);
+			HANDLE hMem = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, len + 1);
 			LPSTR pMem = GlobalLock(hMem);
-			HANDLE hDef = GSSiGlobAlloc(0, GMEM_MOVEABLE, 4096);
+			HANDLE hDef = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, 4096);
 			LPSTR proj4def = GlobalLock(hDef);
 
 			BigRead(fid, pMem, len);
@@ -3801,7 +3801,7 @@ BOOL LoadSQLiteCrimes(LPSTR FromPath, LPSTR ToPath)
 	BOOL rtn = FALSE;
 	sqlite3 *db;
 	int err;
-	HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX * 8);
+	HANDLE hCmd = GSSiGlobAlloc(GAIDNO 1796, GMEM_MOVEABLE, USHRT_MAX * 8);
 	LPSTR  pCmd = GlobalLock(hCmd);
 	
 	rtn = sqlite3_open(ToPath, &db);
@@ -3826,7 +3826,7 @@ BOOL LoadSQLiteCrimes(LPSTR FromPath, LPSTR ToPath)
 		db = (sqlite3*)atoi(ARG[2]);
 		if (db)
 		{
-			HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX * 8);
+			HANDLE hCmd = GSSiGlobAlloc(GAIDNO 1796, GMEM_MOVEABLE, USHRT_MAX * 8);
 			LPSTR  pCmd = GlobalLock(hCmd);
 			LPGWFLDINFO lpFieldInfo;
 			char delim[2] = { 0 };
@@ -3848,7 +3848,7 @@ BOOL LoadSQLiteCrimes(LPSTR FromPath, LPSTR ToPath)
 		db = (sqlite3*)atoi(ARG[2]);
 		if (fid != HFILE_ERROR)
 		{
-			HANDLE hstr = GSSiGlobAlloc(0, GMEM_MOVEABLE, MAXSTR);
+			HANDLE hstr = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, MAXSTR);
 			LPSTR cmd = GlobalLock(hstr);
 			rtn = 1;
 			while (fgetstring(cmd, -(MAXSTR - 2), fid))
@@ -3937,7 +3937,7 @@ BOOL LoadSQLiteCrimes(LPSTR FromPath, LPSTR ToPath)
 			db = (sqlite3*)atoi(ARG[2]);
 			if (db)
 			{
-				HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX * 8);
+				HANDLE hCmd = GSSiGlobAlloc(GAIDNO 1796, GMEM_MOVEABLE, USHRT_MAX * 8);
 				LPSTR  pCmd = GlobalLock(hCmd);
 				LPGWFLDINFO lpFieldInfo;
 				char delim[2] = { 0 };
@@ -4021,7 +4021,7 @@ HANDLE	OpenSLTDatabase(LPSTR NameIN, PSTR SQL, short Access)
 	int rtn;
 	sqlite3 *db;
 
-	hDB = GSSiGlobAlloc(1505, GHND, USHRT_MAX);
+	hDB = GSSiGlobAlloc(GAIDNO 1505, GHND, USHRT_MAX);
 	pDB = (LPSQLDATABASE)GlobalLock(hDB);
 	pDB->hasRowID = FALSE;
 	pDB->xLoc = -1;
@@ -4372,7 +4372,7 @@ HANDLE	OpenSLTDatabaseQuery(LPSTR Name, LPSTR SQL)
 	int rtn = sqlite3_open(Name, &db);
 	if (rtn != SQLITE_OK)
 		return 0;
-	hDB = GSSiGlobAlloc(1505, GHND, USHRT_MAX);
+	hDB = GSSiGlobAlloc(GAIDNO 1505, GHND, USHRT_MAX);
 	pDB = (LPSQLDATABASE)GlobalLock (hDB);
 
 	if (sqlite3_prepare_v2GSSi(db, SQL, -1, &statement, 0) == SQLITE_OK)
@@ -4863,7 +4863,7 @@ MNMXCORL AdjustSLTBounds(LPMNMXCORD pBounds, BOOL Insert)
 
 BOOL SLTSpatialIndexCreate(sqlite3 *db, LPSTR tableName)
 {
-	HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX);
+	HANDLE hCmd = GSSiGlobAlloc(GAIDNO 1796, GMEM_MOVEABLE, USHRT_MAX);
 	LPSTR  pCmd = GlobalLock(hCmd);
 	sqlite3_stmt *statement;
 	BOOL rtn = FALSE;
@@ -4917,7 +4917,7 @@ BOOL SLTSpatialIndexCreate(sqlite3 *db, LPSTR tableName)
 }
 BOOL SLTSpatialIndex2Create(sqlite3 *db, LPSTR tableName)
 {
-	HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX);
+	HANDLE hCmd = GSSiGlobAlloc(GAIDNO 1796, GMEM_MOVEABLE, USHRT_MAX);
 	LPSTR  pCmd = GlobalLock(hCmd);
 	sqlite3_stmt *statement;
 	BOOL rtn = FALSE;
@@ -4971,7 +4971,7 @@ BOOL SLTSpatialIndex2Create(sqlite3 *db, LPSTR tableName)
 }
 BOOL SLTSpatialIndexCreate3D(sqlite3 *db, LPSTR tableName)
 {
-	HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX);
+	HANDLE hCmd = GSSiGlobAlloc(GAIDNO 1796, GMEM_MOVEABLE, USHRT_MAX);
 	LPSTR  pCmd = GlobalLock(hCmd);
 	sqlite3_stmt *statement;
 	BOOL rtn = FALSE;
@@ -4992,7 +4992,7 @@ BOOL SLTSpatialIndexCreate3D(sqlite3 *db, LPSTR tableName)
 
 BOOL SLTSpatialIndexAdd(sqlite3 *db, LPSTR tableName, LONGLONG id, LPSTR Name, LPMNMXCORD pBounds)
 {
-	HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX);
+	HANDLE hCmd = GSSiGlobAlloc(GAIDNO 1796, GMEM_MOVEABLE, USHRT_MAX);
 	LPSTR  pCmd = GlobalLock(hCmd);
 	sqlite3_stmt *statement;
 	BOOL rtn = FALSE;
@@ -5015,7 +5015,7 @@ BOOL SLTSpatialIndexAdd(sqlite3 *db, LPSTR tableName, LONGLONG id, LPSTR Name, L
 }
 BOOL SLTSpatialIndex2Add(sqlite3 *db, LPSTR tableName, LONGLONG id, LPSTR Name, LPMNMXCORD pBounds)
 {
-	HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX);
+	HANDLE hCmd = GSSiGlobAlloc(GAIDNO 1796, GMEM_MOVEABLE, USHRT_MAX);
 	LPSTR  pCmd = GlobalLock(hCmd);
 	sqlite3_stmt *statement;
 	BOOL rtn = FALSE;
@@ -5038,7 +5038,7 @@ BOOL SLTSpatialIndex2Add(sqlite3 *db, LPSTR tableName, LONGLONG id, LPSTR Name, 
 }
 BOOL SLTSpatialIndexAdd3D(sqlite3 *db, LPSTR tableName, LONGLONG id, LPSTR Name, LPMNMXCORD3D pBounds)
 {
-	HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX);
+	HANDLE hCmd = GSSiGlobAlloc(GAIDNO 1796, GMEM_MOVEABLE, USHRT_MAX);
 	LPSTR  pCmd = GlobalLock(hCmd);
 	sqlite3_stmt *statement;
 	BOOL rtn = FALSE;
@@ -5055,7 +5055,7 @@ BOOL SLTSpatialIndexAdd3D(sqlite3 *db, LPSTR tableName, LONGLONG id, LPSTR Name,
 }
 MNMXCORD SLTSpatialIndexBounds(sqlite3 *db, LPSTR tableName)
 {
-	HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX);
+	HANDLE hCmd = GSSiGlobAlloc(GAIDNO 1796, GMEM_MOVEABLE, USHRT_MAX);
 	LPSTR  pCmd = GlobalLock(hCmd);
 	sqlite3_stmt *statement;
 	MNMXCORD Bounds;
@@ -5085,7 +5085,7 @@ MNMXCORD SLTSpatialIndexBounds(sqlite3 *db, LPSTR tableName)
 }
 MNMXCORD3D SLTSpatialIndexBounds3D(sqlite3 *db, LPSTR tableName)
 {
-	HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX);
+	HANDLE hCmd = GSSiGlobAlloc(GAIDNO 1796, GMEM_MOVEABLE, USHRT_MAX);
 	LPSTR  pCmd = GlobalLock(hCmd);
 	sqlite3_stmt *statement;
 	MNMXCORD3D Bounds;
@@ -5131,7 +5131,7 @@ int GetSharedZoomLists(LPHANDLE phTableNames)
 	db = getNVDBHandle(0, &opened);
 	if (!db)
 		return 0;
-	*phTableNames = GSSiGlobAlloc(165, GHND, USHRT_MAX);
+	*phTableNames = GSSiGlobAlloc(GAIDNO 165, GHND, USHRT_MAX);
 	pTables = GlobalLock(*phTableNames);
 
 	if (sqlite3_prepare_v2GSSi(db, query, -1, &statement, 0) == SQLITE_OK)

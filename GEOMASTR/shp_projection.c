@@ -37,9 +37,9 @@ LPSTR SHPGetNVP(LPSTR ShpFileName,LPDOUBLE pFactor)
 		if (fid != HFILE_ERROR)
 		{
 			int len = GSSifilelength(fid);
-			HANDLE hMem = GSSiGlobAlloc(1873, GMEM_MOVEABLE, len + 1);
+			HANDLE hMem = GSSiGlobAlloc(GAIDNO 1873, GMEM_MOVEABLE, len + 1);
 			LPSTR pMem = GlobalLock(hMem);
-			HANDLE hDef = GSSiGlobAlloc(1874, GMEM_MOVEABLE, 4096);
+			HANDLE hDef = GSSiGlobAlloc(GAIDNO 1874, GMEM_MOVEABLE, 4096);
 			LPSTR proj4def = GlobalLock(hDef);
 
 			BigRead(fid, pMem, len);

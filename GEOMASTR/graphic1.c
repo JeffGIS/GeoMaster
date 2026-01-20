@@ -191,7 +191,7 @@ BOOL InitGraphics (HWND hWnd)
 //	CreateFidDBF ();
 	InitProj4CoordConv (FALSE);
 	GoogleTilesInit ();
-	hCmdMess=GSSiGlobAlloc (  39,GHND,MAX_CMDMESSAGE);  
+	hCmdMess=GSSiGlobAlloc(GAIDNO  39,GHND,MAX_CMDMESSAGE);  
     GetCurVal (name,sizeof(name),IDS_FILEVPOFF); 
 	LocationChoice = FillList (0,0,name,str,0);
 	LocationOffset = atof(str);
@@ -210,9 +210,9 @@ BOOL InitGraphics (HWND hWnd)
 		ii = 1;
 	}
 
-	hStartupMenu = GSSiGlobAlloc (  40,GHND,256);
-	hStartupCommand = GSSiGlobAlloc (  41,GHND,256);
-	hCommand = GSSiGlobAlloc (  42,GHND,1024);   
+	hStartupMenu = GSSiGlobAlloc(GAIDNO  40,GHND,256);
+	hStartupCommand = GSSiGlobAlloc(GAIDNO  41,GHND,256);
+	hCommand = GSSiGlobAlloc(GAIDNO  42,GHND,1024);   
 	ShowValue (0,TRUE); 
 	if (App == 1)
 		ConvertWaypointGMD (hWnd);    
@@ -864,7 +864,7 @@ void SetPltNameGlobals (void)
 {GSSiEnterProg (7);
 #endif
 {
-	HANDLE	hName=GSSiGlobAlloc (  43,GMEM_MOVEABLE,1024);
+	HANDLE	hName=GSSiGlobAlloc(GAIDNO  43,GMEM_MOVEABLE,1024);
 	LPSTR	FullName=GlobalLock (hName);
 	LPSTR	name=FullName+256;
 	LPSTR	pltname=name+256; 
@@ -1368,7 +1368,7 @@ Next:
 				{
 					CopyRec = 2;
 					UpdateItem = 0;
-					hUpdateBuf = GSSiGlobAlloc ( 665,GMEM_MOVEABLE,MAXREORGBUF); 
+					hUpdateBuf = GSSiGlobAlloc(GAIDNO 665,GMEM_MOVEABLE,MAXREORGBUF); 
 					lUpdateBuf = 0;
 				}
 				ProcessSHPRecord (*hDC,FidMap,CurrentSHPRec); 
@@ -1414,7 +1414,7 @@ Next:
 				{
 					CopyRec = 2;
 					UpdateItem = 0;
-					hUpdateBuf = GSSiGlobAlloc ( 665,GMEM_MOVEABLE,MAXREORGBUF); 
+					hUpdateBuf = GSSiGlobAlloc(GAIDNO 665,GMEM_MOVEABLE,MAXREORGBUF); 
 					lUpdateBuf = 0;
 				}
 				ProcessPGDBRecord (*hDC,CurrentSHPRec,0);  
@@ -1461,7 +1461,7 @@ Next:
 					CopyRec = 2;
 					UpdateItem = 0;
 					GSSiGlobFree(&hUpdateBuf);
-					hUpdateBuf = GSSiGlobAlloc ( 665,GMEM_MOVEABLE,MAXREORGBUF); 
+					hUpdateBuf = GSSiGlobAlloc(GAIDNO 665,GMEM_MOVEABLE,MAXREORGBUF); 
 					lUpdateBuf = 0;
 				}
 				ProcessFGDBRecord (*hDC,CurrentSHPRec);  
@@ -1524,7 +1524,7 @@ Next:
 				{
 					CopyRec = 2;
 					UpdateItem = 0;
-					hUpdateBuf = GSSiGlobAlloc ( 665,GMEM_MOVEABLE,MAXREORGBUF); 
+					hUpdateBuf = GSSiGlobAlloc(GAIDNO 665,GMEM_MOVEABLE,MAXREORGBUF); 
 					lUpdateBuf = 0;
 				}
 				ProcessORARecord (*hDC,FidMap,CurrentORARec); 
@@ -1612,7 +1612,7 @@ Next:
     if (nBytes<=0)
         goto RtnTrue;  
     SegStart = GSSillseek (FidMap,0,1);
-    hpltBuf = GSSiGlobAlloc (  45,GMEM_MOVEABLE,(DWORD)nBytes+32);
+    hpltBuf = GSSiGlobAlloc(GAIDNO  45,GMEM_MOVEABLE,(DWORD)nBytes+32);
     LPpltBuf = GlobalLock (hpltBuf); 
     nRead = BigRead (FidMap,LPpltBuf,nBytes);  
 //    MapIOTime+=clock()-starttime;
@@ -1639,7 +1639,7 @@ Next:
 		{
 			CopyRec = 2;
 			UpdateItem = 0;
-			hUpdateBuf = GSSiGlobAlloc ( 665,GMEM_MOVEABLE,MAXREORGBUF); 
+			hUpdateBuf = GSSiGlobAlloc(GAIDNO 665,GMEM_MOVEABLE,MAXREORGBUF); 
 			lUpdateBuf = 0;
 			HaveFirstHeader = FALSE;
 		}
@@ -1658,7 +1658,7 @@ Next:
 				ii = 1;
 		    GSSillseek (FidMap,ContinuationOffset,0);
 		    nRead = BigRead (FidMap,(HPSTR)&nBytes,2);
-		    hpltBuf = GSSiGlobAlloc (  48,GMEM_MOVEABLE,(DWORD)nBytes+2);
+		    hpltBuf = GSSiGlobAlloc(GAIDNO  48,GMEM_MOVEABLE,(DWORD)nBytes+2);
 		    LPpltBuf = GlobalLock (hpltBuf);
 		    LPpltBuf[nRead] = 0;
 		    nRead = BigRead (FidMap,LPpltBuf,nBytes);
@@ -4262,7 +4262,7 @@ void ShowPickedItem (HWND hWnd, int InItem)
     SetDisplayMode (CurView->hDC, GF_MAPMODE);
     if (InItem >= 0)
     {
-	    hVisList=GSSiGlobAlloc (  46,GHND,sizeof(VISLIST));
+	    hVisList=GSSiGlobAlloc(GAIDNO  46,GHND,sizeof(VISLIST));
 	    SaveVis = CurVis;
 	    CurVis = (LPVISLIST)GlobalLock (hVisList); 
 	    CurVis->hVisList=hVisList;
@@ -4284,7 +4284,7 @@ void ShowPickedItem (HWND hWnd, int InItem)
     {
 	    GSSillseek (FidMap,PickList[Item].Segment,0);
 	    nRead = BigRead (FidMap,(HPSTR)&nBytes,2);
-	    hpltBuf = GSSiGlobAlloc (  47,GMEM_MOVEABLE,(DWORD)nBytes+2);
+	    hpltBuf = GSSiGlobAlloc(GAIDNO  47,GMEM_MOVEABLE,(DWORD)nBytes+2);
 	    LPpltBuf = GlobalLock (hpltBuf);
 	    LPpltBuf[nRead] = 0;
 	    nRead = BigRead (FidMap,LPpltBuf,nBytes);
@@ -4467,7 +4467,7 @@ void ShowPickedItem (HWND hWnd, int InItem)
 		    
 		    GSSillseek (FidMap,ContinuationOffset,0);
 		    nRead = BigRead (FidMap,(HPSTR)&nBytes,2);
-		    hpltBuf = GSSiGlobAlloc (  48,GMEM_MOVEABLE,(DWORD)nBytes+2);
+		    hpltBuf = GSSiGlobAlloc(GAIDNO  48,GMEM_MOVEABLE,(DWORD)nBytes+2);
 		    LPpltBuf = GlobalLock (hpltBuf);
 		    LPpltBuf[nRead] = 0;
 		    nRead = BigRead (FidMap,LPpltBuf,nBytes);
@@ -5278,7 +5278,7 @@ GSSiExitProg (56);
      CurView->CurFile=-1; 
      CurView->Display=TRUE;  
      GSSiGlobFree (&CurView->hTAGList);
-     CurView->hTAGList = GSSiGlobAlloc (  49,GHND,1024);
+     CurView->hTAGList = GSSiGlobAlloc(GAIDNO  49,GHND,1024);
      _fmemset (CurView->CurVisType,0,sizeof(CurView->CurVisType)); 
      CurView->MaxSymbolWidth = 0;
      /*IncrementFile ();*/
@@ -5616,7 +5616,7 @@ NextFile:
         {
             if (CurView->HaveBounds)
             {
-            	HANDLE hSaveDisplay=GSSiGlobAlloc (  50,GMEM_MOVEABLE,2*MAX_VIEWPORTS);
+            	HANDLE hSaveDisplay=GSSiGlobAlloc(GAIDNO  50,GMEM_MOVEABLE,2*MAX_VIEWPORTS);
             	short	SaveDisplayViewID = DisplayViewID;
             	short	SaveNumViewportsToDisplay = NumViewportsToDisplay; 
             	short	SaveFDP = FirstDisplayPass; 
@@ -6918,7 +6918,7 @@ BOOL IncrementFile ()
     short       NumFiles,ii;
     LPSHORT     lpNumFiles;       
     MNMXCORD    TestBounds;
-    HANDLE		hStr=GSSiGlobAlloc (1548,GMEM_MOVEABLE,1024);
+    HANDLE		hStr=GSSiGlobAlloc(GAIDNO 1548,GMEM_MOVEABLE,1024);
     LPSTR		str=GlobalLock (hStr);
     LPSTR		File = str + 256;
     LPSTR		dir = File + 256;  
@@ -7297,7 +7297,7 @@ MakeBin:
     if (UseBinFileList)
     	FidBin = GSSiOpenFile (BinFile,(LPOFSTRUCTGM)&OFStruct,OF_CREATE);
     NumFiles = 0;    
-    hBinFileList = GSSiGlobAlloc (  53,GMEM_MOVEABLE,16*(long)USHRT_MAX);
+    hBinFileList = GSSiGlobAlloc(GAIDNO  53,GMEM_MOVEABLE,16*(long)USHRT_MAX);
     lpNumFiles = (LPSHORT)GlobalLock (hBinFileList);
     lpEntry = (LPFILELISTENTRY)lpNumFiles; 
     lpEntry++;
@@ -7401,7 +7401,7 @@ GetBin:
 	    FidTxt = GSSiOpenFile (TextFile,(LPOFSTRUCTGM)&OFStruct,OF_READ);
 		goto MakeBin;
 	}
-    hBinFileList = GSSiGlobAlloc (  54,GMEM_MOVEABLE,(int)statbin.st_size);
+    hBinFileList = GSSiGlobAlloc(GAIDNO  54,GMEM_MOVEABLE,(int)statbin.st_size);
     lpNumFiles = (LPSHORT)GlobalLock (hBinFileList);
     BigRead (FidBin,(HPSTR)lpNumFiles,(int)statbin.st_size-2);
     GlobalUnlock (hBinFileList);
@@ -7801,7 +7801,7 @@ BOOL BuildRefIndexes (BOOL UseCurrentViewport)
 	 {   
 		HANDLE	hVis;
 			    		
-        hVis=GSSiGlobAlloc (   1,GHND,sizeof(VISLIST));
+        hVis=GSSiGlobAlloc(GAIDNO   1,GHND,sizeof(VISLIST));
         SaveBuildTAGVis =(LPVISLIST) GlobalLock (hVis);  
         *SaveBuildTAGVis = *CurVis;
         SaveBuildTAGVis->hVisList = hVis;
@@ -7844,7 +7844,7 @@ BOOL BuildRefIndexes (BOOL UseCurrentViewport)
 	 if (!UseCurrentViewport)
 	 	SetViewport(*pCommandViewport);
      CurView->CurZoomAreaRef = 0;
-	 hDupFiles = GSSiGlobAlloc (   2,GHND,USHRT_MAX);
+	 hDupFiles = GSSiGlobAlloc(GAIDNO   2,GHND,USHRT_MAX);
 	 IgnoreSelectVP = TRUE;
 	 Display = FALSE;
 	 RedisplayOnly = FALSE;
@@ -7866,7 +7866,7 @@ BOOL BuildRefIndexes (BOOL UseCurrentViewport)
 	 IgnoreBounds = TRUE;
 	 SetWindowText (hWndMain,"Creating Reference index");
 	 SetViewport(*pCommandViewport); 
-	 hDupFiles = GSSiGlobAlloc (   2,GHND,UINT_MAX);
+	 hDupFiles = GSSiGlobAlloc(GAIDNO   2,GHND,UINT_MAX);
      CurView->CurZoomAreaRef = 0;
 	 IgnoreSelectVP = TRUE;
 	 RedisplayViewport(TRUE,TRUE);  

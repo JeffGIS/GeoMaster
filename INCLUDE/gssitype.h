@@ -8,6 +8,7 @@
 #include "sqlite3.h"
 #include "laszip_dll.h"
 
+#define GAIDNO
 enum STRUCTTYPES {ST_NOTYPE,ST_FTPSTRUCT,ST_VPSTRUCT};
 #define	MAX_CONNECTED_PROCESSES	32
 

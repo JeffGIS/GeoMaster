@@ -470,7 +470,7 @@ GSSiExitProg (883);
 }
 	if (!hPromptList)
 	{
-		hPromptList = GSSiGlobAlloc ( 643,GMEM_MOVEABLE,256*3*sizeof(DWORD));
+		hPromptList = GSSiGlobAlloc(GAIDNO 643,GMEM_MOVEABLE,256*3*sizeof(DWORD));
 		nPromptList = 0;  
 	}
 	pPrompt = (LPDWORD)GlobalLock (hPromptList); 
@@ -978,7 +978,7 @@ BOOL SetErrorProcessing (LPSTR ErrString)
 			l=_fstrlen (ErrString); 
 			if (l)
 			{
-				pCmdStr->hError = GSSiGlobAlloc ( 644,GMEM_MOVEABLE,l+1);
+				pCmdStr->hError = GSSiGlobAlloc(GAIDNO 644,GMEM_MOVEABLE,l+1);
 				pStr = GlobalLock (pCmdStr->hError); 
 				_fstrcpy (pStr,ErrString);
 				GlobalUnlock (pCmdStr->hError); 
@@ -1020,7 +1020,7 @@ BOOL ProcessErrorString (void)
 		    {
 		    	LPSTR pErrStr=GlobalLock (hError);  
 		    	long	size = GlobalSize (hError);
-		    	HANDLE	hNewError = GSSiGlobAlloc (0,GMEM_MOVEABLE,size);
+		    	HANDLE	hNewError = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,size);
 		    	LPSTR	pNewError = GlobalLock (hNewError);
 		    	
 		    	hmemmove (pNewError,pErrStr,size);
@@ -1152,7 +1152,7 @@ GSSiExitProg (892);
     	return;  
 }
     }
-    hStr = GSSiGlobAlloc ( 645,GMEM_MOVEABLE,1024);
+    hStr = GSSiGlobAlloc(GAIDNO 645,GMEM_MOVEABLE,1024);
     str = GlobalLock (hStr); 
     txt = str + 512;
        
@@ -1406,7 +1406,7 @@ BOOL ReadObject (HFILE *Fid, BOOL UpdateTarget,LPVOID *RtnAdd,short WantID)
 			goto RtnTrue;
     	
     	case OB_SAVEMENUNAME:
-    		hMem = GSSiGlobAlloc ( 646,GMEM_MOVEABLE,256);
+    		hMem = GSSiGlobAlloc(GAIDNO 646,GMEM_MOVEABLE,256);
 			pTemp = GlobalLock (hMem); 
 			GSSilread (*Fid,&ObjectID,2);
 			GSSilread (*Fid,&Version,2);
@@ -1476,7 +1476,7 @@ BOOL ReadObject (HFILE *Fid, BOOL UpdateTarget,LPVOID *RtnAdd,short WantID)
 			if (CurView->NumMaskAreaParts)
 				nParts = CurView->NumMaskAreaParts + 1;
 			GSSiGlobFree (&CurView->hMaskArea);
-		    CurView->hMaskArea = GSSiGlobAlloc ( 647,GMEM_MOVEABLE,sizeof(MNMXCORD)+(long)CurView->NumMaskPoints*sizeof(DPOINT)+nParts*sizeof(int));
+		    CurView->hMaskArea = GSSiGlobAlloc(GAIDNO 647,GMEM_MOVEABLE,sizeof(MNMXCORD)+(long)CurView->NumMaskPoints*sizeof(DPOINT)+nParts*sizeof(int));
 		    pRect = (LPMNMXCORD) GlobalLock (CurView->hMaskArea);
 			GSSilread (*Fid,pRect,sizeof(MNMXCORD));
 			pRect++;
@@ -1499,7 +1499,7 @@ BOOL ReadObject (HFILE *Fid, BOOL UpdateTarget,LPVOID *RtnAdd,short WantID)
 			if (CurView->numBackgroundAreaParts)
 				nParts = CurView->numBackgroundAreaParts + 1;
 			GSSiGlobFree (&CurView->hBackgroundArea);
-		    CurView->hBackgroundArea = GSSiGlobAlloc ( 647,GMEM_MOVEABLE,(long)CurView->numBackgroundAreaPoints*sizeof(DPOINT)+nParts*sizeof(int));
+		    CurView->hBackgroundArea = GSSiGlobAlloc(GAIDNO 647,GMEM_MOVEABLE,(long)CurView->numBackgroundAreaPoints*sizeof(DPOINT)+nParts*sizeof(int));
 		    pPoint = (LPDPOINT) GlobalLock (CurView->hBackgroundArea);
 			BigRead (*Fid,(HPSTR)pPoint,(long)CurView->numBackgroundAreaPoints*(long)sizeof(DPOINT)+nParts*sizeof(int)); 
 			GlobalUnlock (CurView->hBackgroundArea); 
@@ -1513,7 +1513,7 @@ BOOL ReadObject (HFILE *Fid, BOOL UpdateTarget,LPVOID *RtnAdd,short WantID)
 			GSSilread (*Fid,&Version,2);
 			GSSilread (*Fid,&nVars,2);
 			GSSilread (*Fid,&lMem,4); 
-			hMem = GSSiGlobAlloc ( 648,GMEM_MOVEABLE,lMem+1024);
+			hMem = GSSiGlobAlloc(GAIDNO 648,GMEM_MOVEABLE,lMem+1024);
 			pVName = GlobalLock (hMem); 
 			pTemp = pVName + lMem;
 			BigRead (*Fid,pVName,lMem);
@@ -1551,7 +1551,7 @@ BOOL ReadObject (HFILE *Fid, BOOL UpdateTarget,LPVOID *RtnAdd,short WantID)
 			GSSilread (*Fid,&Length,2);
 			
 			GSSiGlobFree (&hAttImport);
-    		hAttImport = GSSiGlobAlloc ( 649,GMEM_MOVEABLE,Length); 
+    		hAttImport = GSSiGlobAlloc(GAIDNO 649,GMEM_MOVEABLE,Length); 
     		pObject = GlobalLock (hAttImport);
     		GSSillseek (*Fid,StartLoc,0);
 			GSSilread (*Fid,&ObjectID,2);
@@ -1564,7 +1564,7 @@ BOOL ReadObject (HFILE *Fid, BOOL UpdateTarget,LPVOID *RtnAdd,short WantID)
 			GSSilread (*Fid,&Version,2);
 			GSSilread (*Fid,&Length,2);
 			
-    		hStreetSegFields = GSSiGlobAlloc ( 650,GMEM_MOVEABLE,Length); 
+    		hStreetSegFields = GSSiGlobAlloc(GAIDNO 650,GMEM_MOVEABLE,Length); 
     		pObject = GlobalLock (hStreetSegFields);
     		GSSillseek (*Fid,StartLoc,0);
 			GSSilread (*Fid,&ObjectID,2);
@@ -1577,7 +1577,7 @@ BOOL ReadObject (HFILE *Fid, BOOL UpdateTarget,LPVOID *RtnAdd,short WantID)
 			GSSilread (*Fid,&Version,2);
 			GSSilread (*Fid,&Length,2);
 			
-    		hImportLimits = GSSiGlobAlloc ( 651,GMEM_MOVEABLE,Length); 
+    		hImportLimits = GSSiGlobAlloc(GAIDNO 651,GMEM_MOVEABLE,Length); 
     		pObject = GlobalLock (hImportLimits);
     		GSSillseek (*Fid,StartLoc,0);
 			GSSilread (*Fid,&ObjectID,2);
@@ -1590,7 +1590,7 @@ BOOL ReadObject (HFILE *Fid, BOOL UpdateTarget,LPVOID *RtnAdd,short WantID)
 			GSSilread (*Fid,&Version,2);
 			GSSilread (*Fid,&Length,2);
 			
-    		hImportFilter = GSSiGlobAlloc ( 652,GMEM_MOVEABLE,Length); 
+    		hImportFilter = GSSiGlobAlloc(GAIDNO 652,GMEM_MOVEABLE,Length); 
     		pObject = GlobalLock (hImportFilter);
     		GSSillseek (*Fid,StartLoc,0);
 			GSSilread (*Fid,&ObjectID,2);
@@ -1603,7 +1603,7 @@ BOOL ReadObject (HFILE *Fid, BOOL UpdateTarget,LPVOID *RtnAdd,short WantID)
 			GSSilread (*Fid,&Version,2);
 			GSSilread (*Fid,&Length,2);
 			
-    		hGRText = GSSiGlobAlloc ( 653,GMEM_MOVEABLE,Length); 
+    		hGRText = GSSiGlobAlloc(GAIDNO 653,GMEM_MOVEABLE,Length); 
     		pObject = GlobalLock (hGRText);
     		GSSillseek (*Fid,StartLoc,0);
 			GSSilread (*Fid,&ObjectID,2);
@@ -1616,7 +1616,7 @@ BOOL ReadObject (HFILE *Fid, BOOL UpdateTarget,LPVOID *RtnAdd,short WantID)
 			GSSilread (*Fid,&Version,2);
 			GSSilread (*Fid,&Length,2);
 			
-    		hGRCommand = GSSiGlobAlloc ( 654,GMEM_MOVEABLE,Length); 
+    		hGRCommand = GSSiGlobAlloc(GAIDNO 654,GMEM_MOVEABLE,Length); 
     		pObject = GlobalLock (hGRCommand);
     		GSSillseek (*Fid,StartLoc,0);
 			GSSilread (*Fid,&ObjectID,2);
@@ -1629,7 +1629,7 @@ BOOL ReadObject (HFILE *Fid, BOOL UpdateTarget,LPVOID *RtnAdd,short WantID)
 			GSSilread (*Fid,&Version,2);
 			GSSilread (*Fid,&Length,2);
 			
-    		hTimeStamp = GSSiGlobAlloc ( 655,GMEM_MOVEABLE,Length); 
+    		hTimeStamp = GSSiGlobAlloc(GAIDNO 655,GMEM_MOVEABLE,Length); 
     		pObject = GlobalLock (hTimeStamp);
     		GSSillseek (*Fid,StartLoc,0);
 			GSSilread (*Fid,&ObjectID,2);
@@ -1642,7 +1642,7 @@ BOOL ReadObject (HFILE *Fid, BOOL UpdateTarget,LPVOID *RtnAdd,short WantID)
 			GSSilread (*Fid,&Version,2);
 			GSSilread (*Fid,&Length,2);
 			
-    		hImportRefno = GSSiGlobAlloc ( 656,GMEM_MOVEABLE,Length); 
+    		hImportRefno = GSSiGlobAlloc(GAIDNO 656,GMEM_MOVEABLE,Length); 
     		pObject = GlobalLock (hImportRefno);
     		GSSillseek (*Fid,StartLoc,0);
 			GSSilread (*Fid,&ObjectID,2);
@@ -1655,7 +1655,7 @@ BOOL ReadObject (HFILE *Fid, BOOL UpdateTarget,LPVOID *RtnAdd,short WantID)
 			GSSilread (*Fid,&Version,2);
 			GSSilread (*Fid,&Length,2);
 			
-    		hImportPreSet = GSSiGlobAlloc ( 657,GMEM_MOVEABLE,Length); 
+    		hImportPreSet = GSSiGlobAlloc(GAIDNO 657,GMEM_MOVEABLE,Length); 
     		pObject = GlobalLock (hImportPreSet);
     		GSSillseek (*Fid,StartLoc,0);
 			GSSilread (*Fid,&ObjectID,2);
@@ -1702,13 +1702,13 @@ GSSiExitProg (900);
 		case GF_AREA_IN_MASK_THEME:
 		case GF_CONNECTION_LINE_THEME:
     
-            handle=GSSiGlobAlloc ( 658,GHND,sizeof(THEME));
+            handle=GSSiGlobAlloc(GAIDNO 658,GHND,sizeof(THEME));
             CurTheme=(LPTHEME)GlobalLock(handle); 
             switch (Version)
             {   
             	case 0:
             	{
-            		HANDLE	handle_v0 = GSSiGlobAlloc ( 659,GHND,sizeof(THEME_v0));
+            		HANDLE	handle_v0 = GSSiGlobAlloc(GAIDNO 659,GHND,sizeof(THEME_v0));
             		LPTHEME_v0	pTheme_v0=(LPTHEME_v0)GlobalLock (handle_v0);
             		GSSilread (*Fid,pTheme_v0,sizeof(THEME_v0)); 
             		ConvertThemeV0toV1 ((LPTHEME_V1)CurTheme,pTheme_v0);
@@ -1717,7 +1717,7 @@ GSSiExitProg (900);
             		break;
             	case 1:
             	{
-            		HANDLE	handle_v1 = GSSiGlobAlloc ( 659,GHND,sizeof(THEME_V1));
+            		HANDLE	handle_v1 = GSSiGlobAlloc(GAIDNO 659,GHND,sizeof(THEME_V1));
             		LPTHEME_V1	pTheme_v1=(LPTHEME_V1)GlobalLock (handle_v1);
             		GSSilread (*Fid,pTheme_v1,sizeof(THEME_V1)); 
             		ConvertThemeV1toV2 ((LPTHEME_V4)CurTheme,pTheme_v1);
@@ -1726,7 +1726,7 @@ GSSiExitProg (900);
             		break;
 				case 4:
 				{
-					HANDLE	handle_v4 = GSSiGlobAlloc(659, GHND, sizeof(THEME_V4));
+					HANDLE	handle_v4 = GSSiGlobAlloc(GAIDNO 659, GHND, sizeof(THEME_V4));
 					LPTHEME_V4	pTheme_v4 = (LPTHEME_V4)GlobalLock(handle_v4);
 					GSSilread(*Fid, pTheme_v4, sizeof(THEME_V4));
 					ConvertThemeV4toV5(CurTheme, pTheme_v4);
@@ -1746,7 +1746,7 @@ GSSiExitProg (900);
 			}
 			while (CurTheme->Version != CUR_THEME_VERSION)
 			{
-				HANDLE	hThemeNew = GSSiGlobAlloc(659, GHND, sizeof(THEME));
+				HANDLE	hThemeNew = GSSiGlobAlloc(GAIDNO 659, GHND, sizeof(THEME));
 				LPTHEME pThemeNew = GlobalLock(hThemeNew);
 				switch (CurTheme->Version)
 				{
@@ -1898,7 +1898,7 @@ GSSiExitProg (900);
 						lenrecread = len;
 					if (NumRecs > 0)
 					{
-						hRecs = GSSiGlobAlloc (1759,GMEM_MOVEABLE,NumRecs*(ClassLen+lenrecread));
+						hRecs = GSSiGlobAlloc(GAIDNO 1759,GMEM_MOVEABLE,NumRecs*(ClassLen+lenrecread));
 						pRecs = GlobalLock(hRecs);  
 						BigRead (*Fid,pRecs,NumRecs*(ClassLen+lenrecread));
 						while (NumRecs--)
@@ -1946,7 +1946,7 @@ GSSiExitProg (900);
 
                 if (NumDocs)
                 {                             
-                    hDesiredDocs = GSSiGlobAlloc ( 660,GHND,sizeof(short)+14*NumDocs);
+                    hDesiredDocs = GSSiGlobAlloc(GAIDNO 660,GHND,sizeof(short)+14*NumDocs);
                     pNumDocs = (LPSHORT)GlobalLock (hDesiredDocs);
                     *pNumDocs = NumDocs;  
                     pNumDocs++;
@@ -1962,7 +1962,7 @@ GSSiExitProg (900);
             
         case PF_COORD_DISPLAY:
         
-            handle=GSSiGlobAlloc ( 661,GHND,sizeof(THEME));
+            handle=GSSiGlobAlloc(GAIDNO 661,GHND,sizeof(THEME));
             CD=(LPCOORDINATEDISPLAY)GlobalLock(handle);
             switch (Version)
 			{
@@ -2256,15 +2256,15 @@ GSSiExitProg (902);
 	{
 		GSSillseek(FidMap,NewPrimeOffs.UsedDescOffset,0);
 		BigRead (FidMap,(HPSTR)&nbytes,2);
-		hSpace = GSSiGlobAlloc ( 662,GMEM_MOVEABLE,(DWORD)nbytes);
+		hSpace = GSSiGlobAlloc(GAIDNO 662,GMEM_MOVEABLE,(DWORD)nbytes);
 		Space = GlobalLock (hSpace);
 		ipnt = (LPSHORT)Space;
 		BigRead (FidMap,Space,(WORD)nbytes);
     
 		MemLen = USHRT_MAX;
-		hSym = GSSiGlobAlloc ( 663,GMEM_MOVEABLE,MemLen);  
+		hSym = GSSiGlobAlloc(GAIDNO 663,GMEM_MOVEABLE,MemLen);  
 		pSym = (LPSYMENTRY)GlobalLock (hSym);
-		hPar = GSSiGlobAlloc ( 664,GMEM_MOVEABLE,MemLen);
+		hPar = GSSiGlobAlloc(GAIDNO 664,GMEM_MOVEABLE,MemLen);
 		pPar = (LPSYMENTRY)GlobalLock (hPar);   
 		pEnt = pSym;
 		ipnt++;                
@@ -2545,7 +2545,7 @@ GSSiExitProg (904);
     SetViewport (PickList[Item].ViewID);
     Type = GetBaseRecordType (PickList[Item].Type); 
     _fstrcpy (PltName,PickName);
-	hUpdateBuf = GSSiGlobAlloc ( 665,GMEM_MOVEABLE,MAXREORGBUF); 
+	hUpdateBuf = GSSiGlobAlloc(GAIDNO 665,GMEM_MOVEABLE,MAXREORGBUF); 
 	lUpdateBuf = 0;  
 	KeepTranFileToBase = (HANDLE)1; 
 	if (PickList[Item].Refno == debugref)
@@ -3744,7 +3744,7 @@ moredesc:   ndesc = *(*ipnt);
 			{
 				if (ConvertCurvesToPolylines)
 				{   
-					HANDLE	hMem = GSSiGlobAlloc ( 307,GMEM_MOVEABLE,USHRT_MAX);
+					HANDLE	hMem = GSSiGlobAlloc(GAIDNO 307,GMEM_MOVEABLE,USHRT_MAX);
 		 		    HPDPOINT lpPoints = (HPDPOINT)GlobalLock (hMem); 
 		 		    HPDPOINT pFirstPoint=lpPoints; 
 		 		    double	BackAZ; 
@@ -3904,7 +3904,7 @@ moredesc:   ndesc = *(*ipnt);
 		    (*ipnt)++;
 		    GSSiGlobFree (&hPolyPartLen);
 			GSSiGlobFree (&hPolyBuffer); 
-            hPolyPartLen = GSSiGlobAlloc ( 666,GMEM_MOVEABLE,nMultiPolygon*sizeof(int));
+            hPolyPartLen = GSSiGlobAlloc(GAIDNO 666,GMEM_MOVEABLE,nMultiPolygon*sizeof(int));
             pMultiPolygon = (LPINT)GlobalLock (hPolyPartLen);  
             PolyBufferLen = 2 * (nPoly - 1);
     		while (n--) 
@@ -3913,7 +3913,7 @@ moredesc:   ndesc = *(*ipnt);
     			*pMultiPolygon = *(LPWORD)(*ipnt)++;
     		}
            	GlobalUnlock (hPolyPartLen);
-       		hPolyBuffer = GSSiGlobAlloc ( 667,GMEM_MOVEABLE,(long)PolyBufferLen*PointSize);  
+       		hPolyBuffer = GSSiGlobAlloc(GAIDNO 667,GMEM_MOVEABLE,(long)PolyBufferLen*PointSize);  
        		nPolyPoints = 0;
         }
         break;
@@ -3927,7 +3927,7 @@ moredesc:   ndesc = *(*ipnt);
 		    (*ipnt)++;
 		    GSSiGlobFree (&hPolyPartLen);
 			GSSiGlobFree (&hPolyBuffer); 
-            hPolyPartLen = GSSiGlobAlloc ( 666,GMEM_MOVEABLE,nMultiPolygon*sizeof(int));
+            hPolyPartLen = GSSiGlobAlloc(GAIDNO 666,GMEM_MOVEABLE,nMultiPolygon*sizeof(int));
             pMultiPolygon = (LPINT)GlobalLock (hPolyPartLen);  
             PolyBufferLen = 2 * (nPoly - 1);
     		while (n--) 
@@ -3937,7 +3937,7 @@ moredesc:   ndesc = *(*ipnt);
 			    (*ipnt)++;
     		}
            	GlobalUnlock (hPolyPartLen);
-       		hPolyBuffer = GSSiGlobAlloc ( 667,GMEM_MOVEABLE,(long)PolyBufferLen*PointSize);  
+       		hPolyBuffer = GSSiGlobAlloc(GAIDNO 667,GMEM_MOVEABLE,(long)PolyBufferLen*PointSize);  
        		nPolyPoints = 0;
         }
         break;
@@ -3949,7 +3949,7 @@ moredesc:   ndesc = *(*ipnt);
 			GSSiGlobFree (&hCurvePoints); 
     		nCurvePoints = n = *(*ipnt); 
 		    (*ipnt)++;
-    		hCurvePoints = GSSiGlobAlloc ( 668,GMEM_MOVEABLE,(nCurvePoints+1)*sizeof(short));
+    		hCurvePoints = GSSiGlobAlloc(GAIDNO 668,GMEM_MOVEABLE,(nCurvePoints+1)*sizeof(short));
     		pCurvePoints = (LPSHORT)GlobalLock (hCurvePoints);
     		while (n--)
     			*pCurvePoints++ = *(*ipnt)++;  
@@ -3989,7 +3989,7 @@ moredesc:   ndesc = *(*ipnt);
 		    }
 		    else 
 		    {
-		    	hCoords = GSSiGlobAlloc ( 669,GMEM_MOVEABLE,(long)nPnts*PointSize);
+		    	hCoords = GSSiGlobAlloc(GAIDNO 669,GMEM_MOVEABLE,(long)nPnts*PointSize);
 		    	nCoords = nPnts;
 		    	lCoords = 0;
 		    }
@@ -4238,7 +4238,7 @@ GSSiExitProg (908);
 	else
 		AddToMacroStack(2, 0, PMFile, 0, 0);
 
-    hStr = GSSiGlobAlloc ( 670,GMEM_MOVEABLE,2048*4);
+    hStr = GSSiGlobAlloc(GAIDNO 670,GMEM_MOVEABLE,2048*4);
     str=GlobalLock (hStr);
 	origstr = str;
     textx=str+2048;
@@ -4421,7 +4421,7 @@ Top:
 						}
 						else if (_fstricmp(lpAction, "NULL"))
                         {   
-                        	HANDLE	hTxt=GSSiGlobAlloc ( 671,GMEM_MOVEABLE,2048);
+                        	HANDLE	hTxt=GSSiGlobAlloc(GAIDNO 671,GMEM_MOVEABLE,2048);
                         	LPSTR	pTxt=GlobalLock (hTxt);
                         	
                         	if (SavePickList)
@@ -4571,7 +4571,7 @@ GSSiExitProg (909);
  	SetConfig (PickList[Item].ConfigID);
 	SetViewport (PickList[Item].ViewID);
 	SetPickGlobals (Item);
-    hStr = GSSiGlobAlloc ( 672,GMEM_MOVEABLE,4096+1024);
+    hStr = GSSiGlobAlloc(GAIDNO 672,GMEM_MOVEABLE,4096+1024);
     text=GlobalLock (hStr);
     if (!fgetstring (PMstr,1020,FidPM))
 		goto Exit;
@@ -4653,7 +4653,7 @@ BOOL ProcessPickedItems (HWND hWnd,int item, int irec)
 #endif
 {	int nRc,ii,i;
     HFILE	Fid, FidLast=HFILE_ERROR; 
-    HANDLE	hSTR=GSSiGlobAlloc ( 673,GMEM_MOVEABLE,4096+1024+1024+4096);
+    HANDLE	hSTR=GSSiGlobAlloc(GAIDNO 673,GMEM_MOVEABLE,4096+1024+1024+4096);
     LPSTR	str=GlobalLock(hSTR);
     LPSTR	txt=str+1024;
     LPSTR	NextLine=txt+1024; 
@@ -4685,8 +4685,8 @@ GSSiExitProg (910);
     NumPicked = 1;
 	SetConfig (PickList[0].ConfigID);
     SetViewport (PickList[0].ViewID);
-	hIntData = GSSiGlobAlloc ( 674,GHND,1024); 
-	hPNAddData = GSSiGlobAlloc ( 675,GHND,1024); 
+	hIntData = GSSiGlobAlloc(GAIDNO 674,GHND,1024); 
+	hPNAddData = GSSiGlobAlloc(GAIDNO 675,GHND,1024); 
 	ProcessPickedItem (item,FALSE);
 	{
 		char	GlobFile[MAX_PATH];
@@ -5164,7 +5164,7 @@ BOOL GetThemeSymbolList (short Parent, HANDLE hDBList)
     BOOL	IsPar; 
 	char	Value[128], SymName[128];
 	short	nItem, nPar=0;	
-	HANDLE	hSymbol, hPar = GSSiGlobAlloc ( 676,GMEM_MOVEABLE,4096); 
+	HANDLE	hSymbol, hPar = GSSiGlobAlloc(GAIDNO 676,GMEM_MOVEABLE,4096); 
 	LPSHORT	pPar;
     int   i, ClassNo, ClassZero=0; 
     HANDLE      hBT;
@@ -5235,12 +5235,12 @@ GSSiExitProg (919);
 		return FALSE;
 }
 	SetGlobalValue ("%SHOWSELECTED","");
-	hSaveVP = GSSiGlobAlloc ( 677,GMEM_MOVEABLE,sizeof(VIEWPORT));
+	hSaveVP = GSSiGlobAlloc(GAIDNO 677,GMEM_MOVEABLE,sizeof(VIEWPORT));
 	SaveVP = (LPVIEWPORT)GlobalLock (hSaveVP); 
 	ClearVPHandles(CurView);
 	*SaveVP = *CurView;	
 	AP = SetAutoPan (FALSE);
-	hVisList=GSSiGlobAlloc ( 678,GHND,sizeof(VISLIST));
+	hVisList=GSSiGlobAlloc(GAIDNO 678,GHND,sizeof(VISLIST));
 	CurVis = (LPVISLIST)GlobalLock (hVisList);
 	CurVis->hVisList=hVisList;
 	InitVis ();

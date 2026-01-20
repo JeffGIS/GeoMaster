@@ -483,7 +483,7 @@ HANDLE ReadDIBFile(HFILE hFile)
    // Allocate memory for header & color table.	We'll enlarge this
    // memory as needed.
 
-   hDIB = GSSiGlobAlloc(1739,GMEM_MOVEABLE,
+   hDIB = GSSiGlobAlloc(GAIDNO 1739,GMEM_MOVEABLE,
        (DWORD)(sizeof(BITMAPINFOHEADER) + 256 * sizeof(RGBQUAD)));
    
    if (!hDIB) return NULL;

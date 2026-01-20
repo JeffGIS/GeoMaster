@@ -121,7 +121,7 @@ HANDLE CreateUniqueList(int length, LPSTR Name)
 
 	if (!Name)
 	{
-		hMem = GSSiGlobAlloc(1882, GHND, 256);
+		hMem = GSSiGlobAlloc(GAIDNO 1882, GHND, 256);
 		Name = GlobalLock(hMem);
 	}
 	GSSiGetTempFileName(0, "gmu", 0, (LPSTR)Name);
@@ -144,7 +144,7 @@ HANDLE CreateUniqueList2(int length, LPSTR Name)
 
 	if (!Name)
 	{
-		hMem = GSSiGlobAlloc(1882, GHND, 256);
+		hMem = GSSiGlobAlloc(GAIDNO 1882, GHND, 256);
 		Name = GlobalLock(hMem);
 	}
 	GSSiGetTempFileName(0, "gmu", 0, (LPSTR)Name);
@@ -271,7 +271,7 @@ RETCODE rc;
 HDBC hdbc;
 UDWORD collen;
 SDWORD  lenanswer;
-HANDLE	hStr=GSSiGlobAlloc (1883,GMEM_MOVEABLE,4096);
+HANDLE	hStr=GSSiGlobAlloc(GAIDNO 1883,GMEM_MOVEABLE,4096);
 LPSTR str=GlobalLock(hStr);
 LPSTR sqlstr=str+1024;
 LPSTR	lpsqlstr=sqlstr, lpBrack, lpEndBrack, lpParam, lpOrder, Value, lpFrom;
@@ -402,7 +402,7 @@ HANDLE	hSTR = 0;
 	}
     hdbc = HDBCS[(int)FilePtr->FileHandle]; 
     SQLAllocStmt(hdbc, &hstmt);
-    hSTR = GSSiGlobAlloc ( 142,GMEM_MOVEABLE,4096);
+    hSTR = GSSiGlobAlloc(GAIDNO 142,GMEM_MOVEABLE,4096);
     Value = GlobalLock (hSTR);   
     _fstrcpy (Value,SQLPtr->SQL);  
     if (*Value == '$')
@@ -519,7 +519,7 @@ BOOL ExternalSQLDirectBatch (int hDB, LPSTR SQL)
 		return rtn;                 
 	}
 	if (!BatchHandle)
-		BatchHandle = GSSiGlobAlloc ( 143,GMEM_MOVEABLE,4096);
+		BatchHandle = GSSiGlobAlloc(GAIDNO 143,GMEM_MOVEABLE,4096);
 	lpSQL = GlobalLock (BatchHandle);
 	if (((long)_fstrlen (lpSQL) + (long)_fstrlen (SQL) + 16) > (long)4000 ||
 		 ((hDB != CurBatchID) && CurBatchID))
@@ -578,7 +578,7 @@ BOOL ExternalSQLDirect (int hDB, LPSTR SQL)
     	pEndName++;
     	_fullpath (FullName,pBegName,sizeof(FullName));  
     	_splitpath (FullName,Drive,Dir,Name,Ext);
-    	handle = GSSiGlobAlloc ( 144,GMEM_MOVEABLE,USHRT_MAX);
+    	handle = GSSiGlobAlloc(GAIDNO 144,GMEM_MOVEABLE,USHRT_MAX);
     	pSQL = GlobalLock (handle);  
     	sprintf (pSQL,"%s %s.DBF %s",SQL,Name,pEndName);  
     	SQL = pSQL;
@@ -597,8 +597,8 @@ Next:
     	 HANDLE	hMem;
 	    
 	     rtn = FALSE;	 
-//    	 hMem = GSSiGlobAlloc ( 145,GMEM_MOVEABLE,SQL_MAX_MESSAGE_LENGTH*2+300+10+128+32);     
-    	 hMem = GSSiGlobAlloc ( 146,GMEM_MOVEABLE,USHRT_MAX);     
+//    	 hMem = GSSiGlobAlloc(GAIDNO 145,GMEM_MOVEABLE,SQL_MAX_MESSAGE_LENGTH*2+300+10+128+32);     
+    	 hMem = GSSiGlobAlloc(GAIDNO 146,GMEM_MOVEABLE,USHRT_MAX);     
     	 cError = GlobalLock (hMem);
     	 Mess = cError + 130;
     	 DispStr = Mess + SQL_MAX_MESSAGE_LENGTH+10+4;
@@ -709,7 +709,7 @@ LPCURVAL	pCurVal;
 	}
 	DBhandle = (int)FilePtr->FileHandle;  
 	
-    hSTR = GSSiGlobAlloc ( 147,GHND,USHRT_MAX); 
+    hSTR = GSSiGlobAlloc(GAIDNO 147,GHND,USHRT_MAX); 
     str = GlobalLock (hSTR);
     index = str + 4096;  
     sqlstr = index + 4096;
@@ -729,7 +729,7 @@ LPCURVAL	pCurVal;
     i=DBhandle;
     hdbc = HDBCS[i]; 
     if (!hODBCParams)
-    	hODBCParams = GSSiGlobAlloc ( 148,GPTR,4096);
+    	hODBCParams = GSSiGlobAlloc(GAIDNO 148,GPTR,4096);
     if (!*hstmt)
     {
 	    rc = SQLAllocStmt(hdbc, hstmt); 
@@ -786,7 +786,7 @@ LPCURVAL	pCurVal;
 		if (UseRecNum || SingleVal) 
 		{   
 			if (!FilePtr->BufferHandle)
-				FilePtr->BufferHandle = GSSiGlobAlloc ( 149,GPTR,4096);
+				FilePtr->BufferHandle = GSSiGlobAlloc(GAIDNO 149,GPTR,4096);
 			pBuf = GlobalLock (FilePtr->BufferHandle);
 		    if ((rc = SQLBindCol(*hstmt,  1, SQL_C_CHAR,   pBuf, 4095, &lenanswer)) == SQL_ERROR)
 		    	goto ErrMes;  
@@ -820,7 +820,7 @@ LPCURVAL	pCurVal;
 	}
 	if (ExSQL)
 	{   
-		HANDLE	hTemp=GSSiGlobAlloc ( 150,GMEM_MOVEABLE,4096*2); 
+		HANDLE	hTemp=GSSiGlobAlloc(GAIDNO 150,GMEM_MOVEABLE,4096*2); 
 		LPSTR	pTemp, pParm, tmp;
 		        
 		AddToODBCParms (0,0); 
@@ -854,7 +854,7 @@ ErrMes:
 	    	 SWORD lmes; 
 	    	 LPSTR	cError, Mess, DispStr;
 	    	 HANDLE	hMem; 
-	    	 HANDLE	hParms = GSSiGlobAlloc (0,GMEM_MOVEABLE,4096);
+	    	 HANDLE	hParms = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,4096);
 	    	 LPSTR	pParms = GlobalLock (hParms);
 	    	 RETCODE	rcer;
 	    	 BOOL	FirstErr=TRUE;
@@ -873,7 +873,7 @@ ErrMes:
 				 }  
 				 AddToODBCParms (0,0); 
 		    	 ExpandText (pParms);
-		    	 hMem = GSSiGlobAlloc ( 151,GMEM_MOVEABLE,USHRT_MAX);     
+		    	 hMem = GSSiGlobAlloc(GAIDNO 151,GMEM_MOVEABLE,USHRT_MAX);     
 		    	 cError = GlobalLock (hMem);
 		    	 Mess = cError + 130;
 		    	 DispStr = Mess + SQL_MAX_MESSAGE_LENGTH+10+4;
@@ -1009,7 +1009,7 @@ ErrMes:
     	startfield = 1; 
 /*    	if (!_fstricmp (field->name,"GEOM"))
     	{
-			field->hCurVal = GSSiGlobAlloc ( 152,GHND,2);
+			field->hCurVal = GSSiGlobAlloc(GAIDNO 152,GHND,2);
 			pCurVal = (LPCURVAL)GlobalLock (field->hCurVal); 
 			pCurVal->length=0;   
 			GlobalUnlock (field->hCurVal);  
@@ -1032,7 +1032,7 @@ ErrMes:
 	    		char	mess[64];
 				HPSTR	pTemp;
     			
-    			//hBinVal=GSSiGlobAlloc (0,GMEM_MOVEABLE,size);
+    			//hBinVal=GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,size);
     			//binval=GlobalLock (hBinVal);
 				pTemp = malloc (lCommonMem);
 				pTemp += 1024;
@@ -1072,7 +1072,7 @@ ErrMes:
 		    	}
 		    	
 		    	BinSize = lenanswer+32; 
-    			hBinVal=GSSiGlobAlloc (0,GMEM_MOVEABLE,BinSize);
+    			hBinVal=GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,BinSize);
     			binval=GlobalLock (hBinVal);
     			hmemmove (binval,pTemp,BinSize-1);
 		    	BinSize = lenanswer; 
@@ -1099,7 +1099,7 @@ ErrMes:
 	    		char	mess[64];
 				HPSTR	pTemp;
     			
-    			//hBinVal=GSSiGlobAlloc (0,GMEM_MOVEABLE,size);
+    			//hBinVal=GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,size);
     			//binval=GlobalLock (hBinVal);
 				pTemp = malloc (lCommonMem);
 		    	//rc = SQLGetData(*hstmt, FldNum, SQL_C_BINARY, pCommonMem, lCommonMem, &lenanswer);   
@@ -1139,7 +1139,7 @@ ErrMes:
 		    	}
 		    	
 		    	BinSize = lenanswer+1; 
-    			hBinVal=GSSiGlobAlloc (0,GMEM_MOVEABLE,BinSize);
+    			hBinVal=GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,BinSize);
     			binval=GlobalLock (hBinVal);
     			hmemmove (binval,pTemp,BinSize-1);
 				binval[lenanswer] = 0;
@@ -1234,7 +1234,7 @@ ErrMes:
 		{   short	ii;
 			if (l>255)
 				ii=1;
-			field->hCurVal = GSSiGlobAlloc ( 153,GMEM_MOVEABLE,sizeof(int)+l+4);
+			field->hCurVal = GSSiGlobAlloc(GAIDNO 153,GMEM_MOVEABLE,sizeof(int)+l+4);
 			pCurVal = (LPCURVAL)GlobalLock (field->hCurVal); 
 			pCurVal->length=l;   
 			if (pCurVal->length)
@@ -1292,7 +1292,7 @@ ErrExit:
 			BlowOut ("Reached limit of ODBC Parms","Fatal Error");
 		}
 		l = _fstrlen (Begin)+2;
-		hODBCParms[nODBCParms]=GSSiGlobAlloc ( 154,GMEM_MOVEABLE,l+1);
+		hODBCParms[nODBCParms]=GSSiGlobAlloc(GAIDNO 154,GMEM_MOVEABLE,l+1);
 		pODBCParm = GlobalLock (hODBCParms[nODBCParms]);
 		sprintf (pODBCParm,"[%s]",Begin);
 		GlobalUnlock (hODBCParms[nODBCParms++]);
@@ -1305,7 +1305,7 @@ ErrExit:
 			goto ErrExit;
 		*End = 0; 
 		l = _fstrlen (Begin);
-		hODBCParms[nODBCParms]=GSSiGlobAlloc ( 155,GMEM_MOVEABLE,l+1);
+		hODBCParms[nODBCParms]=GSSiGlobAlloc(GAIDNO 155,GMEM_MOVEABLE,l+1);
 		pODBCParm = GlobalLock (hODBCParms[nODBCParms]);
 		_fstrcpy (pODBCParm,Begin); 
 		*End = save;
@@ -1340,7 +1340,7 @@ static	char	CName[32];
 LPSTR	pBuf; 
 short	lCName;
 
-    hstr = GSSiGlobAlloc ( 156,GMEM_MOVEABLE,4096);
+    hstr = GSSiGlobAlloc(GAIDNO 156,GMEM_MOVEABLE,4096);
     lpsqlstr = GlobalLock (hstr);
     *lpsqlstr = 0;                                       
 	DBhandle = FilePtr->FileHandle;    
@@ -1348,7 +1348,7 @@ short	lCName;
     i=(int)DBhandle;
     hdbc = HDBCS[i]; 
     if (!hODBCParams)
-    	hODBCParams = GSSiGlobAlloc ( 157,GHND,4096);  
+    	hODBCParams = GSSiGlobAlloc(GAIDNO 157,GHND,4096);  
     	
 	if (!_fstrnicmp (index,"%RECNUM=",8))
 	{  
@@ -1367,7 +1367,7 @@ short	lCName;
 		SQLSetStmtOption(hstmt,SQL_ROWSET_SIZE,1);
 		SQLSetStmtOption(hstmt,SQL_CURSOR_TYPE,SQL_CURSOR_KEYSET_DRIVEN);
 		if (!FilePtr->BufferHandle)
-			FilePtr->BufferHandle = GSSiGlobAlloc ( 158,GPTR,4096);
+			FilePtr->BufferHandle = GSSiGlobAlloc(GAIDNO 158,GPTR,4096);
 		pBuf = GlobalLock (FilePtr->BufferHandle);
 	    if ((rc = SQLBindCol(hstmt,  1, SQL_C_CHAR,   pBuf, 4095, &lenanswer)) == SQL_ERROR)
 	    	goto ErrMes; 
@@ -1419,7 +1419,7 @@ short	lCName;
 		GlobalUnlock (hODBCParams);
 	
 		{   
-			HANDLE	hTemp=GSSiGlobAlloc ( 159,GMEM_MOVEABLE,4096); 
+			HANDLE	hTemp=GSSiGlobAlloc(GAIDNO 159,GMEM_MOVEABLE,4096); 
 			LPSTR	pTemp, pParm;
 			        
 			lpBrack = index; 
@@ -1458,7 +1458,7 @@ short	lCName;
     	 HANDLE	hMem;
 	    	 
 ErrMes: 
-    	 hMem = GSSiGlobAlloc ( 160,GMEM_MOVEABLE,SQL_MAX_MESSAGE_LENGTH*2+300+10+128+32);     
+    	 hMem = GSSiGlobAlloc(GAIDNO 160,GMEM_MOVEABLE,SQL_MAX_MESSAGE_LENGTH*2+300+10+128+32);     
     	 cError = GlobalLock (hMem);
     	 Mess = cError + 130;
     	 DispStr = Mess + SQL_MAX_MESSAGE_LENGTH+10+4;
@@ -1503,7 +1503,7 @@ LPSTR	lpsqlstr;
 HANDLE hstr; 
 BOOL	rtn;
 
-    hstr = GSSiGlobAlloc ( 161,GMEM_MOVEABLE,USHRT_MAX);
+    hstr = GSSiGlobAlloc(GAIDNO 161,GMEM_MOVEABLE,USHRT_MAX);
     lpsqlstr = GlobalLock (hstr);
     *lpsqlstr = 0;                                       
 	i = (int)FilePtr->FileHandle;    
@@ -1565,7 +1565,7 @@ RETCODE rc;
 SWORD Nullable;
 static HSTMT hstmt;
 short	i, drivenum,ii;  
-HANDLE	hMem=GSSiGlobAlloc ( 162,GMEM_MOVEABLE,4096);  
+HANDLE	hMem=GSSiGlobAlloc(GAIDNO 162,GMEM_MOVEABLE,4096);  
 LPSTR	TableName=GlobalLock (hMem);
 LPSTR	str = TableName+256;
 LPSTR	dir = str + 256;
@@ -1734,7 +1734,7 @@ void SetODBCPassword (LPSTR UserID,LPSTR Password)
 		
 	if (!hODBCPW)  
 	{
-		hODBCPW=GSSiGlobAlloc ( 163,GHND,2+64*sizeof(PWINFO));    
+		hODBCPW=GSSiGlobAlloc(GAIDNO 163,GHND,2+64*sizeof(PWINFO));    
 	}
 	pnumPW = (LPSHORT)GlobalLock (hODBCPW);
 	pnumPW++;
@@ -1822,7 +1822,7 @@ void SubstituteDBQ (LPSTR str,LPSTR pDBQ)
 		return;
 	if (!*pDBQ)
 		return;
-	hDBQ = GSSiGlobAlloc (0,GMEM_MOVEABLE,2048);
+	hDBQ = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,2048);
 	DBQ = GlobalLock (hDBQ);
 	strcpy (DBQ,pDBQ);
 	pDB = DBQ + 1024;
@@ -1850,7 +1850,7 @@ void SubstituteDBQ (LPSTR str,LPSTR pDBQ)
 		strcat (pDB,DBQ);
 	else
 	{
-		HANDLE	hNewStr=GSSiGlobAlloc (0,GMEM_MOVEABLE,4096);
+		HANDLE	hNewStr=GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,4096);
 		LPSTR	pNewStr=GlobalLock (hNewStr);
 		LPSTR	pEndStr;
 
@@ -1959,7 +1959,7 @@ int  i, next_one, j;
 BOOL	SaveDoPaint, DoPrompt=FALSE;
 HDBC hdbc;
 RETCODE rc; 
-HANDLE	htnames=GSSiGlobAlloc ( 164,GHND,2048+256+1024+256+256+256+1024);
+HANDLE	htnames=GSSiGlobAlloc(GAIDNO 164,GHND,2048+256+1024+256+256+256+1024);
 SDWORD nerr;
 SWORD mlen = 253, Moutlen, maxoutlen = 1024, outlen;
 LPSTR cptr;
@@ -2255,7 +2255,7 @@ int NumDatabaseTablesODBC(char *type, HWND  DBhandle)
 		rc = SQLFetch(hstmt);
 	}
 	icount = 1;
-	hTableNames = GSSiGlobAlloc(165, GHND, USHRT_MAX);
+	hTableNames = GSSiGlobAlloc(GAIDNO 165, GHND, USHRT_MAX);
 	pTables = GlobalLock(hTableNames);
 	while ((rc == SQL_SUCCESS || rc == SQL_SUCCESS_WITH_INFO) && TotLen < USHRT_MAX - 256)
 	{
@@ -2293,7 +2293,7 @@ int NumDatabaseTablesSLT(HANDLE DBhandle)
 	if (!DBhandle)
 		return 0;
 	GSSiGlobFree(&hTableNames);
-	hTableNames = GSSiGlobAlloc(165, GHND, USHRT_MAX);
+	hTableNames = GSSiGlobAlloc(GAIDNO 165, GHND, USHRT_MAX);
 	pTables = GlobalLock(hTableNames);
 
 	pDB = (LPSQLDATABASE)GlobalLock(DBhandle);
@@ -2815,7 +2815,7 @@ BOOL FAR PASCAL SQL_LIKEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARA
             	HANDLE	hMem;
             	LPSTR	lpstr, lpstr2;    
             	
-            	hMem = GSSiGlobAlloc ( 166,GMEM_MOVEABLE,2048);
+            	hMem = GSSiGlobAlloc(GAIDNO 166,GMEM_MOVEABLE,2048);
             	
             	lpstr = GlobalLock (hMem);  
             	if (!GetDlgItemText (hWndDlg,IDC_LIKE,lpstr,256))
@@ -2879,7 +2879,7 @@ BOOL FAR PASCAL SQL_INMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM 
             	LPSTR	lpstr, lpEnd, lpBeg, lpCom;  
             	BOOL	more,first;  
             	
-            	hMem = GSSiGlobAlloc ( 167,GMEM_MOVEABLE,1024);
+            	hMem = GSSiGlobAlloc(GAIDNO 167,GMEM_MOVEABLE,1024);
             	
             	lpstr = GlobalLock (hMem);  
             	if (!GetDlgItemText (hWndDlg,IDC_IN,lpstr,1024))
@@ -2971,7 +2971,7 @@ BOOL FAR PASCAL SQL_BETWEENMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LP
             	HANDLE	hMem;
             	LPSTR	lpstr, lpstr2;    
             	
-            	hMem = GSSiGlobAlloc ( 168,GMEM_MOVEABLE,2048);
+            	hMem = GSSiGlobAlloc(GAIDNO  168,GMEM_MOVEABLE,2048);
             	
             	lpstr = GlobalLock (hMem);  
             	lpstr2 = lpstr + 1024;
@@ -3053,7 +3053,7 @@ BOOL FAR PASCAL SQL_VALUEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPAR
             	HANDLE	hMem;
             	LPSTR	lpstr, lpstr2;    
             	
-            	hMem = GSSiGlobAlloc ( 169,GMEM_MOVEABLE,2048);
+            	hMem = GSSiGlobAlloc(GAIDNO 169,GMEM_MOVEABLE,2048);
             	
             	lpstr = GlobalLock (hMem);  
             	if (!GetDlgItemText (hWndDlg,IDC_SQLVALUE,lpstr,256))

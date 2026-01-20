@@ -372,7 +372,7 @@ int OpenJournal (LPSTR Name,HFILE Fid,UINT Mode)
 			OriginalFileLength[Fid] = GSSifilelength (Fid);
 			if (JournalHeader.NumBlocks > 0)
 			{
-				JournalFileIndex[Fid] = GSSiGlobAlloc (1599,GHND,sizeof(int)+(JournalHeader.NumBlocks / 1024 + 1)*1024*sizeof(JOURNALINDEXRECORD));
+				JournalFileIndex[Fid] = GSSiGlobAlloc(GAIDNO 1599,GHND,sizeof(int)+(JournalHeader.NumBlocks / 1024 + 1)*1024*sizeof(JOURNALINDEXRECORD));
 				pNumIndexBlocks = GlobalLock (JournalFileIndex[Fid]);
 				*pNumIndexBlocks = JournalHeader.NumBlocks;
 				pIndexRecord = (LPJOURNALINDEXRECORD)(pNumIndexBlocks+1);
@@ -398,7 +398,7 @@ int OpenJournal (LPSTR Name,HFILE Fid,UINT Mode)
 				if (JournalHeader.OrigFileLength < 0)
 					JournalFileIndex[Fid] = 0;
 				else
-					JournalFileIndex[Fid] = GSSiGlobAlloc (1599,GHND,sizeof(int)+1024*sizeof(JOURNALINDEXRECORD));
+					JournalFileIndex[Fid] = GSSiGlobAlloc(GAIDNO 1599,GHND,sizeof(int)+1024*sizeof(JOURNALINDEXRECORD));
 				OriginalFileLength[Fid] = JournalHeader.OrigFileLength;
 			}
 			if (JournalHeader.OrigFileLength < 0)
@@ -434,7 +434,7 @@ Create:
 	else
 	{
 		JournalHeader.OrigFileLength = OpenFileLength[Fid] = OriginalFileLength[Fid] = GSSifilelength (Fid);
-		JournalFileIndex[Fid] = GSSiGlobAlloc (1599,GHND,sizeof(int)+1024*sizeof(JOURNALINDEXRECORD));
+		JournalFileIndex[Fid] = GSSiGlobAlloc(GAIDNO 1599,GHND,sizeof(int)+1024*sizeof(JOURNALINDEXRECORD));
 		JournalIsCompleteFile[Fid] = 0;
 	}
 	BigWrite64 (FidJnl,(LPSTR)&JournalHeader,sizeof(JOURNALHEADER),-1);
@@ -490,7 +490,7 @@ BOOL CloseJournal (HFILE Fid)
 		if (!hFilesWithJournals)
 		{
 			lFilesWithJournals = len+1;
-			hFilesWithJournals = GSSiGlobAlloc (1600,GMEM_MOVEABLE,lFilesWithJournals);
+			hFilesWithJournals = GSSiGlobAlloc(GAIDNO 1600,GMEM_MOVEABLE,lFilesWithJournals);
 			pFilesWithJournals = GlobalLock (hFilesWithJournals);
 			strcpy (pFilesWithJournals,OpenFileName[Fid]);
 		}
@@ -560,7 +560,7 @@ BOOL ApplyJournal (LPSTR FileName)
 			else if (JournalHeader.OrigFileLength < 0) //file created
 			{
 				HANDLE	FidFile = OpenFileGM(FileName,&OFStruct,OF_CREATE);
-				HANDLE	hJournalRecord = GSSiGlobAlloc (0,GMEM_MOVEABLE,USHRT_MAX);
+				HANDLE	hJournalRecord = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,USHRT_MAX);
 				LPBYTE	pJournalRecord = GlobalLock (hJournalRecord);
 				int		nread;
 
@@ -575,7 +575,7 @@ BOOL ApplyJournal (LPSTR FileName)
 			else
 			{
 				LPJOURNALINDEXRECORD pIndexRecord;
-				HANDLE hIndex = GSSiGlobAlloc (1599,GHND,sizeof(int)+JournalHeader.NumBlocks*sizeof(JOURNALINDEXRECORD));
+				HANDLE hIndex = GSSiGlobAlloc(GAIDNO 1599,GHND,sizeof(int)+JournalHeader.NumBlocks*sizeof(JOURNALINDEXRECORD));
 				int	i;
 				HANDLE	FidFile = OpenFileGM(FileName,&OFStruct,OF_READWRITE);
 
@@ -606,7 +606,7 @@ BOOL ApplyJournal (LPSTR FileName)
 					int	BytesToRead = JournalHeader.BlockSize*pIndexRecord->NumBlocks;
 					if (BytesToRead > 0)
 					{
-						HANDLE	hJournalRecord = GSSiGlobAlloc (0,GMEM_MOVEABLE,BytesToRead);
+						HANDLE	hJournalRecord = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,BytesToRead);
 						LPBYTE	pJournalRecord = GlobalLock (hJournalRecord);
 
 						llFileSeek (FidJnl,pIndexRecord->JournalFileOffset,0);
@@ -1135,7 +1135,7 @@ long BigWrite (HFILE Fid,LPVOID pMF,DWORD isize,long loc)
 				loc = GSSillseek (Fid,0,1);   
 			if (loc < SizeAtLastCheckpoint)
 			{
-				HANDLE	hSave = GSSiGlobAlloc (  99,GMEM_MOVEABLE,isize);
+				HANDLE	hSave = GSSiGlobAlloc(GAIDNO  99,GMEM_MOVEABLE,isize);
 				HPSTR	pSave = GlobalLock (hSave);
 				
 				ii=BigRead (Fid,pSave,isize);
@@ -1240,7 +1240,7 @@ int GetLongPathFromBuffer (LPSTR Name,short MaxLen)
 	{
 		if (!MaxLen)
 			return 0;
-		hGLPBuffer = GSSiGlobAlloc (0,GMEM_MOVEABLE,USHRT_MAX);
+		hGLPBuffer = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,USHRT_MAX);
 		pGLPBuffer = GlobalLock (hGLPBuffer);
 Top:
 		lGLPBuffer = 4;
@@ -1889,7 +1889,7 @@ HFILE FileAlreadyOpen (LPSTR InName,UINT Mode,LPOFSTRUCTGM pOFStruct)
 	if (KeepFilesOpen) 
 	{   
 		LPSTR	pFullPath = _fullpath (0,InName,0);    
-		HANDLE	hMem = GSSiGlobAlloc (1546,GMEM_MOVEABLE,512);
+		HANDLE	hMem = GSSiGlobAlloc(GAIDNO 1546,GMEM_MOVEABLE,512);
 		LPSTR	pMem = GlobalLock (hMem);
 		
 		if (pFullPath)
@@ -2219,7 +2219,7 @@ GSSiExitProg (182);
 			DirCreated = 1;
 		if (!DirCreated && Verify)
 		{
-			HANDLE	hMess=GSSiGlobAlloc (  79,GMEM_MOVEABLE,256);
+			HANDLE	hMess=GSSiGlobAlloc(GAIDNO  79,GMEM_MOVEABLE,256);
 			LPSTR	pMess = GlobalLock (hMess);
 			int DoCreate;
 				
@@ -2559,7 +2559,7 @@ int GetLBSelectedItems (HWND hWndDlg,UINT controlid,LPHANDLE phItems)
 	
 	if (nItems)
 	{
-		*phItems=GSSiGlobAlloc (  80,GHND,nItems*4);
+		*phItems=GSSiGlobAlloc(GAIDNO  80,GHND,nItems*4);
 		pItems=  (LPINT) GlobalLock(*phItems);
 		SendDlgItemMessage(hWndDlg,controlid,LB_GETSELITEMS,nItems,(LPARAM)pItems); 
 		GlobalUnlock (*phItems);
@@ -2955,7 +2955,7 @@ GSSiExitProg (203);
 #endif
     	return (Arg1);
 }
-    handle = GSSiGlobAlloc (  81,GMEM_MOVEABLE,l+1);
+    handle = GSSiGlobAlloc(GAIDNO  81,GMEM_MOVEABLE,l+1);
     OutLoc = GlobalLock (handle);
     SaveOutLoc = OutLoc;
     LastWasBlank = FALSE;  
@@ -3551,7 +3551,7 @@ void SubstituteDL (LPSTR Name,BOOL WantAt)
 	{  
 		char	DL[MAX_PATH]="[%DL]";
 		short	l=_fstrlen (Name); 
-		HANDLE	hMEM=GSSiGlobAlloc (  82,GMEM_MOVEABLE,l+1);
+		HANDLE	hMEM=GSSiGlobAlloc(GAIDNO  82,GMEM_MOVEABLE,l+1);
 		LPSTR	TempName = GlobalLock (hMEM);         	
 		ExpandText (DL);
 		_fstrupr (DL); 
@@ -4167,7 +4167,7 @@ GSSiExitProg (237);
 HGLOBAL GSSiGlobalCopy(USHORT From, HGLOBAL hGlob)
 {
 	long len = GlobalSize(hGlob);
-	HGLOBAL rtn = GSSiGlobAlloc(From, GMEM_MOVEABLE, len);
+	HGLOBAL rtn = GSSiGlobAlloc(GAIDNO From, GMEM_MOVEABLE, len);
 	LPBYTE pFrom = GlobalLock(hGlob);
 	LPBYTE pTo = GlobalLock(rtn);
 	memmove(pTo, pFrom, len);
@@ -4217,7 +4217,7 @@ GSSiExitProg (1398);
 #endif
 }  
 
-HGLOBAL GSSiGlobAlloc (int From,UINT fuAlloc, long cbAlloc)
+HGLOBAL GSSiGlobAlloc(GAIDNO int From,UINT fuAlloc, long cbAlloc)
 #if ENABLETRACE
 {GSSiEnterProg (238);
 #endif
@@ -4542,7 +4542,7 @@ BOOL FPointInRect(LPFPOINT pt, LPRECT rect)
 }
 HANDLE DPointsToPoints(HANDLE hDPoints, int np)
 {
-	HANDLE hP = GSSiGlobAlloc(1803, GMEM_MOVEABLE, np*sizeof(POINT)+4);
+	HANDLE hP = GSSiGlobAlloc(GAIDNO 1803, GMEM_MOVEABLE, np*sizeof(POINT)+4);
 	LPPOINT p = GlobalLock(hP);
 	HPDPOINT dp = GlobalLock(hDPoints);
 	for (int i = 0; i < np; i++)
@@ -4557,7 +4557,7 @@ HANDLE DPointsToPoints(HANDLE hDPoints, int np)
 
 HANDLE DPointsToHFPoints(LPDPOINT DPoints, int np)
 {
-	HANDLE hP = GSSiGlobAlloc(1803, GMEM_MOVEABLE, np*sizeof(FPOINT)+4);
+	HANDLE hP = GSSiGlobAlloc(GAIDNO 1803, GMEM_MOVEABLE, np*sizeof(FPOINT)+4);
 	LPFPOINT p = GlobalLock(hP);
 	HPDPOINT dp = DPoints;
 	for (int i = 0; i < np; i++)
@@ -4571,7 +4571,7 @@ HANDLE DPointsToHFPoints(LPDPOINT DPoints, int np)
 
 HANDLE HDPointsToHFPoints(HANDLE hDPoints, int np)
 {
-	HANDLE hP = GSSiGlobAlloc(1803, GMEM_MOVEABLE, np*sizeof(FPOINT) + 4);
+	HANDLE hP = GSSiGlobAlloc(GAIDNO 1803, GMEM_MOVEABLE, np*sizeof(FPOINT) + 4);
 	LPFPOINT p = GlobalLock(hP);
 	HPDPOINT dp = GlobalLock(hDPoints);
 	for (int i = 0; i < np; i++)
@@ -5572,7 +5572,7 @@ int GSSiRemove2 (LPSTR Name)
 #endif
 {   
 	int	i=0,ii;
-	HANDLE	hMem = GSSiGlobAlloc (  84,GMEM_MOVEABLE,256);
+	HANDLE	hMem = GSSiGlobAlloc(GAIDNO  84,GMEM_MOVEABLE,256);
 	LPSTR	str = GlobalLock (hMem);  
 	HFILE	Fid;
 	
@@ -5800,7 +5800,7 @@ short FillList (HWND hWndDlg,UINT Control,LPSTR file, LPSTR DefaultVal,LPRECT pR
 #endif
 {
     HFILE       Fid=HFILE_ERROR;  
-    HANDLE		hMem = GSSiGlobAlloc (  85,GMEM_MOVEABLE,4096);
+    HANDLE		hMem = GSSiGlobAlloc(GAIDNO  85,GMEM_MOVEABLE,4096);
     LPSTR       str = GlobalLock (hMem); 
     LPSTR		str2 = str + 2048;
     LPSTR       lpBar, LastChar, pVal, pComma, pEnd; 
@@ -6655,7 +6655,7 @@ BOOL GetCacheFile (LPSTR UseFile, LPSTR DiskFile, BOOL Add, HWND StatusWnd)
     short       NumFiles, NewNumFiles, st, i;
     long    FreeSpace, MaxFileNum,  CurrentLoc, 
 		     NeedLength,  length; 
-	HANDLE	hMem = GSSiGlobAlloc (  86,GMEM_MOVEABLE,4096);
+	HANDLE	hMem = GSSiGlobAlloc(GAIDNO  86,GMEM_MOVEABLE,4096);
     LPSTR    str=GlobalLock (hMem);
     LPSTR	 CacheFile=str+256;
     LPOFSTRUCTGM	pOFStruct = (LPOFSTRUCTGM)(CacheFile + 256);
@@ -6713,7 +6713,7 @@ BOOL GetCacheFile (LPSTR UseFile, LPSTR DiskFile, BOOL Add, HWND StatusWnd)
                     HANDLE  h0s;
                     LPSTR   p0s;
                     
-                    h0s = GSSiGlobAlloc (  87,GHND,SHRT_MAX);
+                    h0s = GSSiGlobAlloc(GAIDNO  87,GHND,SHRT_MAX);
                     p0s = GlobalLock (h0s);
                     FileSize = FreeSpace;
                     while (FileSize)
@@ -6745,7 +6745,7 @@ NoCache:    CacheDir[0]='\0';
         BigRead (FidIndex,(HPSTR)&MaxCache,4);
         BigRead (FidIndex,(HPSTR)&FreeSpace,4);
         BigRead (FidIndex,(HPSTR)&MaxFileNum,4);
-        hBuffer = GSSiGlobAlloc (  88,GMEM_MOVEABLE,(long)sizeof(CACHEBUF)*(NumFiles+1));
+        hBuffer = GSSiGlobAlloc(GAIDNO  88,GMEM_MOVEABLE,(long)sizeof(CACHEBUF)*(NumFiles+1));
         pBuffer = GlobalLock (hBuffer);
         pCacheBuf = (CACHEBUF *) pBuffer;
         for (i=0;i<NumFiles;i++,pCacheBuf++)
@@ -7252,7 +7252,7 @@ GSSiExitProg (292);
     {   
     	LPSTR	str2;
     	
-    	hSTR = GSSiGlobAlloc (1745,GMEM_MOVEABLE,2048);  
+    	hSTR = GSSiGlobAlloc(GAIDNO 1745,GMEM_MOVEABLE,2048);  
     	str2 = GlobalLock (hSTR);
     	_fmemset (str2,'\t',CurTraceLev);
     	_fstrcpy (&str2[CurTraceLev],str);
@@ -7324,7 +7324,7 @@ GSSiExitProg (294);
 		return;
 }   
 	{
-	HANDLE	hMem=GSSiGlobAlloc (  89,GMEM_MOVEABLE,1024+4096+128);
+	HANDLE	hMem=GSSiGlobAlloc(GAIDNO  89,GMEM_MOVEABLE,1024+4096+128);
     LPSTR   txt = GlobalLock (hMem);
     LPSTR	errmes = txt + 128;
     LPSTR	Spaces = errmes + 128; 
@@ -7858,7 +7858,7 @@ int ActuallyCloseFile (HFILE Fid)
 			rtn = 0;
 		if (rtn == HFILE_ERROR || TraceOn) 
 		{
-			HANDLE	hMem=GSSiGlobAlloc (  90,GMEM_MOVEABLE,128);
+			HANDLE	hMem=GSSiGlobAlloc(GAIDNO  90,GMEM_MOVEABLE,128);
 			LPSTR	str = GlobalLock (hMem);
 			if (rtn) 
 			{
@@ -8154,7 +8154,7 @@ BOOL ConvertToMemFile (HFILE Fid,int MaxMem)
 	case OF_READ:
 		OpenFilePosition[Fid] = GSSillseek (Fid,0,1);
 		MaxMem = GSSillseek (Fid,0,2);
-		OpenFileHandle[Fid] = GSSiGlobAlloc (0,GMEM_MOVEABLE,MaxMem);
+		OpenFileHandle[Fid] = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,MaxMem);
 		if (!OpenFileHandle[Fid])
 		{
 			GSSillseek (Fid,OpenFilePosition[Fid],0);
@@ -8171,7 +8171,7 @@ BOOL ConvertToMemFile (HFILE Fid,int MaxMem)
 	case OF_CREATE:
 	case OF_READWRITE:
 		OpenFilePosition[Fid] = GSSillseek (Fid,0,1);
-		OpenFileHandle[Fid] = GSSiGlobAlloc (0,GMEM_MOVEABLE,MaxMem);
+		OpenFileHandle[Fid] = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,MaxMem);
 		if (!OpenFileHandle[Fid])
 		{
 			GSSillseek (Fid,OpenFilePosition[Fid],0);
@@ -8202,7 +8202,7 @@ HFILE GSSiOpenFileMem (LPSTR InName,UINT mode,UINT maxlen)
 	else
 		len = GSSillseek (Fid,0,2); 
 	GSSillseek (Fid,0,0);
-	handle = GSSiGlobAlloc (1,GMEM_MOVEABLE,len);
+	handle = GSSiGlobAlloc(GAIDNO 1,GMEM_MOVEABLE,len);
 	if (mode == OF_CREATE)
 	{
 		if (!handle)
@@ -8374,7 +8374,7 @@ short CacheAlreadyChecked (LPSTR Name,int lCacheDir,UINT Mode)
 
 			lenCACBuf = max (lenCACBuf, _llseek (Fid,0,2) * 2);
 			_llseek (Fid,0,0);
-			hCacheAlreadyChecked = GSSiGlobAlloc (  91,GHND,lenCACBuf);
+			hCacheAlreadyChecked = GSSiGlobAlloc(GAIDNO  91,GHND,lenCACBuf);
 			pAlreadyCached = GlobalLock (hCacheAlreadyChecked);
 			while (fgetstring2 (bgfile,MAX_PATH,Fid))
 			{
@@ -8388,7 +8388,7 @@ short CacheAlreadyChecked (LPSTR Name,int lCacheDir,UINT Mode)
 			GlobalUnlock (hCacheAlreadyChecked);
 		}
 		else*/
-			hCacheAlreadyChecked = GSSiGlobAlloc (  91,GHND,lenCACBuf);
+			hCacheAlreadyChecked = GSSiGlobAlloc(GAIDNO  91,GHND,lenCACBuf);
 	}
 	lb = pAlreadyCached = GlobalLock (hCacheAlreadyChecked);
 	while (*pAlreadyCached)
@@ -8451,7 +8451,7 @@ BOOL FileErrMess (HFILE Fid,LPSTR Name,LPOFSTRUCTGM pOFStruct,UINT Mode)
 	
 	if (Fid != HFILE_ERROR)
 		return FALSE;
-	hStr = GSSiGlobAlloc (  92,GMEM_MOVEABLE,1024);
+	hStr = GSSiGlobAlloc(GAIDNO  92,GMEM_MOVEABLE,1024);
 	ErrMess = GlobalLock (hStr);
 	str = ErrMess + 512;
 	
@@ -8474,7 +8474,7 @@ BOOL FileErrMess (HFILE Fid,LPSTR Name,LPOFSTRUCTGM pOFStruct,UINT Mode)
 
 BOOL ValidPathName (LPSTR InName)
 {
-	HANDLE	hStr=GSSiGlobAlloc (  93,GMEM_MOVEABLE,1024); 
+	HANDLE	hStr=GSSiGlobAlloc(GAIDNO  93,GMEM_MOVEABLE,1024); 
 	LPSTR	pSlash, pDot;
 	LPSTR	Err=GlobalLock (hStr);
 	LPSTR	str=Err+256;
@@ -8676,7 +8676,7 @@ int ConvertToNewLocation (LPSTR Path,BOOL DoCopy)
 		if (Fid != HFILE_ERROR)
 		{
 			//MessageBox(0, "Opened", 0, MB_OK);
-			hConvert = GSSiGlobAlloc(1547, GMEM_MOVEABLE, USHRT_MAX);
+			hConvert = GSSiGlobAlloc(GAIDNO 1547, GMEM_MOVEABLE, USHRT_MAX);
 			pConvert = GlobalLock (hConvert);
 			while (fgetstring (str,256,Fid))
 			{
@@ -9104,7 +9104,7 @@ BOOL CopyFileToCache (LPSTR ToFileIN, LPSTR FromFileIN)
 	}
 	if (TraceOn)
 	{
-		HANDLE hMem = GSSiGlobAlloc(0, GMEM_MOVEABLE, 1024);
+		HANDLE hMem = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, 1024);
 		LPSTR pMem = (LPSTR)GlobalLock(hMem);
 		int st = rtn;
 		if (!st)
@@ -9169,7 +9169,7 @@ int StoreTestToProduction(LPSTR testDirIN, int option)
 	if (!TotFiles)
 		return FALSE;
 	GSSillseek(FidTemp, 0, 0);
-	hFid = GSSiGlobAlloc(1790, GHND, TotFiles * sizeof(HFILE));
+	hFid = GSSiGlobAlloc(GAIDNO 1790, GHND, TotFiles * sizeof(HFILE));
 	fid = GlobalLock(hFid);
 	while (fgetstring(fileName, MAX_PATH, FidTemp))
 	{
@@ -9297,7 +9297,7 @@ HFILE GSSiOpenFile (LPSTR InName,LPOFSTRUCTGM pOFStruct,UINT Mode)
 {GSSiEnterProg (307);
 #endif
 {   HFILE   Fid=HFILE_ERROR; 
- 	HANDLE	hSTR=GSSiGlobAlloc (  94,GHND,15*512);
+ 	HANDLE	hSTR=GSSiGlobAlloc(GAIDNO  94,GHND,15*512);
     LPSTR	str=GlobalLock (hSTR);
     LPSTR	SaveName=str+512;
     LPSTR	SaveText=SaveName+512;
@@ -9863,7 +9863,7 @@ BOOL copyfile (LPSTR ToFileIn, LPSTR FromFile,short AppendOrReplace,long BeginPo
     	TotToRead = EndPos - BeginPos;
 
     maxread = SHRT_MAX;
-    hBuffer = GSSiGlobAlloc (  95,GMEM_MOVEABLE,maxread);
+    hBuffer = GSSiGlobAlloc(GAIDNO  95,GMEM_MOVEABLE,maxread);
     pBuffer = GlobalLock (hBuffer);
     FidFrom = GSSiOpenFile (FromFile,pStruct,OF_READ);
     if (FidFrom == HFILE_ERROR)
@@ -10776,7 +10776,7 @@ HANDLE SaveScreen2 (HWND hWnd,HDC hDC, RECT Rect, LPVOID pVP,LPLONG pID)
 {GSSiEnterProg (330);
 #endif
 {   
-	HANDLE	handle=GSSiGlobAlloc (  96,GHND,sizeof(SAVESCREEN));
+	HANDLE	handle=GSSiGlobAlloc(GAIDNO  96,GHND,sizeof(SAVESCREEN));
 	LPSAVESCREEN	pSaveScreen=(LPSAVESCREEN)GlobalLock (handle);
 	RECT winRect;
 	static saveIndex = 1;
@@ -11064,7 +11064,7 @@ GSSiExitProg (335);
 }
 	GSSifstat (Fid,&Stat);
 	*pUpdateTime = Stat.st_mtime;
-	handle = GSSiGlobAlloc (  97,GMEM_MOVEABLE,sizeof(SAVESCREEN));  
+	handle = GSSiGlobAlloc(GAIDNO  97,GMEM_MOVEABLE,sizeof(SAVESCREEN));  
 	pSaveScreen = (LPSAVESCREEN)GlobalLock (handle);
 	ii=GSSillseek (Fid,0,2);                
 	ii=GSSillseek (Fid,ii-(sizeof(RECT)+sizeof(MNMXCORD)),0);                
@@ -13013,7 +13013,7 @@ GSSiExitProg (405);
 
 BOOL PolylineF(HDC hDC, LPFPOINT pt, int npt)
 {
-	HANDLE hPoints = GSSiGlobAlloc(0, GMEM_MOVEABLE, npt * sizeof(POINT)+4);
+	HANDLE hPoints = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, npt * sizeof(POINT)+4);
 	LPPOINT Points = GlobalLock(hPoints);
 	BOOL rtn;
 
@@ -13026,7 +13026,7 @@ BOOL PolylineF(HDC hDC, LPFPOINT pt, int npt)
 
 BOOL PolygonF(HDC hDC, LPFPOINT pt, int npt)
 {
-	HANDLE hPoints = GSSiGlobAlloc(0, GMEM_MOVEABLE, npt * sizeof(POINT)+4);
+	HANDLE hPoints = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, npt * sizeof(POINT)+4);
 	LPPOINT Points = GlobalLock(hPoints);
 	BOOL rtn;
 
@@ -13815,7 +13815,7 @@ UINT  WINAPI GSSilwrite(HFILE Fid, HPSTR ptr, UINT len)
 
 long NumRowsInTxtFile (HFILE Fid)
 {   
-    HANDLE	hSTR = GSSiGlobAlloc ( 141,GMEM_MOVEABLE,4096);
+    HANDLE	hSTR = GSSiGlobAlloc(GAIDNO 141,GMEM_MOVEABLE,4096);
     LPSTR	Value = GlobalLock (hSTR);  
 	long	rtn=0;
 	long	Offset=GSSillseek (Fid,0,1);
@@ -13830,7 +13830,7 @@ long NumRowsInTxtFile (HFILE Fid)
 
 int GSSiMsgBox (HWND hWnd, LPSTR MessIn, LPSTR TitleIn, UINT Flag,LPSTR Position)
 {   
-	//HANDLE	hMem=GSSiGlobAlloc (1545,GMEM_MOVEABLE,4096*2+256+512);
+	//HANDLE	hMem=GSSiGlobAlloc(GAIDNO 1545,GMEM_MOVEABLE,4096*2+256+512);
 	LPSTR	Title=malloc (4096*2+256+512);
 	LPSTR	Mess=Title+4096;
 	LPSTR	File=Mess+4096,Line=File+256;

@@ -94,7 +94,7 @@ int GetTextWH (HDC hDC,LPSTR str,LPSIZE pSize,float f)
 
 void BlockText (HDC hDC,LPSTR str,int maxlen,float f)
 {
-	HANDLE	hMem=GSSiGlobAlloc (1838,GMEM_MOVEABLE,maxlen+1024);
+	HANDLE	hMem=GSSiGlobAlloc(GAIDNO 1838,GMEM_MOVEABLE,maxlen+1024);
 	LPSTR	newstr = GlobalLock (hMem);
 	SIZE	txSize;
 	int		perim, minperim=INT_MAX;
@@ -154,7 +154,7 @@ HANDLE YellowTextBox (HWND hWnd, LPSTR instr, POINT WinPoint,LPRECT pRect,LPRECT
 	HANDLE	rtn=0;  
 	RECT	WRect; 
 	short	ii;
-	HANDLE	hStr=GSSiGlobAlloc (1837,GMEM_MOVEABLE,4096);
+	HANDLE	hStr=GSSiGlobAlloc(GAIDNO 1837,GMEM_MOVEABLE,4096);
 	LPSTR	str=GlobalLock (hStr);
 	BOOL	DoNotMove = FALSE;
 	BOOL	SaveContinueProcessing = ContinueProcessing;
@@ -415,7 +415,7 @@ BOOL ResetTAGBox (HDC hDC,short From)
 	LPFIELDINFO	lpFieldInfo; 
 	HANDLE		SaveHandle;
 	RECT	Rect;   
-	HANDLE	hMEM=GSSiGlobAlloc ( 381,GMEM_MOVEABLE,1024+1024+4096+256);
+	HANDLE	hMEM=GSSiGlobAlloc(GAIDNO 381,GMEM_MOVEABLE,1024+1024+4096+256);
 	LPSTR	ExpLine, Line, ExpandArea, ReportName,str;
 	BOOL	rtn=TRUE;
 	double	Factor, IBFactor;
@@ -712,7 +712,7 @@ void DrawTAG (HWND hWnd, HDC hDC, BOOL MoveMode, BOOL Restore)
 	LPOPENFILEDATA	FilePtr;
 	LPOPENSQLDATA	SQLPtr;
 	LPFIELDINFO	lpFieldInfo; 
-	HANDLE		SaveHandle, hMEM=GSSiGlobAlloc ( 382,GMEM_MOVEABLE,1024+1024+4096+256);
+	HANDLE		SaveHandle, hMEM=GSSiGlobAlloc(GAIDNO 382,GMEM_MOVEABLE,1024+1024+4096+256);
 	BOOL	Save=FALSE, InMoveMode = MoveMode;   
 	double	Factor, IBFactor;
 	SIZE	txSize;
@@ -1395,7 +1395,7 @@ HANDLE DrawTAGPointerLine (HDC hDC,POINT begpoint,POINT endpoint,BOOL MoveMode,i
     	case 3:
     		TipWidth *=2;
     	case 2:
-			hPointer = GSSiGlobAlloc (1592,GMEM_MOVEABLE,3*sizeof(POINT));
+			hPointer = GSSiGlobAlloc(GAIDNO 1592,GMEM_MOVEABLE,3*sizeof(POINT));
 			Points = (LPPOINT)GlobalLock (hPointer);
 			az = getaz (begpoint,endpoint);
 			Points[0]=newpt(begpoint,az+HALFPI,TipWidth);
@@ -1677,7 +1677,7 @@ int GetNumInfoBox (void)
 {            
 	int n=0;
 	HFILE	FidTag; 
-	HANDLE	hMem=GSSiGlobAlloc ( 385,GMEM_MOVEABLE,sizeof(TAGBOX));
+	HANDLE	hMem=GSSiGlobAlloc(GAIDNO 385,GMEM_MOVEABLE,sizeof(TAGBOX));
 	LPTAGBOX	pTAGBox=(LPTAGBOX)GlobalLock (hMem);
 	
 	if (*TagFile)
@@ -1800,7 +1800,7 @@ void UpdateGroup (HFILE FidTag)
 void WriteInfoBoxes (HFILE Fid)
 {
 	HFILE	FidTag;
-	HANDLE	hMem=GSSiGlobAlloc ( 386,GMEM_MOVEABLE,sizeof(TAGBOX));
+	HANDLE	hMem=GSSiGlobAlloc(GAIDNO 386,GMEM_MOVEABLE,sizeof(TAGBOX));
 	LPTAGBOX	pTAGBox=(LPTAGBOX)GlobalLock (hMem);
 	
     if (*TagFile) 
@@ -2358,7 +2358,7 @@ void AddInfoBoxRect (LPRECT pRect,short IBNum,short VPID)
 		GlobalUnlock (hIBRect);
 	}
 	else
-	    hIBRect = GSSiGlobAlloc ( 387,GMEM_MOVEABLE,USHRT_MAX); 
+	    hIBRect = GSSiGlobAlloc(GAIDNO 387,GMEM_MOVEABLE,USHRT_MAX); 
 	if (!pRect)
 		return;
 	pIBRect = (LPINFOBOXRECT)GlobalLock (hIBRect);
@@ -2380,7 +2380,7 @@ void RemoveInfoBoxRectForVP(short VPID)
 	if (!hIBRect || ConfigLevel)
 		return;
 	pIBRect = (LPINFOBOXRECT)GlobalLock (hIBRect); 
-	hIBRectNew = GSSiGlobAlloc ( 388,GMEM_MOVEABLE,USHRT_MAX);
+	hIBRectNew = GSSiGlobAlloc(GAIDNO 388,GMEM_MOVEABLE,USHRT_MAX);
 	pIBRect2 = (LPINFOBOXRECT)GlobalLock (hIBRectNew);  
 	while (NumIBRect--)           
 	{

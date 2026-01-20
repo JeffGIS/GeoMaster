@@ -242,7 +242,7 @@ void GetWindowsText(HWND hWnd,LPSTR OutFile)
 	WINPROCESSANDTHREAD wpt;
 
 	wpt.thread = GetWindowThreadProcessId(hWnd, &wpt.process);
-	HANDLE hFile = GSSiGlobAlloc (0, GMEM_MOVEABLE, 258);
+	HANDLE hFile = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, 258);
 	LPSTR file = GlobalLock (hFile);
 	strcpy (file, OutFile);
 	GlobalUnlock (hFile);
@@ -412,7 +412,7 @@ GSSiExitProg (1348);
 	}
 	if (TraceOn)
 	{
-		hMem=GSSiGlobAlloc ( 785,GMEM_MOVEABLE,4096);
+		hMem=GSSiGlobAlloc(GAIDNO 785,GMEM_MOVEABLE,4096);
 		lpstr = GlobalLock (hMem);
 		sprintf (lpstr,"GFV:%s(%s)",LastFunctionName,Args);
 		GSSiTraceLev (lpstr,1,2);
@@ -972,7 +972,7 @@ GSSiExitProg (1348);
 			{  
 				HFILE Fid;
 				int	Class;
-				HANDLE	hKey=GSSiGlobAlloc (0,GMEM_MOVEABLE,4096);
+				HANDLE	hKey=GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,4096);
 				LPSTR	pKey=GlobalLock (hKey);
 				LPSTR	str=pKey+1024;
 
@@ -1063,7 +1063,7 @@ GSSiExitProg (1348);
 				{
 					if (!_fstrchr(Arg[2],'\\'))
 					{                
-						HANDLE	hTemp=GSSiGlobAlloc ( 836,GMEM_MOVEABLE,256);
+						HANDLE	hTemp=GSSiGlobAlloc(GAIDNO 836,GMEM_MOVEABLE,256);
 						LPSTR	Name=GlobalLock (hTemp);
 						
 						_fstrcpy (Name,"themes\\");
@@ -1112,7 +1112,7 @@ GSSiExitProg (1348);
 			long	lmem1,lmem2;
 			char	clause1;
 			
-			hMem = GSSiGlobAlloc ( 837,GMEM_MOVEABLE,USHRT_MAX);
+			hMem = GSSiGlobAlloc(GAIDNO 837,GMEM_MOVEABLE,USHRT_MAX);
 			Arg2 = GlobalLock(hMem);
 			if (!(ParLoc = MatchLev (Args,',')))
 		   	    goto RtnFalse;
@@ -1124,7 +1124,7 @@ GSSiExitProg (1348);
 NextWhile:  
 			if (HaltReport)
 				goto RtnFalse;
-			hMem1 = GSSiGlobAlloc ( 838,GMEM_MOVEABLE,lmem1+4);
+			hMem1 = GSSiGlobAlloc(GAIDNO 838,GMEM_MOVEABLE,lmem1+4);
 			clause = GlobalLock(hMem1); 
 			_fstrcpy (clause,Args);  
 			ExpandTextDB(clause,pBrkPt, bpOffset, bpLen);
@@ -1133,7 +1133,7 @@ NextWhile:
 			GSSiGlobUlFree (&hMem1);
 			if (clause1 =='0')
 				goto RtnTrue; 
-			hMem2 = GSSiGlobAlloc ( 839,GMEM_MOVEABLE,4096);
+			hMem2 = GSSiGlobAlloc(GAIDNO 839,GMEM_MOVEABLE,4096);
 			WhileString = GlobalLock(hMem2); 
 			_fstrcpy (WhileString,Arg2);
 			incDbOff = lmem2 + 1;
@@ -1315,7 +1315,7 @@ GotFile:
 			_fstrcpy (UGridTitle,Arg[4]); 
 			if (*Arg[7])
 			{
-				UgridVarList = GSSiGlobAlloc (1595,GMEM_MOVEABLE,4096);
+				UgridVarList = GSSiGlobAlloc(GAIDNO 1595,GMEM_MOVEABLE,4096);
 				pList = GlobalLock (UgridVarList);
 				strcpy (pList,Arg[7]);
 				GlobalUnlock (UgridVarList);
@@ -1324,7 +1324,7 @@ GotFile:
 	    	{
 				LPSTR	pDot;
 
-		    	hScreenFile = GSSiGlobAlloc ( 840,GMEM_MOVEABLE,256);
+		    	hScreenFile = GSSiGlobAlloc(GAIDNO 840,GMEM_MOVEABLE,256);
 	    		pFile = GlobalLock (hScreenFile);
 	        	GSSiGetTempFileName (0,"gm",0,pFile); 
 				pDot = strrchr (pFile,'.');
@@ -1476,7 +1476,7 @@ GotCloseFilehSQL:
 				CloseBufferedMacros();
 				goto RtnTrue;
 			}
-			hMem = GSSiGlobAlloc ( 843,GMEM_MOVEABLE,4*2048);
+			hMem = GSSiGlobAlloc(GAIDNO 843,GMEM_MOVEABLE,4*2048);
 			Arg1 = GlobalLock(hMem); 
 			pName = Arg1 + 2048;
 			pSTR = pName + 2048;   
@@ -1485,7 +1485,7 @@ GotCloseFilehSQL:
 			{
 				*ParLoc++ = 0; 
 				incDbOff = strlen(Args) + 1;
-				hMacroArgs=GSSiGlobAlloc ( 844,GHND,4096L*MAX_MACRO_ARGS);
+				hMacroArgs=GSSiGlobAlloc(GAIDNO 844,GHND,4096L*MAX_MACRO_ARGS);
 				pMacroArg = GlobalLock (hMacroArgs);
 				while (ParLoc)
 				{   
@@ -1954,7 +1954,7 @@ GotCloseFilehSQL:
 						n += Inc;			
 				   	GSSiGlobFree (&hAddGraphicsFun2);
 			   		AddGraphicsFunVP = n;
-					hAddGraphicsFun2 = GSSiGlobAlloc ( 851,GHND,lcmd+1);
+					hAddGraphicsFun2 = GSSiGlobAlloc(GAIDNO 851,GHND,lcmd+1);
 					pGCmd = GlobalLock (hAddGraphicsFun2); 
 					_fstrcpy (pGCmd,Arg[CmdArg]);
 					GlobalUnlock (hAddGraphicsFun2);  
@@ -1985,7 +1985,7 @@ GotCloseFilehSQL:
 		case 519: /* $UNHLT(ALL) clears highlight list*/
 				  // $UNHLT(ITEM,Refno or PREFIX:UDI); 
 		{	   
-			HANDLE	hHlt = GSSiGlobAlloc ( 852,GMEM_MOVEABLE,sizeof(HIGHLIGHTDATA));
+			HANDLE	hHlt = GSSiGlobAlloc(GAIDNO 852,GMEM_MOVEABLE,sizeof(HIGHLIGHTDATA));
 			LPHIGHLIGHTDATA	pHighlightData = (LPHIGHLIGHTDATA)GlobalLock (hHlt);
 			long	StartRef;
 
@@ -2329,9 +2329,9 @@ GotCloseFilehSQL:
 					if (pDot && !stricmp (pDot,".gfc"))
 					{
 						int	   lFileDCmp, lFileCmp = GSSifilelength (Fid);
-						HANDLE hFileCmp = GSSiGlobAlloc (0,GMEM_MOVEABLE,lFileCmp);
+						HANDLE hFileCmp = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,lFileCmp);
 						LPBYTE pFileCmp = GlobalLock (hFileCmp);
-						HANDLE hFileDCmp = GSSiGlobAlloc (0,GMEM_MOVEABLE,1024L*1024L*4);
+						HANDLE hFileDCmp = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,1024L*1024L*4);
 						LPBYTE pFileDCmp = GlobalLock (hFileDCmp);
 
 						BigRead (Fid,pFileCmp,lFileCmp);
@@ -2536,7 +2536,7 @@ GotCloseFilehSQL:
 				if (nSkipRefs)
 					hSkipRefs = GSSiGlobalReAlloc (1684,hSkipRefs,(nSkipRefs+1)*sizeof(SKIPREF),GMEM_MOVEABLE);
 				else
-					hSkipRefs = GSSiGlobAlloc (1684,GMEM_MOVEABLE,sizeof(SKIPREF));
+					hSkipRefs = GSSiGlobAlloc(GAIDNO 1684,GMEM_MOVEABLE,sizeof(SKIPREF));
 				pSkipRef = GlobalLock (hSkipRefs);
 				pSkipRef[nSkipRefs].VPID = atoi (Arg[3]);
 				pSkipRef[nSkipRefs++].Refno = atoi (Arg[2]);
@@ -2672,7 +2672,7 @@ GotCloseFilehSQL:
 		case 537: //$UNLIT(value)
 		{
 			int ln;
-			HANDLE hStr = GSSiGlobAlloc (1776,GMEM_MOVEABLE,4096);
+			HANDLE hStr = GSSiGlobAlloc(GAIDNO 1776,GMEM_MOVEABLE,4096);
 			LPSTR  pStr = GlobalLock (hStr);
 
 			ExpandText (Args);
@@ -2873,7 +2873,7 @@ GotCloseFilehSQL:
 			char	fillchar;
 			
 			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
-			hMem = GSSiGlobAlloc ( 855,GMEM_MOVEABLE,2048*3);
+			hMem = GSSiGlobAlloc(GAIDNO 855,GMEM_MOVEABLE,2048*3);
 			Arg1 = GlobalLock(hMem);
 			Arg2 = Arg1 + 2048; 
 			Arg3 = Arg2 + 2048; 
@@ -3053,7 +3053,7 @@ GotCloseFilehSQL:
 		{	 
 			if (InInfoBox && !InAtPrint)
 			{
-				HANDLE	hMem = GSSiGlobAlloc (0,GMEM_MOVEABLE,1024);
+				HANDLE	hMem = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,1024);
 				LPSTR	pMem = GlobalLock (hMem);
 
 				sprintf (pMem,"$REPORT(%s)",Args);
@@ -3072,7 +3072,7 @@ GotCloseFilehSQL:
 				HWND	hWnd = GetFocus();
 				RECT	TBRect;
 				POINT	ScreenPoint;
-				HANDLE	hTxt=GSSiGlobAlloc (0,GMEM_MOVEABLE,4096);
+				HANDLE	hTxt=GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,4096);
 				LPSTR	ptxt=GlobalLock (hTxt);
 				MSG		msg;
 				HANDLE	hSaveScreen;
@@ -3315,18 +3315,18 @@ GotCloseFilehSQL:
 						
 			if (!hSetVals)
 				goto RtnFalse;
-			hMem = GSSiGlobAlloc ( 858,GMEM_MOVEABLE,4096);
+			hMem = GSSiGlobAlloc(GAIDNO 858,GMEM_MOVEABLE,4096);
 			Arg1 = GlobalLock(hMem);
 			
 			nArgs = GetFunArgs(Args, Arg, 1, &hMem, pBrkPt, bpOffset, bpLen);
 			hSQL = (HANDLE)atol(Arg[1]);
 			if (!hSQL)
 				goto RtnFalse;
-			hUpdateString = GSSiGlobAlloc ( 859,GMEM_MOVEABLE,USHRT_MAX);
+			hUpdateString = GSSiGlobAlloc(GAIDNO 859,GMEM_MOVEABLE,USHRT_MAX);
 			pUpdateString = GlobalLock (hUpdateString);
-			hFieldString = GSSiGlobAlloc ( 860,GMEM_MOVEABLE,USHRT_MAX);
+			hFieldString = GSSiGlobAlloc(GAIDNO 860,GMEM_MOVEABLE,USHRT_MAX);
 			pFieldString = GlobalLock (hFieldString);
-			hValueString = GSSiGlobAlloc ( 861,GMEM_MOVEABLE,USHRT_MAX);
+			hValueString = GSSiGlobAlloc(GAIDNO 861,GMEM_MOVEABLE,USHRT_MAX);
 			pValueString = GlobalLock (hValueString);  
 			_fstrcpy (pFieldString,"(");
 			_fstrcpy (pValueString,"VALUES (");  
@@ -3522,7 +3522,7 @@ GotCloseFilehSQL:
 			}
 			else if (!_fstricmp(Arg[1], "DISPLAY"))
 			{
-				HANDLE hPoints = GSSiGlobAlloc(1225, GMEM_MOVEABLE, 4 * sizeof(DPOINT));
+				HANDLE hPoints = GSSiGlobAlloc(GAIDNO 1225, GMEM_MOVEABLE, 4 * sizeof(DPOINT));
 				LPDPOINT pPoint = (HPDPOINT)GlobalLock(hPoints);
 				Bounds = atobounds(Arg[2], &Err);
 				COLORREF borderColor = atoi(Arg[3]);
@@ -4007,7 +4007,7 @@ GotCloseFilehSQL:
 					memSize = max(memSize, maxMemSize);
 					{
 						HFILE Fid = GSSiOpenFile(Arg[1], 0, OF_READ);
-						HANDLE hFile = GSSiGlobAlloc(0, GMEM_MOVEABLE, memSize);
+						HANDLE hFile = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, memSize);
 						LPSTR pFile = GlobalLock(hFile);
 						int len = memSize;
 						LPSTR pLoc = pFile;
@@ -4144,7 +4144,7 @@ GotCloseFilehSQL:
 			long	NewNum;
 			LPSTR	MSDir, str, str2;
 			
-			hMem = GSSiGlobAlloc ( 874,GMEM_MOVEABLE,6*2048);
+			hMem = GSSiGlobAlloc(GAIDNO 874,GMEM_MOVEABLE,6*2048);
 			Arg1 = GlobalLock(hMem);
 			Arg2 = Arg1 + 2048;
 			Arg3 = Arg2 + 2048;
@@ -4249,7 +4249,7 @@ GotCloseFilehSQL:
 		
 		case 625: // $SUBSET(CD Name)returns null if CD not installed or %INSTALLED% if installed
 		{				
-			hMem = GSSiGlobAlloc ( 875,GMEM_MOVEABLE,4096);
+			hMem = GSSiGlobAlloc(GAIDNO 875,GMEM_MOVEABLE,4096);
 			Arg1 = GlobalLock(hMem);
 			
 			_fstrcpy (Arg1,Args);
@@ -4636,7 +4636,7 @@ GotCloseFilehSQL:
 			}
 			else if (!stricmp(Arg[2], "MESSAGE"))
 			{
-				HANDLE hMessage = GSSiGlobAlloc(0, GMEM_MOVEABLE, strlen(Arg[3]) + 4);
+				HANDLE hMessage = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, strlen(Arg[3]) + 4);
 				LPSTR pMessage = GlobalLock(hMessage);
 				strcpy(pMessage, Arg[3]);
 				GlobalUnlock(hMessage);
@@ -4808,7 +4808,7 @@ GotCloseFilehSQL:
 					static	HANDLE hArgs;
 					LPSTR	arg1,arg2,arg3;
 
-					hArgs = GSSiGlobAlloc (9999,GMEM_MOVEABLE,4096*3);
+					hArgs = GSSiGlobAlloc(GAIDNO 9999,GMEM_MOVEABLE,4096*3);
 					arg1=GlobalLock (hArgs);
 					arg2=arg1+4096;
 					arg3=arg2+4096;
@@ -5234,7 +5234,7 @@ GotCloseFilehSQL:
 			if (nArgs < 3)
 				goto RtnFalse;
 			{
-				HANDLE hFile = GSSiGlobAlloc(0, GMEM_MOVEABLE, 1024);
+				HANDLE hFile = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, 1024);
 				LPSTR  pFile = GlobalLock(hFile);
 				LPSTR  pVar = pFile + 300;
 				LPSTR  pVal = pVar + 128;
@@ -5838,7 +5838,7 @@ Exit:
 	GSSiGlobUlFree (&hMem);
 	if (TraceOn)
 	{
-		hMem=GSSiGlobAlloc ( 914,GMEM_MOVEABLE,4096);
+		hMem=GSSiGlobAlloc(GAIDNO 914,GMEM_MOVEABLE,4096);
 		lpstr = GlobalLock (hMem);
 		sprintf (lpstr,"GFV:%s",Args);
 		GSSiTraceLev (lpstr,-1,2);

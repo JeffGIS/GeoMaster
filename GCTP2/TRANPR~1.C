@@ -311,7 +311,7 @@ static  BOOL FIRST = TRUE;
              *CPART = -1;
              return -2;
            }  
-        Handle = GSSiGlobAlloc ( 401,GPTR,10000); 
+        Handle = GSSiGlobAlloc(GAIDNO 401,GPTR,10000); 
         lpStuff = (char far *) GlobalLock(Handle);    
         BigRead (lpFile,(HPSTR)lpStuff,10000);
         GSSiClose2 (&lpFile);

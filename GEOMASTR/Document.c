@@ -35,7 +35,7 @@ BOOL CreateCompressedImage (LPSTR ToName,LPSTR FromName)
 	GSSiClose2 (&FidIndex);
 	FidIndex = GSSiOpenFile (Index,(LPOFSTRUCTGM) &OFStruct,OF_CREATE); 
 	
-	hlpFI = GSSiGlobAlloc ( 408,GHND,sizeof(FILEINDEX)+sizeof(FILEINDEXENTRY)); 
+	hlpFI = GSSiGlobAlloc(GAIDNO 408,GHND,sizeof(FILEINDEX)+sizeof(FILEINDEXENTRY)); 
 	lpFI = (LPFILEINDEX) GlobalLock(hlpFI);    
 	lpFI->CurrentEntry=(FILEINDEXENTRY *) &lpFI->FirstIndex;
 	lpFI->Type = 5;  

@@ -409,7 +409,7 @@ void DestroyAdvancedOpts (void)
 
 BOOL ImportCommonCode (HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam,HANDLE hDB) 
 {
-  HANDLE	hStr=GSSiGlobAlloc ( 427,GMEM_MOVEABLE,256);
+  HANDLE	hStr=GSSiGlobAlloc(GAIDNO 427,GMEM_MOVEABLE,256);
   LPSTR	str=GlobalLock (hStr);
   int   TabStops[2]={10,1300},i; 
   BOOL	RemoveOpt, rtn=FALSE; 
@@ -622,7 +622,7 @@ BOOL ImportCommonCode (HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam,
 	                	  	  	  LPSETREFNO	lpSetRef; 
 
 	                	  	  	  if (!hImportPreSet)
-	                	  	  	  	hImportPreSet = GSSiGlobAlloc ( 428,GHND,sizeof(SETREFNO));
+	                	  	  	  	hImportPreSet = GSSiGlobAlloc(GAIDNO 428,GHND,sizeof(SETREFNO));
 	                	  	  	  lpSetRef = (LPSETREFNO)GlobalLock (hImportPreSet);
 	                	  	  	  
        	  	  	  			   	  GetTextString (hWndDlg,lpSetRef->SetRefno,256,"Enter Pre-load settings",0,0,0,TRUE,TRUE);
@@ -646,7 +646,7 @@ BOOL ImportCommonCode (HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam,
 
 	                	  	  	  
 	                	  	  	  if (!hImportRefno)
-	                	  	  	  	hImportRefno = GSSiGlobAlloc ( 429,GHND,sizeof(SETREFNO));
+	                	  	  	  	hImportRefno = GSSiGlobAlloc(GAIDNO 429,GHND,sizeof(SETREFNO));
 	                	  	  	  lpSetRef = (LPSETREFNO)GlobalLock (hImportRefno);
 	                	  	  	  
        	  	  	  			   	  GetTextString (hWndDlg,lpSetRef->SetRefno,256,"Set Refno From",0,0,0,TRUE,TRUE);
@@ -872,7 +872,7 @@ void GetTLIDShapePoints (long TLID,LPSHORT NumShapes,HPDPOINT lpShapes,HFILE Fid
     *NumShapes=0;
     if (TLID == -1)
     {
-        hTiger2 = GSSiGlobAlloc ( 444,GMEM_MOVEABLE,sizeof(TIGER2)+4);
+        hTiger2 = GSSiGlobAlloc(GAIDNO 444,GMEM_MOVEABLE,sizeof(TIGER2)+4);
         Tiger2 = (LPTIGER2)GlobalLock (hTiger2);
         if (!TigerShapeIndex[0])
             GSSiGetTempFileName (0,"gmt",0,(LPSTR)TigerShapeIndex);

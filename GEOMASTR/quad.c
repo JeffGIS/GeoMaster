@@ -157,7 +157,7 @@ InDBlock:
                 ii=GSSillseek (FidMap,Offset,0); 
                 nRead = BigRead (FidMap,(HPSTR)&nBytes,2);
                 CurRecLen = nBytes;
-                hPltBuf = GSSiGlobAlloc ( 591,GMEM_MOVEABLE,(DWORD)abs(nBytes));
+                hPltBuf = GSSiGlobAlloc(GAIDNO 591,GMEM_MOVEABLE,(DWORD)abs(nBytes));
                 LPpltBuf = GlobalLock (hPltBuf);
                 nRead = BigRead (FidMap,LPpltBuf,abs(nBytes));
                 ipnt = (LPSHORT)LPpltBuf;
@@ -568,11 +568,11 @@ GSSiExitProg (1221);
 #endif
     	return FALSE;
 }
-    hQuadTree = GSSiGlobAlloc ( 592,GMEM_MOVEABLE,(DWORD)LenQuad);
+    hQuadTree = GSSiGlobAlloc(GAIDNO 592,GMEM_MOVEABLE,(DWORD)LenQuad);
     pQuadTree = (HPSTR)GlobalLock (hQuadTree);   
     if (WantQuadTree2)
     {
-        hQuadTree2 = GSSiGlobAlloc ( 593,GMEM_MOVEABLE,(DWORD)LenQuad);
+        hQuadTree2 = GSSiGlobAlloc(GAIDNO 593,GMEM_MOVEABLE,(DWORD)LenQuad);
         pQuadTree2 = GlobalLock (hQuadTree2);
         QuadTreeOffset = GSSillseek (FidMap,0,1); 
         CurMinMax.xmn=SHRT_MAX;
@@ -590,7 +590,7 @@ GSSiExitProg (1221);
     QuadLevelAt = 1;
     QuadTypeNext = -1;
     GlobalUnlock (hQuadTree);
-    hQuadOffset=GSSiGlobAlloc ( 594,GHND,(DWORD)((MaxQuadLevel+1)*sizeof(long)));
+    hQuadOffset=GSSiGlobAlloc(GAIDNO 594,GHND,(DWORD)((MaxQuadLevel+1)*sizeof(long)));
     pint = (LPLONG)GlobalLock(hQuadOffset);
     *pint = 1;
     GlobalUnlock(hQuadOffset);

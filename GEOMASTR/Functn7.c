@@ -71,7 +71,7 @@ int	GetFunctionValue7(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, 
 	}
 	if (TraceOn)
 	{
-		hMem = GSSiGlobAlloc(785, GMEM_MOVEABLE, 4096);
+		hMem = GSSiGlobAlloc(GAIDNO 785, GMEM_MOVEABLE, 4096);
 		lpstr = GlobalLock(hMem);
 		sprintf(lpstr, "GFV:%s(%s)", LastFunctionName, Args);
 		GSSiTraceLev(lpstr, 1, 2);
@@ -357,7 +357,7 @@ int	GetFunctionValue7(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, 
 			goto RtnFalse;
 		if (!hAreaOffFile)
 		{
-			hAreaOffFile = GSSiGlobAlloc(882, GMEM_MOVEABLE, 256);
+			hAreaOffFile = GSSiGlobAlloc(GAIDNO 882, GMEM_MOVEABLE, 256);
 			pFile = GlobalLock(hAreaOffFile);
 			GSSiGetTempFileName(0, "gm", 0, pFile);
 		}
@@ -388,7 +388,7 @@ int	GetFunctionValue7(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, 
 		BOOL	DropDown = TRUE, Sorted = TRUE;
 
 		nArgs = GetFunArgs(Args, Arg, 5, &hMem, pBrkPt, bpOffset, bpLen);
-		hMem2 = GSSiGlobAlloc(883, GHND, 4096);
+		hMem2 = GSSiGlobAlloc(GAIDNO 883, GHND, 4096);
 		lpstr = GlobalLock(hMem2);
 		lpstr2 = lpstr + 2048;
 		if (FunID == 641)
@@ -577,7 +577,7 @@ int	GetFunctionValue7(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, 
 			GSSiClose2(&Fid);
 			goto Rtnl;
 		}
-		hTemp = GSSiGlobAlloc(888, GHND, 256);
+		hTemp = GSSiGlobAlloc(GAIDNO 888, GHND, 256);
 		str = GlobalLock(hTemp);
 		_fstrcpy(str, Arg[5]);
 		if (*str && !*LastChr(str) != '\\')
@@ -1523,7 +1523,7 @@ int	GetFunctionValue7(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, 
 	case 760: //$ADDLINE(file.plt,TAG,SYMBOLNAME,points)  
 	{
 		nArgs = GetFunArgs(Args, Arg, -4, &hMem, pBrkPt, bpOffset, bpLen);
-		hMem2 = GSSiGlobAlloc(913, GMEM_MOVEABLE, USHRT_MAX);
+		hMem2 = GSSiGlobAlloc(GAIDNO 913, GMEM_MOVEABLE, USHRT_MAX);
 		ExpandText(Arg[1]);
 		ExpandText(Arg[2]);
 		ExpandText(Arg[3]);
@@ -1847,7 +1847,7 @@ int	GetFunctionValue7(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, 
 		LPSHORT	pStuff = 0;
 
 		nArgs = GetFunArgs(Args, Arg, -16, &hMem, pBrkPt, bpOffset, bpLen);
-		hMem2 = GSSiGlobAlloc(913, GMEM_MOVEABLE, USHRT_MAX);
+		hMem2 = GSSiGlobAlloc(GAIDNO 913, GMEM_MOVEABLE, USHRT_MAX);
 		ExpandText(Arg[1]);
 		ExpandText(Arg[2]);
 		ExpandText(Arg[3]);
@@ -2572,7 +2572,7 @@ int	GetFunctionValue7(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, 
 	break;
 	case 789:  //$INTCHOP(returns integer value (truncates remaining junk))
 	{
-		hMem = GSSiGlobAlloc(821, GMEM_MOVEABLE, 2048);
+		hMem = GSSiGlobAlloc(GAIDNO 821, GMEM_MOVEABLE, 2048);
 		Arg1 = GlobalLock(hMem);
 		_fstrcpy(Arg1, Args);
 		ExpandText(Arg1);
@@ -2656,7 +2656,7 @@ Exit:
 	GSSiGlobUlFree(&hMem);
 	if (TraceOn)
 	{
-		hMem = GSSiGlobAlloc(914, GMEM_MOVEABLE, 4096);
+		hMem = GSSiGlobAlloc(GAIDNO 914, GMEM_MOVEABLE, 4096);
 		lpstr = GlobalLock(hMem);
 		sprintf(lpstr, "GFV:%s", Args);
 		GSSiTraceLev(lpstr, -1, 2);

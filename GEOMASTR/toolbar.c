@@ -604,7 +604,7 @@ HANDLE FillTBRows (int nTB,LPSHORT TB,int nInIndexArray,LPSHORT IndexArray,int n
 	int	rowIndex[MAXINTBROW];
 
 	if (!*phOut)
-		*phOut=GSSiGlobAlloc (1736,GHND,USHRT_MAX);
+		*phOut=GSSiGlobAlloc(GAIDNO 1736,GHND,USHRT_MAX);
 	if (nRows == 1)
 	{
 		for (j=0;j < nInIndexArray;j++)
@@ -4371,7 +4371,7 @@ int LoadToolbar (HWND hWnd,LPSTR Pathname,LPSTR TypeIn,int Height,int nPerRow,LP
 	}
 	SaveToolBarStartPoint = ToolBarStartPoint;
 	ToolbarHeight[nToolbars] = Height;
-	ToolbarHandle[nToolbars] = GSSiGlobAlloc (1570,GHND,MAX_TOOLBAR_BUTTONS*sizeof(TOOBAR_CONTROL_INFO));
+	ToolbarHandle[nToolbars] = GSSiGlobAlloc(GAIDNO 1570,GHND,MAX_TOOLBAR_BUTTONS*sizeof(TOOBAR_CONTROL_INFO));
 	strcpy (ToolbarPath[nToolbars],Pathname);
 	ToolbarId[nToolbars] = nextToolbarId++;
 	ToolbarID = nToolbars++;
@@ -4423,7 +4423,7 @@ int LoadToolbar (HWND hWnd,LPSTR Pathname,LPSTR TypeIn,int Height,int nPerRow,LP
 		DisplayToolbars = saveDisplayToolbars;
 		ToolbarID = saveToolbarID;
 		if (!ToolbarHandle[ToolbarID])
-			ToolbarHandle[ToolbarID] = GSSiGlobAlloc (1570,GHND,MAX_TOOLBAR_BUTTONS*sizeof(TOOBAR_CONTROL_INFO));
+			ToolbarHandle[ToolbarID] = GSSiGlobAlloc(GAIDNO 1570,GHND,MAX_TOOLBAR_BUTTONS*sizeof(TOOBAR_CONTROL_INFO));
 		strcpy (ToolbarPath[ToolbarID],Pathname);
 		//nToolbars++;
 	}
@@ -5126,7 +5126,7 @@ static	int	nxw, nxh, nxlft, nxbot, prvlft, prvbot,DisplayHeight,ImageWidth,Image
 	case WM_DROPFILES:
     {
     	HANDLE	hFile = (HANDLE)wParam;   
-    	HANDLE	hFileMem=GSSiGlobAlloc (1525,GMEM_MOVEABLE,256);
+    	HANDLE	hFileMem=GSSiGlobAlloc(GAIDNO 1525,GMEM_MOVEABLE,256);
     	LPSTR	pFile = GlobalLock (hFileMem);
     	int	n=0, LocAdded;  
 
@@ -5302,7 +5302,7 @@ static	int	nxw, nxh, nxlft, nxbot, prvlft, prvbot,DisplayHeight,ImageWidth,Image
 				 break;
 			 case IDC_GETFILES:
 				{
-    				 HANDLE	hFileMem=GSSiGlobAlloc (0,GHND,USHRT_MAX);
+    				 HANDLE	hFileMem=GSSiGlobAlloc(GAIDNO 0,GHND,USHRT_MAX);
     				 LPSTR	ImageFiles = GlobalLock (hFileMem);
 					 LPSTR	pName = ImageFiles;
 					 if (GetMultFiles(hWndDlg,ImageFiles,USHRT_MAX,IDS_FILTERALLIMAGE,IDS_FILEIMAGE)) 
@@ -5974,7 +5974,7 @@ HWND InitTempImageInstance(HWND hWndPar, LPSTR imageFile,int centerOpt)
 	{
 		return FALSE;
 	}
-	hTempWindata = GSSiGlobAlloc(1782,GHND, sizeof(TEMPWINDDATA));
+	hTempWindata = GSSiGlobAlloc(GAIDNO 1782,GHND, sizeof(TEMPWINDDATA));
 	pTempWindata = GlobalLock(hTempWindata);
 	pTempWindata->hDib32 = hDib32;
 	GlobalUnlock(hTempWindata);

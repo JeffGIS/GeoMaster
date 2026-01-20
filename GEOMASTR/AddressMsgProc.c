@@ -198,7 +198,7 @@ GetPID:
     str[0]='#'; while (str[0]=='#') {str[0]=' ';fgetstring (str,128,Fid);n++;} 
     _fstrcpy(AddUDIVar,str); 
     str[0]='#'; while (str[0]=='#') {str[0]=' ';fgetstring (str,128,Fid);n++;}  
-    hAddDisplayLine = GSSiGlobAlloc ( 118,GHND,256);
+    hAddDisplayLine = GSSiGlobAlloc(GAIDNO 118,GHND,256);
     AddDisplayLine = GlobalLock (hAddDisplayLine);
     _fstrcpy (AddDisplayLine,str);      
     GlobalUnlock (hAddDisplayLine);
@@ -1503,7 +1503,7 @@ BOOL FAR PASCAL ABVEDITMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM
     	Update = FALSE;
     	SendDlgItemMessage (hWndDlg,IDC_TYPE_NAME,BM_SETCHECK,TRUE,0); 
 		SetAddressDir();
-        hName = GSSiGlobAlloc ( 567,GMEM_MOVEABLE,256);
+        hName = GSSiGlobAlloc(GAIDNO 567,GMEM_MOVEABLE,256);
         pName = GlobalLock (hName);
 		_fstrcpy (pName,AddMatchDir); 
         _fstrcat (pName,"\\AbbrName.txt"); 
@@ -2081,7 +2081,7 @@ BOOL FAR PASCAL ADDLOC_FROMINTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam,
                  HANDLE hMem;
                  LPSTR  lpStr, lpWhere;
                  
-                 hMem = GSSiGlobAlloc ( 119,GHND,4096);
+                 hMem = GSSiGlobAlloc(GAIDNO 119,GHND,4096);
                  lpStr = GlobalLock (hMem); 
                  GetDlgItemText (hWndDlg,IDC_SQL,lpStr,1024);
                  if (GetSQLWhereClause (hWndDlg, hSQL, lpStr))
@@ -2533,7 +2533,7 @@ BOOL FAR PASCAL STREET_SEGS_BETWEEN_INTSMsgProc(HWND hWndDlg, UINT Message, WPAR
                  HANDLE hMem;
                  LPSTR  lpStr, lpWhere;
                  
-                 hMem = GSSiGlobAlloc ( 119,GHND,4096);
+                 hMem = GSSiGlobAlloc(GAIDNO 119,GHND,4096);
                  lpStr = GlobalLock (hMem); 
                  GetDlgItemText (hWndDlg,IDC_SQL,lpStr,1024);
                  if (GetSQLWhereClause (hWndDlg, hSQL, lpStr))
@@ -3000,7 +3000,7 @@ BOOL FAR PASCAL INTACCIDPROFMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, L
                  HANDLE hMem;
                  LPSTR  lpStr;
                  
-                 hMem = GSSiGlobAlloc ( 566,GHND,4096);
+                 hMem = GSSiGlobAlloc(GAIDNO 566,GHND,4096);
                  lpStr = GlobalLock (hMem); 
                  GetDlgItemText (hWndDlg,IDC_SQL,lpStr,1024);
                  if (GetSQLWhereClause (hWndDlg, hSQL, lpStr))
@@ -3633,9 +3633,9 @@ Close:
             case IDC_TRYHARDER:
             case IDC_TRY_MATCH:  
             {
-				HANDLE hList = GSSiGlobAlloc ( 574,GMEM_MOVEABLE,USHRT_MAX); 
+				HANDLE hList = GSSiGlobAlloc(GAIDNO 574,GMEM_MOVEABLE,USHRT_MAX); 
 				short	nList=0, nAdded;
-				HANDLE	hMem=GSSiGlobAlloc ( 573,GMEM_MOVEABLE,512);
+				HANDLE	hMem=GSSiGlobAlloc(GAIDNO 573,GMEM_MOVEABLE,512);
 				LPSTR	STDNAM1=GlobalLock (hMem);
 				LPSTR	NRONAM1=STDNAM1+50;
 				LPSTR	NMONLY1=NRONAM1+50;
@@ -4512,7 +4512,7 @@ BOOL FAR PASCAL ADD_MATCH_EDITMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam,
 #define lnAddEditReport 256
 #define lnAddEditUpdateMacro	256
     
-	hMem = GSSiGlobAlloc(576, GMEM_MOVEABLE, 4096 * 2);
+	hMem = GSSiGlobAlloc(GAIDNO 576, GMEM_MOVEABLE, 4096 * 2);
     str = GlobalLock (hMem);
     Street = str + lnstr;
     StreetBuf = Street + lnStreet;
@@ -6072,7 +6072,7 @@ BOOL FAR PASCAL ADDLOC_FROMADDMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam,
  if (DATAFILEMsgProc(hWndDlg,Message,wParam,lParam, 0,
                      SV_SET_FILE, SV_DATABASE_LIST, SV_TABLE_NAMES,SV_TABLE_HEADING, FieldLists,0,
                      IMDataFile, &IMDataFileType, &hSQL,FieldListTypes,TRUE))  goto RtnTrue;  
- hStr = GSSiGlobAlloc(120, GHND, 256 + 256 + 256 + 256 * 4 + 256 + 256 + 256 + 256 + sizeof(OFSTRUCTGM));
+ hStr = GSSiGlobAlloc(GAIDNO 120, GHND, 256 + 256 + 256 + 256 * 4 + 256 + 256 + 256 + 256 + sizeof(OFSTRUCTGM));
  str = GlobalLock (hStr);
  Street = str + 256;
  HouseNum = Street + 256;
@@ -6401,7 +6401,7 @@ BOOL FAR PASCAL ADDLOC_FROMADDMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam,
                  HANDLE hMem;
                  LPSTR  lpStr, lpWhere;
                  
-                 hMem = GSSiGlobAlloc ( 121,GHND,4096);
+                 hMem = GSSiGlobAlloc(GAIDNO 121,GHND,4096);
                  lpStr = GlobalLock (hMem); 
                  GetDlgItemText (hWndDlg,IDC_SQL,lpStr,1024);
                  if (GetSQLWhereClause (hWndDlg, hSQL, lpStr))
@@ -7010,9 +7010,9 @@ BOOL FAR PASCAL ADDRESS1MsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARA
 
 			case IDC_TRY_MATCH:
             {
-				HANDLE hList = GSSiGlobAlloc ( 574,GMEM_MOVEABLE,USHRT_MAX); 
+				HANDLE hList = GSSiGlobAlloc(GAIDNO 574,GMEM_MOVEABLE,USHRT_MAX); 
 				short	nList=0, nAdded;
-				HANDLE	hMem=GSSiGlobAlloc ( 573,GMEM_MOVEABLE,512);
+				HANDLE	hMem=GSSiGlobAlloc(GAIDNO 573,GMEM_MOVEABLE,512);
 				LPSTR	STDNAM1=GlobalLock (hMem);
 				LPSTR	NRONAM1=STDNAM1+50;
 				LPSTR	NMONLY1=NRONAM1+50;

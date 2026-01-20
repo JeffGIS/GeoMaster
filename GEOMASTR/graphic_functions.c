@@ -2036,7 +2036,7 @@ LButUp:
 			} 
 		    while (NumPicked && !hLastBox)
 		    {
-		    	HANDLE	hTxt=GSSiGlobAlloc (  62,GMEM_MOVEABLE,4096);
+		    	HANDLE	hTxt=GSSiGlobAlloc(GAIDNO  62,GMEM_MOVEABLE,4096);
 		    	LPSTR	pTxt=GlobalLock (hTxt); 
 		    	BOOL	ShowMenu=FALSE; 
 		    	HWND	hwnd=0;
@@ -2054,7 +2054,7 @@ LButUp:
 					PickList[NumPicked-1].Rect = ZoomBoxRect;
 			    }
 				GSSiGlobFree (&hLastCmd);
-		    	hLastCmd = GSSiGlobAlloc (  63,GMEM_MOVEABLE,4096);
+		    	hLastCmd = GSSiGlobAlloc(GAIDNO  63,GMEM_MOVEABLE,4096);
 		    	pCmd = GlobalLock (hLastCmd); 
 		    	*pCmd = 0;
 				if (hLastHLT)
@@ -2178,7 +2178,7 @@ DoCmd:
 				
 				if (pParen)
 				{
-					HANDLE hMem = GSSiGlobAlloc (  64,GMEM_MOVEABLE,2048);
+					HANDLE hMem = GSSiGlobAlloc(GAIDNO  64,GMEM_MOVEABLE,2048);
 					LPSTR pStr=GlobalLock (hMem), pEnd=MatchLev (++pParen,')');
 					
 					if (pEnd)
@@ -2214,7 +2214,7 @@ DoCmd:
 				
 				if ((pEnd = MatchLev (pNext,')')))
 				{   
-					HANDLE	hSavePM=GSSiGlobAlloc (  65,GMEM_MOVEABLE,256);
+					HANDLE	hSavePM=GSSiGlobAlloc(GAIDNO  65,GMEM_MOVEABLE,256);
 					LPSTR	pSavePM = GlobalLock (hSavePM);   
 					LPVIEWPORT	pSaveVP=CurView;
 					
@@ -2548,7 +2548,7 @@ NoBox:
 					char AutoIDPickList[MAX_PATH];
 					if (GetGlobalCVal("[%AUTOIDPICKABILITY]", AutoIDPickList, 0))
 					{
-						HANDLE hMem = GSSiGlobAlloc(0, GMEM_MOVEABLE, MAX_PATH * 2);
+						HANDLE hMem = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, MAX_PATH * 2);
 						LPSTR pMem = GlobalLock(hMem);
 						GSSiGetTempFileName(0, "gmp", 0, (LPSTR)CurView->PickabilityRestoreFile);
 						sprintf(pMem, "$SAVEPIK(%s,,%s)", CurView->PickabilityRestoreFile, CurView->Name);
@@ -2723,7 +2723,7 @@ DoPick:
 			MaxPick = SaveMaxPick; 
 			if (GSSiLength(CurView->PickabilityRestoreFile) > 0)
 			{
-				HANDLE hMem = GSSiGlobAlloc(0, GMEM_MOVEABLE, MAX_PATH * 2);
+				HANDLE hMem = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, MAX_PATH * 2);
 				LPSTR pMem = GlobalLock(hMem);
 				sprintf(pMem, "$LOADPIK(%s,%s)", CurView->PickabilityRestoreFile, CurView->Name);
 				ProcessText(pMem);
@@ -2788,7 +2788,7 @@ DoPick:
 NextPickItem:
 	    while (NumPicked && !hLastBox)
 	    {
-	    	HANDLE	hTxt=GSSiGlobAlloc (  66,GMEM_MOVEABLE,4096);
+	    	HANDLE	hTxt=GSSiGlobAlloc(GAIDNO  66,GMEM_MOVEABLE,4096);
 	    	LPSTR	pTxt=GlobalLock (hTxt);
 	    	
 	    	SetGlobalValue ("%ZOOMSELECTIONTEXT","");
@@ -2824,7 +2824,7 @@ NextPickItem:
 		    	ForceHLT = FALSE;
 		    }
 		    GSSiGlobFree (&hLastCmd); 
-	    	hLastCmd = GSSiGlobAlloc (  67,GMEM_MOVEABLE,4096);
+	    	hLastCmd = GSSiGlobAlloc(GAIDNO  67,GMEM_MOVEABLE,4096);
 	    	pCmd = GlobalLock (hLastCmd); 
 	    	*pCmd = 0;  
 	    	if (Function == GF_AUTO_IDENTIFY)
@@ -5989,7 +5989,7 @@ BOOL CreatePoly (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam,short Fun
    		Spline = GetGlobalBVal2 ("[%SPLINE]",FALSE);
    		if (!hCurPolyPoints)
    		{
-   			hCurPolyPoints = GSSiGlobAlloc ( 603,GHND,MAX_DIGPOINTS*(long)sizeof(DPOINT));
+   			hCurPolyPoints = GSSiGlobAlloc(GAIDNO 603,GHND,MAX_DIGPOINTS*(long)sizeof(DPOINT));
    			nCurPolyPoints = 0;
    			CurPolyVP = CurView;
   		}
@@ -6001,7 +6001,7 @@ BOOL CreatePoly (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam,short Fun
 		InCursor=CurView->hCursor;
 		SetCurs (hDigCursor,FALSE);
 		GSSiGlobFree (&hTempPoints);
-		hTempPoints = GSSiGlobAlloc ( 604,GMEM_MOVEABLE,USHRT_MAX); 
+		hTempPoints = GSSiGlobAlloc(GAIDNO 604,GMEM_MOVEABLE,USHRT_MAX); 
 	 	Points = (HPPOINT)GlobalLock (hTempPoints);
    		nTempPoints = 0;
    		StartSpline = 1;  
@@ -6115,7 +6115,7 @@ BOOL CreatePoly (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam,short Fun
 			CurView->hRgn = CreateVPRgn (FALSE);
 		  	SelectClipRgn (CurView->hDC,CurView->hRgn);
 		  	DeleteObject(CurView->hRgn);
-   			hPoints = GSSiGlobAlloc ( 605,GMEM_MOVEABLE,nCurPolyPoints*sizeof(POINT));
+   			hPoints = GSSiGlobAlloc(GAIDNO 605,GMEM_MOVEABLE,nCurPolyPoints*sizeof(POINT));
    			lpPoints = (HPPOINT)GlobalLock(hPoints);
    			lpPoint = lpPoints;
    			lpDPoint = (HPDPOINT)GlobalLock(hCurPolyPoints); 
@@ -6203,7 +6203,7 @@ LButUp:
 		}
    		if (!hCurPolyPoints)
    		{
-   			hCurPolyPoints = GSSiGlobAlloc ( 606,GHND,MAX_DIGPOINTS*(long)sizeof(DPOINT));
+   			hCurPolyPoints = GSSiGlobAlloc(GAIDNO 606,GHND,MAX_DIGPOINTS*(long)sizeof(DPOINT));
    			nCurPolyPoints = 0;
   			CurPolyVP = CurView;
    		}
@@ -6363,7 +6363,7 @@ RButUp:
 				HPDPOINT	pDistPoints;
 	
 				GSSiGlobFree (&CurView->hDistanceLine);
-				CurView->hDistanceLine = GSSiGlobAlloc (0,GMEM_MOVEABLE,USHRT_MAX);
+				CurView->hDistanceLine = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,USHRT_MAX);
 				pNumDistPoints = (LPLONG)GlobalLock (CurView->hDistanceLine);
 				pDistPoints = (HPDPOINT)(pNumDistPoints+1);
 				*pNumDistPoints = -nCurPolyPoints;
@@ -6406,7 +6406,7 @@ RButUp:
         else if (AllowSinglePoint)
         {
         	NumNewPolyPoints = 1;
-        	hNewPolyPoints = GSSiGlobAlloc (0,GMEM_MOVEABLE,sizeof(DPOINT));
+        	hNewPolyPoints = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,sizeof(DPOINT));
         	lpDPoint = (HPDPOINT)GlobalLock (hNewPolyPoints);
         	*lpDPoint = BasePoint;
         	GlobalUnlock (hNewPolyPoints);
@@ -6667,7 +6667,7 @@ BOOL CreateHLTArea (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
     		lpDPoints = (HPDPOINT)GlobalLock (hNewPolyPoints);
 			if (!SameDPoint(lpDPoints, &lpDPoints[NumNewPolyPoints - 1]))
 			{
-				HANDLE hPoints = GSSiGlobAlloc(0, GMEM_MOVEABLE, (NumNewPolyPoints+1) * sizeof(DPOINT));
+				HANDLE hPoints = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, (NumNewPolyPoints+1) * sizeof(DPOINT));
 				LPDPOINT pPt = GlobalLock(hPoints);
 				for (int i = 0; i < NumNewPolyPoints; i++)
 				{
@@ -6878,7 +6878,7 @@ LButUp:
 				if (GetGlobalBVal2 ("[%LINESONLY]",FALSE) )
 				{   
 					int		nPnts2=2, i;
-					HANDLE	hPnts2=GSSiGlobAlloc ( 610,GMEM_MOVEABLE,2*sizeof(DPOINT));
+					HANDLE	hPnts2=GSSiGlobAlloc(GAIDNO 610,GMEM_MOVEABLE,2*sizeof(DPOINT));
 					HPDPOINT	pPoint2=(HPDPOINT)GlobalLock (hPnts2), pNewPP=(HPDPOINT)GlobalLock (hNewPolyPoints);
 					
 					for (i=1;i<NumNewPolyPoints;i++)
@@ -7198,7 +7198,7 @@ BOOL DistancePolyline (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam, sh
 					GSSiGlobFree (&CurView->hDistanceLine);
 					NewPolyPoints = (HPDPOINT)GlobalLock (hNewPolyPoints); 
 					NewPolyPoints[NumNewPolyPoints++] = NewPolyPoints[0];
-					CurView->hDistanceLine = GSSiGlobAlloc (0,GMEM_MOVEABLE,USHRT_MAX);
+					CurView->hDistanceLine = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,USHRT_MAX);
 					pNumDistPoints = (LPLONG)GlobalLock (CurView->hDistanceLine);
 					pDistPoints = (HPDPOINT)(pNumDistPoints+1);
 					*pNumDistPoints = NumNewPolyPoints;
@@ -7437,7 +7437,7 @@ NextChain:
 				goto Exit;
 			}
 			BigRead (FidChain,(HPSTR)StreetNums,16);
-			hChain = GSSiGlobAlloc ( 532,GMEM_MOVEABLE,NumInChain*4);
+			hChain = GSSiGlobAlloc(GAIDNO 532,GMEM_MOVEABLE,NumInChain*4);
 			pChain = (LPLONG)GlobalLock (hChain);
 			BigRead (FidChain,(HPSTR)pChain,(size_t)(4*NumInChain)); 
 			First = TRUE; 
@@ -9185,7 +9185,7 @@ BOOL SplitPolygon (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam,short F
 		    ClearHighlightList (FALSE); 
        		GSSiGlobUlFree (&hUpdateMultiPolygon); 
 		    nUpdatePolyPoints = NumNewPolyPoints + npnts; 
-       		hUpdatePoly = GSSiGlobAlloc (0,GMEM_MOVEABLE,(nUpdatePolyPoints+1)*sizeof(DPOINT));  
+       		hUpdatePoly = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,(nUpdatePolyPoints+1)*sizeof(DPOINT));  
        		Points = (HPDPOINT)GlobalLock (hUpdatePoly);
         	NewPoints = (HPDPOINT)GlobalLock (hNewPolyPoints); 
         	OldPoints = (HPDPOINT)GlobalLock (hPoly);
@@ -9464,7 +9464,7 @@ BOOL ReplacePolyPoints (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam,sh
 		    ClearHighlightList (FALSE); 
        		GSSiGlobUlFree (&hUpdateMultiPolygon); 
 		    nUpdatePolyPoints = NumNewPolyPoints + npnts; 
-       		hUpdatePoly = GSSiGlobAlloc (0,GMEM_MOVEABLE,(nUpdatePolyPoints+1)*sizeof(DPOINT));  
+       		hUpdatePoly = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,(nUpdatePolyPoints+1)*sizeof(DPOINT));  
        		Points = (HPDPOINT)GlobalLock (hUpdatePoly);
         	NewPoints = (HPDPOINT)GlobalLock (hNewPolyPoints); 
         	OldPoints = (HPDPOINT)GlobalLock (hPoly);
@@ -11254,7 +11254,7 @@ BOOL ProcessCmdString (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
        	if (hGCmdString)
        	{   
        		BOOL	SaveDisableHalt;  
-       		HANDLE	handle=GSSiGlobAlloc ( 765,GMEM_MOVEABLE,1024);
+       		HANDLE	handle=GSSiGlobAlloc(GAIDNO 765,GMEM_MOVEABLE,1024);
        		LPSTR	pStr=GlobalLock (handle);
        		
        		pString = GlobalLock (hGCmdString);   
@@ -11880,7 +11880,7 @@ GSSiExitProg (879);
 		    	break;  
 		    Item = NumPicked-1;
 		}
-	    hPickedTextHeader = GSSiGlobAlloc ( 642,GMEM_MOVEABLE,sizeof(GRTEXTHEADER)+512); 
+	    hPickedTextHeader = GSSiGlobAlloc(GAIDNO 642,GMEM_MOVEABLE,sizeof(GRTEXTHEADER)+512); 
 	    pPickedTextHeader = (LPGRTEXTHEADER)GlobalLock (hPickedTextHeader);
 		lTextString = 0; 
 		GSSiGlobFree (&hTextString);   
@@ -12063,7 +12063,7 @@ BOOL EditTextMultiple (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 			CurView->PassID = 4;
 			lTextString = 0; 
 			GSSiGlobFree (&hTextString);   
-		    hPickedTextHeader = GSSiGlobAlloc ( 642,GMEM_MOVEABLE,sizeof(GRTEXTHEADER)+512); 
+		    hPickedTextHeader = GSSiGlobAlloc(GAIDNO 642,GMEM_MOVEABLE,sizeof(GRTEXTHEADER)+512); 
 			ProcessPickedItem (0,FALSE);        		
 	       	if (lTextString && hTextString)
 	       	{   
@@ -12305,7 +12305,7 @@ GSSiExitProg (843);
 	    if (!NumPicked)
 	    	break;  
 	    Item = NumPicked-1;
-	    hPickedTextHeader = GSSiGlobAlloc ( 519,GMEM_MOVEABLE,sizeof(GRTEXTHEADER)+512); 
+	    hPickedTextHeader = GSSiGlobAlloc(GAIDNO 519,GMEM_MOVEABLE,sizeof(GRTEXTHEADER)+512); 
 		ProcessPickedItem (Item,FALSE);        		
 	    pPickedTextHeader = (LPGRTEXTHEADER)GlobalLock (hPickedTextHeader);
        	if (CurTextHeaderLoc)
@@ -12891,7 +12891,7 @@ BOOL OrthoFilterFunction (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam,
 		
 		if (!hGSPal)
 			break;
-		handle = GSSiGlobAlloc (1109,GHND,NUMENTRIES * sizeof(PALETTEENTRY));
+		handle = GSSiGlobAlloc(GAIDNO 1109,GHND,NUMENTRIES * sizeof(PALETTEENTRY));
     	lpPalEnt = lpPalEntBeg = (LPPALETTEENTRY)GlobalLock (handle);
 		for (i = 0, red = 0, green = 0, blue = 0; i < NUMENTRIES;
 		        i++, red++, green++, blue++)
@@ -12919,7 +12919,7 @@ BOOL OrthoFilterFunction (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam,
 		
 		if (!hGSPal)
 			break;
-		handle = GSSiGlobAlloc (1110,GHND,NUMENTRIES * sizeof(PALETTEENTRY));
+		handle = GSSiGlobAlloc(GAIDNO 1110,GHND,NUMENTRIES * sizeof(PALETTEENTRY));
     	lpPalEnt = lpPalEntBeg = (LPPALETTEENTRY)GlobalLock (handle);
 		for (i = 0, red = 0, green = 0, blue = 0; i < NUMENTRIES;
 		        i++, red++, green++, blue++)
@@ -13101,7 +13101,7 @@ GSSiExitProg (931);
    		break;
 
     case GF_COMPLETE:
-    	hNewPolyPoints = GSSiGlobAlloc ( 752,GMEM_MOVEABLE,sizeof(DPOINT)*4);
+    	hNewPolyPoints = GSSiGlobAlloc(GAIDNO 752,GMEM_MOVEABLE,sizeof(DPOINT)*4);
     	Points = (HPDPOINT)GlobalLock (hNewPolyPoints);
     	Points[0].x = ZoomBoxRect.xmn; 
     	Points[0].y = ZoomBoxRect.ymn; 
@@ -14202,7 +14202,7 @@ BOOL SnapToIntersection (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam, 
 		i=1; 
 		type[0] = 2;
 		npnts[0] = 2;
-        hPoly[0] = GSSiGlobAlloc ( 615,GMEM_MOVEABLE,npnts[0]*sizeof(DPOINT));
+        hPoly[0] = GSSiGlobAlloc(GAIDNO 615,GMEM_MOVEABLE,npnts[0]*sizeof(DPOINT));
         pPolyPoints[0] = (HPDPOINT)GlobalLock (hPoly[0]); 
         *pPolyPoints[0]++ = TrackLineBegin;
         *pPolyPoints[0] = TrackLineEnd;
@@ -14820,9 +14820,9 @@ BOOL CreateAreaAroundPoint (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lPara
 		BTVar[3].BT_VAROFF=20;
 		BT_CREATE (File,sizeof(IntData), FALSE, 4, 1,(LPBTVARDESC)BTVar,FALSE, 0, 0, FALSE);
 		hInt= BT_OPEN (File, 0, BT_WRITE, 0); 
-   		hNewPolyPoints = GSSiGlobAlloc ( 616,GHND,MAX_DIGPOINTS*(long)sizeof(DPOINT)); 
+   		hNewPolyPoints = GSSiGlobAlloc(GAIDNO 616,GHND,MAX_DIGPOINTS*(long)sizeof(DPOINT)); 
    		NewPolyPoints = (HPDPOINT)GlobalLock (hNewPolyPoints);
-   		hSegData = GSSiGlobAlloc ( 617,GHND,MAX_SEGMENTS*(long)sizeof(SEGMENTDATA)); 
+   		hSegData = GSSiGlobAlloc(GAIDNO 617,GHND,MAX_SEGMENTS*(long)sizeof(SEGMENTDATA)); 
    		SegData = (HPSEGMENTDATA)GlobalLock (hSegData);
         Segno = NextSeg++; 
         StartDist = PickList[0].PCT * PickList[0].Length;
@@ -15460,7 +15460,7 @@ GSSiExitProg (1099);
 		else
 			Point1 = HighlightData.PD.BeginPoint;
 		symnum = GetOrCreateSym (hWnd,"TRANLINE",&NumSyms,&hSymDesc,TRUE,2);
-		hPnts = GSSiGlobAlloc (1064,GMEM_MOVEABLE,1024);
+		hPnts = GSSiGlobAlloc(GAIDNO 1064,GMEM_MOVEABLE,1024);
 		PickList[0] = HighlightData.PD;
 		GetPickName (0);  
 		_fstrcpy(PltName,PickName);
@@ -16508,7 +16508,7 @@ GSSiExitProg (1177);
 		if ((hHighlightArea = GetNextHighlightArea (0,0,&Type,&NumNewPolyPoints,&nPoly,0,&Offset,0)))
 		{
 		    lpRect = (LPMNMXCORD) GlobalLock (hHighlightArea); 
-            hNewPolyPoints = GSSiGlobAlloc (1262,GMEM_MOVEABLE,NumNewPolyPoints*sizeof(DPOINT)); 
+            hNewPolyPoints = GSSiGlobAlloc(GAIDNO 1262,GMEM_MOVEABLE,NumNewPolyPoints*sizeof(DPOINT)); 
             pOutPoints = (HPDPOINT)GlobalLock (hNewPolyPoints);
             lpRect++;
             pPoints = (HPDPOINT)lpRect;
@@ -16611,11 +16611,11 @@ BOOL AutoSplinePoints (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 		EnlargeScreen (0,0);
 		if (!PickColor (POINTStoPOINT(MousePoint),GetGlobalLVal2("[%PICKCOLOR]",0),&EndPoint,FALSE,2))
 			return FALSE; 
-		hDPoints = GSSiGlobAlloc ( 611,GMEM_MOVEABLE,(nPntsIn+1024)*sizeof(DPOINT)); 
+		hDPoints = GSSiGlobAlloc(GAIDNO 611,GMEM_MOVEABLE,(nPntsIn+1024)*sizeof(DPOINT)); 
 		DPoints = (HPDPOINT)GlobalLock (hDPoints);
-		hPoints = GSSiGlobAlloc ( 612,GMEM_MOVEABLE,MAXBITPOINTS*sizeof(POINT)); 
+		hPoints = GSSiGlobAlloc(GAIDNO 612,GMEM_MOVEABLE,MAXBITPOINTS*sizeof(POINT)); 
 		BitPoints = (HPPOINT)GlobalLock (hPoints); 
-		hFlags = GSSiGlobAlloc ( 613,GHND,(long)MAXBITPOINTS*8);  
+		hFlags = GSSiGlobAlloc(GAIDNO 613,GHND,(long)MAXBITPOINTS*8);  
 		Flags = (HPBYTE)GlobalLock (hFlags);
 		pCurPoints = (HPDPOINT)GlobalLock (hCurPolyPoints);
 		for (i=0;i<nPntsIn;i++)
@@ -16669,7 +16669,7 @@ EndOfTheLine:
 		for (pass = 0; pass < 2; pass++)
 		{                                                        
 			GSSiGlobFree (&hNewPolyPoints);
-	   		hNewPolyPoints = GSSiGlobAlloc ( 614,GMEM_MOVEABLE,NumNewPolyPoints*sizeof(DPOINT)); 
+	   		hNewPolyPoints = GSSiGlobAlloc(GAIDNO 614,GMEM_MOVEABLE,NumNewPolyPoints*sizeof(DPOINT)); 
 	   		pNewPoints = (HPDPOINT)GlobalLock (hNewPolyPoints);
 	   		for (i=0,k=nBitPnts/NumNewPolyPoints,j=k;i<NumNewPolyPoints-1;i++,j=k+((i*nBitPnts)/NumNewPolyPoints))
 	   		{   
@@ -17127,7 +17127,7 @@ BOOL CopyPolylineWithOffset (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lPar
 		PltType = 2;
 		{   
 			int	nPnts2=2, i;
-			HANDLE	hPnts2=GSSiGlobAlloc ( 624,GMEM_MOVEABLE,2*sizeof(DPOINT));
+			HANDLE	hPnts2=GSSiGlobAlloc(GAIDNO 624,GMEM_MOVEABLE,2*sizeof(DPOINT));
 			HPDPOINT	pPoint2=(HPDPOINT)GlobalLock (hPnts2);  
 			long	NewRefno;
 			double	AZ = getazd (&HighlightData.PD.BeginPoint,&HighlightData.PD.EndPoint);
@@ -17358,7 +17358,7 @@ BOOL RemovePolyLoop (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam,short
 		    ClearHighlightList (FALSE); 
        		GSSiGlobUlFree (&hUpdateMultiPolygon); 
 		    nUpdatePolyPoints = NumNewPolyPoints ; 
-       		hUpdatePoly = GSSiGlobAlloc (0,GMEM_MOVEABLE,(nUpdatePolyPoints+1)*sizeof(DPOINT));  
+       		hUpdatePoly = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,(nUpdatePolyPoints+1)*sizeof(DPOINT));  
        		Points = (HPDPOINT)GlobalLock (hUpdatePoly);
         	NewPoints = (HPDPOINT)GlobalLock (hNewPolyPoints); 
         	OldPoints = (HPDPOINT)GlobalLock (hPoly);
@@ -17694,7 +17694,7 @@ BOOL ThemeShowClassMembers (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lPara
 				{
 	    			LPVIEWPORT savedVP = CurView;
 
-					hMacro = GSSiGlobAlloc (1783,GMEM_MOVEABLE,4096);
+					hMacro = GSSiGlobAlloc(GAIDNO 1783,GMEM_MOVEABLE,4096);
 					pMacro = GlobalLock (hMacro);
 
 					GetGlobalCVal ("%SHOWCLASSMEMBERMACRO",pMacro,0);
@@ -17734,7 +17734,7 @@ BOOL ThemeShowClassMembers (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lPara
 						if (singleStep)
 						{
 							currentRef = LONG_MIN;
-							hMacro = GSSiGlobAlloc (1783,GMEM_MOVEABLE,4096);
+							hMacro = GSSiGlobAlloc(GAIDNO 1783,GMEM_MOVEABLE,4096);
 							pMacro = GlobalLock (hMacro);
 							GetGlobalCVal ("%SHOWCLASSMEMBERMACRO",pMacro,0);
 						}

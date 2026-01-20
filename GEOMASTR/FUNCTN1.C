@@ -138,7 +138,7 @@ GSSiExitProg (1348);
 	}
 	if (TraceOn)
 	{
-		hMem=GSSiGlobAlloc ( 785,GMEM_MOVEABLE,4096);
+		hMem=GSSiGlobAlloc(GAIDNO 785,GMEM_MOVEABLE,4096);
 		lpstr = GlobalLock (hMem);
 		sprintf (lpstr,"GFV:%s(%s)",LastFunctionName,Args);
 		GSSiTraceLev (lpstr,1,2);
@@ -348,7 +348,7 @@ GSSiExitProg (1348);
 			break;
 		case 108://$M(macrofile,args..)
 		{
-			HANDLE hMem = GSSiGlobAlloc(1826, GMEM_MOVEABLE, SHRT_MAX);
+			HANDLE hMem = GSSiGlobAlloc(GAIDNO 1826, GMEM_MOVEABLE, SHRT_MAX);
 			LPSTR pMem = GlobalLock(hMem);
 			LPSTR pComma = strchr(Args, ',');
 			LPSTR pMacro;
@@ -508,7 +508,7 @@ GSSiExitProg (1348);
 
 							GSSiGlobFree(&hAddGraphicsFun2);
 							AddGraphicsFunVP = CurView->ID;
-							hAddGraphicsFun2 = GSSiGlobAlloc(793, GHND, lcmd + 1);
+							hAddGraphicsFun2 = GSSiGlobAlloc(GAIDNO 793, GHND, lcmd + 1);
 							pGCmd = GlobalLock(hAddGraphicsFun2);
 							_fstrcpy(pGCmd, pLoc);
 							GlobalUnlock(hAddGraphicsFun2);
@@ -1668,7 +1668,7 @@ Exit:
 	GSSiGlobUlFree (&hMem);
 	if (TraceOn)
 	{
-		hMem=GSSiGlobAlloc ( 914,GMEM_MOVEABLE,4096);
+		hMem=GSSiGlobAlloc(GAIDNO 914,GMEM_MOVEABLE,4096);
 		lpstr = GlobalLock (hMem);
 		sprintf (lpstr,"GFV:%s",Args);
 		GSSiTraceLev (lpstr,-1,2);

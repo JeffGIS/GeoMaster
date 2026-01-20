@@ -50,11 +50,11 @@ void GetSymDictChildren (int Parent,LPSHORT pnChildren,LPHANDLE phChildren,int S
 		return;   
 	if (*IconDict)
 	{   
-		HANDLE	hMem=GSSiGlobAlloc ( 447,GMEM_MOVEABLE,256);
+		HANDLE	hMem=GSSiGlobAlloc(GAIDNO 447,GMEM_MOVEABLE,256);
 		LPSTR	str=GlobalLock (hMem); 
 		long	CurLoc;
 		
-		*phChildren = GSSiGlobAlloc ( 448,GHND,USHRT_MAX); 
+		*phChildren = GSSiGlobAlloc(GAIDNO 448,GHND,USHRT_MAX); 
 		pChildren = (LPSHORT)GlobalLock (*phChildren);
 		*pnChildren = 0;
 		CurLoc = GSSillseek (FidSD,0,0);
@@ -75,7 +75,7 @@ void GetSymDictChildren (int Parent,LPSHORT pnChildren,LPHANDLE phChildren,int S
 	{
 		*pnChildren = 0; 
 		if (lChildList)
-			*phChildren = GSSiGlobAlloc ( 449,GMEM_MOVEABLE,(long)lChildList * sizeof(CHILDLIST));
+			*phChildren = GSSiGlobAlloc(GAIDNO 449,GMEM_MOVEABLE,(long)lChildList * sizeof(CHILDLIST));
 		else
 		{
 			*phChildren = 0;
@@ -116,7 +116,7 @@ void BuildChildList (void)
 
 	if (hChildList)
 		return;
-	hChildList = GSSiGlobAlloc ( 450,GHND,USHRT_MAX);
+	hChildList = GSSiGlobAlloc(GAIDNO 450,GHND,USHRT_MAX);
 	pChildList = (LPCHILDLIST)GlobalLock (hChildList);
 	lChildList = 0;
 	for (i=1;i<=NumSymbols;i++)
@@ -428,12 +428,12 @@ int GetSymbol (int SymNum,LPDPOINT pDPoint,HANDLE *hnPnts, HANDLE *hElements)
 	long		offset=200;
     
     
-	*hnPnts = GSSiGlobAlloc ( 451,GMEM_MOVEABLE,NumElements*sizeof(int));
-	*hElements = GSSiGlobAlloc ( 452,GMEM_MOVEABLE,NumElements*sizeof(HANDLE));
+	*hnPnts = GSSiGlobAlloc(GAIDNO 451,GMEM_MOVEABLE,NumElements*sizeof(int));
+	*hElements = GSSiGlobAlloc(GAIDNO 452,GMEM_MOVEABLE,NumElements*sizeof(HANDLE));
 	pnPnts = (LPSHORT)GlobalLock (*hnPnts);  
 	*pnPnts = 4; 
 	phDPoints = (LPHANDLE)GlobalLock (*hElements);
-	*phDPoints = GSSiGlobAlloc ( 453,GMEM_MOVEABLE,*pnPnts*sizeof(DPOINT));
+	*phDPoints = GSSiGlobAlloc(GAIDNO 453,GMEM_MOVEABLE,*pnPnts*sizeof(DPOINT));
 	pDPoints = (LPDPOINT)GlobalLock (*phDPoints);
 	pDPoints->x = pDPoint->x - offset;
 	pDPoints++->y = pDPoint->y + offset;
@@ -753,7 +753,7 @@ HANDLE GetDictSymDesc (int idesc,short opt)
 	if (cachedSymbolHandle[idesc])
 		return cachedSymbolHandle[idesc];
 	opt = 0;
-	handle = GSSiGlobAlloc ( 454,GHND,sizeof(SYMBOL));
+	handle = GSSiGlobAlloc(GAIDNO 454,GHND,sizeof(SYMBOL));
 	pSymDesc = (LPSYMBOL)GlobalLock (handle);
 	if (*IconDict)
 	{
@@ -772,7 +772,7 @@ HANDLE GetDictSymDesc (int idesc,short opt)
 	GlobalUnlock (hSymIndex);
 	if (SymDictVersion == 1)
 	{   
-		HANDLE	hSym=GSSiGlobAlloc (2,GMEM_MOVEABLE,SizeSYMBOL_V1);
+		HANDLE	hSym=GSSiGlobAlloc(GAIDNO 2,GMEM_MOVEABLE,SizeSYMBOL_V1);
 		LPSYMBOL_V1	pSymV1=(LPSYMBOL_V1)GlobalLock (hSym);
 		
 		ii=GSSilread (FidSD,pSymV1,SizeSYMBOL_V1); 
@@ -802,7 +802,7 @@ ErrOut:
 	{ 
 		LPELEMENT	pElement;
 		
-		*phElement = GSSiGlobAlloc ( 455,GMEM_MOVEABLE,sizeof(ELEMENT)+
+		*phElement = GSSiGlobAlloc(GAIDNO 455,GMEM_MOVEABLE,sizeof(ELEMENT)+
 									(long)(MAX_ELEMENT_VECTORS-1)*sizeof(VECTOR));
 		pElement = (LPELEMENT)GlobalLock (*phElement); 
 		GSSilread (FidSD,pElement,sizeof(ELEMENT)-sizeof(VECTOR));
@@ -863,7 +863,7 @@ void DisplayAreaSymbol (HANDLE hSymbol, HDC hDC, int nPnts, LPPOINT Points)
 HDIB32 GetSymbolImage (LPSTR SymName)
 {
 	HDIB32	hDib=0;
-	HANDLE	hMem = GSSiGlobAlloc (1884,GMEM_MOVEABLE,512);
+	HANDLE	hMem = GSSiGlobAlloc(GAIDNO 1884,GMEM_MOVEABLE,512);
 	LPSTR	pBS, BMPName = GlobalLock (hMem);
 		
 	_fstrcpy (BMPName,"[%SYM_DICT]");
@@ -1644,7 +1644,7 @@ Next:
 		}		
 		
 		NumElementPoints = 0;    
-		hCurElement = GSSiGlobAlloc ( 456,GMEM_MOVEABLE,(long)MAX_POLY_POINTS*sizeof(POINT));
+		hCurElement = GSSiGlobAlloc(GAIDNO 456,GMEM_MOVEABLE,(long)MAX_POLY_POINTS*sizeof(POINT));
 		pPoint = (LPPOINT)GlobalLock (hCurElement);
 		for (j=0,pVector=&pElement->Vector;j<pElement->NumVectors;j++,pVector++)
 		{   
@@ -1730,7 +1730,7 @@ Next:
 								{
 									UINT	j;
 									
-									hPnt = GSSiGlobAlloc (0,GMEM_MOVEABLE,sizeof(POINT)*NumElementPoints);
+									hPnt = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,sizeof(POINT)*NumElementPoints);
 									pPointScreen = GlobalLock (hPnt);
 									for (j=0;j<NumElementPoints;j++)
 										pPointScreen[j] = TranPoint16 (pPoint[j],CurView->hTranVPToScreen);
@@ -1805,7 +1805,7 @@ Next:
 					}
 					else
 					{                        
-						HANDLE		hDPoint = GSSiGlobAlloc ( 457,GMEM_MOVEABLE,NumElementPoints*sizeof(DPOINT));
+						HANDLE		hDPoint = GSSiGlobAlloc(GAIDNO 457,GMEM_MOVEABLE,NumElementPoints*sizeof(DPOINT));
 						HPDPOINT	pDPoint = (HPDPOINT)GlobalLock (hDPoint);
 						for (j=0;j<NumElementPoints;j++) 
 						{
@@ -1819,7 +1819,7 @@ Next:
 					break;
 				case SVAREA:
 					{                        
-						HANDLE		hDPoint = GSSiGlobAlloc ( 458,GMEM_MOVEABLE,NumElementPoints*sizeof(DPOINT));
+						HANDLE		hDPoint = GSSiGlobAlloc(GAIDNO 458,GMEM_MOVEABLE,NumElementPoints*sizeof(DPOINT));
 						HPDPOINT	pDPoint = (HPDPOINT)GlobalLock (hDPoint);
 						for (j=0;j<NumElementPoints;j++)
 						{
@@ -1835,7 +1835,7 @@ Next:
 		}
 		else if (hDC == (HDC)99) // output symbol to edit file
 		{   
-			HANDLE		hDPoint = GSSiGlobAlloc ( 458,GMEM_MOVEABLE,NumElementPoints*sizeof(DPOINT));
+			HANDLE		hDPoint = GSSiGlobAlloc(GAIDNO 458,GMEM_MOVEABLE,NumElementPoints*sizeof(DPOINT));
 			HPDPOINT	pDPoint = (HPDPOINT)GlobalLock (hDPoint);   
 			int			np=NumElementPoints;   
 			short		LineSymNum=GetDictSymbolNumber ("PEN1"),AreaSymNum = GetDictSymbolNumber ("FILL1");
@@ -2017,7 +2017,7 @@ BOOL SetMaxSymNum (short MaxSym)
 		hSymIndex = GSSiGlobalReAlloc (0,hSymIndex,(MaxSym)*sizeof(long),GMEM_MOVEABLE);   
 	}
 	else 
-		hSymIndex = GSSiGlobAlloc ( 459,GMEM_MOVEABLE,(MaxSym)*sizeof(long));   
+		hSymIndex = GSSiGlobAlloc(GAIDNO 459,GMEM_MOVEABLE,(MaxSym)*sizeof(long));   
     pSymIndex = (LPLONG)GlobalLock (hSymIndex);
 	pSymIndex += NumSymbols;
 	while (NumSymbols++ < MaxSym)
@@ -2061,7 +2061,7 @@ int SaveSymbol (HANDLE hCurSymbol,int isym)
 		isym = CurSymNum;
 	}
 	if (!NumSymbols) 
-    	hSymIndex = GSSiGlobAlloc ( 460,GMEM_MOVEABLE,2*sizeof(long));  
+    	hSymIndex = GSSiGlobAlloc(GAIDNO 460,GMEM_MOVEABLE,2*sizeof(long));  
     pSymIndex = (LPLONG)GlobalLock (hSymIndex); 
     if (isym)
     {   
@@ -2154,7 +2154,7 @@ BOOL CompressSymDict (void)
     CloseSymDict(); 
    	OpenSymDict (OF_DELETE); 
 	OpenSymDict (OF_READWRITE);  
-	hBuf = GSSiGlobAlloc ( 461,GMEM_MOVEABLE,MaxLen);
+	hBuf = GSSiGlobAlloc(GAIDNO 461,GMEM_MOVEABLE,MaxLen);
 	pBuf = GlobalLock (hBuf); 
 	StatusWindowUpdate ("Reload Symbol Dictionary",0, EndLoc,0);
 	while (Loc < EndLoc)
@@ -2216,7 +2216,7 @@ BOOL OpenSymDict (int Mode)
     *LastSymName=0;                  
     SymDictOpenMode = Mode;
     AllVarEqQuestionMark = FALSE;  
-    hNames = GSSiGlobAlloc ( 464,GMEM_MOVEABLE,1024);
+    hNames = GSSiGlobAlloc(GAIDNO 464,GMEM_MOVEABLE,1024);
     Name = GlobalLock (hNames);
     AtName = Name + 256; 
     NamesName = AtName + 256;
@@ -2305,7 +2305,7 @@ Start:
     SymDictVersion = Version;
     if (NumSymbols)
     {   
-    	hSymIndex = GSSiGlobAlloc ( 465,GMEM_MOVEABLE,NumSymbols*sizeof(long));
+    	hSymIndex = GSSiGlobAlloc(GAIDNO 465,GMEM_MOVEABLE,NumSymbols*sizeof(long));
     	pSymIndex = (LPLONG)GlobalLock (hSymIndex); 
     	SymbolFileEnd = SymbolFileEnd-NumSymbols*sizeof(long);
 	    GSSillseek(FidSD,SymbolFileEnd,0);
@@ -2315,9 +2315,9 @@ Start:
 	SetContinueProcessing ( SaveCP);  
 	if (NumSymbols && !hSymbolAttributes)
 	{
-		hSymbolAttributes = GSSiGlobAlloc ( 466,GHND,NumSymbols*sizeof(SYMBOLATTRIBUTE));
+		hSymbolAttributes = GSSiGlobAlloc(GAIDNO 466,GHND,NumSymbols*sizeof(SYMBOLATTRIBUTE));
 		pSymAtt = (LPSYMBOLATTRIBUTE)GlobalLock (hSymbolAttributes); 
-		hSymNames = GSSiGlobAlloc ( 467,GHND,USHRT_MAX);
+		hSymNames = GSSiGlobAlloc(GAIDNO 467,GHND,USHRT_MAX);
 		pSymNames = GlobalLock (hSymNames); 
 		pSymIndex = (LPLONG)GlobalLock (hSymIndex); 
 		FidNames = GSSiOpenFile (NamesName,0,OF_READ); 
@@ -2521,12 +2521,12 @@ RECT	GetSymRect (int idesc)
 
 HANDLE AllocateNewElement (void)
 {
-	return GSSiGlobAlloc ( 468,GHND,sizeof(ELEMENT) + (long)sizeof(VECTOR) * MAX_ELEMENT_VECTORS);  
+	return GSSiGlobAlloc(GAIDNO 468,GHND,sizeof(ELEMENT) + (long)sizeof(VECTOR) * MAX_ELEMENT_VECTORS);  
 }
  
 HANDLE AllocateNewSymbol (void)
 {
-	return GSSiGlobAlloc ( 469,GHND,sizeof(SYMBOL)+MAX_SYMBOL_ELEMENTS*sizeof(HANDLE));
+	return GSSiGlobAlloc(GAIDNO 469,GHND,sizeof(SYMBOL)+MAX_SYMBOL_ELEMENTS*sizeof(HANDLE));
 }
     
 int CurvePoints (LPDPOINT PC, LPDPOINT POC, LPDPOINT PT, LPLONG nPnts, HPPOINT *Points,double CurveExpansionFactor,long MaxPoints)
@@ -2808,7 +2808,7 @@ short GetUMSymPoly (LPSTR Snam,short Snum,short View,double OFF,double Scale,dou
 					short MaxPoly)   
 { 
 	char	snam[10];
-	HANDLE	hStr=GSSiGlobAlloc ( 470,GMEM_MOVEABLE,USHRT_MAX);
+	HANDLE	hStr=GSSiGlobAlloc(GAIDNO 470,GMEM_MOVEABLE,USHRT_MAX);
 	LPSTR	str=GlobalLock (hStr); 
 	short	numc, loc, ipen;  
 	HPDPOINT	pPoints; 
@@ -2851,7 +2851,7 @@ short GetUMSymPoly (LPSTR Snam,short Snum,short View,double OFF,double Scale,dou
    						{   
    							PolyPen[*pnPoly] = ipen;
 			         		plPoly[*pnPoly] = numc;
-			         		phPoly[*pnPoly] = GSSiGlobAlloc ( 471,GMEM_MOVEABLE,numc*sizeof(DPOINT));
+			         		phPoly[*pnPoly] = GSSiGlobAlloc(GAIDNO 471,GMEM_MOVEABLE,numc*sizeof(DPOINT));
 			         		pPoints = (HPDPOINT)GlobalLock (phPoly[*pnPoly]);
 			         		while (numc--)
 			         		{
@@ -2872,7 +2872,7 @@ short GetUMSymPoly (LPSTR Snam,short Snum,short View,double OFF,double Scale,dou
 			         		{
 	   							PolyPen[*pnPoly] = -ipen;
 				         		plPoly[*pnPoly] = 2;
-				         		phPoly[*pnPoly] = GSSiGlobAlloc ( 472,GMEM_MOVEABLE,2*sizeof(DPOINT));
+				         		phPoly[*pnPoly] = GSSiGlobAlloc(GAIDNO 472,GMEM_MOVEABLE,2*sizeof(DPOINT));
 				         		pPoints = (HPDPOINT)GlobalLock (phPoly[*pnPoly]);   
 			         			pPoints->x = (double)ldread (&str[loc],6)/1000.0 - Xoff;
 			         			loc += 6;
@@ -2923,7 +2923,7 @@ void GetUMSymDump (LPSTR Snam,HANDLE hSym,HFILE Fid)
 	CurSymbol->TiePoint.x = CurSymbol->TiePoint.y = 0;
 	for (ipoly=0;ipoly<nPoly;ipoly++,phElement++)
 	{
-		*phElement=GSSiGlobAlloc ( 473,GHND,sizeof(ELEMENT)+max(0,(lPoly[ipoly]-1))*sizeof(VECTOR));
+		*phElement=GSSiGlobAlloc(GAIDNO 473,GHND,sizeof(ELEMENT)+max(0,(lPoly[ipoly]-1))*sizeof(VECTOR));
 		pElement = (LPELEMENT)GlobalLock (*phElement);
 		pElement->NumVectors = max(0,lPoly[ipoly]); 
 		if (lPoly[ipoly] > 0)
@@ -3053,7 +3053,7 @@ void createsymbols (short type)
 	CurSymbol->NumElements=1;
 	CurSymbol->Parent=GetDictSymbolNumber("CENSUSAR");		 
 	NumVectors = 0;
-	CurSymbol->hElement=GSSiGlobAlloc ( 474,GHND,sizeof(ELEMENT)+(NumVectors-1)*sizeof(VECTOR));
+	CurSymbol->hElement=GSSiGlobAlloc(GAIDNO 474,GHND,sizeof(ELEMENT)+(NumVectors-1)*sizeof(VECTOR));
 	pElement = (LPELEMENT)GlobalLock (CurSymbol->hElement);
 	pElement->NumVectors = NumVectors;
 	pElement->FillColor = 0;  
@@ -3083,7 +3083,7 @@ void createsymbols (short type)
 	CurSymbol->NumElements=1;
 	CurSymbol->Parent=GetDictSymbolNumber("CENSUSAR");		 
 	NumVectors = 0;
-	CurSymbol->hElement=GSSiGlobAlloc ( 475,GHND,sizeof(ELEMENT)+(NumVectors-1)*sizeof(VECTOR));
+	CurSymbol->hElement=GSSiGlobAlloc(GAIDNO 475,GHND,sizeof(ELEMENT)+(NumVectors-1)*sizeof(VECTOR));
 	pElement = (LPELEMENT)GlobalLock (CurSymbol->hElement);
 	pElement->NumVectors = NumVectors;
 	pElement->FillColor = 0;  
@@ -3113,7 +3113,7 @@ void createsymbols (short type)
 	CurSymbol->NumElements=1;
 	CurSymbol->Parent=GetDictSymbolNumber("CENSUSAR");		 
 	NumVectors = 0;
-	CurSymbol->hElement=GSSiGlobAlloc ( 476,GHND,sizeof(ELEMENT)+(NumVectors-1)*sizeof(VECTOR));
+	CurSymbol->hElement=GSSiGlobAlloc(GAIDNO 476,GHND,sizeof(ELEMENT)+(NumVectors-1)*sizeof(VECTOR));
 	pElement = (LPELEMENT)GlobalLock (CurSymbol->hElement);
 	pElement->NumVectors = NumVectors;
 	pElement->FillColor = 0;  
@@ -3131,7 +3131,7 @@ void createsymbols (short type)
 	CurSymbol->NumElements=0;
 	CurSymbol->Parent=GetDictSymbolNumber("CENSUSAR");		 
 	NumVectors = 0;
-	CurSymbol->hElement=GSSiGlobAlloc ( 477,GHND,sizeof(ELEMENT)+(NumVectors-1)*sizeof(VECTOR));
+	CurSymbol->hElement=GSSiGlobAlloc(GAIDNO 477,GHND,sizeof(ELEMENT)+(NumVectors-1)*sizeof(VECTOR));
 	GlobalUnlock (hSym);	 
 	SaveSymbol(hSym,0);   
 	DestroySymbol (hSym);
@@ -3144,7 +3144,7 @@ void createsymbols (short type)
 	CurSymbol->NumElements=1;
 	CurSymbol->Parent=GetDictSymbolNumber("CENSUSAR");		 
 	NumVectors = 0;
-	CurSymbol->hElement=GSSiGlobAlloc ( 478,GHND,sizeof(ELEMENT)+(NumVectors-1)*sizeof(VECTOR));
+	CurSymbol->hElement=GSSiGlobAlloc(GAIDNO 478,GHND,sizeof(ELEMENT)+(NumVectors-1)*sizeof(VECTOR));
 	pElement = (LPELEMENT)GlobalLock (CurSymbol->hElement);
 	pElement->NumVectors = NumVectors;
 	pElement->FillColor = -100;  
@@ -3162,7 +3162,7 @@ void createsymbols (short type)
 	CurSymbol->NumElements=1;
 	CurSymbol->Parent=GetDictSymbolNumber("CENSUSAR");		 
 	NumVectors = 0;
-	CurSymbol->hElement=GSSiGlobAlloc ( 479,GHND,sizeof(ELEMENT)+(NumVectors-1)*sizeof(VECTOR));
+	CurSymbol->hElement=GSSiGlobAlloc(GAIDNO 479,GHND,sizeof(ELEMENT)+(NumVectors-1)*sizeof(VECTOR));
 	pElement = (LPELEMENT)GlobalLock (CurSymbol->hElement);
 	pElement->NumVectors = NumVectors;
 	pElement->FillColor = 0;  
@@ -3195,7 +3195,7 @@ void createsymbols (short type)
 	
 	NumVectors = 19; 
 	DBoundsInit (&Bounds);
-	CurSymbol->hElement=GSSiGlobAlloc ( 480,GHND,sizeof(ELEMENT)+(NumVectors-1)*sizeof(VECTOR));
+	CurSymbol->hElement=GSSiGlobAlloc(GAIDNO 480,GHND,sizeof(ELEMENT)+(NumVectors-1)*sizeof(VECTOR));
 	pElement = (LPELEMENT)GlobalLock (CurSymbol->hElement);
 	pElement->NumVectors = NumVectors;
 	pElement->FillColor = RGB(255,255,255);  
@@ -3233,7 +3233,7 @@ void createsymbols (short type)
 	NumVectors = 8; 
 	DBoundsInit (&Bounds);
 	phElement = &CurSymbol->hElement;
-	*phElement=GSSiGlobAlloc ( 481,GHND,sizeof(ELEMENT)+(NumVectors-1)*sizeof(VECTOR));
+	*phElement=GSSiGlobAlloc(GAIDNO 481,GHND,sizeof(ELEMENT)+(NumVectors-1)*sizeof(VECTOR));
 	pElement = (LPELEMENT)GlobalLock (*phElement);
 	pElement->NumVectors = NumVectors;
 	pElement->FillColor = -1;  
@@ -3254,7 +3254,7 @@ void createsymbols (short type)
 	}
 	GlobalUnlock (*phElement++);
 	NumVectors = 8;
-	*phElement=GSSiGlobAlloc ( 482,GHND,sizeof(ELEMENT)+(NumVectors-1)*sizeof(VECTOR));
+	*phElement=GSSiGlobAlloc(GAIDNO 482,GHND,sizeof(ELEMENT)+(NumVectors-1)*sizeof(VECTOR));
 	pElement = (LPELEMENT)GlobalLock (*phElement);
 	pElement->NumVectors = NumVectors;
 	pElement->FillColor = -2;  
@@ -3291,7 +3291,7 @@ void createsymbols (short type)
 	
 	NumVectors = 5;
 	DBoundsInit (&Bounds);
-	CurSymbol->hElement=GSSiGlobAlloc ( 483,GHND,sizeof(ELEMENT)+(NumVectors-1)*sizeof(VECTOR));
+	CurSymbol->hElement=GSSiGlobAlloc(GAIDNO 483,GHND,sizeof(ELEMENT)+(NumVectors-1)*sizeof(VECTOR));
 	pElement = (LPELEMENT)GlobalLock (CurSymbol->hElement);
 	pElement->NumVectors = NumVectors;
 	pElement->FillColor = RGB(255,255,255);  
@@ -3344,7 +3344,7 @@ void createsymbols (short type)
 	
 	NumVectors = 5;
 	DBoundsInit (&Bounds);
-	CurSymbol->hElement=GSSiGlobAlloc ( 484,GHND,sizeof(ELEMENT)+(NumVectors-1)*sizeof(VECTOR));
+	CurSymbol->hElement=GSSiGlobAlloc(GAIDNO 484,GHND,sizeof(ELEMENT)+(NumVectors-1)*sizeof(VECTOR));
 	pElement = (LPELEMENT)GlobalLock (CurSymbol->hElement);
 	pElement->NumVectors = NumVectors;
 	pElement->FillColor = RGB(255,255,255);  
@@ -3392,7 +3392,7 @@ void createsymbols (short type)
 	
 	NumVectors = 5;
 	DBoundsInit (&Bounds);
-	CurSymbol->hElement=GSSiGlobAlloc ( 485,GHND,sizeof(ELEMENT)+(NumVectors-1)*sizeof(VECTOR));
+	CurSymbol->hElement=GSSiGlobAlloc(GAIDNO 485,GHND,sizeof(ELEMENT)+(NumVectors-1)*sizeof(VECTOR));
 	pElement = (LPELEMENT)GlobalLock (CurSymbol->hElement);
 	pElement->NumVectors = NumVectors;
 	pElement->FillColor = RGB(255,255,255);  
@@ -3809,7 +3809,7 @@ HPEN DrawSymbolBetweenPoints (HDC hDC,LPFPOINT pPoint1F, LPFPOINT pPoint2F, LPSY
 	UINT		i,j;
 	LPELEMENT	pElement;
 	LPVECTOR	pVector, pVector1, pVector2;  
-	HANDLE		hPlotPoint=GSSiGlobAlloc ( 486,GMEM_MOVEABLE,2048*sizeof(POINT));
+	HANDLE		hPlotPoint=GSSiGlobAlloc(GAIDNO 486,GMEM_MOVEABLE,2048*sizeof(POINT));
 	LPPOINT		pPoint, PlotPoint=(LPPOINT)GlobalLock (hPlotPoint), Points;
 //	POINT		PlotPoint[1000];
 	LPHANDLE	phElement; 
@@ -4073,7 +4073,7 @@ NextVector:;
 								else
 								{
 									GSSiGlobFree (&hElemPoints[*pCurElem]);
-									hElemPoints[*pCurElem] = GSSiGlobAlloc (1572,GMEM_MOVEABLE,MAX_ELEMENT_VECTORS*sizeof(POINT));
+									hElemPoints[*pCurElem] = GSSiGlobAlloc(GAIDNO 1572,GMEM_MOVEABLE,MAX_ELEMENT_VECTORS*sizeof(POINT));
 									Points = GlobalLock (hElemPoints[*pCurElem]);
 									Points[0] = PlotPoint[0];
 									Points[1] = PlotPoint[1];
@@ -4153,7 +4153,7 @@ EndSymbol:
 
 void AddPointsToSymbolRectF(HDC	hDC, HPFPOINT lpPoints, long npnts, int Width)
 {
-	HANDLE handle = GSSiGlobAlloc(0, GMEM_MOVEABLE, npnts*sizeof(POINT) + 4);
+	HANDLE handle = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, npnts*sizeof(POINT) + 4);
 	HPPOINT	pPoints = (HPPOINT)GlobalLock(handle);
 
 	for (int i = 0; i < npnts; i++)
@@ -4166,7 +4166,7 @@ void AddPointsToSymbolRectF(HDC	hDC, HPFPOINT lpPoints, long npnts, int Width)
 }
 void AddFPointsToSymbolRect(HDC	hDC, HPFPOINT lpPoints, long npnts, int Width)
 {
-	HANDLE hPoints = GSSiGlobAlloc(0, GMEM_MOVEABLE, npnts * sizeof(POINT)+4);
+	HANDLE hPoints = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, npnts * sizeof(POINT)+4);
 	LPPOINT pPoints = GlobalLock(hPoints);
 
 	for (int i = 0; i < npnts; i++)
@@ -4258,7 +4258,7 @@ GSSiExitProg (963);
 	while (npnts > 0)
 	{   
 		lpPoints += mxp;
-		hMem = GSSiGlobAlloc ( 760,GMEM_MOVEABLE,USHRT_MAX);
+		hMem = GSSiGlobAlloc(GAIDNO 760,GMEM_MOVEABLE,USHRT_MAX);
 		pPoints = (LPPOINT)GlobalLock (hMem);  
 		np = min (npnts,mxp);
 		_fmemmove (pPoints,lpPoints,np*sizeof(POINT));
@@ -4284,7 +4284,7 @@ GSSiExitProg (963);
    
 BOOL FlatEndPolylineI(HDC hDC, HPPOINT lpPoints, long npnts, int Width, COLORREF Color)
 {
-	HANDLE handle = GSSiGlobAlloc(0, GMEM_MOVEABLE, npnts*sizeof(FPOINT)+4);
+	HANDLE handle = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, npnts*sizeof(FPOINT)+4);
 	HPFPOINT	pPoints = (HPFPOINT)GlobalLock(handle);
 
 	for (int i = 0; i < npnts; i++)
@@ -4339,7 +4339,7 @@ GSSiExitProg (963);
 	while (npnts > 0)
 	{   
 		lpPoints += mxp;
-		hMem = GSSiGlobAlloc ( 760,GMEM_MOVEABLE,USHRT_MAX*2);
+		hMem = GSSiGlobAlloc(GAIDNO 760,GMEM_MOVEABLE,USHRT_MAX*2);
 		pPoints = (LPFPOINT)GlobalLock (hMem);  
 		np = min (npnts,mxp);
 		_fmemmove (pPoints,lpPoints,np*sizeof(FPOINT));
@@ -4369,7 +4369,7 @@ BOOL BigFPolyline (HDC hDC, HPDPOINT lpPoints, long npnts,double Width)
 {GSSiEnterProg (964);
 #endif
 {
-	HANDLE handle = GSSiGlobAlloc ( 761,GMEM_MOVEABLE,(npnts+1)*sizeof(POINT));
+	HANDLE handle = GSSiGlobAlloc(GAIDNO 761,GMEM_MOVEABLE,(npnts+1)*sizeof(POINT));
 	HPPOINT	pPoints = (HPPOINT)GlobalLock (handle);
 	HPPOINT	pPointsBeg = pPoints;
 	BOOL	rtn=1; 
@@ -4426,7 +4426,7 @@ BOOL BigSPolyline (HDC hDC, HPPOINTS lpPoints, long npnts,int Width)
 {GSSiEnterProg (964);
 #endif
 {
-	HANDLE handle = GSSiGlobAlloc ( 761,GMEM_MOVEABLE,(npnts+1)*sizeof(POINT));
+	HANDLE handle = GSSiGlobAlloc(GAIDNO 761,GMEM_MOVEABLE,(npnts+1)*sizeof(POINT));
 	HPPOINT	pPoints = (HPPOINT)GlobalLock (handle);
 	HPPOINT	pPointsBeg = pPoints;
 	BOOL	rtn=1; 
@@ -4459,7 +4459,7 @@ GSSiExitProg (964);
 
 int GWPolyline2 (HDC hDC, HPPOINT Points, long npnts,int idesc)
 {
-    HANDLE	hPoints = GSSiGlobAlloc (0,GMEM_MOVEABLE,npnts*sizeof(DPOINT));
+    HANDLE	hPoints = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,npnts*sizeof(DPOINT));
     HPDPOINT	DPoints=(HPDPOINT)GlobalLock (hPoints);
     long	i; 
     int	rtn;
@@ -4498,7 +4498,7 @@ BOOL DrawOneWayArrows (HDC hDC, int OneWay,HPFPOINT Points, int npnts,int Width)
 			return FALSE;
 		{
 			int			NumArrowPoints,i, iarrow, nap;
-			HANDLE		hDPoly=GSSiGlobAlloc (0,GMEM_MOVEABLE,npnts * sizeof (DPOINT));
+			HANDLE		hDPoly=GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,npnts * sizeof (DPOINT));
 			HPDPOINT	pArrowDPoints, pDPoints=GlobalLock (hDPoly);
 			HANDLE		hArrowPoints, hArrowDPoints;
 			double		StartArrow, EndArrow;
@@ -4533,7 +4533,7 @@ BOOL DrawOneWayArrows (HDC hDC, int OneWay,HPFPOINT Points, int npnts,int Width)
 				if (NumArrowPoints > 1)
 				{
 					pArrowDPoints = GlobalLock (hArrowDPoints);
-					hArrowPoints = GSSiGlobAlloc (0,GMEM_MOVEABLE,NumArrowPoints*sizeof(POINT));
+					hArrowPoints = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,NumArrowPoints*sizeof(POINT));
 					pArrowPoints = GlobalLock (hArrowPoints);
 					switch (OneWay)
 					{
@@ -4614,7 +4614,7 @@ void DisplayHollowLines (BOOL Clear)
 				GSSillseek (FidHollowLines,0,0);
 			    while (BigRead (FidHollowLines,(HPSTR)&HollowLineHeader,sizeof(HollowLineHeader)) == sizeof(HollowLineHeader))
 			    {
-				    HANDLE	hPoints = GSSiGlobAlloc (0,GMEM_MOVEABLE,HollowLineHeader.npnts*sizeof(FPOINT));
+				    HANDLE	hPoints = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,HollowLineHeader.npnts*sizeof(FPOINT));
 				    HPFPOINT	SPoints=(HPFPOINT)GlobalLock (hPoints); 
 				    
 				    BigRead (FidHollowLines,(HPSTR)SPoints,HollowLineHeader.npnts*sizeof(FPOINT));
@@ -4761,7 +4761,7 @@ int GWPolylineScreen2 (HDC hDC, HPDPOINT Points, long npnts,int idesc)
     long	i, n=0, npm1=npnts-1; 
     DPOINT	ScreenPoint,PreviousPoint;  
     BOOL	PrevPointIn, PointIn=FALSE;   
-    HANDLE	hPoints = GSSiGlobAlloc (0,GMEM_MOVEABLE,npnts*sizeof(DPOINT));
+    HANDLE	hPoints = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,npnts*sizeof(DPOINT));
     HPDPOINT	SPoints=(HPDPOINT)GlobalLock (hPoints);
     int		rtn=0, w;
 	double	dw;
@@ -4810,7 +4810,7 @@ int GWPolylineScreen2 (HDC hDC, HPDPOINT Points, long npnts,int idesc)
 
 int GWPolylineScreen(HDC hDC, HPFPOINT Points, long npnts, int idesc)
 {
-	HANDLE	hPoints = GSSiGlobAlloc(0, GMEM_MOVEABLE, npnts*sizeof(DPOINT) + 4);
+	HANDLE	hPoints = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, npnts*sizeof(DPOINT) + 4);
 	HPDPOINT	SPoints = (HPDPOINT)GlobalLock(hPoints);
 	int		rtn;
 	long	i;
@@ -4829,7 +4829,7 @@ int GWPolylineScreen(HDC hDC, HPFPOINT Points, long npnts, int idesc)
 }
 int GWPolylineScreenI(HDC hDC, HPPOINT Points, long npnts, int idesc)
 {
-	HANDLE	hPoints = GSSiGlobAlloc(0, GMEM_MOVEABLE, npnts*sizeof(DPOINT) + 4);
+	HANDLE	hPoints = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, npnts*sizeof(DPOINT) + 4);
 	HPDPOINT	SPoints = (HPDPOINT)GlobalLock(hPoints);
 	int		rtn;
 	long	i;
@@ -4848,7 +4848,7 @@ int GWPolylineScreenI(HDC hDC, HPPOINT Points, long npnts, int idesc)
 }
 int GWPolylineScreenS(HDC hDC, HPPOINTS Points, long npnts, int idesc)
 {
-	HANDLE	hPoints = GSSiGlobAlloc(0, GMEM_MOVEABLE, npnts*sizeof(DPOINT) + 4);
+	HANDLE	hPoints = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, npnts*sizeof(DPOINT) + 4);
 	HPDPOINT	SPoints = (HPDPOINT)GlobalLock(hPoints);
 	int		rtn;
 	long	i;
@@ -4936,7 +4936,7 @@ AddToFile:
     	
     	if (!hHollowLinesFile) 
     	{
-    		hHollowLinesFile = GSSiGlobAlloc (0,GHND,256);
+    		hHollowLinesFile = GSSiGlobAlloc(GAIDNO 0,GHND,256);
     		pFile = GlobalLock (hHollowLinesFile);
    			GSSiGetTempFileName (0,"gm",0,pFile);
    		}
@@ -4970,7 +4970,7 @@ Exit:
 
 	if (UseShortSymbols)// && (!SymbolIsSolidLine (idesc) || GetSymbolWidth (idesc) > 1))
 	{
-	    HANDLE	hPoints = GSSiGlobAlloc (0,GMEM_MOVEABLE,abs(npnts)*sizeof(DPOINT));
+	    HANDLE	hPoints = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,abs(npnts)*sizeof(DPOINT));
 	    HPDPOINT	DPoints=(HPDPOINT)GlobalLock (hPoints);
 	    ULONG	i; 
 	    
@@ -5005,7 +5005,7 @@ int GWPolyline (HDC hDC, HPPOINTS Points, long npnts,int idesc)
 
 	//if (CurView->Rotation)
 	{
-		HANDLE	Handle = GSSiGlobAlloc ( 756,GMEM_MOVEABLE,(long)abs(npnts)*sizeof(DPOINT));
+		HANDLE	Handle = GSSiGlobAlloc(GAIDNO 756,GMEM_MOVEABLE,(long)abs(npnts)*sizeof(DPOINT));
 		HPDPOINT pPolyPointsD = (HPDPOINT) GlobalLock (Handle);
 		UINT	i;
 
@@ -5969,7 +5969,7 @@ GSSiExitProg (989);
 //    	retrn (0);  
 /*	if (Spline)
 	{   
-		hSpline = GSSiGlobAlloc ( 767,GMEM_MOVEABLE,MaxSplinePoints * sizeof(DPOINT));
+		hSpline = GSSiGlobAlloc(GAIDNO 767,GMEM_MOVEABLE,MaxSplinePoints * sizeof(DPOINT));
 		pSplinePoints = (HPDPOINT)GlobalLock (hSpline);
 		SplinePointsD (1,npnts,lpPoints,&nSplinePoints, pSplinePoints,CurView->BaseUnitsPerPixel,CurView->BaseUnitsPerPixel/4,0,MaxSplinePoints);
 		npnts = nSplinePoints;
@@ -5992,7 +5992,7 @@ GSSiExitProg (989);
 	}
 	if (ShowLineDirection)
 	{
-		HANDLE hFPoints = GSSiGlobAlloc(0, GMEM_MOVEABLE, npnts * sizeof(FPOINT)+4);
+		HANDLE hFPoints = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, npnts * sizeof(FPOINT)+4);
 		HPFPOINT FPoints = GlobalLock(hFPoints);
 		for (i = 0; i<npnts; i++)
 			FPoints[i] = BasePtToWinPtF(&lpPoints[i]);
@@ -6014,7 +6014,7 @@ GSSiExitProg (989);
 		CurTheme = StreetCenterline;
 		if (ShowHollowStreet != 1)
 			desc = -desc;
-		Handle = GSSiGlobAlloc ( 768,GMEM_MOVEABLE,((long)npnts+16L) * (long)sizeof(DPOINT));
+		Handle = GSSiGlobAlloc(GAIDNO 768,GMEM_MOVEABLE,((long)npnts+16L) * (long)sizeof(DPOINT));
 		lpPoints16 = (HPDPOINT)GlobalLock (Handle);
 		for (i=0;i<npnts;i++,lpPoints++)
 			lpPoints16[i] = BasePtToWinPtD (lpPoints);   
@@ -6028,7 +6028,7 @@ GSSiExitProg (989);
 	CurView->WBounds = FactorBounds (&CurView->WBounds,1.15);
     SaveDC (hDC);
 	SetDisplayMode (hDC, GF_TEXTMODE);
-	Handle = GSSiGlobAlloc ( 768,GMEM_MOVEABLE,((long)npnts+16L) * (long)sizeof(FPOINT));
+	Handle = GSSiGlobAlloc(GAIDNO 768,GMEM_MOVEABLE,((long)npnts+16L) * (long)sizeof(FPOINT));
 	lpPntNew = lpNewPoints = (HPFPOINT)GlobalLock (Handle);
 
 //d1=ldistp (lpPoints[0],lpPoints[1]);
@@ -6119,7 +6119,7 @@ GSSiExitProg (989);
 		
 		CurTheme = StreetCenterline;
 		
-		Handle = GSSiGlobAlloc ( 768,GMEM_MOVEABLE,((long)npnts+16L) * (long)sizeof(FPOINT));
+		Handle = GSSiGlobAlloc(GAIDNO 768,GMEM_MOVEABLE,((long)npnts+16L) * (long)sizeof(FPOINT));
 		lpPoints16 = (HPFPOINT)GlobalLock (Handle); 
 		lpPoints = lpPointsIn;
 		for (i=0;i<npnts;i++,lpPoints++)
@@ -6162,7 +6162,7 @@ BOOL DisplaySymInRect2 (HDC hDC,HANDLE hSymbol,RECT Rect,short nElement,HANDLE h
     	return FALSE;
 	SaveDC (hDC);
 	SetDisplayMode (hDC, GF_SCREENMODE);
-	hVisList=GSSiGlobAlloc ( 487,GHND,sizeof(VISLIST));
+	hVisList=GSSiGlobAlloc(GAIDNO 487,GHND,sizeof(VISLIST));
 	CurVis = (LPVISLIST)GlobalLock (hVisList); 
 	CurVis->hVisList=hVisList;
 	InitVis ();
@@ -6560,7 +6560,7 @@ BOOL DisplaySymInWindow (HWND hWnd,HDC hDCin,HANDLE hSymbol,short nElement,HANDL
     
     if (!hSymbol)
     	return FALSE;
-	hVP = GSSiGlobAlloc (1880,GMEM_MOVEABLE,sizeof(VIEWPORT));
+	hVP = GSSiGlobAlloc(GAIDNO 1880,GMEM_MOVEABLE,sizeof(VIEWPORT));
 	pSaveVP = GlobalLock (hVP);
 	*pSaveVP = *CurView;
 	CurView->HalfTone = 0;

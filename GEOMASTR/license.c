@@ -524,7 +524,7 @@ BOOL EnterAccessCode (HWND hWnd,LPSTR Code)
 
 void AddTextToClipboard (LPSTR txt)
 {
-	HANDLE	hStr = GSSiGlobAlloc (0,GMEM_MOVEABLE,strlen(txt)+256);
+	HANDLE	hStr = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,strlen(txt)+256);
 	LPSTR	str = GlobalLock (hStr);
 
 	sprintf (str,"$TEXTTOCLIPBOARD(%s)",txt);

@@ -986,7 +986,7 @@ BOOL SendPacketSerial (HANDLE Stream,LPBYTE Packet)
 	BOOL	HaveMsg;  
 	BOOL	Continue=TRUE;
 	short	PacketID, numstuff; 
-    HANDLE	hMem=GSSiGlobAlloc (0,GMEM_MOVEABLE,4096);
+    HANDLE	hMem=GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,4096);
     LPBYTE	OutPacket=GlobalLock (hMem);
 	int		TotTime = 0;
    
@@ -1211,7 +1211,7 @@ short CheckForNMEA (HANDLE Stream)
 	short	rtn=0;   
 	int		nRead=0; 
 	int		st;
-	HANDLE	hMem=GSSiGlobAlloc (0,GMEM_MOVEABLE,4096);
+	HANDLE	hMem=GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,4096);
 	LPBYTE	InPacket = GlobalLock (hMem); 
 	
     
@@ -1455,7 +1455,7 @@ BOOL OpenMagellan (HWND hWnd,LPSTR Identity)
     LPSTR	lpCmd, lpVer;
 	HCURSOR	hcurSave; 
 	int		ii;
-    HANDLE	hMem=GSSiGlobAlloc (0,GMEM_MOVEABLE,4096);
+    HANDLE	hMem=GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,4096);
     LPBYTE	Mess=GlobalLock (hMem);   
     BOOL	rtn=FALSE;
 
@@ -1506,7 +1506,7 @@ int SendMagellanPacket (LPSTR Packet)
 	int		rtn=0; 
 	short	PacketID, numstuff; 
 	HCURSOR	hcurSave; 
-	HANDLE	hMem = GSSiGlobAlloc (0,GMEM_MOVEABLE,4096);
+	HANDLE	hMem = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,4096);
 	LPBYTE	OutPacket=GlobalLock (hMem);
 	int		TotTime=0;
 	//LPBYTE	InPacket = OutPacket + 2048;
@@ -1819,7 +1819,7 @@ BOOL OpenGarmin (HWND hWnd,LPSTR Identity)
 	int        nError, nLength,ii, LenInput ;
 	COMSTAT    ComStat ;
 	MSG        msg ;  
-	HANDLE	hMem=GSSiGlobAlloc (0,GMEM_MOVEABLE,4096);  
+	HANDLE	hMem=GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,4096);  
 	LPBYTE	Packet=GlobalLock (hMem); 
 	LPBYTE	pstr=Packet; 
 	HANDLE	hInput;
@@ -2254,7 +2254,7 @@ short GPSExportGarminRoute (HWND hWndDlg,UINT Control,UINT StatusControl)
 			break;
 	}  
 	nItems=(short)SendDlgItemMessage(hWndDlg ,Control,LB_GETSELCOUNT,0,0); 
-	hItems=GSSiGlobAlloc (1036,GMEM_MOVEABLE,nItems*4);
+	hItems=GSSiGlobAlloc(GAIDNO 1036,GMEM_MOVEABLE,nItems*4);
 	lpItems=  (LPINT) GlobalLock(hItems);
 	SendDlgItemMessage(hWndDlg ,Control,LB_GETSELITEMS,nItems,(LPARAM)lpItems);
 	GlobalUnlock (hItems);
@@ -2430,7 +2430,7 @@ short GPSExportGarminWP (HWND hWndDlg,UINT Control,UINT StatusControl)
 	int		i,n;     
 	BOOL	Err;
 	short	sizeWpt=sizeof(D103_Wpt_Type), sizecomment=40,PadZeros=0;  
-	HANDLE	hWPMem=GSSiGlobAlloc (0,GHND,1024);
+	HANDLE	hWPMem=GSSiGlobAlloc(GAIDNO 0,GHND,1024);
 	LPSTR	pWP=GlobalLock (hWPMem);
 	
 	switch (WptFormat)
@@ -2694,7 +2694,7 @@ BOOL GPSImportGarminWP (HWND hWndDlg,UINT Control,UINT StatusControl)
 	LPSEMICIRCLETYPE	Wpt_posn;    
 	HCURSOR	hcurSave;
 	long	nLoaded, nRecs;  
-	HANDLE	hWPMem=GSSiGlobAlloc (0,GHND,1024);
+	HANDLE	hWPMem=GSSiGlobAlloc(GAIDNO 0,GHND,1024);
 	LPSTR	pWP=GlobalLock (hWPMem);
 	short	ii=0,nerr;
 
@@ -2867,7 +2867,7 @@ Top:
 	if (SearchALL)
 	{
 		GSSiGlobFree (&hLowranceWPList);
-		hLowranceWPList = GSSiGlobAlloc (0,GHND,(MaxLowranceWP+1)*18);
+		hLowranceWPList = GSSiGlobAlloc(GAIDNO 0,GHND,(MaxLowranceWP+1)*18);
 	}  
 	
 	while (n-- && ContinueProcessing)
@@ -3105,7 +3105,7 @@ short GPSExportLSI100WP (HWND hWndDlg,UINT Control,UINT StatusControl,BOOL Searc
 	}
 	if (phWPNums)
 	{
-		*phWPNums = GSSiGlobAlloc (1039,GMEM_MOVEABLE,nItems*4);
+		*phWPNums = GSSiGlobAlloc(GAIDNO 1039,GMEM_MOVEABLE,nItems*4);
 		lpWPNums=  (LPINT) GlobalLock(*phWPNums);  
 	}
 	lpItems=  (LPINT) GlobalLock(hItems);
@@ -3213,7 +3213,7 @@ short GPSExportLSI100Route (HWND hWndDlg,UINT Control,UINT StatusControl,BOOL Se
 	if (!GetTextString (hWndDlg,str,5,"Enter Route Number",NULL,NULL,0,TRUE,TRUE))
 		return FALSE; 
 	sizeRte = sizeof(LSI100ROUTE)+nItems*sizeof(WORD);
-	hRoute = GSSiGlobAlloc (1040,GMEM_MOVEABLE,sizeRte);
+	hRoute = GSSiGlobAlloc(GAIDNO 1040,GMEM_MOVEABLE,sizeRte);
 	pRte = (LPLSI100ROUTE)GlobalLock (hRoute);
 	pRte->Number = max (0,atoi (str)-1); 
 	pRte->nWP = nItems;
@@ -3634,9 +3634,9 @@ Top:
 			goto Top;
 	   	return FALSE; 
 	} 
-	hPTD = GSSiGlobAlloc (1042,GHND,sizeof(LSI100PLOTTRAILDELTAS)*MAXDELTATRANSFER*sizeof(DELTA)); 
+	hPTD = GSSiGlobAlloc(GAIDNO 1042,GHND,sizeof(LSI100PLOTTRAILDELTAS)*MAXDELTATRANSFER*sizeof(DELTA)); 
 	pPlotTrailDeltas = (LPLSI100PLOTTRAILDELTAS)GlobalLock (hPTD);
-	hDeltas = GSSiGlobAlloc (1042,GHND,PlotTrail.NumberOfDeltas*sizeof(DELTA)); 
+	hDeltas = GSSiGlobAlloc(GAIDNO 1042,GHND,PlotTrail.NumberOfDeltas*sizeof(DELTA)); 
 	pDeltas = (LPDELTA)GlobalLock (hDeltas); 
 	while (nTot < PlotTrail.NumberOfDeltas)
 	{
@@ -3827,7 +3827,7 @@ BOOL FAR PASCAL LOWRANCESCANMsgProc(HWND hWndDlg, WORD Message, WORD wParam, LON
 				SetDlgItemText (hWndDlg,IDC_STATUS,"Requesting waypoints");   
 				WayPoint.Status = 1; 
 				GSSiGlobFree (&hLowranceWPList);
-				hLowranceWPList = GSSiGlobAlloc (0,GHND,(MaxLowranceWP+1)*18);
+				hLowranceWPList = GSSiGlobAlloc(GAIDNO 0,GHND,(MaxLowranceWP+1)*18);
 				Processing = TRUE;	
 				while (n-- && ContinueProcessing)
 				{
@@ -3894,7 +3894,7 @@ BOOL FAR PASCAL LOWRANCESCANMsgProc(HWND hWndDlg, WORD Message, WORD wParam, LON
 				SetDlgItemText (hWndDlg,IDC_STATUS,"Requesting waypoints");   
 				Wpt.Status = 1; 
 				GSSiGlobFree (&hLowranceWPList);
-				hLowranceWPList = GSSiGlobAlloc (0,GHND,(MaxLowranceWP+1)*18);
+				hLowranceWPList = GSSiGlobAlloc(GAIDNO 0,GHND,(MaxLowranceWP+1)*18);
 				Processing = TRUE;	
 				while (n-- && ContinueProcessing)
 				{   

@@ -6,7 +6,7 @@
 #include "gmlimits.h"
 #include "bigmemln.h"   
 //#include "toolhelp.h"
-HGLOBAL GSSiGlobAlloc (USHORT From,UINT fuAlloc, long cbAlloc);
+HGLOBAL GSSiGlobAlloc(GAIDNO USHORT From,UINT fuAlloc, long cbAlloc);
 void GSSiGlobUlFree (LPHANDLE pHandle);
 #include "gmvardef.h"
 
@@ -203,11 +203,11 @@ void CreateBigMem (void)
 				//	+ MAXFONTS * sizeof(double);  
 
 //common memory
-	hNulls = GSSiGlobAlloc(1871, GHND, 128);
-	hBigMem7 = GSSiGlobAlloc (1302, GHND,lCommonMem+32);
+	hNulls = GSSiGlobAlloc(GAIDNO 1871, GHND, 128);
+	hBigMem7 = GSSiGlobAlloc(GAIDNO 1302, GHND,lCommonMem+32);
 	pCommonMem = GlobalLock (hBigMem7);
 
-	hBigMem1 = GSSiGlobAlloc (1297,GHND,memlen);
+	hBigMem1 = GSSiGlobAlloc(GAIDNO 1297,GHND,memlen);
 	
 	MapCopyProjection = GlobalLock (hBigMem1);
 	PickedOrthoName = MapCopyProjection + lnMapCopyProjection;
@@ -253,7 +253,7 @@ void CreateBigMem (void)
     _fstrcpy (curunits,"FEET");
 //directories 
 	memlen = MAX_PATH * 7;  
-	hBigMem2 = GSSiGlobAlloc (1298,GHND,memlen);
+	hBigMem2 = GSSiGlobAlloc(GAIDNO 1298,GHND,memlen);
 
 	MapCopyPath = GlobalLock (hBigMem2);
  	CurDocDir = MapCopyPath + MAX_PATH;
@@ -265,7 +265,7 @@ void CreateBigMem (void)
 
 //pathnames
 	memlen = MAX_PATH * 29;   
-	hBigMem3 = GSSiGlobAlloc (1299,GHND,memlen);
+	hBigMem3 = GSSiGlobAlloc(GAIDNO 1299,GHND,memlen);
  	PltName = GlobalLock (hBigMem3);
 	PickName = PltName + MAX_PATH;
 	PickDirectory = PickName + MAX_PATH;
@@ -296,13 +296,13 @@ void CreateBigMem (void)
 
 
 	memlen = MAXPENS * (sizeof(HPEN) + sizeof(HBRUSH));  
-	hBigMem4 = GSSiGlobAlloc (1300,GHND,memlen);     
+	hBigMem4 = GSSiGlobAlloc(GAIDNO 1300,GHND,memlen);     
 	pens = (LPHPEN)GlobalLock (hBigMem4);
 	brushes = (LPHBRUSH) (pens + MAXPENS);
     
 //viewport stuff
 	memlen = MAX_VIEWPORTS * 2 * (sizeof (LPVOID) + sizeof (LPVOID) + sizeof (LPHANDLE));
-	hBigMem5 = GSSiGlobAlloc (1301,GHND,memlen);
+	hBigMem5 = GSSiGlobAlloc(GAIDNO 1301,GHND,memlen);
 	pViewportsArray[0] = (LPVOID)GlobalLock (hBigMem5);
 	pViewportsArray[1] = pViewportsArray[0] + MAX_VIEWPORTS;
 	pViewportsDArray[0] = pViewportsArray[1] + MAX_VIEWPORTS;
@@ -311,7 +311,7 @@ void CreateBigMem (void)
 	hViewportsArray[1] = hViewportsArray[0] + MAX_VIEWPORTS;  
 	
 	memlen = sizeof(double) * 4 * 10 + sizeof(short) * 10 + sizeof(long) * 10;
-	hBigMem6 = GSSiGlobAlloc (1302,GHND,memlen);
+	hBigMem6 = GSSiGlobAlloc(GAIDNO 1302,GHND,memlen);
 	PossibleAz = (LPDOUBLE)GlobalLock (hBigMem6);
 	PossibleMP = PossibleAz + 10;
 	PossiblePCT = PossibleMP + 10;

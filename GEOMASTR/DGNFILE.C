@@ -97,7 +97,7 @@ BOOL OpenDGNFile (LPSTR InName,LPMNMXCORD pBounds)
 	DGNNumElements = DGNGetNumElements (hDGN);
 	DBoundsInit (&DGNLastBounds); 
 	if (!hElement)
-		hElement = GSSiGlobAlloc (1,GMEM_MOVEABLE,MaxDGNElementSize);
+		hElement = GSSiGlobAlloc(GAIDNO 1,GMEM_MOVEABLE,MaxDGNElementSize);
 	memset (ColorUsed,0,sizeof(ColorUsed));
 	return TRUE;
 }
@@ -867,9 +867,9 @@ BOOL ProcessDGNRecord (HDC hDC,long Recno)
 	        NumPoints = 0; 
 //	        if (pElement->type == DGNT_COMPLEX_SHAPE_HEADER)
 //	        	NumPoints = NumPoints+nPoly-1;
-	        hPartIndex = GSSiGlobAlloc (1418,GMEM_MOVEABLE,sizeof(long)*(nPoly+1));
-	        hPolyPartLen = GSSiGlobAlloc (1419,GMEM_MOVEABLE,sizeof(USHORT)*(nPoly+1));
-			hPoints = GSSiGlobAlloc (1420,GMEM_MOVEABLE,sizeof(DPOINT)*(long)USHRT_MAX); 
+	        hPartIndex = GSSiGlobAlloc(GAIDNO 1418,GMEM_MOVEABLE,sizeof(long)*(nPoly+1));
+	        hPolyPartLen = GSSiGlobAlloc(GAIDNO 1419,GMEM_MOVEABLE,sizeof(USHORT)*(nPoly+1));
+			hPoints = GSSiGlobAlloc(GAIDNO 1420,GMEM_MOVEABLE,sizeof(DPOINT)*(long)USHRT_MAX); 
 	        pPartIndex = (LPLONG)GlobalLock (hPartIndex);
 	        *pPartIndex = 0;
 
@@ -997,7 +997,7 @@ BOOL ProcessDGNRecord (HDC hDC,long Recno)
     		CurrentType = GF_LINE; 
 			int  size = sizeof(DGNElemArc);
 
-			hPoints = GSSiGlobAlloc(1420, GMEM_MOVEABLE, sizeof(DPOINT)*(long)USHRT_MAX);
+			hPoints = GSSiGlobAlloc(GAIDNO 1420, GMEM_MOVEABLE, sizeof(DPOINT)*(long)USHRT_MAX);
 			//pPartIndex = (LPLONG)GlobalLock(hPartIndex);
 			//*pPartIndex = 0;
 
@@ -1052,8 +1052,8 @@ BOOL ProcessDGNRecord (HDC hDC,long Recno)
 /*		case DGNT_BSPLINE: 
 		{
 			DGNElemMultiPoint FAR	*pRec=(DGNElemMultiPoint*)pElement;  
-			HANDLE	hOldPnts = GSSiGlobAlloc (0,GMEM_MOVEABLE,pRec->num_vertices*sizeof(DPOINT));
-			HANDLE	hNewPnts = GSSiGlobAlloc (0,GMEM_MOVEABLE,(long)(UINT_MAX/4)*sizeof(DPOINT)); 
+			HANDLE	hOldPnts = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,pRec->num_vertices*sizeof(DPOINT));
+			HANDLE	hNewPnts = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,(long)(UINT_MAX/4)*sizeof(DPOINT)); 
 			HPDPOINT	OldPnts=(HPDPOINT)GlobalLock (hOldPnts);
 			HPDPOINT	NewPnts=(HPDPOINT)GlobalLock (hNewPnts);
 			
@@ -1105,9 +1105,9 @@ ProcessMultipoint:
 	        NumPoints = *pnum_vertices; 
 	        if (pElement->type == DGNT_COMPLEX_SHAPE_HEADER)
 	        	NumPoints = NumPoints+nPoly-1;
-	        hPartIndex = GSSiGlobAlloc (1418,GMEM_MOVEABLE,sizeof(long)*(nPoly+1));
-	        hPolyPartLen = GSSiGlobAlloc (1419,GMEM_MOVEABLE,sizeof(USHORT)*(nPoly+1));
-			hPoints = GSSiGlobAlloc (1420,GMEM_MOVEABLE,sizeof(DPOINT)*NumPoints); 
+	        hPartIndex = GSSiGlobAlloc(GAIDNO 1418,GMEM_MOVEABLE,sizeof(long)*(nPoly+1));
+	        hPolyPartLen = GSSiGlobAlloc(GAIDNO 1419,GMEM_MOVEABLE,sizeof(USHORT)*(nPoly+1));
+			hPoints = GSSiGlobAlloc(GAIDNO 1420,GMEM_MOVEABLE,sizeof(DPOINT)*NumPoints); 
 	        pPartIndex = (LPLONG)GlobalLock (hPartIndex);
 	        *pPartIndex = 0; 
 	        pPartIndex[NumParts]= NumPoints;
@@ -1130,7 +1130,7 @@ ProcessMultipoint:
 	        GSSiGlobUlFree (&hPartIndex);  
 			pPoints = (HPDPOINT)GlobalLock (hPoints);
 			GSSiGlobFree (&hElevBuffer);
-		    hElevBuffer = GSSiGlobAlloc ( 312,GMEM_MOVEABLE,NumPoints*sizeof(float));
+		    hElevBuffer = GSSiGlobAlloc(GAIDNO 312,GMEM_MOVEABLE,NumPoints*sizeof(float));
 		    pElev = (HPFLOAT)GlobalLock (hElevBuffer);
 			for (i=0;i<NumPoints;i++)  
 			{   
@@ -1221,13 +1221,13 @@ DoPoly:
 					pNumPoints = (LPINT)GlobalLock(hPolyPartLen);//pNumPoints[1]
 					if (nPoly > 1)
 					{
-						HANDLE	hhPoly = GSSiGlobAlloc(418, GMEM_MOVEABLE, sizeof(HANDLE)*nPoly);
+						HANDLE	hhPoly = GSSiGlobAlloc(GAIDNO 418, GMEM_MOVEABLE, sizeof(HANDLE)*nPoly);
 						LPHANDLE phPoly = (LPHANDLE)GlobalLock(hhPoly);
 						HPDPOINT	pPoints1 = (HPDPOINT)GlobalLock(hPoints), pPoints2;
 
 						for (i = 0; i<nPoly; i++)
 						{
-							phPoly[i] = GSSiGlobAlloc(420, GMEM_MOVEABLE, sizeof(DPOINT)*(long)pNumPoints[i]);
+							phPoly[i] = GSSiGlobAlloc(GAIDNO 420, GMEM_MOVEABLE, sizeof(DPOINT)*(long)pNumPoints[i]);
 							pPoints2 = (HPDPOINT)GlobalLock(phPoly[i]);
 							hmemmove((HPSTR)pPoints2, (HPSTR)pPoints1, sizeof(DPOINT)*(long)pNumPoints[i]);
 							GlobalUnlock(phPoly[i]);
@@ -1458,7 +1458,7 @@ RtnFalse:
 	DWORD	st,
 	LPDGNElementCore pElement;       
     st = DGN7GetExtents (hDGN,Extents);
-    hMem = GSSiGlobAlloc (0,GMEM_MOVEABLE,2000000L);
+    hMem = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,2000000L);
     pElement = GlobalLock (hMem);
     while (DGN7ReadElement (hDGN,pElement))
     {
@@ -1489,7 +1489,7 @@ BOOL OpenDGNCellLibrary (LPSTR InName)
 	hDGNCell = DGN7Open (Name,0,0);  
 	if (!hDGNCell)
 		return FALSE;
-	hElement = GSSiGlobAlloc (0,GMEM_MOVEABLE,MaxDGNElementSize);
+	hElement = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,MaxDGNElementSize);
 	pElement = (LPDGNElementCore)GlobalLock (hElement);
 	while (DGNLibReadElement (hDGNCell,pElement,MaxDGNElementSize,0,&FillColor,&NumAttributes,Attributes))
 	{

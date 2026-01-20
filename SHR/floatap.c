@@ -62,7 +62,7 @@ BOOL LogicPBP(LPSTR INEXPR, LPBOOL IRC, LPBREAKPOINT pBrkPt, int bpOffset, int b
 { 
 // IRC (0=success, 1 = invalid flt value, 2 = error in paren matching, 3 = invalid statement, 4 = devide by 0, 5=invalid op code)  
     LPSTR	pLchr, pVal1Begin, pVal1End, pVal2Begin, pVal2End, pEnd; 
-    HANDLE	hInput=GSSiGlobAlloc ( 744,GMEM_MOVEABLE,4096);
+    HANDLE	hInput=GSSiGlobAlloc(GAIDNO 744,GMEM_MOVEABLE,4096);
     LPSTR	INPUT = GlobalLock (hInput); 
     UINT	OpCode, OpCodeNext=0;  
     BOOL	rtn=0, Value1, Value2, NeedVal1, Error;  
@@ -407,7 +407,7 @@ double fltread (LPSTR Instr, LPBOOL IRC)
 {
     LPSTR lpEnd, lpComma;
     double	rtn=0, val, val1, val2;  
-    HANDLE	hInput=GSSiGlobAlloc ( 745,GMEM_MOVEABLE,USHRT_MAX);
+    HANDLE	hInput=GSSiGlobAlloc(GAIDNO 745,GMEM_MOVEABLE,USHRT_MAX);
     LPSTR	str = GlobalLock (hInput); 
     
     _fstrcpy (str,Instr);
@@ -698,7 +698,7 @@ BOOL ComputeLogValue (LPSTR Inval1, LPSTR Inval2, UINT OpCode,LPBOOL IRC)
 	short	rtn=0, ival;
 	BOOL	rc;
 	double	dval1=0, dval2=0; 
-	HANDLE	hVals=GSSiGlobAlloc ( 746,GMEM_MOVEABLE,USHRT_MAX); 
+	HANDLE	hVals=GSSiGlobAlloc(GAIDNO 746,GMEM_MOVEABLE,USHRT_MAX); 
 	LPSTR	val1=GlobalLock (hVals), val2=val1+4096;
 	
 	*val1 = 0;
@@ -708,7 +708,7 @@ BOOL ComputeLogValue (LPSTR Inval1, LPSTR Inval2, UINT OpCode,LPBOOL IRC)
 		LPHANDLE	phStatement = (LPHANDLE)GlobalLock (hLogicPStatements); 
 		LPLOGICPSTATEMENT	pStatement;
 		
-		phStatement[nLogicPStatements] = GSSiGlobAlloc ( 747,GMEM_MOVEABLE,sizeof(LOGICPSTATEMENT));
+		phStatement[nLogicPStatements] = GSSiGlobAlloc(GAIDNO 747,GMEM_MOVEABLE,sizeof(LOGICPSTATEMENT));
 		pStatement = (LPLOGICPSTATEMENT)GlobalLock (phStatement[nLogicPStatements]);    
 		_fstrcpy (pStatement->Arg1,Inval1); 
 		if (Inval2)
@@ -1073,7 +1073,7 @@ double FltAP (LPSTR INEXPR,LPBOOL IRC)
 { 
 // IRC (0=success, 1 = invalid flt value, 2 = error in paren matching, 3 = invalid statement, 4 = devide by 0)  
     LPSTR	pLchr, pVal1Begin, pVal1End, pVal2Begin, pVal2End, pEnd; 
-    HANDLE	hInput=GSSiGlobAlloc ( 748,GMEM_MOVEABLE,4096);
+    HANDLE	hInput=GSSiGlobAlloc(GAIDNO 748,GMEM_MOVEABLE,4096);
     LPSTR	INPUT = GlobalLock (hInput); 
 	LPSTR	pEndOfFunction=0;
     char	OpCode, OpCodeNext=0;  
@@ -1102,7 +1102,7 @@ NextVal1:
 	{
 		int lrem = strlen(pEndOfFunction) - 1;
 		pEndOfFunction++;
-		HANDLE hMemRem = GSSiGlobAlloc(1806, GHND, lrem + 2);
+		HANDLE hMemRem = GSSiGlobAlloc(GAIDNO 1806, GHND, lrem + 2);
 		LPSTR pRem = GlobalLock(hMemRem);
 		strcpy(pRem, pEndOfFunction);
 		*pEndOfFunction = 0;
@@ -1221,7 +1221,7 @@ NextVal2:
 	{
 		int lrem = strlen(pEndOfFunction) - 1;
 		pEndOfFunction++;
-		HANDLE hMemRem = GSSiGlobAlloc(1806, GHND, lrem + 2);
+		HANDLE hMemRem = GSSiGlobAlloc(GAIDNO 1806, GHND, lrem + 2);
 		LPSTR pRem = GlobalLock(hMemRem);
 		strcpy(pRem, pEndOfFunction);
 		*pEndOfFunction = 0;

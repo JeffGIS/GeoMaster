@@ -109,7 +109,7 @@ BOOL SetupTIFHeader (HFILE Fid, LPHANDLE phDibInfo,LPSHORT pNumStrips, LPHANDLE 
     BigRead (Fid,(HPSTR)&NumTags,2);
    	flip2 ((LPSTR)&NumTags,2,FlipTif);
     *phImageOffset=0;
-    *phDibInfo = GSSiGlobAlloc (1102,GHND,1024+sizeof(BITMAPINFO));
+    *phDibInfo = GSSiGlobAlloc(GAIDNO 1102,GHND,1024+sizeof(BITMAPINFO));
     pDibInfo = (LPBITMAPINFO) GlobalLock(*phDibInfo);  
     pDibInfo->bmiHeader.biSize = sizeof (BITMAPINFOHEADER);
     pDibInfo->bmiHeader.biPlanes = 1;
@@ -164,7 +164,7 @@ BOOL SetupTIFHeader (HFILE Fid, LPHANDLE phDibInfo,LPSHORT pNumStrips, LPHANDLE 
 			case StripOffsets:
 				if(TIFFTAG.type==TIFFlong)
 				{
-					*phImageOffset = GSSiGlobAlloc (1103,GMEM_MOVEABLE,4*TIFFTAG.length);
+					*phImageOffset = GSSiGlobAlloc(GAIDNO 1103,GMEM_MOVEABLE,4*TIFFTAG.length);
 					pOffsets = (HPLONG)GlobalLock (*phImageOffset);
 					if (TIFFTAG.length > 1)
 					{
@@ -186,7 +186,7 @@ BOOL SetupTIFHeader (HFILE Fid, LPHANDLE phDibInfo,LPSHORT pNumStrips, LPHANDLE 
 			case StripByteCounts:
 				if(TIFFTAG.type==TIFFlong)
 				{
-					*phByteCounts = GSSiGlobAlloc (1104,GMEM_MOVEABLE,4*TIFFTAG.length); 
+					*phByteCounts = GSSiGlobAlloc(GAIDNO 1104,GMEM_MOVEABLE,4*TIFFTAG.length); 
 					pOffsets = (HPULONG)GlobalLock (*phByteCounts);
 					if (TIFFTAG.length > 1)
 					{
@@ -430,7 +430,7 @@ BOOL DecompressTIFF (HPSTR Data,long length,long explen,short type)
 	
 	if (type != 3)
 		return TRUE;  
-	handle = GSSiGlobAlloc (1105,GMEM_MOVEABLE,explen);
+	handle = GSSiGlobAlloc(GAIDNO 1105,GMEM_MOVEABLE,explen);
 	pData = GlobalLock (handle);
 	while (length > 0)
 	{   
@@ -559,7 +559,7 @@ HANDLE  BMPFromTIF (LPSTR TiffFile,BOOL Check)
 		for (i=0;i<NumStrips;i++,pOffset++,pLength++) 
 		{
 			long	OutLen=*pLength;
-			HANDLE	hDeCompressedData = GSSiGlobAlloc (1106,GMEM_MOVEABLE,RowsPerStrp * rowlen);
+			HANDLE	hDeCompressedData = GSSiGlobAlloc(GAIDNO 1106,GMEM_MOVEABLE,RowsPerStrp * rowlen);
 			HPBYTE	pDeCompressedData = GlobalLock (hDeCompressedData);
 
 			GSSillseek (FidTiff,*pOffset,0);
@@ -568,7 +568,7 @@ HANDLE  BMPFromTIF (LPSTR TiffFile,BOOL Check)
 				
 				case 4: 
 				{
-					HANDLE	hCompressedData = GSSiGlobAlloc (1107,GMEM_MOVEABLE,*pLength);
+					HANDLE	hCompressedData = GSSiGlobAlloc(GAIDNO 1107,GMEM_MOVEABLE,*pLength);
 					HPBYTE	pCompressedData = GlobalLock (hCompressedData);
 					
 					BigRead (FidTiff,pCompressedData,*pLength);  

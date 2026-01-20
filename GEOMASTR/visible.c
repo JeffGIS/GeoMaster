@@ -178,7 +178,7 @@ GSSiExitProg (1377);
 
 BOOL MapIndexVisible (LPSTR IndexPathName)
 {   
-	HANDLE	hStr=GSSiGlobAlloc (1830,GMEM_MOVEABLE,256);
+	HANDLE	hStr=GSSiGlobAlloc(GAIDNO 1830,GMEM_MOVEABLE,256);
 	LPSTR	str=GlobalLock (hStr);
 	LPSTR	lpBS;
 	BOOL	rtn=TRUE;
@@ -277,7 +277,7 @@ UseVis:
          {
              if (CurView->NumFiles)
              {
-				HANDLE hVisList=GSSiGlobAlloc ( 709,GHND,sizeof(VISLIST));
+				HANDLE hVisList=GSSiGlobAlloc(GAIDNO 709,GHND,sizeof(VISLIST));
 				CurVis = (LPVISLIST)GlobalLock (hVisList); 
 				CurVis->hVisList=hVisList;
 				InitVis ();
@@ -371,7 +371,7 @@ MaxScale:
 	       	GSSillseek (FidVis,0,0);
 		    SetCurVal (Name,IDS_FILEPIK);
 	        LastVisList = 0;
-	        hVisList=GSSiGlobAlloc ( 710,GHND,sizeof(VISLIST));
+	        hVisList=GSSiGlobAlloc(GAIDNO 710,GHND,sizeof(VISLIST));
 	        CurVis =(LPVISLIST) GlobalLock (hVisList);
 	        nread = BigRead (FidVis,CurVis,sizeof(VISLIST));
 	        while (nread == sizeof(VISLIST))
@@ -383,7 +383,7 @@ MaxScale:
 	                CurView->pPickListManual = CurVis; 
 	                if (!CurView->pPickList1)
 	                {
-	                 	HANDLE hVisList=GSSiGlobAlloc ( 719,GHND,sizeof(VISLIST));
+	                 	HANDLE hVisList=GSSiGlobAlloc(GAIDNO 719,GHND,sizeof(VISLIST));
 					 	 
 					 	CurVis->LastVisList = 0; 
 					 	CurView->pPickList1 =(LPVISLIST) GlobalLock (hVisList);
@@ -404,7 +404,7 @@ MaxScale:
 	                CurVis = SaveVis;
 	            }
 	            LastVisList = CurVis; 
-	            hVisList=GSSiGlobAlloc ( 711,GHND,sizeof(VISLIST));
+	            hVisList=GSSiGlobAlloc(GAIDNO 711,GHND,sizeof(VISLIST));
 	            CurVis =(LPVISLIST) GlobalLock (hVisList);
 	            nread = BigRead (FidVis,CurVis,sizeof(VISLIST));
 	            if (nread != sizeof(VISLIST))
@@ -472,7 +472,7 @@ BOOL LoadPickList (LPSTR InName)
 	       	GSSillseek (FidVis,0,0);
 		    SetCurVal (Name,IDS_FILEPIK);
 	        LastVisList = 0;
-	        hVisList=GSSiGlobAlloc ( 710,GHND,sizeof(VISLIST));
+	        hVisList=GSSiGlobAlloc(GAIDNO 710,GHND,sizeof(VISLIST));
 	        CurVis =(LPVISLIST) GlobalLock (hVisList);
 			lenVL = GSSillseek (FidVis,0,2);
 			GSSillseek(FidVis,lenVL-4,0);
@@ -505,7 +505,7 @@ BOOL LoadPickList (LPSTR InName)
 	                CurVis = SaveVis;
 	            }
 	            LastVisList = CurVis; 
-	            hVisList=GSSiGlobAlloc ( 711,GHND,sizeof(VISLIST));
+	            hVisList=GSSiGlobAlloc(GAIDNO 711,GHND,sizeof(VISLIST));
 	            CurVis =(LPVISLIST) GlobalLock (hVisList);
   				if (Version < 2)
 					nread = ReadVISLIST16 (FidVis,CurVis); 
@@ -556,7 +556,7 @@ HANDLE ReadVisList (LPSTR InName)
 	    if (FidVis == HFILE_ERROR)
 	        return 0;
     }
-    hNewVisList=GSSiGlobAlloc ( 712,GHND,sizeof(VISLIST));
+    hNewVisList=GSSiGlobAlloc(GAIDNO 712,GHND,sizeof(VISLIST));
     NewVisList =(LPVISLIST) GlobalLock (hNewVisList);
     lenVL = GSSillseek (FidVis,0,2);
     GSSillseek(FidVis,lenVL-4,0);
@@ -587,7 +587,7 @@ BOOL LoadVisList (LPSTR InName)
 {   LPVISLIST   SaveVis, LastVisList, NewVisList;
     short nread; 
 	HFILE FidVis;
-    HANDLE	hMem=GSSiGlobAlloc ( 713,GMEM_MOVEABLE,1024);
+    HANDLE	hMem=GSSiGlobAlloc(GAIDNO 713,GMEM_MOVEABLE,1024);
     LPSTR   Name=GlobalLock (hMem);
     LPOFSTRUCTGM    pOFStruct = (LPOFSTRUCTGM)(Name+256);
     HANDLE	hVisList,hNewVisList; 
@@ -625,7 +625,7 @@ BOOL LoadVisList (LPSTR InName)
 	    }
     }
     SetCurVal (Name,IDS_FILEVIS);
-    hNewVisList=GSSiGlobAlloc (1727,GHND,sizeof(VISLIST));
+    hNewVisList=GSSiGlobAlloc(GAIDNO 1727,GHND,sizeof(VISLIST));
     NewVisList =(LPVISLIST) GlobalLock (hNewVisList);
     lenVL = GSSillseek (FidVis,0,2);
     GSSillseek(FidVis,lenVL-4,0);
@@ -679,7 +679,7 @@ BOOL LoadVisList (LPSTR InName)
             CurVis = SaveVis;
         }
         LastVisList = CurVis; 
-        hVisList=GSSiGlobAlloc ( 715,GHND,sizeof(VISLIST));
+        hVisList=GSSiGlobAlloc(GAIDNO 715,GHND,sizeof(VISLIST));
         CurVis =(LPVISLIST) GlobalLock (hVisList);
   		if (Version < 2)
 			nread = ReadVISLIST16 (FidVis,CurVis); 
@@ -897,7 +897,7 @@ void GetVisList (HWND hWndDlg,int DlgItemSym, int DlgItemPar, int DlgItemFile,in
     BOOL		First;  
     BOOL	SaveUseRefOrTAGIndex=UseRefOrTAGIndex;   
     BOOL	SaveIgnoreBounds = IgnoreBounds, SaveDisplay = Display;
-	HANDLE  hSaveView = GSSiGlobAlloc(1847, GMEM_MOVEABLE, sizeof(VIEWPORT)+4);
+	HANDLE  hSaveView = GSSiGlobAlloc(GAIDNO 1847, GMEM_MOVEABLE, sizeof(VIEWPORT)+4);
 	LPVIEWPORT pSaveCurView = CurView;
 	LPVIEWPORT pSaveView = GlobalLock(hSaveView);
 
@@ -1153,7 +1153,7 @@ void DuplicateDescInit(void)
 //    hCursor = LoadCursor (0,IDC_WAIT);
 //    OldCursor = GSSiSetCursor (hCursor);
     
-    hDupDesc = GSSiGlobAlloc ( 716,GHND,3200*sizeof(BOOL16));
+    hDupDesc = GSSiGlobAlloc(GAIDNO 716,GHND,3200*sizeof(BOOL16));
     pDupDesc = (LPSHORT) GlobalLock (hDupDesc);
     return;
 }
@@ -1406,7 +1406,7 @@ HANDLE AddParToList(int Parent)
 {   HANDLE  hParList;
     PARLIST *pParList;
 
-    hParList = GSSiGlobAlloc ( 717,GMEM_MOVEABLE,sizeof(PARLIST));
+    hParList = GSSiGlobAlloc(GAIDNO 717,GMEM_MOVEABLE,sizeof(PARLIST));
     pParList =(LPPARLIST) GlobalLock (hParList);
     pParList->Parent = Parent;
     pParList->Next = 0;
@@ -1463,7 +1463,7 @@ BOOL CopyVisListToPickList (void)
     
     if (CurView->pVisListManual)
     {
-        hVisList=GSSiGlobAlloc ( 718,GHND,sizeof(VISLIST));
+        hVisList=GSSiGlobAlloc(GAIDNO 718,GHND,sizeof(VISLIST));
         CurVis =(LPVISLIST) GlobalLock (hVisList);
         *CurVis = *CurView->pVisListManual; 
         CurVis->hVisList = hVisList; 
@@ -1475,7 +1475,7 @@ BOOL CopyVisListToPickList (void)
     FromVis = CurView->pVisList1;
     while (FromVis)
     {
-        hVisList=GSSiGlobAlloc ( 718,GHND,sizeof(VISLIST));
+        hVisList=GSSiGlobAlloc(GAIDNO 718,GHND,sizeof(VISLIST));
         CurVis =(LPVISLIST) GlobalLock (hVisList);
         *CurVis = *FromVis; 
         if (!LastVis) CurView->pPickList1 = CurVis;
@@ -1620,7 +1620,7 @@ BOOL GetFileVisList (HWND hWndDlg,WORD iList)
  
 HANDLE BuildSymHierarchy (HWND hWndDlg,UINT iList, LPINT pStartSym, LPINT pnSym)
 {
-	HANDLE	handle, hPar = GSSiGlobAlloc ( 726,GMEM_MOVEABLE,USHRT_MAX);
+	HANDLE	handle, hPar = GSSiGlobAlloc(GAIDNO 726,GMEM_MOVEABLE,USHRT_MAX);
 	LPSYMHIERARCHY pSH, pSHLast, pSHPar, pSHBeg;  
 	short	nsym;
 	short	i, nPar=0, np, ParID, Lev; 
@@ -1633,7 +1633,7 @@ HANDLE BuildSymHierarchy (HWND hWndDlg,UINT iList, LPINT pStartSym, LPINT pnSym)
     *pnSym = nsym; 
     if (!nsym)
     	return 0;
-    handle = GSSiGlobAlloc ( 727,GHND,(long)nsym*sizeof(SYMHIERARCHY));
+    handle = GSSiGlobAlloc(GAIDNO 727,GHND,(long)nsym*sizeof(SYMHIERARCHY));
     pSH = (LPSYMHIERARCHY)GlobalLock (handle);
     for (i=0;i<nsym;i++,pSH++)
     {
@@ -1959,7 +1959,7 @@ void AddPenRedef (int ipen, COLORREF Color)
 	if (!CurView->hPenRedef)
 	{   int	i;
 	
-		CurView->hPenRedef = GSSiGlobAlloc (1757,GMEM_MOVEABLE,sizeof(COLORREF)*MAXPENS);
+		CurView->hPenRedef = GSSiGlobAlloc(GAIDNO 1757,GMEM_MOVEABLE,sizeof(COLORREF)*MAXPENS);
 		lpNewColors = (COLORREF *)GlobalLock (CurView->hPenRedef);
 		for (i=0;i<MAXPENS;i++,lpNewColors++)   
 			*lpNewColors = ULONG_MAX;
@@ -2001,7 +2001,7 @@ BOOL LoadDisplayRedefFile (LPSTR Name)
 	if (HavePenRedef)
 	{
 		if (!CurView->hPenRedef)
-			CurView->hPenRedef = GSSiGlobAlloc (1758,GMEM_MOVEABLE,sizeof(COLORREF)*MAXPENS);
+			CurView->hPenRedef = GSSiGlobAlloc(GAIDNO 1758,GMEM_MOVEABLE,sizeof(COLORREF)*MAXPENS);
 		lpNewColors = (COLORREF *)GlobalLock (CurView->hPenRedef); 
 		BigRead (Fid,(HPSTR)lpNewColors,sizeof(COLORREF)*MAXPENS);
 		GlobalUnlock (CurView->hPenRedef);

@@ -933,7 +933,7 @@ BOOL UseTrustedCacheFile(LPSTR FileName)
 		{
 			int ln = llFileSeek(fid, 0, 2);
 			llFileSeek(fid, 0, 0);
-			hTrustedCacheFiles = GSSiGlobAlloc(0,GMEM_MOVEABLE,ln+2);
+			hTrustedCacheFiles = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,ln+2);
 			LPSTR pTrustedFiles = GlobalLock(hTrustedCacheFiles);
 			BigRead64(fid, pTrustedFiles, ln);
 			pTrustedFiles[ln] = 0;
@@ -941,7 +941,7 @@ BOOL UseTrustedCacheFile(LPSTR FileName)
 			GSSiClose64(&fid);
 		}
 		else
-			hTrustedCacheFiles = GSSiGlobAlloc(0, GHND, 4);
+			hTrustedCacheFiles = GSSiGlobAlloc(GAIDNO 0, GHND, 4);
 	}
 	pTrustedFiles = GlobalLock(hTrustedCacheFiles);
 	char searchFile[MAX_PATH + 2];

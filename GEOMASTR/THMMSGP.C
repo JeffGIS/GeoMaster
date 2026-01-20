@@ -270,14 +270,14 @@ BOOL ThemeDisplayOffsetAreas (void)
 						Offset *= ClassMin;
 						if (nPoly > 1)
 						{
-							hPolyPartLen = GSSiGlobAlloc (0,GMEM_MOVEABLE,(nPoly+1)*sizeof(int));
+							hPolyPartLen = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,(nPoly+1)*sizeof(int));
 							pNumPoints = (LPINT)GlobalLock (hPolyPartLen);
 						
 							BigRead (CurTheme->FidAreas,(HPSTR)pNumPoints,(nPoly+1)*sizeof(int));
 							GlobalUnlock (hPolyPartLen);
 						}
 						BigRead (CurTheme->FidAreas,(HPSTR)&NumPoints,4);  
-						hPoints = GSSiGlobAlloc (0,GMEM_MOVEABLE,NumPoints * sizeof(DPOINT));
+						hPoints = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,NumPoints * sizeof(DPOINT));
 						lpPoints = (HPDPOINT)GlobalLock (hPoints);
 						BigRead (CurTheme->FidAreas,(HPSTR)lpPoints,NumPoints * sizeof(DPOINT)); 
 						width = 2*IDNINT (Offset/CurView->BaseUnitsPerPixel);
@@ -287,7 +287,7 @@ BOOL ThemeDisplayOffsetAreas (void)
 							if (Type == GF_AREA)
 							{   
 								HPPOINT	lpPoints32;
-								HANDLE	Handle = GSSiGlobAlloc ( 768,GMEM_MOVEABLE,(long)NumPoints * (long)sizeof(POINT));
+								HANDLE	Handle = GSSiGlobAlloc(GAIDNO 768,GMEM_MOVEABLE,(long)NumPoints * (long)sizeof(POINT));
 								UINT	i;
 								HBRUSH	hBrush = CreateSolidBrush (color);
 								HBRUSH	hBrushOld = SelectObject (CurView->hDC,hBrush);
@@ -330,7 +330,7 @@ BOOL ThemeDisplayOffsetAreas (void)
 						for (ip=0;ip<nPoly;ip++,pNumPoints++)
 						{   
 							HPPOINT	lpPoints32;
-							HANDLE	Handle = GSSiGlobAlloc ( 768,GMEM_MOVEABLE,((long)*pNumPoints+16L) * (long)sizeof(POINT));
+							HANDLE	Handle = GSSiGlobAlloc(GAIDNO 768,GMEM_MOVEABLE,((long)*pNumPoints+16L) * (long)sizeof(POINT));
 							UINT	i, nPnts2=1;
 							BOOL	LastIn, ThisIn;
 							POINT	LastPoint;
@@ -604,7 +604,7 @@ void DisplayCoordGridThemeLegend(short From)
     	char	Dir; 
     	short	Deg1, Deg2, Min1, Min2, DegDif, MinDif, Format, Pass;
     	double	Rot, pct, Sec1, Sec2, SecDif, finc, MajorInc, MinorInc, MajorX, MinorX, LastX;
-    	HANDLE	hMem=GSSiGlobAlloc (1011,GMEM_MOVEABLE,512*sizeof(double));
+    	HANDLE	hMem=GSSiGlobAlloc(GAIDNO 1011,GMEM_MOVEABLE,512*sizeof(double));
     	LPDOUBLE	XTics=(LPDOUBLE)GlobalLock (hMem);
     	LPDOUBLE	YTics=XTics+256;  
     	short	nXTics=0, nYTics=0, i, j;  
@@ -2030,7 +2030,7 @@ void CompareViewportsThemeLegend (short From,short FromVPID)
 					ii=BitBlt(hDCMem, 0, 0, bm.bmWidth,bm.bmHeight,CurView->hDC, 0,0, SRCCOPY);
 					hBitmapTemp = SelectObject (hDCMem,hBitmap);
 					lbits = bm.bmHeight*bm.bmWidthBytes;
-					hBits = GSSiGlobAlloc (0,GMEM_MOVEABLE,lbits);
+					hBits = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,lbits);
 					pBits = (LPBYTE)GlobalLock (hBits);
 					GetBitmapBits(hBitmapTemp,lbits,pBits);
 					bytesperpixel = bm.bmBitsPixel / 8;
@@ -2510,7 +2510,7 @@ GSSiExitProg (1294);
 	                 {
 	                 	short	idesc, iparent, i, j;
                 	    LPSTR	pTAGList;  
-                	    HANDLE	hPar=GSSiGlobAlloc (1015,GMEM_MOVEABLE,4096);
+                	    HANDLE	hPar=GSSiGlobAlloc(GAIDNO 1015,GMEM_MOVEABLE,4096);
                 	    short	nPar=0;
                 	    LPSHORT	pPar, pPar2; 
                 	    char	str[64], SymbolName[34];
@@ -2631,7 +2631,7 @@ GSSiExitProg (1294);
                  HANDLE hMem;
                  LPSTR  lpStr;
                  
-                 hMem = GSSiGlobAlloc (1016,GHND,4096);
+                 hMem = GSSiGlobAlloc(GAIDNO 1016,GHND,4096);
                  lpStr = GlobalLock (hMem); 
                  GetDlgItemText (hWndDlg,IDC_SQL,lpStr,1024);
                  if (GetSQLWhereClause (hWndDlg, hSQL, lpStr))
@@ -2877,7 +2877,7 @@ BOOL SetThemeContents (LPTHEME CurTheme,LPSTR Contents)
 		    LPVISLIST	SaveVis=CurVis; 
 		    HANDLE		handle;
 				    
-		    handle=GSSiGlobAlloc (1017,GHND,sizeof(VISLIST));
+		    handle=GSSiGlobAlloc(GAIDNO 1017,GHND,sizeof(VISLIST));
 			CurVis = (LPVISLIST)GlobalLock (handle); 
 		    InitVis ();
 			CurTheme->SymNum=GetSymbolNum (lpContents);
@@ -3108,7 +3108,7 @@ GSSiExitProg (1319);
 //		pHSData->GridWidth = ((CurView->DrawRect.right - CurView->DrawRect.left) * shrinkfactor)/pHSData->Granularity;
 //		pHSData->GridHeight = ((CurView->DrawRect.bottom - CurView->DrawRect.top) * shrinkfactor)/pHSData->Granularity;  
 		GridSize =  (long)pHSData->GridWidth * (long)pHSData->GridHeight * 4; 
-		pHSData->hGrid = GSSiGlobAlloc (1023,GHND,GridSize);
+		pHSData->hGrid = GSSiGlobAlloc(GAIDNO 1023,GHND,GridSize);
 		pHSData->TotalIncidents=0; 
 		pHSData->SecondsRepresented=GetSecondsInSample();
 		HSX[0]=HSX[1]=0;
@@ -3410,7 +3410,7 @@ GSSiExitProg (1330);
 	CurView->BoundsDisplayVP = CurTheme->TargetViewport;   
 	if (*lpBoundsDisplay->BoundsGlobal) 
 	{   
-		HANDLE	hStr=GSSiGlobAlloc (1026,GMEM_MOVEABLE,256);
+		HANDLE	hStr=GSSiGlobAlloc(GAIDNO 1026,GMEM_MOVEABLE,256);
 		LPSTR	pStr=GlobalLock (hStr); 
 		BOOL	err;
 		
@@ -3519,7 +3519,7 @@ GSSiExitProg (1330);
 		{
 			short SaveNumVehicles=NumVehicles; 
 			BOOL	SaveIPL=IgnorePrevLayers;
-			HANDLE	hSaveVis = GSSiGlobAlloc (0,GMEM_MOVEABLE,sizeof(VISLIST));
+			HANDLE	hSaveVis = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,sizeof(VISLIST));
 			LPVISLIST	pSaveVis = GlobalLock (hSaveVis);
 			BOOL	UseSymbolWidth;
 
@@ -3563,7 +3563,7 @@ GSSiExitProg (1330);
 	    		{
 		    		short SaveNumVP=NumViewportsToDisplay,n;
 		    		BOOL	DisplayVP[MAX_VIEWPORTS]; 
-		    		HANDLE	hMem = GSSiGlobAlloc (1027,GMEM_MOVEABLE,1024);
+		    		HANDLE	hMem = GSSiGlobAlloc(GAIDNO 1027,GMEM_MOVEABLE,1024);
 		    		LPSTR	CacheFile=GlobalLock (hMem), SaveScreenFile=CacheFile+256; 
 		    		LPOFSTRUCTGM	pOFStruct=(LPOFSTRUCTGM) (SaveScreenFile + 256);  
 		    		long	SaveSize;

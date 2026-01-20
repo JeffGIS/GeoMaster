@@ -153,7 +153,7 @@ LPSTR GetDistAndUnits (LPSTR pParm,LPDOUBLE pDist,LPSHORT pCurDistUnits,BOOL Use
 	l = _fstrlen (pParm);
 	if (l)
 	{
-		hTemp = GSSiGlobAlloc (1079,GMEM_MOVEABLE,l+8);
+		hTemp = GSSiGlobAlloc(GAIDNO 1079,GMEM_MOVEABLE,l+8);
 		pTemp = GlobalLock (hTemp);
 		_fstrcpy (pTemp,pParm);
 		_fstrupr (pTemp);
@@ -734,14 +734,14 @@ void TravCompute (HWND hWndDlg)
 				GSSiGlobFree (&hSnappedPoints);
 				GSSiGlobFree (&hPointType);
 				GSSiGlobFree (&hSnapStatus);
-				hTravPoints = GSSiGlobAlloc (1080,GMEM_MOVEABLE,(long)USHRT_MAX*sizeof(DPOINT));
-				hLegData = GSSiGlobAlloc (1081,GMEM_MOVEABLE,(long)USHRT_MAX); 
+				hTravPoints = GSSiGlobAlloc(GAIDNO 1080,GMEM_MOVEABLE,(long)USHRT_MAX*sizeof(DPOINT));
+				hLegData = GSSiGlobAlloc(GAIDNO 1081,GMEM_MOVEABLE,(long)USHRT_MAX); 
 				nLegs = 0;
 				pPoints = (HPDPOINT)GlobalLock (hTravPoints);  
 				*pPoints++ = POB;
 				nTravPoints=1;    
 				GlobalUnlock (hTravPoints);
-				hPointType = GSSiGlobAlloc (1082,GHND,(long)USHRT_MAX);
+				hPointType = GSSiGlobAlloc(GAIDNO 1082,GHND,(long)USHRT_MAX);
       		break;
       		case 3: //closure   
       			HaveClosure = TRUE;
@@ -776,7 +776,7 @@ void TravCompute (HWND hWndDlg)
 					sprintf (str,"Closure error = %.4f Feet, Acres = %.4f",CloseErr,area);
 					SetDlgItemText (hWndDlg,IDC_MESS,str);
 					GSSiGlobFree (&hSnapStatus);      
-					hSnapStatus = GSSiGlobAlloc (1083,GMEM_MOVEABLE,(long)sizeof(DPOINT)*nTravPoints);
+					hSnapStatus = GSSiGlobAlloc(GAIDNO 1083,GMEM_MOVEABLE,(long)sizeof(DPOINT)*nTravPoints);
 					pSnapCoord = (HPDPOINT)GlobalLock (hSnapStatus);
 					for (icoord=0;icoord<nTravPoints;icoord++,pSnapCoord++)
 						pSnapCoord->x=DBL_MAX;
@@ -1037,7 +1037,7 @@ HANDLE SnapTravPoints (HANDLE hPoints,HANDLE hSnapStatus,long nPoints,double Sna
 	HPDPOINT	pPoint1,pPoint2; 
 	HPDPOINT	pSnapCoord;    
 	long	i, NumNotSnapped=0, MaxTran = min (MAXTRANPOINTS,nPoints);
-	HANDLE handle=GSSiGlobAlloc (1085,GHND,nPoints*(long)sizeof(DPOINT));   
+	HANDLE handle=GSSiGlobAlloc(GAIDNO 1085,GHND,nPoints*(long)sizeof(DPOINT));   
 	HANDLE	hTran=0, hTemp;
 	short	SaveMaxPick=MaxPick, nTran=0;
 	float	RSQMIN;	    
@@ -1052,7 +1052,7 @@ HANDLE SnapTravPoints (HANDLE hPoints,HANDLE hSnapStatus,long nPoints,double Sna
     GetGlobalCVal ("[%SNAPPICKLIST]",PickFile,0);
     if (*PickFile)
     	LoadPickList (PickFile);
-    hTemp = GSSiGlobAlloc (1086,GMEM_MOVEABLE,MaxTran*16*2);
+    hTemp = GSSiGlobAlloc(GAIDNO 1086,GMEM_MOVEABLE,MaxTran*16*2);
     XT1 = (LPDOUBLE)GlobalLock (hTemp);
     XT2 = XT1 + MaxTran;
     YT1 = XT2 + MaxTran;
@@ -1214,7 +1214,7 @@ BOOL TravCreateDimText (void)
 			DPoint = MidPointD (Points[0],Points[1]);
 			AZ = getazd (&Points[0],&Points[1]);
 
-            hGRText = GSSiGlobAlloc (1087,GHND,sizeof(GRTEXT));
+            hGRText = GSSiGlobAlloc(GAIDNO 1087,GHND,sizeof(GRTEXT));
             lpGRText = (LPGRTEXT)GlobalLock (hGRText);   
             lpGRText->UltiMapStyle = 1;  
             lpGRText->version = 1;    
@@ -1253,7 +1253,7 @@ BOOL TravCreateDimText (void)
 
 HANDLE ExpandTravPoints (HANDLE hPoints,HANDLE hPointTypes,long nPoints,LPINT pnExpandedPoints)
 {
-	HANDLE handle=GSSiGlobAlloc (1088,GMEM_MOVEABLE,(long)USHRT_MAX*(long)sizeof(DPOINT));
+	HANDLE handle=GSSiGlobAlloc(GAIDNO 1088,GMEM_MOVEABLE,(long)USHRT_MAX*(long)sizeof(DPOINT));
 	long	nNewPoints=0;
 	HPDPOINT	pPoint1= (HPDPOINT)GlobalLock (hPoints);
 	HPDPOINT	pPoint2= (HPDPOINT)GlobalLock (handle);  

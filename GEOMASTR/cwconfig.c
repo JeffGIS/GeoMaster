@@ -484,7 +484,7 @@ BOOL ProcessCommandLine (LPSTR lpszCmdLine)
 				}
 				if (BigRead(Fid, (HPSTR)&len, 4) == 4)
 				{
-					hSavedZooms = GSSiGlobAlloc(1527, GMEM_MOVEABLE, len);
+					hSavedZooms = GSSiGlobAlloc(GAIDNO 1527, GMEM_MOVEABLE, len);
 					pNumSavedViews = (LPSHORT)GlobalLock(hSavedZooms);
 					BigRead(Fid, (HPSTR)pNumSavedViews, len);
 					GlobalUnlock(hSavedZooms);
@@ -1598,7 +1598,7 @@ WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, 
 		ProcessCommandLine("");
 		ProcessUserParms();
 		{
-			HANDLE	hStr = GSSiGlobAlloc(4, GMEM_MOVEABLE, 256);
+			HANDLE	hStr = GSSiGlobAlloc(GAIDNO 4, GMEM_MOVEABLE, 256);
 			LPSTR	str = GlobalLock(hStr);
 
 			GetGlobalCVal("[%DL]", str, 0);
@@ -1751,7 +1751,7 @@ int PASCAL WinMainGeoMaster(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR 
 	AddVectoredHandlers (0,0);
 #endif
 //long size=1024L*1024L*256;
- //HANDLE hMem=GSSiGlobAlloc (0,GHND,size);
+ //HANDLE hMem=GSSiGlobAlloc(GAIDNO 0,GHND,size);
  //GSSiGlobFree (&hMem);
  //RecoverBadFile ();
  //int	t=IDNINT(atof("1E+08"));
@@ -1894,8 +1894,8 @@ ProcessText("[%FILEUSAGEFILE2]=C:/temp/fileusage.txt");
 
 	 lf1=GSSifilelength (Fid1);
 	 lf2=GSSifilelength (Fid2);
-	 hMemF1 = GSSiGlobAlloc (0,GMEM_MOVEABLE,lf1);
-	 hMemF2 = GSSiGlobAlloc (0,GMEM_MOVEABLE,lf2);
+	 hMemF1 = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,lf1);
+	 hMemF2 = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,lf2);
 	 f1 = GlobalLock (hMemF1);
 	 f2 = GlobalLock (hMemF2);
 	 BigRead (Fid1,f1,lf1);
@@ -1928,11 +1928,11 @@ ProcessText("[%FILEUSAGEFILE2]=C:/temp/fileusage.txt");
 			 n++;
 		 }
 	 }
-	 hMemCmp1 = GSSiGlobAlloc (0,GMEM_MOVEABLE,lf1+1024);
+	 hMemCmp1 = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,lf1+1024);
 	 pMemCmp1 = GlobalLock (hMemCmp1);
 	 lMemCmp1 = CompressByteArray (pPal1,pMemCmp1,1024);
 	 lMemCmp1 = CompressByteArray (f1,pMemCmp1,lf1);
-	 hMemCmp2 = GSSiGlobAlloc (0,GMEM_MOVEABLE,lf2+1024);
+	 hMemCmp2 = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,lf2+1024);
 	 pMemCmp2 = GlobalLock (hMemCmp2);
 	 lMemCmp2 = CompressByteArray (pPal2,pMemCmp2,1024);
 	 lMemCmp2 = CompressByteArray (f2,pMemCmp2,lf2);
@@ -1951,7 +1951,7 @@ if (!MapServer && !DoNotClear)
 //MessageBox (0,"Past ClearGMTempFiles","",MB_OK);
 ProcessUserParms ();
 {
-	HANDLE	hStr=GSSiGlobAlloc (   4,GMEM_MOVEABLE,256);
+	HANDLE	hStr=GSSiGlobAlloc(GAIDNO   4,GMEM_MOVEABLE,256);
 	LPSTR	str=GlobalLock (hStr); 
 
 	GetGlobalCVal ("[%DL]",str,0);
@@ -1971,7 +1971,7 @@ PeopleNet = GetGlobalBVal ("[PEOPLENET]");
     	pMenu = 0;
     if ((nRc = nCwRegisterClasses(pMenu)) == -1)
       {
-			HANDLE	hStr=GSSiGlobAlloc (   3,GMEM_MOVEABLE,256);
+			HANDLE	hStr=GSSiGlobAlloc(GAIDNO   3,GMEM_MOVEABLE,256);
 			LPSTR	str=GlobalLock (hStr); 
 			/* registering one of the windows failed                         */
 			LoadString(hInst, IDS_ERR_REGISTER_CLASS, str, 255);
@@ -2116,7 +2116,7 @@ GSSiExitProg (437);
  //TraceWnd = hWndMain;
  if(hWndMain == 0)
    {
-		HANDLE	hStr=GSSiGlobAlloc (   4,GMEM_MOVEABLE,256);
+		HANDLE	hStr=GSSiGlobAlloc(GAIDNO   4,GMEM_MOVEABLE,256);
 		LPSTR	str=GlobalLock (hStr); 
 		LoadString(hInst, IDS_ERR_CREATE_WINDOW, str, 255);
 		GSSiMsgBox(0, str, 0, MB_ICONEXCLAMATION,0);
@@ -3143,7 +3143,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
          //  wParam; contains the handle to the dialog control thats active
     	 HWND hw;  
     	 
-		 hSTR=GSSiGlobAlloc (   5,GMEM_MOVEABLE,1024);
+		 hSTR=GSSiGlobAlloc(GAIDNO   5,GMEM_MOVEABLE,1024);
 		 str=GlobalLock (hSTR); 
     	 
 //         hw = GetDlgCtrlID(wParam); 
@@ -3245,7 +3245,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
 	     {
 	    	LPSTR	pCmd=GlobalLock (hAddGraphicsFun2); 
 		    short	lcmd = _fstrlen (pCmd);
-		    HANDLE	hCmd2 = GSSiGlobAlloc (   6,GMEM_MOVEABLE,lcmd+1);
+		    HANDLE	hCmd2 = GSSiGlobAlloc(GAIDNO   6,GMEM_MOVEABLE,lcmd+1);
 		    LPSTR	pCmd2 = GlobalLock (hCmd2);
 		    
 		    _fstrcpy (pCmd2,pCmd);            	
@@ -3447,7 +3447,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
 			 break;
             case IDM_VIEW:
             {
-				 hSTR=GSSiGlobAlloc (   7,GMEM_MOVEABLE,1024);
+				 hSTR=GSSiGlobAlloc(GAIDNO   7,GMEM_MOVEABLE,1024);
 				 str=GlobalLock (hSTR); 
             	 
        			 HaltMapDisplay(FALSE,TRUE);
@@ -3723,7 +3723,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
 		           	HANDLE	handle; 
 		           	LPSTR	pExpanded;
 		           	
-		           	handle = GSSiGlobAlloc (   8,GMEM_MOVEABLE,4096);
+		           	handle = GSSiGlobAlloc(GAIDNO   8,GMEM_MOVEABLE,4096);
 		           	pExpanded = GlobalLock (handle); 
 		           	mess = pExpanded+3064;
 		           	sprintf (mess,"Expansion of %s",Command); 
@@ -4163,7 +4163,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
             	 long	MinRef;
 				 long	MaxRef = GetMaxRefno (-1,&MinRef);
 				 
-				 hSTR=GSSiGlobAlloc (   9,GMEM_MOVEABLE,1024);
+				 hSTR=GSSiGlobAlloc(GAIDNO   9,GMEM_MOVEABLE,1024);
 				 str=GlobalLock (hSTR); 
 				 sprintf (str,"Min/Max refno in this configuration is %ld/%ld",MinRef,MaxRef);
 				 GSSiMsgBox(GetFocus(),str," ", MB_OK,0);
@@ -4541,7 +4541,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
 			case IDM_CFG4:
 			case IDM_CFG5:
 			{
-				HANDLE	hMem=GSSiGlobAlloc (  10,GMEM_MOVEABLE,256);
+				HANDLE	hMem=GSSiGlobAlloc(GAIDNO  10,GMEM_MOVEABLE,256);
 				LPSTR	pStr = GlobalLock (hMem);
 			    int		icfg=1;
 			    
@@ -4580,7 +4580,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
 				 
 			case IDM_ADDFORMAT:
 			{
-				 HANDLE hSN=GSSiGlobAlloc (  11,GHND,256);
+				 HANDLE hSN=GSSiGlobAlloc(GAIDNO  11,GHND,256);
 				 LPSTR	Name = GlobalLock (hSN);
 				 
        			 HaltMapDisplay(FALSE,TRUE);
@@ -4600,7 +4600,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
 				 	 	 	 
 			case IDM_ADDMENU:
 			{
-				 HANDLE	hMem=GSSiGlobAlloc (  12,GMEM_MOVEABLE,256);
+				 HANDLE	hMem=GSSiGlobAlloc(GAIDNO  12,GMEM_MOVEABLE,256);
 				 LPSTR	pName=GlobalLock (hMem);
 				 
        			 HaltMapDisplay(FALSE,TRUE);
@@ -4618,7 +4618,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
 				 	 	 	 
 			case IDM_CONFIGURE:
 			{
-				 HANDLE hSN=GSSiGlobAlloc (  13,GMEM_MOVEABLE,256);
+				 HANDLE hSN=GSSiGlobAlloc(GAIDNO  13,GMEM_MOVEABLE,256);
 				 LPSTR	SaveName = GlobalLock (hSN);
 				 
        			 HaltMapDisplay(FALSE,TRUE);
@@ -4829,7 +4829,7 @@ DisplayParcel:
 		 					ShowPickedItem (hWndMain,0);
 		 				}
 		 				SetAutoPan (AP);  
-						hSTR=GSSiGlobAlloc (  15,GMEM_MOVEABLE,256);
+						hSTR=GSSiGlobAlloc(GAIDNO  15,GMEM_MOVEABLE,256);
 						str=GlobalLock (hSTR);
 						GetGlobalCVal ("[%OFFSETLINEDIST]",str,0);
 		 				OffsetLineOffset = atobasedist (str,&rc); 
@@ -4856,7 +4856,7 @@ DisplayParcel:
 	 				{   
 	 					LPPICKDATA	pPickList;
 	 					 
-	 					hSavedPickList = GSSiGlobAlloc (  14,GMEM_MOVEABLE,NumSavedPickList*sizeof(PICKDATA));
+	 					hSavedPickList = GSSiGlobAlloc(GAIDNO  14,GMEM_MOVEABLE,NumSavedPickList*sizeof(PICKDATA));
 	 					pPickList = (LPPICKDATA)GlobalLock (hSavedPickList);
 	 					_fmemmove (pPickList,PickList,NumSavedPickList*sizeof(PICKDATA));
 	 					GlobalUnlock (hSavedPickList);
@@ -5183,7 +5183,7 @@ DisplayParcel:
 			        DLGPROC lpfnEXPORTIMAGEMsgProc; 
 			        int	nRc;
 					
-					hSTR=GSSiGlobAlloc (  15,GHND,256);
+					hSTR=GSSiGlobAlloc(GAIDNO  15,GHND,256);
 					str=GlobalLock (hSTR); 
 		            lpfnEXPORTIMAGEMsgProc = MakeProcInstance((DLGPROC)EXPORTIMAGEMsgProc, hInst);
 		            nRc = DialogBox(hInst, (LPSTR)"EXPORTIMAGE", hWnd, lpfnEXPORTIMAGEMsgProc);
@@ -5214,7 +5214,7 @@ DisplayParcel:
 					break;
 				}  
            		 _fstrcpy (Ext,".HLT");
-				hSTR=GSSiGlobAlloc (  16,GMEM_MOVEABLE,1024);
+				hSTR=GSSiGlobAlloc(GAIDNO  16,GMEM_MOVEABLE,1024);
 				str=GlobalLock (hSTR); 
 				str2 = str + 512;
             	 if (GetSaveName2 (hWnd,str,0,Ext,IDS_FILEHLT))  
@@ -5320,7 +5320,7 @@ DisplayParcel:
 				    DLGPROC lpfnDISPLAY_GWD_DATAMsgProc;
 				    LPSTR	pName;
 				     
-				    hName=GSSiGlobAlloc (  17,GHND,256);
+				    hName=GSSiGlobAlloc(GAIDNO  17,GHND,256);
 					pName=GlobalLock(hName);
 					GlobalUnlock(hName);	
 				    lpfnDISPLAY_GWD_DATAMsgProc = MakeProcInstance((DLGPROC)DISPLAY_GWD_DATAMsgProc, hInst);
@@ -5338,7 +5338,7 @@ DisplayParcel:
             	 BOOL	rc;
             	 
             	 GSSiGlobFree (&hCFName);
-            	 hCFName = GSSiGlobAlloc (  18,GHND,256);
+            	 hCFName = GSSiGlobAlloc(GAIDNO  18,GHND,256);
             	 pName = GlobalLock (hCFName); 
 				 rc = GetFileName3 (hWnd,pName,IDS_FILTERGCF,IDS_FILEGCF);
 			 	 GlobalUnlock (hCFName);
@@ -5375,7 +5375,7 @@ DisplayParcel:
          		 setDoPaint( TRUE);
 				{   
 					
-					hSTR=GSSiGlobAlloc (  19,GMEM_MOVEABLE,256);
+					hSTR=GSSiGlobAlloc(GAIDNO  19,GMEM_MOVEABLE,256);
 					str=GlobalLock (hSTR); 
 					_fstrcpy (str,"$OPENAPP([%WD]help\\gmhelp.chm)");
 					ExpandText (str);
@@ -5428,7 +5428,7 @@ DisplayParcel:
 		HDC		hDC;
 		SIZE	txSize;
 
-		 HANDLE hSTR=GSSiGlobAlloc (  20,GMEM_MOVEABLE,1024);
+		 HANDLE hSTR=GSSiGlobAlloc(GAIDNO  20,GMEM_MOVEABLE,1024);
 		 LPSTR	str=GlobalLock (hSTR); 
     
     	 GSSiTrace ("Begin WM_CREATE",0);
@@ -5473,7 +5473,7 @@ DisplayParcel:
     case WM_DROPFILES: 
     {
     	HANDLE	hFile = (HANDLE)wParam;   
-    	HANDLE	hFileMem=GSSiGlobAlloc (1525,GMEM_MOVEABLE,256);
+    	HANDLE	hFileMem=GSSiGlobAlloc(GAIDNO 1525,GMEM_MOVEABLE,256);
     	LPSTR	pFile = GlobalLock (hFileMem);
     	int	n=0, LocAdded;  
     	LPVIEWPORT	SaveVP;
@@ -5881,7 +5881,7 @@ DisplayParcel:
 						}
 						else
 						{
-							hSaveWindowText = GSSiGlobAlloc (1526,GMEM_MOVEABLE,256);
+							hSaveWindowText = GSSiGlobAlloc(GAIDNO 1526,GMEM_MOVEABLE,256);
 							str = GlobalLock (hSaveWindowText);
 							GetWindowText (hWnd,str,255); 
 							GlobalUnlock (hSaveWindowText);

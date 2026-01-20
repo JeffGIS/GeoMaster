@@ -321,10 +321,10 @@ long FillGWDData (LPGWDHEADER lpGWDHead,long Offset)
 	    LastGMDRecordLength = len;
 	    if (len)
 	    {
-			HANDLE hDeCompressedRec = GSSiGlobAlloc (1516,GMEM_MOVEABLE,lpGWDHead->Reclen+4096);   
+			HANDLE hDeCompressedRec = GSSiGlobAlloc(GAIDNO 1516,GMEM_MOVEABLE,lpGWDHead->Reclen+4096);   
 	    	LPSTR  pDeCompressedRec = GlobalLock (hDeCompressedRec);  
 
-	    	hCompressedRec = GSSiGlobAlloc (1516,GMEM_MOVEABLE,len);   
+	    	hCompressedRec = GSSiGlobAlloc(GAIDNO 1516,GMEM_MOVEABLE,len);   
 	    	CompressedRec = GlobalLock (hCompressedRec);  
 			jj=GSSillseek (fid,0,1);
 	    	ii=BigRead (fid,CompressedRec,len);
@@ -566,14 +566,14 @@ GSSiExitProg (616);
         SendDlgItemMessage (hWndDlg,IDC_CFTYPE,CB_ADDSTRING,0,(LPARAM)"Integer");
         SendDlgItemMessage (hWndDlg,IDC_CFTYPE,CB_ADDSTRING,0,(LPARAM)"Real");
         SendDlgItemMessage (hWndDlg,IDC_CFTYPE,CB_ADDSTRING,0,(LPARAM)"Text");
-        hComboFile = GSSiGlobAlloc ( 254,GHND,sizeof(COMBOFILE)+MAXFIELDS*sizeof(FIELDINFO));
+        hComboFile = GSSiGlobAlloc(GAIDNO 254,GHND,sizeof(COMBOFILE)+MAXFIELDS*sizeof(FIELDINFO));
         pComboFile = (LPCOMBOFILE)GlobalLock (hComboFile);
-        hAddFile = GSSiGlobAlloc ( 255,GHND,128);
+        hAddFile = GSSiGlobAlloc(GAIDNO 255,GHND,128);
         pAddFile = GlobalLock (hAddFile);
         hWndComboFile = hWndDlg;    
-        hComboFields = GSSiGlobAlloc ( 256,GHND,MAXFIELDS*sizeof(COMBOFIELDINFO));
-        hWhere = GSSiGlobAlloc ( 257,GHND,USHRT_MAX); 
-        hComputedFields = GSSiGlobAlloc ( 258,GHND,USHRT_MAX);
+        hComboFields = GSSiGlobAlloc(GAIDNO 256,GHND,MAXFIELDS*sizeof(COMBOFIELDINFO));
+        hWhere = GSSiGlobAlloc(GAIDNO 257,GHND,USHRT_MAX); 
+        hComputedFields = GSSiGlobAlloc(GAIDNO 258,GHND,USHRT_MAX);
         if (hCFName)
         {     
         	LPSTR	pName;
@@ -784,7 +784,7 @@ GSSiExitProg (616);
                   }
                   else
                   { 
-	                  hItems=GSSiGlobAlloc ( 259,GHND,nItems*4);
+	                  hItems=GSSiGlobAlloc(GAIDNO 259,GHND,nItems*4);
 	                  lpItems=  (LPINT) GlobalLock(hItems);
 	                  SendDlgItemMessage(hWndAddComboFile ,SV_FIELD_NAME,LB_GETSELITEMS,nItems,(LPARAM)lpItems);
 	                  pField = pComboFile->FldInfo;
@@ -1007,7 +1007,7 @@ static  LPFIELDINFO lpFieldInfo = &FIELD;
     LPOPENSQLDATA   SQLPtr; 
     LPBOOL pFieldListIsCB;  
     LPUINT pcntlFIELD_NAMES; 
-    HANDLE	hMem=GSSiGlobAlloc ( 260,GMEM_MOVEABLE,4096);
+    HANDLE	hMem=GSSiGlobAlloc(GAIDNO 260,GMEM_MOVEABLE,4096);
     LPSTR 	str=GlobalLock (hMem);
     LPSTR   szDescription=str+1024;
     LPSTR	names=szDescription+256;
@@ -1545,7 +1545,7 @@ BOOL SetFieldValFromCharAndName(LPGWDHEADER lpGWDHead,LPSTR FieldNameIn,LPSTR Ch
 	short	i;
 	LPSTR	pLast;   
 	BOOL	IncValue=FALSE;
-	HANDLE	hMem=GSSiGlobAlloc (1519,GMEM_MOVEABLE,256);
+	HANDLE	hMem=GSSiGlobAlloc(GAIDNO 1519,GMEM_MOVEABLE,256);
 	LPSTR 	FieldName=GlobalLock (hMem);
 	
 	_fstrcpy (FieldName,FieldNameIn);
@@ -1587,7 +1587,7 @@ BOOL SetFieldValFromChar(LPGWDHEADER lpGWDHead,LPGWFLDINFO lpGWFldInfo,LPSTR InC
 #endif
 {   
     LPSTR   lpVal;
-    HANDLE	hMem=GSSiGlobAlloc (1520,GMEM_MOVEABLE,4096);
+    HANDLE	hMem=GSSiGlobAlloc(GAIDNO 1520,GMEM_MOVEABLE,4096);
     LPSTR	CharVal=GlobalLock (hMem); 
     short     l, Type=lpGWFldInfo->Type,ln;
     BOOL	rtn=TRUE; 
@@ -2068,10 +2068,10 @@ void SetGWDCurrentOffset (LPGWDHEADER lpGWDHead,long Offset)
     
     BigRead (FidFrom,(HPSTR)&GWDHead16,sizeof(GWDHEADER16));
 	BigWrite (FidTo,(HPSTR)&GWDHead16,sizeof(GWDHEADER16),-1);
-    DBHandle = GSSiGlobAlloc ( 264,GHND,sizeof (GWDHEADER)+GWDHead16.Reclen+4);
+    DBHandle = GSSiGlobAlloc(GAIDNO 264,GHND,sizeof (GWDHEADER)+GWDHead16.Reclen+4);
     lpGWDHead =(LPGWDHEADER) GlobalLock (DBHandle);
     *lpGWDHead = GWDHEADER16toGWDHEADER32 (&GWDHead16);
-    lpGWDHead->hFldInfo = GSSiGlobAlloc ( 265,GHND,lpGWDHead->NumFields*sizeof(FIELDINFO));
+    lpGWDHead->hFldInfo = GSSiGlobAlloc(GAIDNO 265,GHND,lpGWDHead->NumFields*sizeof(FIELDINFO));
     lpGWDHead->pFldInfo = (LPGWFLDINFO)GlobalLock(lpGWDHead->hFldInfo);   
     for (i=0,lpFieldInfo=lpGWDHead->pFldInfo;i<lpGWDHead->NumFields;i++,lpFieldInfo++)
     {
@@ -2137,7 +2137,7 @@ GSSiExitProg (627);
 		int	Size;
 
 		GSSillseek (Fid,0,0);
-		DBHandle = GSSiGlobAlloc (1890,GHND,sizeof (GWDHEADER)+4);
+		DBHandle = GSSiGlobAlloc(GAIDNO 1890,GHND,sizeof (GWDHEADER)+4);
 		lpGWDHead =(LPGWDHEADER) GlobalLock (DBHandle);
 	    BigRead (Fid,(HPSTR)lpGWDHead,sizeof(GWDHEADER));
 		Size = sizeof (GWDHEADER)+ 4 + lpGWDHead->Reclen;
@@ -2193,10 +2193,10 @@ TryAgain:
 	}
 	else
 	{
-		HANDLE DBHandle32 = GSSiGlobAlloc (1887,GHND,sizeof (GWDHEADER32));
+		HANDLE DBHandle32 = GSSiGlobAlloc(GAIDNO 1887,GHND,sizeof (GWDHEADER32));
 		LPGWDHEADER32 lpGWDHead32 =(LPGWDHEADER32) GlobalLock (DBHandle32);
 
-		DBHandle = GSSiGlobAlloc (1888,GHND,sizeof (GWDHEADER)+GWDHead16.Reclen+4);
+		DBHandle = GSSiGlobAlloc(GAIDNO 1888,GHND,sizeof (GWDHEADER)+GWDHead16.Reclen+4);
 		lpGWDHead =(LPGWDHEADER) GlobalLock (DBHandle);
 		*lpGWDHead32 = GWDHEADER16toGWDHEADER32 (&GWDHead16);
 		*lpGWDHead = GWDHEADER32toGWDHEADER (lpGWDHead32);
@@ -2209,7 +2209,7 @@ TryAgain:
 		GSSiClose2 (&Fid);
 		goto Return0;
 	}
-    lpGWDHead->hFldInfo = GSSiGlobAlloc ( 265,GHND,lpGWDHead->NumFields*sizeof(FIELDINFO));
+    lpGWDHead->hFldInfo = GSSiGlobAlloc(GAIDNO 265,GHND,lpGWDHead->NumFields*sizeof(FIELDINFO));
     lpGWDHead->pFldInfo = (LPGWFLDINFO)GlobalLock(lpGWDHead->hFldInfo);   
     if (lpGWDHead->StoredAs32)
     	ii=1;
@@ -2296,7 +2296,7 @@ TryAgain:
         //GetBTHeader (lpGWDHead->BTHandle[i],&BTHead); 
         if (!lpGWDHead->lKeys[i] || abs (lpGWDHead->lKeys[i]>256))
             lpGWDHead->lKeys[i] = ComputeGWDKeyLen(lpGWDHead,i);
-        lpGWDHead->hKeys[i]=GSSiGlobAlloc ( 266,GHND,abs(lpGWDHead->lKeys[i])+2);
+        lpGWDHead->hKeys[i]=GSSiGlobAlloc(GAIDNO 266,GHND,abs(lpGWDHead->lKeys[i])+2);
         lpGWDHead->pKeys[i]=GlobalLock(lpGWDHead->hKeys[i]);
         if (!lpGWDHead->pKeys[i])
             ii=0;
@@ -2423,7 +2423,7 @@ BOOL BasicDataDisplayToDC(LPSTR DBNameIN, HDC hDC, long RecNum, long iref, LPSTR
 		hFontBold = CreateFont((int)IDNINT(FontSize*fontFactor*1.2), 0, 0, 0, FW_BLACK, 0, 0, 0, 0, 0, 0, 0, 0, "Courier New");
 		hFont = CreateFont((int)IDNINT(FontSize*fontFactor), 0, 0, 0, FW_NORMAL, 0, 0, 0, 0, 0, 0, 0, 0, "Courier New");
 		lineHeight = IDNINT(FontSize*fontFactor*1.2);
-		hStr = GSSiGlobAlloc(270, GMEM_MOVEABLE, 4096);
+		hStr = GSSiGlobAlloc(GAIDNO 270, GMEM_MOVEABLE, 4096);
 		str2 = GlobalLock(hStr);
 		for (ifield = 0; ifield<FilePtr->NumFields; ifield++, lpFieldInfo++)
 		{
@@ -2563,7 +2563,7 @@ GSSiExitProg (630);
     SQLPtr = (LPOPENSQLDATA)GlobalLock (hSQL);
     FilePtr = (LPOPENFILEDATA)GlobalLock (SQLPtr->OFHandle);
     lpFieldInfo = &FilePtr->FldInfo; 
-    hStr = GSSiGlobAlloc ( 270,GMEM_MOVEABLE,4096); 
+    hStr = GSSiGlobAlloc(GAIDNO 270,GMEM_MOVEABLE,4096); 
     str2 = GlobalLock (hStr);
     for (ifield=0;ifield<FilePtr->NumFields;ifield++,lpFieldInfo++)
     {   
@@ -2769,7 +2769,7 @@ double GetNumericFieldData (HANDLE hSQL,LPFIELDINFO lpField, int FunctionID,int 
     long        Offset; 
     BOOL		HaveData=FALSE;
     double      rtn, Sum=0, MinMax=0, Minv=0, Maxv=0;                  
-    HANDLE		hMem = GSSiGlobAlloc ( 271,GMEM_MOVEABLE,4096);
+    HANDLE		hMem = GSSiGlobAlloc(GAIDNO 271,GMEM_MOVEABLE,4096);
     LPSTR		str=GlobalLock (hMem);
     short         st, i, len;
     LPSTR       ep, ValC; 
@@ -3121,7 +3121,7 @@ int GetCharFieldData (HANDLE hSQL,LPFIELDINFO lpField, long iref, short Function
 {GSSiEnterProg (634);
 #endif
 {   
-	HANDLE		hMem = GSSiGlobAlloc(272, GMEM_MOVEABLE, 4096);
+	HANDLE		hMem = GSSiGlobAlloc(GAIDNO 272, GMEM_MOVEABLE, 4096);
 	LPSTR		str = GlobalLock(hMem);
     short       irc=0;
 	int			n=0;
@@ -3136,7 +3136,7 @@ int GetCharFieldData (HANDLE hSQL,LPFIELDINFO lpField, long iref, short Function
 	if (combineOption == 4)
 	{
 		memset (nValues,0,sizeof(nValues));
-		hCombined = GSSiGlobAlloc (1782,GHND,MAX_COMBINED_VALUES*(MAX_COMBINED_ELEMENT_LENGTH+1));
+		hCombined = GSSiGlobAlloc(GAIDNO 1782,GHND,MAX_COMBINED_VALUES*(MAX_COMBINED_ELEMENT_LENGTH+1));
 	}
 	while (FetchDBRec (hSQL))
 	{
@@ -3357,7 +3357,7 @@ GSSiExitProg (635);
 	}
 FoundFile:
 	lUp = strlen (UpdateStringIN);
-	hUpdateString = GSSiGlobAlloc (1885,GMEM_MOVEABLE,lUp+1);
+	hUpdateString = GSSiGlobAlloc(GAIDNO 1885,GMEM_MOVEABLE,lUp+1);
 	UpdateString = GlobalLock (hUpdateString);
 	lpGWDHead = (LPGWDHEADER)GlobalLock (hDBDest);
 	hmemset ((HPSTR)&lpGWDHead->GWDData,0,lpGWDHead->Reclen); 
@@ -4125,7 +4125,7 @@ BOOL CreateGWDIndex (HANDLE hDB, LPSTR Name, short CreateIndex)
     short       pos, DupPos;   
     BOOL		rtn=FALSE;
 
-    hVars = GSSiGlobAlloc ( 273,GHND,(MAX_GMD_INDEX_FIELDS+1) * sizeof(BTVARDESC));
+    hVars = GSSiGlobAlloc(GAIDNO 273,GHND,(MAX_GMD_INDEX_FIELDS+1) * sizeof(BTVARDESC));
     pVars = (BTVARDESC *)GlobalLock(hVars);
     ibeg = 0;
 
@@ -4199,7 +4199,7 @@ BOOL CreateGWDIndex (HANDLE hDB, LPSTR Name, short CreateIndex)
 		} 
 	}
 //        lpGWDHead->NumIndexFields[CreateIndex] = nFld;
-    lpGWDHead->hKeys[CreateIndex]=GSSiGlobAlloc ( 274,GHND,abs(lpGWDHead->lKeys[CreateIndex]));
+    lpGWDHead->hKeys[CreateIndex]=GSSiGlobAlloc(GAIDNO 274,GHND,abs(lpGWDHead->lKeys[CreateIndex]));
     lpGWDHead->pKeys[CreateIndex]=GlobalLock(lpGWDHead->hKeys[CreateIndex]);
                                                  
     _fstrcpy (str,Name); 
@@ -4406,7 +4406,7 @@ GSSiExitProg (642);
  	} 
 	GlobalUnlock (hNameLocal);
  }
- hMem = GSSiGlobAlloc ( 275,GMEM_MOVEABLE,2*4096);
+ hMem = GSSiGlobAlloc(GAIDNO 275,GMEM_MOVEABLE,2*4096);
  str = GlobalLock (hMem);
  str2 = str + 4096;   
  switch(Message)
@@ -4851,7 +4851,7 @@ Display2:
                                     "Error",MB_OK|MB_ICONEXCLAMATION,0);  
                      break;
                   }
-                  hItems=GSSiGlobAlloc ( 276,GHND,nItems*4);
+                  hItems=GSSiGlobAlloc(GAIDNO 276,GHND,nItems*4);
                   lpItems=  (LPINT) GlobalLock(hItems);
                   SendDlgItemMessage(hWndDlg,IDC_FieldName,LB_GETSELITEMS,nItems,(LPARAM)lpItems);
                   pName = GlobalLock(hNameLocal);
@@ -4878,7 +4878,7 @@ Display2:
                   int   nItems, type;
                   LPINT lpItems;
                   HANDLE hItems;
-                  HANDLE	hFile=GSSiGlobAlloc ( 277,GHND,256);
+                  HANDLE	hFile=GSSiGlobAlloc(GAIDNO 277,GHND,256);
 				  HCURSOR hcurSave;
                   LPSTR	pFile=GlobalLock (hFile); 
                   BOOL	GMHeader=FALSE;
@@ -4908,7 +4908,7 @@ Display2:
 		 		  
                   CloseDataFile (TRUE, &hSQL); 
 				  hcurSave = GSSiSetCursor(LoadCursor(0, IDC_WAIT)); 
-                  hItems=GSSiGlobAlloc ( 278,GHND,(nItems+1)*4);
+                  hItems=GSSiGlobAlloc(GAIDNO 278,GHND,(nItems+1)*4);
                   lpItems=  (LPINT) GlobalLock(hItems); 
                   *lpItems++ = nItems;
                   SendDlgItemMessage(hWndDlg,IDC_FieldName,LB_GETSELITEMS,nItems,(LPARAM)lpItems);
@@ -4935,7 +4935,7 @@ Display2:
 				  int   nItems, type;
                   LPINT lpItems;
                   HANDLE hItems;
-                  HANDLE	hFile=GSSiGlobAlloc ( 279,GHND,256);
+                  HANDLE	hFile=GSSiGlobAlloc(GAIDNO 279,GHND,256);
 				  HCURSOR hcurSave;
                   LPSTR	pFile=GlobalLock (hFile); 
                   BOOL	GMHeader=FALSE;
@@ -4967,7 +4967,7 @@ Display2:
 		 		  }  
 		 		  
 				  hcurSave = GSSiSetCursor(LoadCursor(0, IDC_WAIT)); 
-                  hItems=GSSiGlobAlloc ( 280,GHND,(nItems+1)*4);
+                  hItems=GSSiGlobAlloc(GAIDNO 280,GHND,(nItems+1)*4);
                   lpItems=  (LPINT) GlobalLock(hItems); 
                   *lpItems++ = nItems;
                   SendDlgItemMessage(hWndDlg,IDC_FieldName,LB_GETSELITEMS,nItems,(LPARAM)lpItems);
@@ -5007,7 +5007,7 @@ Display2:
                                     "Error",MB_OK|MB_ICONEXCLAMATION,0);  
                      break;
                   }
-                  hItems=GSSiGlobAlloc ( 281,GHND,nItems*4);
+                  hItems=GSSiGlobAlloc(GAIDNO 281,GHND,nItems*4);
                   lpItems=  (LPINT) GlobalLock(hItems);
                   SendDlgItemMessage(hWndDlg,IDC_FieldName,LB_GETSELITEMS,nItems,(LPARAM)lpItems);
                   pName = GlobalLock(hNameLocal);   
@@ -6453,7 +6453,7 @@ BOOL GMDCloseJournal (LPSTR FileName)
 
 BOOL TransferCacheBlocks (int BlockID,HANDLE FidFrom,HANDLE FidTo,HFILE FidNetTransfer,int BlockSize,HWND hWndProgress,int TotBlocksToGet,int nseqblocks,int nblocks)
 {
-	HANDLE	hMem = GSSiGlobAlloc (0,GMEM_MOVEABLE,BlockSize*nseqblocks);
+	HANDLE	hMem = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,BlockSize*nseqblocks);
 	LPBYTE	pBlockData = GlobalLock (hMem);
 	int		FromLoc, ToLoc;
 	long	nBytes;
@@ -6600,7 +6600,7 @@ int UpdateGMDFromCheckPointLog2 (LPSTR CacheFile, LPSTR FromFile,int UpdateFromC
 					AllNumBlocks = (llFileSeek(FidFrom,0,2)-1)/CheckPntLogHeader.BlockSize + 1;
 					MaxNumBlocks = 0;
 					AllLength = (AllNumBlocks - 1) / 8 + 1;
-					hAllRecs = GSSiGlobAlloc (1676,GHND,AllLength);
+					hAllRecs = GSSiGlobAlloc(GAIDNO 1676,GHND,AllLength);
 					CheckPointID = CheckPntLogHeader.LastCheckPointID;
 					loc = CheckPntLogHeader.LastCheckPointLoc[ifile];
 					while (loc >= 0 && CheckPointID-- > UpdateFromCheckPointID)
@@ -6608,13 +6608,13 @@ int UpdateGMDFromCheckPointLog2 (LPSTR CacheFile, LPSTR FromFile,int UpdateFromC
 						llFileSeek(Fid,loc,0);
 						BigRead64 (Fid,&CheckPntLogRecord,sizeof(CHECKPNTLOGRECORD));
 						CompressedLength = CheckPntLogRecord.Reclen -sizeof(CHECKPNTLOGRECORD) + 4;
-						hCompressedRec = GSSiGlobAlloc (1671,GMEM_MOVEABLE,CompressedLength);
+						hCompressedRec = GSSiGlobAlloc(GAIDNO 1671,GMEM_MOVEABLE,CompressedLength);
 						llFileSeek(Fid,loc+(sizeof(CHECKPNTLOGRECORD)-4),0);
 						pCompressedRec = GlobalLock (hCompressedRec);
 						BigRead64(Fid,pCompressedRec,CompressedLength);
 						MaxNumBlocks = max (MaxNumBlocks,CheckPntLogRecord.NumBlocks);
 						FullLength = (CheckPntLogRecord.NumBlocks - 1) / 8 + 1;
-						hFullRec = GSSiGlobAlloc (1672,GMEM_MOVEABLE,FullLength+32);
+						hFullRec = GSSiGlobAlloc(GAIDNO 1672,GMEM_MOVEABLE,FullLength+32);
 						pFullRec = GlobalLock (hFullRec);
 						lFullRec = DecompressBinaryRecordUnsafe (pFullRec,pCompressedRec,CompressedLength);
 						pAllRecs = GlobalLock (hAllRecs);
@@ -6682,7 +6682,7 @@ int UpdateGMDFromCheckPointLog2 (LPSTR CacheFile, LPSTR FromFile,int UpdateFromC
 					GetCacheBlock (0,FidFrom,FidTo,FidNetTransfer,CheckPntLogHeader.BlockSize,GetDlgItem(hWndCache,IDC_CACHEPROGRESS),TotBlocksToGet,2);
 
 			/*	compare from and to files	{
-						HANDLE	hTest=GSSiGlobAlloc (0,GMEM_MOVEABLE,CheckPntLogHeader.BlockSize);
+						HANDLE	hTest=GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,CheckPntLogHeader.BlockSize);
 						LPBYTE	pTest=GlobalLock (hTest);
 
 						_llseek (FidFrom,0,0);
@@ -6863,16 +6863,16 @@ return 1;
 			_llseek (Fid,loc,0);
 			_lread (Fid,&CheckPntLogRecord,sizeof(CHECKPNTLOGRECORD));
 			CompressedLength = CheckPntLogRecord.Reclen -sizeof(CHECKPNTLOGRECORD) + 4;
-			hCompressedRec = GSSiGlobAlloc (1673,GMEM_MOVEABLE,CompressedLength);
+			hCompressedRec = GSSiGlobAlloc(GAIDNO 1673,GMEM_MOVEABLE,CompressedLength);
 			_llseek (Fid,loc+(sizeof(CHECKPNTLOGRECORD)-4),0);
 			pCompressedRec = GlobalLock (hCompressedRec);
 			_lread (Fid,pCompressedRec,CompressedLength);
 			FullLength = (CheckPntLogRecord.NumBlocks - 1) / 8 + 1;
-			hFullRec = GSSiGlobAlloc (1674,GMEM_MOVEABLE,FullLength+32);
+			hFullRec = GSSiGlobAlloc(GAIDNO 1674,GMEM_MOVEABLE,FullLength+32);
 			if (First)
 			{
 				AllLength = FullLength;
-				hAllRecs = GSSiGlobAlloc (1677,GHND,AllLength);
+				hAllRecs = GSSiGlobAlloc(GAIDNO 1677,GHND,AllLength);
 				First = FALSE;
 			}
 			pFullRec = GlobalLock (hFullRec);
@@ -7251,11 +7251,11 @@ BOOL GMDUpdateCheckPointLog (LPSTR FileName)
 						if (CheckPntLogRecord.NumBlocks > 0)
 						{
 							int	len = CheckPntLogRecord.NumBlocks / 8 + 1;
-							HANDLE	hCompressedRec = GSSiGlobAlloc (1513,GMEM_MOVEABLE,len+32);
+							HANDLE	hCompressedRec = GSSiGlobAlloc(GAIDNO 1513,GMEM_MOVEABLE,len+32);
 							HPSTR	pCompressedRec = GlobalLock (hCompressedRec);
 							long	CompressedLength;
 
-							hBytes = GSSiGlobAlloc (1601,GHND,len);
+							hBytes = GSSiGlobAlloc(GAIDNO 1601,GHND,len);
 							pBytes = GlobalLock (hBytes);
 							for (j=0;j<*pNumIndexBlocks;j++,pIndexRecord++)
 							{
@@ -7362,7 +7362,7 @@ BOOL GMDFunctions (int nArgs,LPSTR *Arg,LPSTR OutLoc)
 		if (GWDHead16.Unused)
 		{
 			int	Size;
-			HANDLE DBHandle = GSSiGlobAlloc (1889,GHND,sizeof (GWDHEADER)+4);
+			HANDLE DBHandle = GSSiGlobAlloc(GAIDNO 1889,GHND,sizeof (GWDHEADER)+4);
 
 			lpGWDHead2 =(LPGWDHEADER) GlobalLock (DBHandle);
 			GSSillseek (lpGWDHead->Fid,0,0);
@@ -7375,10 +7375,10 @@ BOOL GMDFunctions (int nArgs,LPSTR *Arg,LPSTR OutLoc)
 		}
 		/*else
 		{
-			HANDLE DBHandle32 = GSSiGlobAlloc ( 264,GHND,sizeof (GWDHEADER32));
+			HANDLE DBHandle32 = GSSiGlobAlloc(GAIDNO 264,GHND,sizeof (GWDHEADER32));
 			LPGWDHEADER32 lpGWDHead32 =(LPGWDHEADER32) GlobalLock (DBHandle32);
 
-			DBHandle = GSSiGlobAlloc ( 264,GHND,sizeof (GWDHEADER)+GWDHead16.Reclen+4);
+			DBHandle = GSSiGlobAlloc(GAIDNO 264,GHND,sizeof (GWDHEADER)+GWDHead16.Reclen+4);
 			lpGWDHead =(LPGWDHEADER) GlobalLock (DBHandle);
 			*lpGWDHead32 = GWDHEADER16toGWDHEADER32 (&GWDHead16);
 			*lpGWDHead = GWDHEADER32toGWDHEADER (lpGWDHead32);
@@ -7483,7 +7483,7 @@ BOOL GMDFunctions (int nArgs,LPSTR *Arg,LPSTR OutLoc)
 					{
 						long nRead, didRead, totLen, curLoc, lastLoc,index;
 #define BUFFERSIZE USHRT_MAX
-						HANDLE hbuf = GSSiGlobAlloc(0, GMEM_MOVEABLE, BUFFERSIZE);
+						HANDLE hbuf = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, BUFFERSIZE);
 						LPSTR pbuf = GlobalLock(hbuf);
 
 						lpGWDHead->SplitLengthRequested = splitLen;
@@ -7831,13 +7831,13 @@ BOOL GMDReorg (LPSTR Name,int IndexToReorgOn,BOOL Compress,BOOL Verify,HWND hWnd
 		return FALSE;
 	} 
 	lpGWDHead = (LPGWDHEADER)GlobalLock (hDB); 
-    hDBNew = GSSiGlobAlloc (1509,GHND,sizeof (GWDHEADER)+lpGWDHead->Reclen+4);
+    hDBNew = GSSiGlobAlloc(GAIDNO 1509,GHND,sizeof (GWDHEADER)+lpGWDHead->Reclen+4);
     lpGWDHeadNew =(LPGWDHEADER) GlobalLock (hDBNew);
 	*lpGWDHeadNew = *lpGWDHead;
 	lpGWDHeadNew->hFldInfo = 0;
 	if (*AddFieldDefs)
 	{        
-		hNewFields = GSSiGlobAlloc (1510,GHND,USHRT_MAX);  
+		hNewFields = GSSiGlobAlloc(GAIDNO 1510,GHND,USHRT_MAX);  
 		NewFieldInfo = (LPGWFLDINFO)GlobalLock (hNewFields);
 		hSetClause = (LPHANDLE)(NewFieldInfo + 256);
 		str = AddFieldDefs;
@@ -7853,7 +7853,7 @@ BOOL GMDReorg (LPSTR Name,int IndexToReorgOn,BOOL Compress,BOOL Verify,HWND hWnd
 		{
 		 	if (!(lpTab = _fstrchr (str,'(')) || !GetFieldTypeAndLenFromChar (lpTab+1,&NewFieldInfo[nNewFields],&hSetClause[nNewFields]))
 			{
-				HANDLE	hMem = GSSiGlobAlloc (1511,GMEM_MOVEABLE,4096);
+				HANDLE	hMem = GSSiGlobAlloc(GAIDNO 1511,GMEM_MOVEABLE,4096);
 				LPSTR	pMess=GlobalLock (hMem);
 		
 				sprintf (pMess,"Error in Table Definition String:Field (%s)",lpTab); 	
@@ -7875,7 +7875,7 @@ BOOL GMDReorg (LPSTR Name,int IndexToReorgOn,BOOL Compress,BOOL Verify,HWND hWnd
 				str++;
 		}    
 		lpGWDHeadNew->Reclen = ibeg;
-	    lpGWDHeadNew->hFldInfo = GSSiGlobAlloc (1512,GHND,lpGWDHeadNew->NumFields*sizeof(FIELDINFO));
+	    lpGWDHeadNew->hFldInfo = GSSiGlobAlloc(GAIDNO 1512,GHND,lpGWDHeadNew->NumFields*sizeof(FIELDINFO));
 	    lpGWDHeadNew->pFldInfo = (LPGWFLDINFO)GlobalLock(lpGWDHeadNew->hFldInfo); 
         for (i=0;i<lpGWDHead->NumFields;i++)
         	lpGWDHeadNew->pFldInfo[i] = lpGWDHead->pFldInfo[i];
@@ -8073,7 +8073,7 @@ int GWDAddRecord (LPGWDHEADER lpGWDHead,long length,LPSHORT IndexArray)//returns
 	}
     if (lpGWDHead->Compressed)
     {
-	    HANDLE	hCompressedRec = GSSiGlobAlloc (1513,GMEM_MOVEABLE,length+32);
+	    HANDLE	hCompressedRec = GSSiGlobAlloc(GAIDNO 1513,GMEM_MOVEABLE,length+32);
 	    HPSTR	pCompressedRec = GlobalLock (hCompressedRec); 
 	    long	CompressedLength = CompressBinaryRecord ((HPSTR)&lpGWDHead->GWDData,pCompressedRec,length);   
 	    
@@ -8182,7 +8182,7 @@ int GWDReplaceRecord (LPGWDHEADER lpGWDHead,long UnCompressedLength,LPSHORT Inde
 			goto Exit;
     }  
 	rtn = 2;
-    hSaveRec = GSSiGlobAlloc ( 282,GMEM_MOVEABLE,length);
+    hSaveRec = GSSiGlobAlloc(GAIDNO 282,GMEM_MOVEABLE,length);
     pSaveRec = GlobalLock (hSaveRec);
     hmemmove (pSaveRec,(HPSTR)lpGWDHead->GWDData,length);
     SetGWDCurrentOffset (lpGWDHead,-1);
@@ -8238,7 +8238,7 @@ int GWDReplaceRecord (LPGWDHEADER lpGWDHead,long UnCompressedLength,LPSHORT Inde
     pWriteRec = lpGWDHead->GWDData;
     if (lpGWDHead->Compressed)
     {
-	    hCompressedRec = GSSiGlobAlloc (1514,GMEM_MOVEABLE,length+32);
+	    hCompressedRec = GSSiGlobAlloc(GAIDNO 1514,GMEM_MOVEABLE,length+32);
 	    pCompressedRec = GlobalLock (hCompressedRec); 
 	    CompressedLength = CompressBinaryRecord ((HPSTR)&lpGWDHead->GWDData,pCompressedRec,length); 
 	    pWriteRec = pCompressedRec;
@@ -8819,7 +8819,7 @@ FoundFile:
 		 		*lpTab++=0;
 		 		if (!GetFieldTypeAndLenFromChar (lpTab,&GWFldInfo,0))
 				{
-					HANDLE	hMem = GSSiGlobAlloc (1515,GMEM_MOVEABLE,4096);
+					HANDLE	hMem = GSSiGlobAlloc(GAIDNO 1515,GMEM_MOVEABLE,4096);
 					LPSTR	pMess=GlobalLock (hMem);
 
 					sprintf (pMess,"Error in Table Definition String:Field %i,(%s)",i,lpTab); 	
@@ -8856,7 +8856,7 @@ FoundFile:
 			}
 			else
 			{
-				HANDLE	hMem = GSSiGlobAlloc (1516,GMEM_MOVEABLE,4096);
+				HANDLE	hMem = GSSiGlobAlloc(GAIDNO 1516,GMEM_MOVEABLE,4096);
 				LPSTR	pMess=GlobalLock (hMem);
 
 				sprintf (pMess,"Error in Table Definition String:Field %i,(%s)",i,lpTab); 	
@@ -9027,7 +9027,7 @@ int NumBytesDifferent (LPSTR File1,LPSTR File2)
 	UINT	i;
 	int		nRead1, nRead2, minRead;
 	BOOL	SaveAllowCache = AllowCache;
-	HANDLE	hMem = GSSiGlobAlloc (0,GMEM_MOVEABLE,BlockSize*2);
+	HANDLE	hMem = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,BlockSize*2);
 	LPBYTE	pBuf1 = GlobalLock (hMem);
 	LPBYTE	pBuf2 = pBuf1 + BlockSize;
 

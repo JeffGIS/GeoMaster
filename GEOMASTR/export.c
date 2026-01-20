@@ -55,7 +55,7 @@ short HaveLinkLines (HPDPOINT pPoints, long nPnts,LPHANDLE phLinks)
 	short	nLinks=1;    
 	LPLINKLINELOC	pLinks;
 	
-	*phLinks = GSSiGlobAlloc ( 680,GMEM_MOVEABLE,4096);
+	*phLinks = GSSiGlobAlloc(GAIDNO 680,GMEM_MOVEABLE,4096);
 	pLinks = (LPLINKLINELOC)GlobalLock (*phLinks);
 	pLinks->PointID1 = 0;
 	pLinks->PointID2 = nPnts;
@@ -105,7 +105,7 @@ BOOL CreateUpdatePolyFromLoops (short nLoops,LPINT nLoopPoints,LPHANDLE hLoopPoi
 	for (i=0;i<nLoops;i++)
 		nPnts += nLoopPoints[i];
 	nUpdatePolyPoints = 0; 
-	hUpdatePoly = GSSiGlobAlloc ( 681,GMEM_MOVEABLE,((long)nPnts+nLoops) * sizeof(DPOINT));
+	hUpdatePoly = GSSiGlobAlloc(GAIDNO 681,GMEM_MOVEABLE,((long)nPnts+nLoops) * sizeof(DPOINT));
 	pNewPolyPoints = (HPDPOINT)GlobalLock (hUpdatePoly);
     {
         long	nNewPoints=0, nLinkPoints;
@@ -114,7 +114,7 @@ BOOL CreateUpdatePolyFromLoops (short nLoops,LPINT nLoopPoints,LPHANDLE hLoopPoi
        	DPOINT	FirstPoint, TiePoint;
                 
     	nUpdateMultiPolygon = nLoops; 
-    	hUpdateMultiPolygon = GSSiGlobAlloc ( 682,GMEM_MOVEABLE,nUpdateMultiPolygon*sizeof(WORD));
+    	hUpdateMultiPolygon = GSSiGlobAlloc(GAIDNO 682,GMEM_MOVEABLE,nUpdateMultiPolygon*sizeof(WORD));
     	pMultiPolygon = (LPWORD)GlobalLock (hUpdateMultiPolygon);
         for (i=0;i<nLoops;i++)
         {   
@@ -224,7 +224,7 @@ BOOL RemoveLinkLines (void)
         		RemoveDupPolyPoints (&nPnts,lpDpoint, P_TOL);
 	        nLinks = HaveLinkLines (lpDpoint,nPnts,&hLinks);
         	nUpdatePolyPoints = nPnts; 
-        	hUpdatePoly = GSSiGlobAlloc ( 681,GMEM_MOVEABLE,((long)nPnts+nLinks) * sizeof(DPOINT));
+        	hUpdatePoly = GSSiGlobAlloc(GAIDNO 681,GMEM_MOVEABLE,((long)nPnts+nLinks) * sizeof(DPOINT));
         	lpUpdatePolyPoints = (HPDPOINT)GlobalLock (hUpdatePoly);
 	        {
 				LPLINKLINELOC	pLinks=(LPLINKLINELOC)GlobalLock (hLinks);
@@ -233,7 +233,7 @@ BOOL RemoveLinkLines (void)
                 USHORT	nextcp=0;
                 
             	nUpdateMultiPolygon = nLinks; 
-            	hUpdateMultiPolygon = GSSiGlobAlloc ( 682,GMEM_MOVEABLE,nUpdateMultiPolygon*sizeof(WORD));
+            	hUpdateMultiPolygon = GSSiGlobAlloc(GAIDNO 682,GMEM_MOVEABLE,nUpdateMultiPolygon*sizeof(WORD));
             	pMultiPolygon = (LPWORD)GlobalLock (hUpdateMultiPolygon);
                 for (iLink =0;iLink < nLinks;iLink++,pLinks++)
                 {
@@ -468,7 +468,7 @@ HANDLE GetBMPBlock (short nRows, short nCols,short nBytesPerPel,double Res,doubl
     UINT	irow, icol, RowLen=nCols*nBytesPerPel ;  
     double	X,Y;
     LPSTR	pRow; 
-    HANDLE	hBlock=GSSiGlobAlloc ( 694,GMEM_MOVEABLE,(long)nBytesPerPel * (long)nRows * (long)nCols);
+    HANDLE	hBlock=GSSiGlobAlloc(GAIDNO 694,GMEM_MOVEABLE,(long)nBytesPerPel * (long)nRows * (long)nCols);
     HPBYTE	pBlock;
     BOOL	SaveMemMap = MemMap; 
     DPOINT	BasePoint;  
@@ -599,7 +599,7 @@ BOOL ClipBMP (LPSTR Name)
 	{   
 		loc = startimage + (long)ClipRect.bottom * InRowLen + ClipRect.left;
 		GSSillseek (FidIn,loc,0); 
-		hRow = GSSiGlobAlloc ( 695,GHND,OutRowLen);
+		hRow = GSSiGlobAlloc(GAIDNO 695,GHND,OutRowLen);
 		pRow = GlobalLock (hRow);
 		BigRead (FidIn,pRow,(long)DibInfoOut.biWidth*BytesPerPel);
 		BigWrite (FidOut,pRow,OutRowLen,-1);                                                         
@@ -683,7 +683,7 @@ BOOL CreateBMPs (LPSTR Name,double Res,double BaseRes,double Offset,HWND hWndDlg
 		return FALSE;	       
 	}
     HeadLen = sizeof(BITMAPINFOHEADER)+pDibInfo->bmiHeader.biClrUsed*sizeof(RGBQUAD);
-    hDibInfoOut = GSSiGlobAlloc ( 696,GHND,HeadLen);
+    hDibInfoOut = GSSiGlobAlloc(GAIDNO 696,GHND,HeadLen);
     pDibInfoOut = (LPBITMAPINFO)GlobalLock (hDibInfoOut); 
     _fmemmove (pDibInfoOut,pDibInfo,HeadLen); 
     if (!hDibIs32Bit (CurOrtho->hDib))
@@ -707,7 +707,7 @@ BOOL CreateBMPs (LPSTR Name,double Res,double BaseRes,double Offset,HWND hWndDlg
 		CurView->NewBounds = PickList[0].Rect;
 		InflateBounds (&CurView->NewBounds,Offset+1);
 		  
-	    hPoints = GSSiGlobAlloc ( 697,GMEM_MOVEABLE,(long)PickList[0].NumPoints*sizeof(DPOINT)); 
+	    hPoints = GSSiGlobAlloc(GAIDNO 697,GMEM_MOVEABLE,(long)PickList[0].NumPoints*sizeof(DPOINT)); 
 	    pPoints = (HPDPOINT)GlobalLock (hPoints);
 		Nump = GetPickItemPoints (0,FALSE,&pPoints); 
 		GlobalUnlock (hPoints);  

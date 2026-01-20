@@ -554,7 +554,7 @@ double PercentOfPolyInHighlightAreas (int PolyType,LPMNMXCORD pBounds,int npnts,
 	LPDWORD	pDwordItem, pDwordArea;
 	BOOL	savebm=FALSE;  
     BITMAP	bm;   
-	HANDLE	hBitmapInfo = GSSiGlobAlloc (0,GHND,sizeof(BITMAPINFO)+sizeof(RGBQUAD));
+	HANDLE	hBitmapInfo = GSSiGlobAlloc(GAIDNO 0,GHND,sizeof(BITMAPINFO)+sizeof(RGBQUAD));
 	LPBITMAPINFO	BitmapInfo = GlobalLock (hBitmapInfo);
 	int		st;
 	HBRUSH	hOldBrush;
@@ -604,7 +604,7 @@ double PercentOfPolyInHighlightAreas (int PolyType,LPMNMXCORD pBounds,int npnts,
     SetViewportOrgEx( hDC, 0, 0,0 );    
   	SetWindowExtEx  ( hDC, Width, Height,0 ); 
 	SetViewportExtEx( hDC, Width, Height,0 );  
-	hPoint = GSSiGlobAlloc ( 294,GMEM_MOVEABLE,npnts * sizeof(POINT));
+	hPoint = GSSiGlobAlloc(GAIDNO 294,GMEM_MOVEABLE,npnts * sizeof(POINT));
 	pPoint = (HPPOINT)GlobalLock(hPoint);
 	basetopixel = Width / (Bounds.xmx - Bounds.xmn);
 	for (i=0;i<npnts;i++)
@@ -647,7 +647,7 @@ double PercentOfPolyInHighlightAreas (int PolyType,LPMNMXCORD pBounds,int npnts,
 			break;
 		}
 		hOldPen = SelectObject (hDC,hPen);
-		hPoint = GSSiGlobAlloc ( 294,GMEM_MOVEABLE,nHighlightAreaPoints * sizeof(POINT));
+		hPoint = GSSiGlobAlloc(GAIDNO 294,GMEM_MOVEABLE,nHighlightAreaPoints * sizeof(POINT));
 		pPoint = (HPPOINT)GlobalLock(hPoint);
 
 		for (i=0;i<nHighlightAreaPoints;i++)
@@ -3508,7 +3508,7 @@ void ThinPoly (LPLONG pnPnts, HPDPOINT pPoints, double maxdist)
 #endif
 {   
 	long	ipoint=2, jpoint, nNewPnts=0, lpoint=0;
-	HANDLE	hNewPoints = GSSiGlobAlloc ( 293,GMEM_MOVEABLE,*pnPnts*sizeof(DPOINT));
+	HANDLE	hNewPoints = GSSiGlobAlloc(GAIDNO 293,GMEM_MOVEABLE,*pnPnts*sizeof(DPOINT));
 	HPDPOINT	NewPoints=(HPDPOINT)GlobalLock (hNewPoints); 
 	double	A1, A2;
 	DPOINT	IntPoint;
@@ -3967,7 +3967,7 @@ HANDLE  PointInAreaAcceleratorSetup (DWORD nPoints, HPDPOINT pAreaPoints,int nPo
     UINT	Height,Width,irow,icol;
     DWORD	loc;  
     HANDLE	hPIAA=0; 
-    HANDLE	hPoint = GSSiGlobAlloc ( 294,GMEM_MOVEABLE,max(5,(long)nPoints+1) * sizeof(POINT));
+    HANDLE	hPoint = GSSiGlobAlloc(GAIDNO 294,GMEM_MOVEABLE,max(5,(long)nPoints+1) * sizeof(POINT));
     HPPOINT	pPoint = (HPPOINT)GlobalLock(hPoint);
 	HBRUSH	hRedBrush =   CreateSolidBrush(RGB(255,   0,   0));
     HBRUSH	hGreenBrush = CreateSolidBrush(RGB(  0, 255,   0));
@@ -4098,7 +4098,7 @@ HANDLE  PointInAreaAcceleratorSetup (DWORD nPoints, HPDPOINT pAreaPoints,int nPo
     	sprintf (str,"memsize too big:%ld",memsize);
     	MessageBox (0,str,0,MB_OK);  
     } */
-    hPIAA = GSSiGlobAlloc (1778,GMEM_MOVEABLE,memsize);
+    hPIAA = GSSiGlobAlloc(GAIDNO 1778,GMEM_MOVEABLE,memsize);
     pPIAA = (LPPIAAStruct)GlobalLock (hPIAA); 
     pPIAA->Offset = Offset;   
     pPIAA->Type = 0;
@@ -4116,7 +4116,7 @@ HANDLE  PointInAreaAcceleratorSetup (DWORD nPoints, HPDPOINT pAreaPoints,int nPo
 	if (bm.bmBitsPixel == 32)
 	{
 		int		l = (int)bm.bmWidthBytes * (int)bm.bmHeight; 
-		HANDLE	hBits = GSSiGlobAlloc (1875,GMEM_MOVEABLE,l);
+		HANDLE	hBits = GSSiGlobAlloc(GAIDNO 1875,GMEM_MOVEABLE,l);
 //		LPCOLORREF	pBits = GlobalLock (hBits);
 		LPRGBQUAD	pBits = GlobalLock (hBits);
 
@@ -4232,7 +4232,7 @@ HANDLE  PointInAreaAcceleratorSetupMono (DWORD nPoints, HPDPOINT pAreaPoints, in
     UINT	Height,Width,irow,icol;
     DWORD	loc;  
     HANDLE	hPIAA=0; 
-    HANDLE	hPoint = GSSiGlobAlloc ( 294,GMEM_MOVEABLE,max(5,(long)nPoints+1) * sizeof(POINT));
+    HANDLE	hPoint = GSSiGlobAlloc(GAIDNO 294,GMEM_MOVEABLE,max(5,(long)nPoints+1) * sizeof(POINT));
     HPPOINT	pPoint = (HPPOINT)GlobalLock(hPoint);
 	HBRUSH	OldBrush; 
 	HPEN	OldPen, hPen;
@@ -4322,7 +4322,7 @@ HANDLE  PointInAreaAcceleratorSetupMono (DWORD nPoints, HPDPOINT pAreaPoints, in
     	sprintf (str,"memsize too big:%ld",memsize);
     	MessageBox (0,str,0,MB_OK);  
     } */
-    hPIAA = GSSiGlobAlloc (0,GMEM_MOVEABLE,memsize);
+    hPIAA = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,memsize);
     pPIAA = (LPPIAAStruct)GlobalLock (hPIAA); 
     pPIAA->Offset = Offset;   
     pPIAA->Type = 0;
@@ -4341,7 +4341,7 @@ HANDLE  PointInAreaAcceleratorSetupMono (DWORD nPoints, HPDPOINT pAreaPoints, in
 	{
 		int		l = ((int)bm.bmWidthBytes * (int)bm.bmHeight); 
 		int		rowleninwords = bm.bmWidthBytes / 2;
-		HANDLE	hBits = GSSiGlobAlloc (0,GMEM_MOVEABLE,l);
+		HANDLE	hBits = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,l);
 		LPUSHORT	pBitsStart,pBits = (LPUSHORT)GlobalLock (hBits), pNextRow;//(long)pBits - (long)pBitsStart
 		ULONG	RowLenLoc, CurValLoc, CurRepeatLoc, nRepeat, RowLen;
 
@@ -4471,7 +4471,7 @@ HANDLE  PCTInAreasInit (LPMNMXCORD pBounds,int Precision, BOOL CreateAreaPoint)
 	if (BoundsWidth (pBounds)<= 0 || BoundsHeight(pBounds)<=0)
 		goto Exit;
 	Factor = MaxDim[min (2,max (0,Precision))] / max (BoundsWidth (pBounds),BoundsHeight(pBounds));
-    hPIA = GSSiGlobAlloc (1723,GHND,sizeof(PCTIAStruct));
+    hPIA = GSSiGlobAlloc(GAIDNO 1723,GHND,sizeof(PCTIAStruct));
     pPIA = (LPPCTIAStruct)GlobalLock (hPIA); 
     pPIA->Type = 0;
     pPIA->Bounds = *pBounds;
@@ -4516,7 +4516,7 @@ double  PCTInAreasLoad (HANDLE hPIA,int opt,int Type,DWORD nPoints, HPDPOINT pAr
     double	Factor; 
     UINT	Height,Width,irow,icol;
     DWORD	loc;  
-    HANDLE	hPoint = GSSiGlobAlloc ( 294,GMEM_MOVEABLE,max(5,(long)nPoints+1) * sizeof(POINT));
+    HANDLE	hPoint = GSSiGlobAlloc(GAIDNO 294,GMEM_MOVEABLE,max(5,(long)nPoints+1) * sizeof(POINT));
     HPPOINT	pPoint = (HPPOINT)GlobalLock(hPoint);
 	HBRUSH	OldBrush; 
 	HPEN	OldPen, hPen=0;
@@ -4767,13 +4767,13 @@ DPOINT PCTInAreasCreatePoint(HANDLE hPIA)
 	pPIA = (LPPCTIAStruct)GlobalLock(hPIA);
 	GetObject(pPIA->hBitMap[0], sizeof(bm), (LPSTR)&bm);
 	lMem = bm.bmWidthBytes * bm.bmHeight;
-	hMem1 = GSSiGlobAlloc(1724, GMEM_MOVEABLE, lMem);
+	hMem1 = GSSiGlobAlloc(GAIDNO 1724, GMEM_MOVEABLE, lMem);
 	pBits1 = GlobalLock(hMem1);
 	GetBitmapBits(pPIA->hBitMap[0], lMem, pBits1);
-	HANDLE hRowBits = GSSiGlobAlloc(1851, GHND, bm.bmHeight * sizeof(long long));
+	HANDLE hRowBits = GSSiGlobAlloc(GAIDNO 1851, GHND, bm.bmHeight * sizeof(long long));
 	long long *pRowBits = GlobalLock(hRowBits);
 	long long* pColBits = 0;
-	HANDLE hColBits = GSSiGlobAlloc(1852, GHND, bm.bmWidthBytes * sizeof(long long));
+	HANDLE hColBits = GSSiGlobAlloc(GAIDNO 1852, GHND, bm.bmWidthBytes * sizeof(long long));
 	long long totRowBits = 0, totColBits = 0;
 	LPBYTE pBits = pBits1;
 	for (irow = 0; irow < bm.bmHeight; irow++,pRowBits++)
@@ -4845,8 +4845,8 @@ double PCTInAreas (HANDLE hPIA)
 	pPIA = (LPPCTIAStruct)GlobalLock (hPIA);
     GetObject(pPIA->hBitMap[0], sizeof(bm), (LPSTR)&bm);
 	lMem = bm.bmWidthBytes * bm.bmHeight;
-	hMem1 = GSSiGlobAlloc (1724,GMEM_MOVEABLE,lMem);
-	hMem2 = GSSiGlobAlloc (1724,GMEM_MOVEABLE,lMem);
+	hMem1 = GSSiGlobAlloc(GAIDNO 1724,GMEM_MOVEABLE,lMem);
+	hMem2 = GSSiGlobAlloc(GAIDNO 1724,GMEM_MOVEABLE,lMem);
 	pBits1 = GlobalLock (hMem1);
 	pBits2 = GlobalLock (hMem2);
 	GetBitmapBits (pPIA->hBitMap[0],lMem,pBits1);
@@ -4896,7 +4896,7 @@ double PCTInAreas (HANDLE hPIA)
     int		Height,Width,irow,icol;
     DWORD	loc;  
     HANDLE	hPIAA=0; 
-    HANDLE	hPoint = GSSiGlobAlloc ( 294,GMEM_MOVEABLE,max(5,(long)nPoints+1) * sizeof(POINT));
+    HANDLE	hPoint = GSSiGlobAlloc(GAIDNO 294,GMEM_MOVEABLE,max(5,(long)nPoints+1) * sizeof(POINT));
     HPPOINT	pPoint = (HPPOINT)GlobalLock(hPoint);
 	HBRUSH	hRedBrush =   CreateSolidBrush(RGB(255,   0,   0));
     HBRUSH	hGreenBrush = CreateSolidBrush(RGB(  0, 255,   0));
@@ -5006,7 +5006,7 @@ double PCTInAreas (HANDLE hPIA)
     SelectObject (hDC,OldBrush);
     SelectObject (hDC,OldPen);  
     memsize = (long)sizeof(PIAAStruct)+(long)Width*(long)Height;
-    hPIAA = GSSiGlobAlloc (0,GMEM_MOVEABLE,memsize);
+    hPIAA = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,memsize);
     pPIAA = (LPPIAAStruct)GlobalLock (hPIAA);  
     pPIAA->Offset = Offset; 
     pPIAA->Type = 1;
@@ -5099,7 +5099,7 @@ HANDLE  PointInAreaAcceleratorSetupWindow (DWORD nPoints, HPDPOINT pAreaPoints, 
     DWORD	Height,Width,irow,icol;
     DWORD	loc;  
     HANDLE	hPIAA=0; 
-    HANDLE	hPoint = GSSiGlobAlloc ( 294,GMEM_MOVEABLE,max(5,(long)nPoints+1) * sizeof(POINT));
+    HANDLE	hPoint = GSSiGlobAlloc(GAIDNO 294,GMEM_MOVEABLE,max(5,(long)nPoints+1) * sizeof(POINT));
     HPPOINT	pPoint = (HPPOINT)GlobalLock(hPoint);
 	HBRUSH	hRedBrush =   CreateSolidBrush(RGB(255,   0,   0));
     HBRUSH	hGreenBrush = CreateSolidBrush(RGB(  0, 255,   0));
@@ -5186,7 +5186,7 @@ HANDLE  PointInAreaAcceleratorSetupWindow (DWORD nPoints, HPDPOINT pAreaPoints, 
 	curProgID = -1;
 	GetObject(hBM, sizeof(bm), (LPSTR)&bm);
     biBits = bm.bmPlanes * bm.bmBitsPixel;
-	hBits = GSSiGlobAlloc (0,GMEM_MOVEABLE,bm.bmWidthBytes * bm.bmHeight);
+	hBits = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,bm.bmWidthBytes * bm.bmHeight);
 	pBits = GlobalLock (hBits);
 //    hBM = CreateCompatibleBitmap(hDC,Width,Height); 
 	ReleaseDC (hWndMain,hDCMain);
@@ -5266,7 +5266,7 @@ HANDLE  PointInAreaAcceleratorSetupWindow (DWORD nPoints, HPDPOINT pAreaPoints, 
     	sprintf (str,"memsize too big:%ld",memsize);
     	MessageBox (0,str,0,MB_OK);  
     } */
-    hPIAA = GSSiGlobAlloc (0,GMEM_MOVEABLE,memsize);
+    hPIAA = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,memsize);
     pPIAA = (LPPIAAStruct)GlobalLock (hPIAA);  
     pPIAA->Offset = Offset; 
     pPIAA->Type = 1;
@@ -5399,7 +5399,7 @@ BOOL  POINT_IN_AREA (POINT PickPoint, DWORD nPoints, HPPOINT lpAreaPoints)
      
     PickPointD.x = PickPoint.x;
     PickPointD.y = PickPoint.y; 
-    hPoint = GSSiGlobAlloc ( 294,GMEM_MOVEABLE,(long)nPoints * sizeof(DPOINT));
+    hPoint = GSSiGlobAlloc(GAIDNO 294,GMEM_MOVEABLE,(long)nPoints * sizeof(DPOINT));
     pDPoint = (HPDPOINT)GlobalLock(hPoint);
     i=nPoints;
     while (i--)
@@ -5435,7 +5435,7 @@ BOOL  POINT_IN_AREAS (POINT PickPoint, DWORD nPoints, HPPOINTS lpAreaPoints)
      
     PickPointD.x = PickPoint.x;
     PickPointD.y = PickPoint.y; 
-    hPoint = GSSiGlobAlloc ( 294,GMEM_MOVEABLE,(long)nPoints * sizeof(DPOINT));
+    hPoint = GSSiGlobAlloc(GAIDNO 294,GMEM_MOVEABLE,(long)nPoints * sizeof(DPOINT));
     pDPoint = (HPDPOINT)GlobalLock(hPoint);
     i=nPoints;
     while (i--)
@@ -6813,7 +6813,7 @@ HANDLE	GetOffsetPoly (LPDPOINT pPoints,int nPoints,LPINT pnOffPoints,double Offs
 
 	if (nPoints < 1)
 		return 0;
-	hOffPoly = GSSiGlobAlloc (1594,GMEM_MOVEABLE,nPoints*sizeof(DPOINT));
+	hOffPoly = GSSiGlobAlloc(GAIDNO 1594,GMEM_MOVEABLE,nPoints*sizeof(DPOINT));
 	pOffPoints = GlobalLock (hOffPoly);
 	AZ1 = getazd (&pPoints[0], &pPoints[1]);
 	pOffPoints[0] = dnewpt (pPoints[0], AZ1+HALFPI,Offset);
@@ -7150,7 +7150,7 @@ HANDLE GetPolyBetweenDist (HPDPOINT lpPoints,long nPnts,double StartDist,double 
 	double Dist=0, LastDist, AZ, dst;
 	DWORD	i,j; 
 	HPDPOINT	lpPoints2=lpPoints+1, lpPointsIn = lpPoints; 
-	HANDLE	hPoly = GSSiGlobAlloc (1069,GMEM_MOVEABLE,nPnts*sizeof(DPOINT));
+	HANDLE	hPoly = GSSiGlobAlloc(GAIDNO 1069,GMEM_MOVEABLE,nPnts*sizeof(DPOINT));
 	HPDPOINT	pPoly=(HPDPOINT)GlobalLock (hPoly); 
 	HPDPOINT	pPnt;
 	

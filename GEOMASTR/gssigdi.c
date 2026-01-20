@@ -4,7 +4,7 @@
 
 HBRUSH CreateTransparentBrush(int itrans, COLORREF color);
 HPEN CreateTransparentPen(int itrans, int width, COLORREF color);
-
+#define GAIDNO
 extern BOOL useGDIPlus;
 extern BOOL debugLineDir;
 static int ii = 0;
@@ -248,7 +248,7 @@ void DisplaySavedGraphicsFile (HDC hDC,int Type)
 				BigRead (Fid,&npt,4);
 				if (npt)
 				{
-					hpt = GSSiGlobAlloc (1829,GMEM_MOVEABLE,npt*sizeof(POINT));
+					hpt = GSSiGlobAlloc(GAIDNO 1829,GMEM_MOVEABLE,npt*sizeof(POINT));
 					ppt = (LPPOINT)GlobalLock (hpt);
 					BigRead (Fid,ppt,npt*sizeof(POINT));
 					if (FidSTG == HFILE_ERROR)
@@ -263,7 +263,7 @@ void DisplaySavedGraphicsFile (HDC hDC,int Type)
 				BigRead (Fid,&npt,4);
 				if (npt)
 				{
-					hpt = GSSiGlobAlloc (0,GMEM_MOVEABLE,npt*sizeof(POINT));
+					hpt = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,npt*sizeof(POINT));
 					ppt = (LPPOINT)GlobalLock (hpt);
 					BigRead (Fid,ppt,npt*sizeof(POINT));
 					if (FidSTG == HFILE_ERROR)
@@ -340,7 +340,7 @@ void DisplaySavedGraphicsFile (HDC hDC,int Type)
 
 					BigRead (Fid,&BitBltStruct.xDest,sizeof(BitBltStruct)-2);
 					lnBits = BitBltStruct.bm.bmWidthBytes*BitBltStruct.bm.bmHeight;
-					hBits = GSSiGlobAlloc (0,GMEM_MOVEABLE,lnBits);
+					hBits = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,lnBits);
 					pBits = GlobalLock (hBits);
 					BigRead (Fid,pBits,lnBits);
 					memset (&bmi,0,sizeof(BITMAPINFO));
@@ -376,7 +376,7 @@ void DisplaySavedGraphicsFile (HDC hDC,int Type)
 
 					BigRead (Fid,&BitBltStruct.xDest,sizeof(BitBltStruct)-2);
 					lnBits = BitBltStruct.bm.bmWidthBytes*BitBltStruct.bm.bmHeight;
-					hBits = GSSiGlobAlloc (0,GMEM_MOVEABLE,lnBits);
+					hBits = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,lnBits);
 					pBits = GlobalLock (hBits);
 					BigRead (Fid,pBits,lnBits);
 					memset (&bmi,0,sizeof(BITMAPINFO));
@@ -773,7 +773,7 @@ BOOL	 WINAPI GSSiStretchBlt(__in HDC hdcDest, __in int xDest, __in int yDest, __
 		SelectObject (hDCTemp,hBM);
 		GetObject (hBMTemp,sizeof(BITMAP),&BitBltStruct.bm);
 		lnBits = BitBltStruct.bm.bmWidthBytes*BitBltStruct.bm.bmHeight;
-		hBits = GSSiGlobAlloc (0,GMEM_MOVEABLE,lnBits);
+		hBits = GSSiGlobAlloc(0,GMEM_MOVEABLE,lnBits);
 		pBits = GlobalLock (hBits);
 		GetBitmapBits (hBMTemp,lnBits,pBits);
 		BigWrite (SavedGraphicsFid,&BitBltStruct,sizeof(BitBltStruct),-1);

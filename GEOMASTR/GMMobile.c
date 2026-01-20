@@ -87,9 +87,9 @@ int GMMCompression(LPSTR INFile, LPSTR OUTFile)
 {
 	int rtn = 0;
 	int flen = GSSiLength(INFile);
-	HANDLE hMem = GSSiGlobAlloc(0, GMEM_MOVEABLE, 4096*8);
+	HANDLE hMem = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, 4096*8);
 	LPSTR pFile = GlobalLock(hMem);
-	HANDLE hMemCmp = GSSiGlobAlloc(0, GMEM_MOVEABLE, 4096*8);
+	HANDLE hMemCmp = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, 4096*8);
 	LPSTR pFileCmp = GlobalLock(hMemCmp);
 	HFILE fid = GSSiOpenFile(INFile, 0, OF_READ);
 	int flenCmp=0;
@@ -115,9 +115,9 @@ int GMMCompression(LPSTR INFile, LPSTR OUTFile)
 
 	/*	int rtn = 0;
 	int flen = GSSiLength(INFile);
-	HANDLE hMem = GSSiGlobAlloc(0, GMEM_MOVEABLE, flen + 4);
+	HANDLE hMem = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, flen + 4);
 	LPSTR pFile = GlobalLock(hMem);
-	HANDLE hMemCmp = GSSiGlobAlloc(0, GMEM_MOVEABLE, flen * 2);
+	HANDLE hMemCmp = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, flen * 2);
 	LPSTR pFileCmp = GlobalLock(hMemCmp);
 	HFILE fid = GSSiOpenFile(INFile, 0, OF_READ);
 	int flenCmp;
@@ -133,9 +133,9 @@ int GMMCompression(LPSTR INFile, LPSTR OUTFile)
 /*{
 	int rtn = 0;
 	int flen = GSSiLength(INFile);
-	HANDLE hMem = GSSiGlobAlloc(0, GMEM_MOVEABLE, flen + 4);
+	HANDLE hMem = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, flen + 4);
 	LPSTR pFile = GlobalLock(hMem);
-	HANDLE hMemCmp = GSSiGlobAlloc(0, GMEM_MOVEABLE, flen * 2);
+	HANDLE hMemCmp = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, flen * 2);
 	LPSTR pFileCmp = GlobalLock(hMemCmp);
 	HFILE fid = GSSiOpenFile(INFile, 0, OF_READ);
 	int flenCmp=0;

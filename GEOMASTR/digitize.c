@@ -333,7 +333,7 @@ BOOL OpenDigConnection( HWND hWnd )
       	  lpStart = lpComma; 
 	      Sleep (500);
 	  } 
-	  hDigQue=GSSiGlobAlloc ( 596,GMEM_MOVEABLE,UINT_MAX);
+	  hDigQue=GSSiGlobAlloc(GAIDNO 596,GMEM_MOVEABLE,UINT_MAX);
 	  DigQueLen=0; 
 	  *IncompleteDigInput=0;
    }
@@ -451,7 +451,7 @@ POINT DrawCurPoints (BOOL Spline,long StartSpline,short Mode,LPPOINT Points)
 	nDisplayPoints = nCurPolyPoints;  
 	if (Spline)
 		nDisplayPoints = StartSpline;
-	hPoints = GSSiGlobAlloc ( 602,GMEM_MOVEABLE,(long)(nDisplayPoints+1)*sizeof(POINT));
+	hPoints = GSSiGlobAlloc(GAIDNO 602,GMEM_MOVEABLE,(long)(nDisplayPoints+1)*sizeof(POINT));
 	lpPoints = (HPPOINT)GlobalLock(hPoints);
 	lpPoint = lpPoints;
 	lpDPoint = (HPDPOINT)GlobalLock(hCurPolyPoints); 
@@ -572,7 +572,7 @@ long GetPointsFromList (LPSTR PointList,LPHANDLE phList)
 			return 0;
 		nPoints = GlobalSize (hList) / sizeof(DPOINT); 
 		Points2 = (HPDPOINT)GlobalLock (hList);
-		*phList = GSSiGlobAlloc ( 607,GMEM_MOVEABLE,nPoints * sizeof(DPOINT));
+		*phList = GSSiGlobAlloc(GAIDNO 607,GMEM_MOVEABLE,nPoints * sizeof(DPOINT));
 		Points = (HPDPOINT)GlobalLock (*phList);
 		for (i=0;i<nPoints;i++)  
 		{
@@ -588,7 +588,7 @@ long GetPointsFromList (LPSTR PointList,LPHANDLE phList)
 	}
 	else
 	{
-		*phList = GSSiGlobAlloc ( 607,GMEM_MOVEABLE,USHRT_MAX);
+		*phList = GSSiGlobAlloc(GAIDNO 607,GMEM_MOVEABLE,USHRT_MAX);
 		Points = (HPDPOINT)GlobalLock (*phList);
 		while (PointList)
 		{
@@ -620,7 +620,7 @@ long GetIntsFromList (LPSTR PointList,LPHANDLE phList)
 	OneSpace (PointList);
 	if (!*PointList)
 		return 0;         
-	*phList = GSSiGlobAlloc ( 608,GMEM_MOVEABLE,USHRT_MAX);
+	*phList = GSSiGlobAlloc(GAIDNO 608,GMEM_MOVEABLE,USHRT_MAX);
 	Vals = (HPLONG)GlobalLock (*phList);
 	while (PointList)
 	{
@@ -635,7 +635,7 @@ long GetIntsFromList (LPSTR PointList,LPHANDLE phList)
 
 long ConvertRectToArea (LPHANDLE phPoints)
 {
-	HANDLE		hPoints2 = GSSiGlobAlloc ( 609,GMEM_MOVEABLE,sizeof(DPOINT)*4);
+	HANDLE		hPoints2 = GSSiGlobAlloc(GAIDNO 609,GMEM_MOVEABLE,sizeof(DPOINT)*4);
 	HPDPOINT	Point1 = (HPDPOINT)GlobalLock (*phPoints); 
 	HPDPOINT	Point2 = (HPDPOINT)GlobalLock (hPoints2);
     	
@@ -801,7 +801,7 @@ BOOL AddAreaToMap (LPSTR EditName,LPSTR TAG,LPSTR SymNameIn,LPSTR PointList,shor
 						} 
 					} 
 				}
-				hText = GSSiGlobAlloc ( 343,GHND,sizeof(GRTEXT));
+				hText = GSSiGlobAlloc(GAIDNO 343,GHND,sizeof(GRTEXT));
 			   	lpGRText = (LPGRTEXT)GlobalLock (hText); 
 				lpGRText->version = 1;    
 				lpGRText->length = sizeof(GRTEXT);   
@@ -878,7 +878,7 @@ BOOL FillRectWithGrid (LPSTR EditName,LPSTR SymName,LPMNMXCORD pRect,double Grid
     nPointsy = RectHeight/GridSpaceY+2;
     for (i = 0;i<nPointsy;i++)
     {
-    	hPoints = GSSiGlobAlloc (0,GMEM_MOVEABLE,nPointsx*sizeof(DPOINT));
+    	hPoints = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,nPointsx*sizeof(DPOINT));
     	pPoints = (HPDPOINT)GlobalLock (hPoints);
     	for (j=0;j<nPointsx;j++) 
     	{
@@ -891,7 +891,7 @@ BOOL FillRectWithGrid (LPSTR EditName,LPSTR SymName,LPMNMXCORD pRect,double Grid
     }
     for (i = 0;i<nPointsx;i++)
     {
-    	hPoints = GSSiGlobAlloc (0,GMEM_MOVEABLE,nPointsy*sizeof(DPOINT));
+    	hPoints = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,nPointsy*sizeof(DPOINT));
     	pPoints = (HPDPOINT)GlobalLock (hPoints);
     	for (j=0;j<nPointsy;j++) 
     	{
@@ -1691,7 +1691,7 @@ BOOL FindIntersectionsWithRef (long Segno,HANDLE hInt,double Tol,
  	HPDPOINT	pPolyPoints[2];
  	long	MaxNewSegs=1024;
  	short	NumNewSegs=0;
-	HANDLE	hPoly[2]={0,0}, hNewSegs=GSSiGlobAlloc ( 618,GMEM_MOVEABLE,MaxNewSegs*4);  
+	HANDLE	hPoly[2]={0,0}, hNewSegs=GSSiGlobAlloc(GAIDNO 618,GMEM_MOVEABLE,MaxNewSegs*4);  
 	LPLONG	NewSegs=(LPLONG)GlobalLock (hNewSegs);
 	BOOL	rtn=TRUE;  
 	DPOINT	IntPoint;
@@ -1741,7 +1741,7 @@ BOOL FindIntersectionsWithRef (long Segno,HANDLE hInt,double Tol,
 	   	else if (npnts[0] > 2 && !SegData[Segno].Reverse && ldistp (pPolyPoints[0][0],pPolyPoints[0][1]) < AtDist+P_TOL)
 	   	{ 
 	   		npnts[1] = 2;
-	   		hPoly[1] = GSSiGlobAlloc ( 619,GMEM_MOVEABLE,2*sizeof(DPOINT));
+	   		hPoly[1] = GSSiGlobAlloc(GAIDNO 619,GMEM_MOVEABLE,2*sizeof(DPOINT));
    			pPolyPoints[1] = (HPDPOINT)GlobalLock (hPoly[1]);
 	   		pPolyPoints[1][0] = pPolyPoints[0][0];
 	   		pPolyPoints[1][1] = pPolyPoints[0][1];  
@@ -1750,7 +1750,7 @@ BOOL FindIntersectionsWithRef (long Segno,HANDLE hInt,double Tol,
 	   	else if (npnts[0] > 2 && !SegData[Segno].Reverse && AtDist-P_TOL > 0)
 	   	{ 
 	   		npnts[1] = 2;
-	   		hPoly[1] = GSSiGlobAlloc ( 620,GMEM_MOVEABLE,2*sizeof(DPOINT));
+	   		hPoly[1] = GSSiGlobAlloc(GAIDNO 620,GMEM_MOVEABLE,2*sizeof(DPOINT));
    			pPolyPoints[1] = (HPDPOINT)GlobalLock (hPoly[1]);
 	   		pPolyPoints[1][0] = pPolyPoints[0][0]; 
 	   		AZ = getazd (&pPolyPoints[0][0],&pPolyPoints[0][1]);
@@ -1762,7 +1762,7 @@ BOOL FindIntersectionsWithRef (long Segno,HANDLE hInt,double Tol,
 	   			ldistp (pPolyPoints[0][npnts[0]-2],pPolyPoints[0][npnts[0]-1])) > AtDist+P_TOL)
 	   	{ 
 	   		npnts[1] = 2;
-	   		hPoly[1] = GSSiGlobAlloc ( 621,GMEM_MOVEABLE,2*sizeof(DPOINT));
+	   		hPoly[1] = GSSiGlobAlloc(GAIDNO 621,GMEM_MOVEABLE,2*sizeof(DPOINT));
    			pPolyPoints[1] = (HPDPOINT)GlobalLock (hPoly[1]);
 	   		pPolyPoints[1][0] = pPolyPoints[0][npnts[0]-1];
 	   		pPolyPoints[1][1] = pPolyPoints[0][npnts[0]-2];  
@@ -1772,7 +1772,7 @@ BOOL FindIntersectionsWithRef (long Segno,HANDLE hInt,double Tol,
 	   	else if (npnts[0] > 2 && SegData[Segno].Reverse && AtDist-P_TOL > 0)
 	   	{ 
 	   		npnts[1] = 2;
-	   		hPoly[1] = GSSiGlobAlloc ( 622,GMEM_MOVEABLE,2*sizeof(DPOINT));
+	   		hPoly[1] = GSSiGlobAlloc(GAIDNO 622,GMEM_MOVEABLE,2*sizeof(DPOINT));
    			pPolyPoints[1] = (HPDPOINT)GlobalLock (hPoly[1]);
 	   		pPolyPoints[1][0] = pPolyPoints[0][npnts[0]-1];
 	   		AZ = getazd (&pPolyPoints[0][npnts[0]-1],&pPolyPoints[0][npnts[0]-2]);

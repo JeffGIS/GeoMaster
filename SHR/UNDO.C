@@ -187,7 +187,7 @@ BOOL CreateUndoPoint (LPSTR InName)
 		ii=1;
 	if (!UndoEnabled)
 		return TRUE; 
-	hMem=GSSiGlobAlloc (0,GMEM_MOVEABLE,2048);
+	hMem=GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,2048);
 	str=GlobalLock (hMem);
 	Name=str+1024;
     _fstrcpy (Name,InName);
@@ -436,14 +436,14 @@ BOOL UndoAction (HFILE FidUndo)
 	switch (UndoRecordHeader.Type)
 	{
 		case UNDO_CHECKPOINT:
-			hMem = GSSiGlobAlloc (  75,GMEM_MOVEABLE,UndoRecordHeader.Length);
+			hMem = GSSiGlobAlloc(GAIDNO  75,GMEM_MOVEABLE,UndoRecordHeader.Length);
 			pMem = GlobalLock (hMem); 
 			GetUndoData (FidUndo,pMem,UndoRecordHeader.Length,UndoRecordHeader.FirstPiece,TRUE);
 			GSSiGlobUlFree (&hMem);
 		break;
 		
 		case UNDO_OPEN: 
-			hMem = GSSiGlobAlloc (  76,GMEM_MOVEABLE,UndoRecordHeader.Length);
+			hMem = GSSiGlobAlloc(GAIDNO  76,GMEM_MOVEABLE,UndoRecordHeader.Length);
 			pMem = GlobalLock (hMem); 
 			GetUndoData (FidUndo,pMem,UndoRecordHeader.Length,UndoRecordHeader.FirstPiece,TRUE);
 			if (!UndoRecordHeader.SeekLoc)
@@ -464,7 +464,7 @@ BOOL UndoAction (HFILE FidUndo)
 			GSSiGlobUlFree (&hMem);
 		break;
 		case UNDO_WRITE: 
-			hMem = GSSiGlobAlloc (  77,GMEM_MOVEABLE,UndoRecordHeader.Length);
+			hMem = GSSiGlobAlloc(GAIDNO  77,GMEM_MOVEABLE,UndoRecordHeader.Length);
 			pMem = GlobalLock (hMem); 
 			GetUndoData (FidUndo,pMem,UndoRecordHeader.Length,UndoRecordHeader.FirstPiece,TRUE);
 			Fid = GetUndoFid (UndoRecordHeader.UndoFileID);
@@ -753,7 +753,7 @@ void AddFileToUndoFile (LPSTR Name,long BeginLoc,HFILE Fid)
 	}
 	if (Fid == HFILE_ERROR)
 		return;
-	hStr = GSSiGlobAlloc (  78,GMEM_MOVEABLE,USHRT_MAX);
+	hStr = GSSiGlobAlloc(GAIDNO  78,GMEM_MOVEABLE,USHRT_MAX);
 	pStr = GlobalLock (hStr);
 	CurLoc = _llseek (Fid,0,2);  
 	LastLoc = CurLoc;

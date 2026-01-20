@@ -438,7 +438,7 @@ LRESULT CALLBACK ModifyProc(HWND Window, UINT Message,
            cListItems = SendDlgItemMessage(Edit->Dialog, epyT, LB_GETCOUNT, 0, 0);
          else
            cListItems = SendDlgItemMessage(Edit->Dialog, epyT, CB_GETCOUNT, 0, 0);
-         hCurrentValues = GSSiGlobAlloc ( 520,GHND,18000);
+         hCurrentValues = GSSiGlobAlloc(GAIDNO 520,GHND,18000);
          if(cListItems)
          {//i load them into memory for Combobox to unload and work with
            lpS = (LPSTR) GlobalLock(hCurrentValues);
@@ -1273,7 +1273,7 @@ TryAgain:     _fstrcpy(buffer,lpF->FldContents);
                     GlobalUnlock(lpF->hCurrValue);
                     GSSiGlobUlFree (&lpF->hCurrValue);
                   }
-                  lpF->hCurrValue = GSSiGlobAlloc ( 521,GHND ,length+1);
+                  lpF->hCurrValue = GSSiGlobAlloc(GAIDNO 521,GHND ,length+1);
                   _fstrcpy(lpF->FI.name,lpF->FldContents);
                   lpS = (LPSTR)GlobalLock(lpF->hCurrValue);
                   if(lps)_fstrcpy(lpS,lps);
@@ -1378,7 +1378,7 @@ BOOL CreateDynamicDialog (LPSTR DBName, LPGWDHEADER lpGWDHead,
 
             FilePtr = (LPOPENFILEDATA)GlobalLock (SQLPtr->OFHandle);
             lpFieldInfo = &FilePtr->FldInfo;
-            hGlobal = GSSiGlobAlloc ( 522, GHND, sizeof(FldInfo)* (NUMEDIT+NumSelect));
+            hGlobal = GSSiGlobAlloc(GAIDNO 522, GHND, sizeof(FldInfo)* (NUMEDIT+NumSelect));
             if(!hGlobal) return FALSE;
             lpItemInfo = (lpFldInfo) GlobalLock(hGlobal);
             lpF = lpItemInfo;
@@ -1418,7 +1418,7 @@ BOOL CreateDynamicDialog (LPSTR DBName, LPGWDHEADER lpGWDHead,
 	              ExpandText (str); 
 	              length = _fstrlen (str);
 	              //now I want to get the value currently held in this field 
-	              lpF->hCurrValue = GSSiGlobAlloc ( 523,GHND,length+1);
+	              lpF->hCurrValue = GSSiGlobAlloc(GAIDNO 523,GHND,length+1);
 	              lpS = (LPSTR)GlobalLock(lpF->hCurrValue);
 	              _fstrcpy(lpS,str);
 	              GlobalUnlock(lpF->hCurrValue); 
@@ -1508,7 +1508,7 @@ BOOL UpdateDynamicData (HWND hDlg,BOOL FromSave)
    LPSTR	lpUpdate, lpEnd, lpStr;
    BOOL		rtn=FALSE;
            
-   hUpStr = GSSiGlobAlloc ( 524,GMEM_MOVEABLE,4096);
+   hUpStr = GSSiGlobAlloc(GAIDNO 524,GMEM_MOVEABLE,4096);
    lpUpdate = GlobalLock (hUpStr);
    *lpUpdate = 0;
            
@@ -1903,7 +1903,7 @@ GLOBALHANDLE ReadDialogDef(char *filename)
 		//fgets(buffer,199,file);
 		if(12 != sscanf(buffer,"%12s%80s%hd%d%hd%hd%hd%hd%hd%hd%hd%80s",str1,str2,&BorderOption,&CloseOnSave,&SaveOnClose,&wX,&wY,&wCX,&wCY,&wLength,&wItemCount,DataFile))
 			break;
-		hInfo=GSSiGlobAlloc ( 525,GHND, sizeof(DlgInfo)+((2*wItemCount-1)*sizeof(DlgItemInfo)));
+		hInfo=GSSiGlobAlloc(GAIDNO 525,GHND, sizeof(DlgInfo)+((2*wItemCount-1)*sizeof(DlgItemInfo)));
 		lpInfo=(LPDLGINFO)GlobalLock(hInfo);
 		if(_fstrcmp(str1,"DIALOG"))
 			break;
@@ -2078,7 +2078,7 @@ GLOBALHANDLE NewDlgTemplate(DWORD Style,WORD X,WORD Y,
         needed_size+=_fstrlen(TypeFace)+1+sizeof(short);
 
 
-    hDTemplate=GSSiGlobAlloc ( 526,GMEM_MOVEABLE | GMEM_ZEROINIT,
+    hDTemplate=GSSiGlobAlloc(GAIDNO 526,GMEM_MOVEABLE | GMEM_ZEROINIT,
                         needed_size);
     if(hDTemplate==0)
        return hDTemplate;
@@ -2201,7 +2201,7 @@ BOOL AddNewDlgItem(HWND Window,HWND Dialog, WORD Type)
               GlobalUnlock(lpF->hCurrValue);
               GSSiGlobUlFree (&lpF->hCurrValue);
             }              
-            lpF->hCurrValue = GSSiGlobAlloc ( 527,GHND,lpF->TempFldLen);
+            lpF->hCurrValue = GSSiGlobAlloc(GAIDNO 527,GHND,lpF->TempFldLen);
         pt.y = 1;
      break;
      case TYPE_CHECKBOX: 
@@ -2948,7 +2948,7 @@ BOOL   EditDynamicDialog (HWND hWndDlg,LPSTR Name, LPSTR SQL, LPSTR InsertString
        ptr = _fstrrchr(buffer,' ');//isolate number of items in file
        ptr++;
        GlobNumItems = atoi(ptr);
-       hGlobal = GSSiGlobAlloc ( 528, GHND, sizeof(FldInfo)* GlobNumItems + TOTALEXTRA + 45);
+       hGlobal = GSSiGlobAlloc(GAIDNO 528, GHND, sizeof(FldInfo)* GlobNumItems + TOTALEXTRA + 45);
        lpItemInfo = (lpFldInfo) GlobalLock(hGlobal);
        lpF = lpItemInfo;
        if (!(FileType = OpenDataFile (ThemeDB ,SQL,BT_READ,&hThemeDB))) return FALSE;
@@ -2983,7 +2983,7 @@ Again:if(0==fgetstring(buffer,200,OutFid)) break;
       {
         lpF->FldType = 2;
         lpF->TempFldLen = 256;
-        lpF->hCurrValue = GSSiGlobAlloc ( 529,GHND,lpF->TempFldLen);
+        lpF->hCurrValue = GSSiGlobAlloc(GAIDNO 529,GHND,lpF->TempFldLen);
         lpS = (LPSTR)GlobalLock(lpF->hCurrValue);
         _fstrcpy(lpS,lpF->FldContents);
         GlobalUnlock(lpF->hCurrValue);
@@ -2993,7 +2993,7 @@ Again:if(0==fgetstring(buffer,200,OutFid)) break;
       {
         lpF->FldType = 1;
         lpF->TempFldLen = 256;
-        lpF->hCurrValue = GSSiGlobAlloc ( 530,GHND,lpF->TempFldLen);
+        lpF->hCurrValue = GSSiGlobAlloc(GAIDNO 530,GHND,lpF->TempFldLen);
         lpS = (LPSTR)GlobalLock(lpF->hCurrValue);
         _fstrcpy(lpS,lpF->FldContents);
         GlobalUnlock(lpF->hCurrValue);
@@ -3053,7 +3053,7 @@ TryAgain:
             	goto TryAgain;
             }  
             length = _fstrlen (str);
-			lpF->hCurrValue = GSSiGlobAlloc ( 531,GHND,length+1);
+			lpF->hCurrValue = GSSiGlobAlloc(GAIDNO 531,GHND,length+1);
 			lpS = (LPSTR)GlobalLock(lpF->hCurrValue); 
 			if (length)
 				_fstrcpy(lpS,str);
@@ -3168,7 +3168,7 @@ BOOL FAR PASCAL EDITDYNDIALOGMsgProc(HWND hWndDlg, WORD Message, WORD wParam, LO
                  HANDLE hMem;
                  LPSTR  lpStr, lpWhere;
                  
-                 hMem = GSSiGlobAlloc ( 335,GHND,4096);
+                 hMem = GSSiGlobAlloc(GAIDNO 335,GHND,4096);
                  lpStr = GlobalLock (hMem); 
                  GetDlgItemText (hWndDlg,IDC_SQL,lpStr,1024);
                  if (GetSQLWhereClause (hWndDlg, hDDSQL, lpStr))
@@ -3406,7 +3406,7 @@ BOOL GetDynInitialValues (HWND hWndDlg)
     
     GSSiGlobFree (&hDynInitialStrings);
     lInitialStrings = 1;
-    hDynInitialStrings = GSSiGlobAlloc ( 331,GHND,USHRT_MAX);
+    hDynInitialStrings = GSSiGlobAlloc(GAIDNO 331,GHND,USHRT_MAX);
     pInitialStrings=GlobalLock (hDynInitialStrings);
 	for (i=0;i<NumDynControls;i++) 
 	{
@@ -3443,8 +3443,8 @@ BOOL SetDynDlgData (HWND hWndDlg,LPSTR Name,LPUINT pcntls,short lncntls)
 		GSSiGlobFree (&hDynStrings);  
 		_fstrcpy (DDFile,Name);
 		NumDynControls = lncntls/2;
-		hDynControls = GSSiGlobAlloc ( 332,GHND,(NumDynControls+1)*sizeof(CONTROLDEF));
-		hDynStrings = GSSiGlobAlloc ( 333,GHND,USHRT_MAX);
+		hDynControls = GSSiGlobAlloc(GAIDNO 332,GHND,(NumDynControls+1)*sizeof(CONTROLDEF));
+		hDynStrings = GSSiGlobAlloc(GAIDNO 333,GHND,USHRT_MAX);
 		lDynStrings = 1;  
 		pDynStrings = GlobalLock (hDynStrings);
 		pControlDef = (LPCONTROLDEF)GlobalLock (hDynControls);
@@ -3777,7 +3777,7 @@ BOOL ProcessDynEdit (HWND hWndDlg,HWND hWndEdit,WPARAM wParam,LPARAM lParam)
 			rtn = TRUE;   
 		case IDC_EXIT: 
 		{
-			HANDLE	hCmd = GSSiGlobAlloc ( 334,GMEM_MOVEABLE,USHRT_MAX);
+			HANDLE	hCmd = GSSiGlobAlloc(GAIDNO 334,GMEM_MOVEABLE,USHRT_MAX);
 			LPSTR	pCmd = GlobalLock (hCmd);  
 			LPSTR	pTableName;
 			char	delim=' ';

@@ -288,7 +288,7 @@ void GetSHPName (LPSTR Name)
 	
 	if (!*SmallDBFName)
 		GSSiGetTempFileName (0,"gms",0,(LPSTR)SmallDBFName);
-	hMem = GSSiGlobAlloc (1416,GMEM_MOVEABLE,sizeof(OFSTRUCTGM));
+	hMem = GSSiGlobAlloc(GAIDNO 1416,GMEM_MOVEABLE,sizeof(OFSTRUCTGM));
 	pOFStruct = (LPOFSTRUCTGM)GlobalLock (hMem);	
    	FidSmallDBF = OpenFile (SmallDBFName,pOFStruct,OF_CREATE);
    	GSSiGlobUlFree (&hMem);
@@ -313,7 +313,7 @@ BOOL CloseFidDBF (BOOL Final)
 		FidSmallDBF = HFILE_ERROR;  
 		return TRUE;
 	}
-	hMem = GSSiGlobAlloc (1416,GMEM_MOVEABLE,sizeof(OFSTRUCTGM)+256);
+	hMem = GSSiGlobAlloc(GAIDNO 1416,GMEM_MOVEABLE,sizeof(OFSTRUCTGM)+256);
 	TestName = GlobalLock (hMem);
 	pOFStruct = (LPOFSTRUCTGM)(TestName + 256);	
 	GSSiGetTempFileName (0,"gms",0,(LPSTR)TestName);
@@ -384,7 +384,7 @@ void CreateSHPSymlistFile(LPSTR SHPFileName, int NumSHPParms, LPSTR SymName)
 			{
 			case MT_FILE_GEO_DB:
 			{
-				hStr = GSSiGlobAlloc(0, GMEM_MOVEABLE, 4096+1024);
+				hStr = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, 4096+1024);
 				str = GlobalLock(hStr);
 				sql = str + 4096;
 				sname = sql + 512;
@@ -419,7 +419,7 @@ void CreateSHPSymlistFile(LPSTR SHPFileName, int NumSHPParms, LPSTR SymName)
 					int lSymbols = 0;
 					HANDLE hBTDistinct = GetDistinctValues(hWnd, SymName, ln, hDB, 1024);
 					numSymbols = BT_NUM_IN_INDEX(hBTDistinct);
-					hSymbols = GSSiGlobAlloc(0,GHND, ln*numSymbols + 32);
+					hSymbols = GSSiGlobAlloc(GAIDNO 0,GHND, ln*numSymbols + 32);
 					pSymbols = GlobalLock(hSymbols);
 					while (!BT_FIND(hBTDistinct, value, pos, BT_ANY, (LPSTR)&count))
 					{
@@ -878,7 +878,7 @@ BOOL SetSHPParms (long RecordNumber)
 	pTAG = SHPTAG;
 	if (*pTAG && (pC = _fstrchr (pTAG,':')))
 	{   
-		HANDLE hTag = GSSiGlobAlloc(1832,GMEM_MOVEABLE, 4096);
+		HANDLE hTag = GSSiGlobAlloc(GAIDNO 1832,GMEM_MOVEABLE, 4096);
 		LPSTR ptag = GlobalLock(hTag);
 		_fstrcpy (ptag,pTAG); 
 		ExpandText (ptag);
@@ -1050,7 +1050,7 @@ HFILE CreateSHPFileIndex (LPSTR IndexName,LPSTR SHPFileName)
 	Fid = GSSiOpenFile (Name,0,OF_READ);
 	if (Fid == HFILE_ERROR)
 		return Fid;   
-	hIndexBlocks = GSSiGlobAlloc (0,GMEM_MOVEABLE,NumIndexBlocks*sizeof(mnmxCor));
+	hIndexBlocks = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,NumIndexBlocks*sizeof(mnmxCor));
 	BlockMinMax = (LPMINMAX)GlobalLock (hIndexBlocks); 
 	for (i=0;i<NumIndexBlocks;i++)
 		MinMaxInit (&BlockMinMax[i]);
@@ -1426,7 +1426,7 @@ long GetSHPRecordOffset (long record,BOOL UseBounds)
 			if (!hOffsets || loc < FirstLoc || loc > LastLoc)
 			{   
 				GSSiGlobFree (&hOffsets);
-				hOffsets = GSSiGlobAlloc (1720,GMEM_MOVEABLE,MaxLen);
+				hOffsets = GSSiGlobAlloc(GAIDNO 1720,GMEM_MOVEABLE,MaxLen);
 				pLoc = (LPSTR)GlobalLock (hOffsets);
 				GSSillseek (SHPIDXFid,loc,0);
 				Len = GSSilread (SHPIDXFid,pLoc,MaxLen); 
@@ -1463,7 +1463,7 @@ long GetSHPRecordOffset (long record,BOOL UseBounds)
 				GSSillseek (SHPIDXFid,2,0);
 				GSSilread (SHPIDXFid,(HPSTR)&NumBlocks,4);
 				GSSilread (SHPIDXFid,(HPSTR)&RecsPerBlock,4);
-				hBlocks = GSSiGlobAlloc (1721,GMEM_MOVEABLE,NumBlocks*sizeof(mnmxCor));
+				hBlocks = GSSiGlobAlloc(GAIDNO 1721,GMEM_MOVEABLE,NumBlocks*sizeof(mnmxCor));
 				BlockMinMax = (LPMINMAX)GlobalLock (hBlocks); 
 				GSSilread (SHPIDXFid,(HPSTR)BlockMinMax,NumBlocks*sizeof(mnmxCor));
                 GlobalUnlock (hBlocks); 
@@ -1505,7 +1505,7 @@ long GetSHPRecordOffset (long record,BOOL UseBounds)
 			if (!hOffsets || loc < FirstLoc || loc > LastLoc)
 			{   
 				GSSiGlobFree (&hOffsets);
-				hOffsets = GSSiGlobAlloc (1422,GMEM_MOVEABLE,RecsPerBlock*sizeof(SHPINDEXRECORD));
+				hOffsets = GSSiGlobAlloc(GAIDNO 1422,GMEM_MOVEABLE,RecsPerBlock*sizeof(SHPINDEXRECORD));
 				pLoc = (LPSTR)GlobalLock (hOffsets);
 				GSSillseek (SHPIDXFid,loc,0);
 				Len = GSSilread (SHPIDXFid,(HPSTR)pLoc,RecsPerBlock*sizeof(SHPINDEXRECORD)); 
@@ -2121,9 +2121,9 @@ DoPoly:
 	        NumPoints = SHPPolyHeader.NumPoints; 
 	        if (SHPHeader.ShapeType == SHPT_POLYGON || SHPHeader.ShapeType == SHPT_POLYGONZ || SHPHeader.ShapeType == SHPT_POLYGONM)
 	        	NumPoints = NumPoints+nPoly-1;
-	        hPartIndex = GSSiGlobAlloc (1418,GMEM_MOVEABLE,sizeof(long)*(nPoly+1));
-	        hPolyPartLen = GSSiGlobAlloc (1419,GMEM_MOVEABLE,sizeof(int)*(nPoly+1));
-			hPoints = GSSiGlobAlloc (1420,GMEM_MOVEABLE,sizeof(DPOINT)*NumPoints); 
+	        hPartIndex = GSSiGlobAlloc(GAIDNO 1418,GMEM_MOVEABLE,sizeof(long)*(nPoly+1));
+	        hPolyPartLen = GSSiGlobAlloc(GAIDNO 1419,GMEM_MOVEABLE,sizeof(int)*(nPoly+1));
+			hPoints = GSSiGlobAlloc(GAIDNO 1420,GMEM_MOVEABLE,sizeof(DPOINT)*NumPoints); 
 	        pPartIndex = (HPLONG)GlobalLock (hPartIndex); 
 	        BigRead (FidSHP,(HPSTR)pPartIndex,(long)nPoly*sizeof(long)); //pPartIndex[0]
 	        pPartIndex[SHPPolyHeader.NumParts]= SHPPolyHeader.NumPoints;
@@ -2160,8 +2160,8 @@ DoPoly:
 			if (Display && nPoly > 1 && !BoundsInBounds (&CurrentSHPRecBounds,&CurView->WBounds,0))
 			{
 				int	nPolyNew = 0, nPointsNew=0;
-				HANDLE	hPolyPartLenNew = GSSiGlobAlloc (1783,GMEM_MOVEABLE,sizeof(int)*(nPoly+1));
-				HANDLE	hPointsNew = GSSiGlobAlloc (1784,GMEM_MOVEABLE,sizeof(DPOINT)*NumPoints); 
+				HANDLE	hPolyPartLenNew = GSSiGlobAlloc(GAIDNO 1783,GMEM_MOVEABLE,sizeof(int)*(nPoly+1));
+				HANDLE	hPointsNew = GSSiGlobAlloc(GAIDNO 1784,GMEM_MOVEABLE,sizeof(DPOINT)*NumPoints); 
 				HPDPOINT	pPointsNew = (HPDPOINT)GlobalLock (hPointsNew);
 				LPLONG		pNumPointsNew = (LPLONG)GlobalLock (hPolyPartLenNew);
 				DPOINT	FirstPointNew;
@@ -2238,13 +2238,13 @@ DoPoly:
 						pNumPoints = (LPINT)GlobalLock(hPolyPartLen);//pNumPoints[1]
 						if (nPoly > 1)
 						{
-							HANDLE	hhPoly = GSSiGlobAlloc(418, GMEM_MOVEABLE, sizeof(HANDLE)*nPoly);
+							HANDLE	hhPoly = GSSiGlobAlloc(GAIDNO 418, GMEM_MOVEABLE, sizeof(HANDLE)*nPoly);
 							LPHANDLE phPoly = (LPHANDLE)GlobalLock(hhPoly);
 							HPDPOINT	pPoints1 = (HPDPOINT)GlobalLock(hPoints), pPoints2;
 							
 							for (i = 0; i<nPoly; i++)
 							{
-								phPoly[i] = GSSiGlobAlloc(420, GMEM_MOVEABLE, sizeof(DPOINT)*(long)pNumPoints[i]);
+								phPoly[i] = GSSiGlobAlloc(GAIDNO 420, GMEM_MOVEABLE, sizeof(DPOINT)*(long)pNumPoints[i]);
 								pPoints2 = (HPDPOINT)GlobalLock(phPoly[i]);
 								hmemmove((HPSTR)pPoints2, (HPSTR)pPoints1, sizeof(DPOINT)*(long)pNumPoints[i]);
 								GlobalUnlock(phPoly[i]);
@@ -2354,13 +2354,13 @@ DoPoly:
 						pNumPoints = (LPINT)GlobalLock (hPolyPartLen);//pNumPoints[1]
 						if (nPoly > 1)
 						{
-							HANDLE	hhPoly = GSSiGlobAlloc ( 418,GMEM_MOVEABLE,sizeof(HANDLE)*nPoly); 
+							HANDLE	hhPoly = GSSiGlobAlloc(GAIDNO 418,GMEM_MOVEABLE,sizeof(HANDLE)*nPoly); 
 							LPHANDLE phPoly = (LPHANDLE)GlobalLock (hhPoly);
 							HPDPOINT	pPoints1=(HPDPOINT)GlobalLock (hPoints), pPoints2;
                         
 							for (i=0;i<nPoly;i++)
 							{   
-	                   			phPoly[i] = GSSiGlobAlloc ( 420,GMEM_MOVEABLE,sizeof(DPOINT)*(long)pNumPoints[i]);
+	                   			phPoly[i] = GSSiGlobAlloc(GAIDNO 420,GMEM_MOVEABLE,sizeof(DPOINT)*(long)pNumPoints[i]);
 								pPoints2= (HPDPOINT)GlobalLock (phPoly[i]);  
 								hmemmove ((HPSTR)pPoints2,(HPSTR)pPoints1,sizeof(DPOINT)*(long)pNumPoints[i]);
 								GlobalUnlock (phPoly[i]); 
@@ -2666,7 +2666,7 @@ BOOL OpenPGDBFileIndex (LPSTR DBNameIN,LPMNMXCORD WBounds)
     	
     	sprintf (str,"TABLENAME = '%s'",PGDBTable);
 		st = OpenPGDB (DBName,"GDB_GeomColumns",str); 
-		hSelectFields = GSSiGlobAlloc (GMEM_MOVEABLE,0,1024);
+		hSelectFields = GSSiGlobAlloc(GAIDNO GMEM_MOVEABLE,0,1024);
 		pFields = GlobalLock (hSelectFields);
 		strcpy (pFields,"TableName,FieldName,ShapeType,ExtentLeft,ExtentRight,ExtentBottom,ExtentTop,IdxOriginX,IdxOriginY,IdxGridSize");
 		GlobalUnlock (hSelectFields);
@@ -2809,7 +2809,7 @@ long ReadPGDBHeader (LPSTR DBNameIN,LPMNMXCORD pMinMaxCoord)
 
 	if (!OpenPGDB (DBName,"GDB_GeomColumns",SQL))
 		goto RtnFalse;
-	hSelectFields = GSSiGlobAlloc (GMEM_MOVEABLE,0,1024);
+	hSelectFields = GSSiGlobAlloc(GAIDNO GMEM_MOVEABLE,0,1024);
 	pFields = GlobalLock (hSelectFields);
 	strcpy (pFields,"TableName,FieldName,ShapeType,ExtentLeft,ExtentRight,ExtentBottom,ExtentTop");
 	GlobalUnlock (hSelectFields);
@@ -3023,7 +3023,7 @@ long ListPGDBTables (LPSTR DBNameIN,HWND hWndDlg,UINT ListCntl,int ListType)
     	*pPar++ = 0; 
 	if (!OpenPGDB (DBName,"GDB_GeomColumns",""))
 		return 0;
-	hSelectFields = GSSiGlobAlloc (GMEM_MOVEABLE,0,1024);
+	hSelectFields = GSSiGlobAlloc(GAIDNO GMEM_MOVEABLE,0,1024);
 	pFields = GlobalLock (hSelectFields);
 	strcpy (pFields,"TableName,FieldName,ShapeType,ExtentLeft,ExtentRight,ExtentBottom,ExtentTop,IdxOriginX,IdxOriginY,IdxGridSize");
 	GlobalUnlock (hSelectFields);
@@ -3376,10 +3376,10 @@ long ConvertFGDBTable(LPSTR DBNameIN, LPSTR OutFile, LPSTR Version,LPSTR TableNa
 					SHPPolyHeader.Type = SHPT_POLYGON;
 				if (pFGDBRecHeader->shapeType != SHPT_TEXT && (SHPPolyHeader.Type == SHPT_POLYGON || SHPPolyHeader.Type == SHPT_POLYGON_WITHCURVES || SHPPolyHeader.Type == SHPT_POLYGONZ || SHPPolyHeader.Type == SHPT_POLYGONM || SHPPolyHeader.Type == SHPT_PGDB_POLYGONZ))
 					NumPoints = NumPoints + nPoly - 1;
-				HANDLE hPartIndex = GSSiGlobAlloc(1418, GMEM_MOVEABLE, sizeof(long) * (nPoly + 1));
-				HANDLE hPolyPartLen = GSSiGlobAlloc(1787, GMEM_MOVEABLE, sizeof(int) * (nPoly + 1));
-				HANDLE hPolyBounds = GSSiGlobAlloc(1855, GMEM_MOVEABLE, sizeof(MNMXCORD) * (nPoly + 1));
-				HANDLE hPoints = GSSiGlobAlloc(1420, GMEM_MOVEABLE, sizeof(DPOINT) * NumPoints);
+				HANDLE hPartIndex = GSSiGlobAlloc(GAIDNO 1418, GMEM_MOVEABLE, sizeof(long) * (nPoly + 1));
+				HANDLE hPolyPartLen = GSSiGlobAlloc(GAIDNO 1787, GMEM_MOVEABLE, sizeof(int) * (nPoly + 1));
+				HANDLE hPolyBounds = GSSiGlobAlloc(GAIDNO 1855, GMEM_MOVEABLE, sizeof(MNMXCORD) * (nPoly + 1));
+				HANDLE hPoints = GSSiGlobAlloc(GAIDNO 1420, GMEM_MOVEABLE, sizeof(DPOINT) * NumPoints);
 				HPLONG pPartIndex = (HPLONG)GlobalLock(hPartIndex);
 				long		recloc = sizeof(SHPPOLYHEADER);
 				totPoints += NumPoints;
@@ -3479,7 +3479,7 @@ long ConvertFGDBTable(LPSTR DBNameIN, LPSTR OutFile, LPSTR Version,LPSTR TableNa
 				}
 				GlobalUnlock(hPolyBounds);
 				GlobalUnlock(hPolyPartLen);
-				HANDLE hIPoints = GSSiGlobAlloc(0, GMEM_MOVEABLE, NumPoints * sizeof(POINT));
+				HANDLE hIPoints = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, NumPoints * sizeof(POINT));
 				LPPOINT pIPoints = (LPPOINT)GlobalLock(hIPoints);
 				BOOL canCompressI1 = TRUE;
 				BOOL canCompressI2 = TRUE;
@@ -3502,7 +3502,7 @@ long ConvertFGDBTable(LPSTR DBNameIN, LPSTR OutFile, LPSTR Version,LPSTR TableNa
 				if (canCompressI1)
 				{
 					int lmem = NumPoints * sizeof(BPOINT);
-					HANDLE hCMPPoints = GSSiGlobAlloc(0, GHND, lmem);
+					HANDLE hCMPPoints = GSSiGlobAlloc(GAIDNO 0, GHND, lmem);
 					LPBPOINT pCMPPoints = GlobalLock(hCMPPoints);
 					numCompress1++;
 					compType = 1;
@@ -3542,7 +3542,7 @@ long ConvertFGDBTable(LPSTR DBNameIN, LPSTR OutFile, LPSTR Version,LPSTR TableNa
 				else if (canCompressI2)
 				{
 					int lmem = NumPoints * sizeof(SPOINT);
-					HANDLE hCMPPoints = GSSiGlobAlloc(0, GHND, lmem);
+					HANDLE hCMPPoints = GSSiGlobAlloc(GAIDNO 0, GHND, lmem);
 					LPSPOINT pCMPPoints = GlobalLock(hCMPPoints);
 					numCompress2++;
 					compType = 2;
@@ -3582,7 +3582,7 @@ long ConvertFGDBTable(LPSTR DBNameIN, LPSTR OutFile, LPSTR Version,LPSTR TableNa
 				else
 				{
 					int lmem = NumPoints * sizeof(POINT);
-					HANDLE hCMPPoints = GSSiGlobAlloc(0, GHND, lmem);
+					HANDLE hCMPPoints = GSSiGlobAlloc(GAIDNO 0, GHND, lmem);
 					LPPOINT pCMPPoints = GlobalLock(hCMPPoints);
 					numCompress3++;
 					for (int i = 0; i < NumPoints; i++)
@@ -3751,7 +3751,7 @@ long ListFGDBTables(LPSTR DBNameIN, HWND hWndDlg, UINT ListCntl, int ListType)
 	/*	strcpy (TableName,"gdb_items");
 		if (!OpenFGDB (DBName,TableName,""))
 			return 0;
-		hSelectFields = GSSiGlobAlloc (GMEM_MOVEABLE,0,1024);
+		hSelectFields = GSSiGlobAlloc(GAIDNO GMEM_MOVEABLE,0,1024);
 		pFields = GlobalLock (hSelectFields);
 		strcpy (pFields,"Name,DatasetSubtype1,DatasetSubtype2");
 		GlobalUnlock (hSelectFields);
@@ -4469,7 +4469,7 @@ int FileForPoint (HPDPOINT p,int minx,int miny,int iwidth,int ncols)
 HANDLE ConvertToIPoint (int np,HPDPOINT pPoints)
 {
 	int i;
-	HANDLE handle=GSSiGlobAlloc (0,GMEM_MOVEABLE,np*sizeof(POINT));
+	HANDLE handle=GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,np*sizeof(POINT));
 	LPPOINT p=GlobalLock (handle);
 
 	for (i=0;i<np;i++)
@@ -4505,7 +4505,7 @@ BOOL SaveContours (int NumPoints,HPDPOINT pPoints,LPSTR CurrentUDI)
 		nfiles = nrows*ncols;
 		if (nfiles <= 0)
 			return FALSE;
-		hfid = GSSiGlobAlloc (1779,GMEM_MOVEABLE,nfiles*sizeof(HFILE));
+		hfid = GSSiGlobAlloc(GAIDNO 1779,GMEM_MOVEABLE,nfiles*sizeof(HFILE));
 		pfid = GlobalLock (hfid);
 		for (i=0;i<nfiles;i++)
 		{
@@ -4614,7 +4614,7 @@ BOOL PointInScreenRect (LPPOINT p)
 
 LPPOINT MergeContourPoints (LPHANDLE phPoints,LPINT pnpnts)
 {
-	HANDLE hNewPoints = GSSiGlobAlloc (1780,GMEM_MOVEABLE,((*pnpnts)+1) * sizeof(POINT));
+	HANDLE hNewPoints = GSSiGlobAlloc(GAIDNO 1780,GMEM_MOVEABLE,((*pnpnts)+1) * sizeof(POINT));
 	LPPOINT newp = GlobalLock (hNewPoints);
 	LPPOINT p;
 	unsigned int i;
@@ -4730,7 +4730,7 @@ BOOL PointsWithinMaxOffset (LPPOINT ip,int ibeg,int iend)
 
 LPPOINT SmoothContourPoints (LPHANDLE phPoints,LPINT pnpnts)
 {
-	HANDLE hNewPoints = GSSiGlobAlloc (1780,GMEM_MOVEABLE,((*pnpnts)+1) * sizeof(POINT));
+	HANDLE hNewPoints = GSSiGlobAlloc(GAIDNO 1780,GMEM_MOVEABLE,((*pnpnts)+1) * sizeof(POINT));
 	LPPOINT newp = GlobalLock (hNewPoints);
 	LPPOINT p;
 	int i, ibeg;
@@ -4761,7 +4761,7 @@ LPPOINT SmoothContourPoints (LPHANDLE phPoints,LPINT pnpnts)
 
 LPPOINT SmoothContourPoints_old (LPHANDLE phPoints,LPINT pnpnts)
 {
-	HANDLE hNewPoints = GSSiGlobAlloc (1780,GMEM_MOVEABLE,*pnpnts * sizeof(POINT));
+	HANDLE hNewPoints = GSSiGlobAlloc(GAIDNO 1780,GMEM_MOVEABLE,*pnpnts * sizeof(POINT));
 	LPPOINT newp = GlobalLock (hNewPoints);
 	LPPOINT p;
 	unsigned int i;
@@ -4819,7 +4819,7 @@ BOOL GetNextThinnedContour (float *contourElev,int *nconPnts,HANDLE *hConPnts)
 Top:
 	if (BigRead (thinnedConFid,&conheader,sizeof(conheader)) != sizeof(conheader))
 		return FALSE;
-	hPoints = GSSiGlobAlloc (0,GMEM_MOVEABLE,conheader.npnts*sizeof(POINT));
+	hPoints = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,conheader.npnts*sizeof(POINT));
 	pPoints = GlobalLock (hPoints);
 
 	BigRead (thinnedConFid,pPoints,conheader.npnts*sizeof(POINT));
@@ -4834,7 +4834,7 @@ Top:
 		pPoints = MergeContourPoints (&hPoints,&npnts);
 	if (contourPointLinearSmooth > 0)
 		pPoints = SmoothContourPoints (&hPoints,&npnts);
-	*hConPnts = GSSiGlobAlloc (1782,GMEM_MOVEABLE,npnts*sizeof(DPOINT)+sizeof(MNMXCORD));
+	*hConPnts = GSSiGlobAlloc(GAIDNO 1782,GMEM_MOVEABLE,npnts*sizeof(DPOINT)+sizeof(MNMXCORD));
 	*nconPnts = npnts;
 	*contourElev = conheader.fcontour;
 	pBounds = GlobalLock (*hConPnts);
@@ -4933,7 +4933,7 @@ void DisplayContours (HDC hDC,LPSTR UDI)
 	{
 		if (BoundsInBounds (&conheader.bounds,&CurView->WBounds,1))
 		{
-			HANDLE hPoints = GSSiGlobAlloc (0,GMEM_MOVEABLE,conheader.npnts*sizeof(POINT));
+			HANDLE hPoints = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,conheader.npnts*sizeof(POINT));
 			HPPOINT pPoints = GlobalLock (hPoints);
 
 			BigRead (fid,pPoints,conheader.npnts*sizeof(POINT));
@@ -5021,12 +5021,12 @@ void DisplayContours_d (HDC hDC,LPSTR UDI)
 	{
 		if (BoundsInBounds (&header.bounds,&CurView->WBounds,1))
 		{
-			HANDLE hPoints = GSSiGlobAlloc (0,GMEM_MOVEABLE,header.npnts*sizeof(DPOINT));
+			HANDLE hPoints = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,header.npnts*sizeof(DPOINT));
 			HPDPOINT pPoints = GlobalLock (hPoints);
 
 			BigRead (fid,pPoints,header.npnts*sizeof(DPOINT));
 			{
-				HANDLE hScreenPoints = GSSiGlobAlloc ( 0,GMEM_MOVEABLE,header.npnts * (long)sizeof(POINT));
+				HANDLE hScreenPoints = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,header.npnts * (long)sizeof(POINT));
 				HPPOINT	pScreenPoints = GlobalLock (hScreenPoints);
 				int nPnts = header.npnts;
 				
@@ -5078,12 +5078,12 @@ void DisplayContours_old (HDC hDC,LPSTR UDI)
 	{
 		if (BoundsInBounds (&header.bounds,&CurView->WBounds,1))
 		{
-			HANDLE hPoints = GSSiGlobAlloc (0,GMEM_MOVEABLE,header.npnts*sizeof(DPOINT));
+			HANDLE hPoints = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,header.npnts*sizeof(DPOINT));
 			HPDPOINT pPoints = GlobalLock (hPoints);
 
 			BigRead (fid,pPoints,header.npnts*sizeof(DPOINT));
 			{
-				HANDLE hScreenPoints = GSSiGlobAlloc ( 0,GMEM_MOVEABLE,header.npnts * (long)sizeof(POINT));
+				HANDLE hScreenPoints = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,header.npnts * (long)sizeof(POINT));
 				HPPOINT	pScreenPoints = GlobalLock (hScreenPoints);
 				int nPnts = header.npnts;
 				
@@ -5591,10 +5591,10 @@ DoPoly:
 
 	        if (pFGDBRecHeader->shapeType != SHPT_TEXT && (SHPPolyHeader.Type == SHPT_POLYGON || SHPPolyHeader.Type == SHPT_POLYGON_WITHCURVES || SHPPolyHeader.Type == SHPT_POLYGONZ || SHPPolyHeader.Type == SHPT_POLYGONM || SHPPolyHeader.Type == SHPT_PGDB_POLYGONZ))
 	        	NumPoints = NumPoints+nPoly-1;
-	        hPartIndex = GSSiGlobAlloc (1418,GMEM_MOVEABLE,sizeof(long)*(nPoly+1));
-	        hPolyPartLen = GSSiGlobAlloc (1785,GMEM_MOVEABLE,sizeof(int)*(nPoly+1));
-			hPolyPartLenNew = GSSiGlobAlloc(1786, GMEM_MOVEABLE, sizeof(int) * (nPoly + 1));
-			hPoints = GSSiGlobAlloc (1420,GMEM_MOVEABLE,sizeof(DPOINT)*(NumPoints+1));
+	        hPartIndex = GSSiGlobAlloc(GAIDNO 1418,GMEM_MOVEABLE,sizeof(long)*(nPoly+1));
+	        hPolyPartLen = GSSiGlobAlloc(GAIDNO 1785,GMEM_MOVEABLE,sizeof(int)*(nPoly+1));
+			hPolyPartLenNew = GSSiGlobAlloc(GAIDNO 1786, GMEM_MOVEABLE, sizeof(int) * (nPoly + 1));
+			hPoints = GSSiGlobAlloc(GAIDNO 1420,GMEM_MOVEABLE,sizeof(DPOINT)*(NumPoints+1));
 	        pPartIndex = (HPLONG)GlobalLock (hPartIndex); 
 	        hmemmove ((HPSTR)pPartIndex,&pRec[recloc],nPoly*sizeof(long));   //pPartIndex[5]
 	        recloc += nPoly*sizeof(long);
@@ -5753,7 +5753,7 @@ DoPoly:
 			
 				db_dopoly=TRUE;
 	
-				hPoints2 = GSSiGlobAlloc (1834,GMEM_MOVEABLE,(1024*NumPOC+NumPoints*2)*sizeof(DPOINT));
+				hPoints2 = GSSiGlobAlloc(GAIDNO 1834,GMEM_MOVEABLE,(1024*NumPOC+NumPoints*2)*sizeof(DPOINT));
 				pPoints2 = pPoints2Base = (HPDPOINT)GlobalLock (hPoints2);
 				NumPoints2 = 0;
 				for (i=0;i<NumPoints;i++)
@@ -6013,7 +6013,7 @@ NextPt:;
 								d = ldistp (MP[0],MP[1]);
 								az = getazd (&MP[1],&MP[0]);
 								POC = dnewpt (MP[1],az,d*0.27);
-								hCurve = GSSiGlobAlloc (0,GMEM_MOVEABLE,sizeof(DPOINT)*4096);
+								hCurve = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,sizeof(DPOINT)*4096);
 								pDPoint = pDPointBeg = GlobalLock (hCurve);
 								np = 0;
 								CurvePointsD(&PC,&POC,&PT, &np, &pDPointBeg,&BackAZ,4090,DisplayCurveFactor,1);
@@ -6159,7 +6159,7 @@ ExitText:
 						if (CurveText)
 						{
 							int	npnts = 3;
-							HANDLE	hPoints=GSSiGlobAlloc (0,GMEM_MOVEABLE,3*sizeof(DPOINT));
+							HANDLE	hPoints=GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,3*sizeof(DPOINT));
 							LPDPOINT Points = GlobalLock (hPoints);
 
 							Points[0] = BP;
@@ -6223,13 +6223,13 @@ badcode:
 					pNumPoints = (LPINT)GlobalLock (hPolyPartLen);//pNumPoints[1]
 					if (nPoly > 1)
 					{
-						HANDLE	hhPoly = GSSiGlobAlloc ( 418,GMEM_MOVEABLE,sizeof(HANDLE)*nPoly); 
+						HANDLE	hhPoly = GSSiGlobAlloc(GAIDNO 418,GMEM_MOVEABLE,sizeof(HANDLE)*nPoly); 
 						LPHANDLE phPoly = (LPHANDLE)GlobalLock (hhPoly);
                         HPDPOINT	pPoints1=(HPDPOINT)GlobalLock (hPoints), pPoints2;
                         
 	                    for (i=0;i<nPoly;i++)
 	                    {   
-	                   		phPoly[i] = GSSiGlobAlloc ( 420,GMEM_MOVEABLE,sizeof(DPOINT)*(long)pNumPoints[i]);
+	                   		phPoly[i] = GSSiGlobAlloc(GAIDNO 420,GMEM_MOVEABLE,sizeof(DPOINT)*(long)pNumPoints[i]);
 		                    pPoints2= (HPDPOINT)GlobalLock (phPoly[i]);  
 		                    hmemmove ((HPSTR)pPoints2,(HPSTR)pPoints1,sizeof(DPOINT)*(long)pNumPoints[i]);
 	                        GlobalUnlock (phPoly[i]); 
@@ -6365,13 +6365,13 @@ badcode:
 					pNumPoints = (LPINT)GlobalLock (hPolyPartLen);//pNumPoints[1]
 					if (nPoly > 1)
 					{
-						HANDLE	hhPoly = GSSiGlobAlloc ( 418,GMEM_MOVEABLE,sizeof(HANDLE)*nPoly); 
+						HANDLE	hhPoly = GSSiGlobAlloc(GAIDNO 418,GMEM_MOVEABLE,sizeof(HANDLE)*nPoly); 
 						LPHANDLE phPoly = (LPHANDLE)GlobalLock (hhPoly);
                         HPDPOINT	pPoints1=(HPDPOINT)GlobalLock (hPoints), pPoints2;
                         
 	                    for (i=0;i<nPoly;i++)
 	                    {   
-	                   		phPoly[i] = GSSiGlobAlloc ( 420,GMEM_MOVEABLE,sizeof(DPOINT)*(long)pNumPoints[i]);
+	                   		phPoly[i] = GSSiGlobAlloc(GAIDNO 420,GMEM_MOVEABLE,sizeof(DPOINT)*(long)pNumPoints[i]);
 		                    pPoints2= (HPDPOINT)GlobalLock (phPoly[i]);  
 		                    hmemmove ((HPSTR)pPoints2,(HPSTR)pPoints1,sizeof(DPOINT)*(long)pNumPoints[i]);
 	                        GlobalUnlock (phPoly[i]); 
@@ -6743,10 +6743,10 @@ DoPoly:
 				SHPPolyHeader.Type = SHPT_POLYGON;	//added for runway ares for gmavl
 	        if (SHPType != SHPT_TEXT && (SHPPolyHeader.Type == SHPT_POLYGON || SHPPolyHeader.Type == SHPT_POLYGON_WITHCURVES || SHPPolyHeader.Type == SHPT_POLYGONZ || SHPPolyHeader.Type == SHPT_POLYGONM || SHPPolyHeader.Type == SHPT_PGDB_POLYGONZ))
 	        	NumPoints = NumPoints+nPoly-1;
-	        hPartIndex = GSSiGlobAlloc (1418,GMEM_MOVEABLE,sizeof(long)*(nPoly+1));
-	        hPolyPartLen = GSSiGlobAlloc (1787,GMEM_MOVEABLE,sizeof(int)*(nPoly+1));
-	        hPolyPartLenNew = GSSiGlobAlloc (1788,GMEM_MOVEABLE,sizeof(int)*(nPoly+1));
-			hPoints = GSSiGlobAlloc (1420,GMEM_MOVEABLE,sizeof(DPOINT)*NumPoints); 
+	        hPartIndex = GSSiGlobAlloc(GAIDNO 1418,GMEM_MOVEABLE,sizeof(long)*(nPoly+1));
+	        hPolyPartLen = GSSiGlobAlloc(GAIDNO 1787,GMEM_MOVEABLE,sizeof(int)*(nPoly+1));
+	        hPolyPartLenNew = GSSiGlobAlloc(GAIDNO 1788,GMEM_MOVEABLE,sizeof(int)*(nPoly+1));
+			hPoints = GSSiGlobAlloc(GAIDNO 1420,GMEM_MOVEABLE,sizeof(DPOINT)*NumPoints); 
 	        pPartIndex = (HPLONG)GlobalLock (hPartIndex); 
 	        hmemmove ((HPSTR)pPartIndex,&pRec[recloc],nPoly*sizeof(long));   //pPartIndex[5]
 	        recloc += nPoly*sizeof(long);
@@ -6840,7 +6840,7 @@ DoPoly:
 //DisplayMarkers = TRUE;  
 //SHPPolyHeader.Type == SHPT_POLYLINE_WITHCURVES;
 	
-				hPoints2 = GSSiGlobAlloc (0,GMEM_MOVEABLE,(1024*NumPOC+NumPoints*2)*sizeof(DPOINT));
+				hPoints2 = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,(1024*NumPOC+NumPoints*2)*sizeof(DPOINT));
 				pPoints2 = (HPDPOINT)GlobalLock (hPoints2); 
 				NumPoints2 = 0;
 				for (i=0;i<NumPoints;i++)
@@ -6958,7 +6958,7 @@ NextPt:;
 				AZ = getazd (RP,&MidPoint);
 				POC = dnewpt (*RP,AZ, Radius);  
 				GSSiGlobUlFree (&hPoints);
-				hPoints = GSSiGlobAlloc (0,GMEM_MOVEABLE,4090*sizeof(DPOINT));
+				hPoints = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,4090*sizeof(DPOINT));
 				pPoints = (HPDPOINT)GlobalLock (hPoints); 
 				NumPoints = 0;
 				if (!Display)   
@@ -7101,7 +7101,7 @@ NextPt:;
 								d = ldistp (MP[0],MP[1]);
 								az = getazd (&MP[1],&MP[0]);
 								POC = dnewpt (MP[1],az,d*0.27);
-								hCurve = GSSiGlobAlloc (0,GMEM_MOVEABLE,sizeof(DPOINT)*4096);
+								hCurve = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,sizeof(DPOINT)*4096);
 								pDPoint = pDPointBeg = GlobalLock (hCurve);
 								np = 0;
 								CurvePointsD(&PC,&POC,&PT, &np, &pDPointBeg,&BackAZ,4090,DisplayCurveFactor,1);
@@ -7245,7 +7245,7 @@ ExitText:
 						if (CurveText)
 						{
 							int	npnts = 3;
-							HANDLE	hPoints=GSSiGlobAlloc (0,GMEM_MOVEABLE,3*sizeof(DPOINT));
+							HANDLE	hPoints=GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,3*sizeof(DPOINT));
 							LPDPOINT Points = GlobalLock (hPoints);
 
 							Points[0] = BP;
@@ -7309,13 +7309,13 @@ badcode:
 					pNumPoints = (LPINT)GlobalLock (hPolyPartLenNew);//pNumPoints[1]
 					if (nPoly > 1)
 					{
-						HANDLE	hhPoly = GSSiGlobAlloc ( 418,GMEM_MOVEABLE,sizeof(HANDLE)*nPoly); 
+						HANDLE	hhPoly = GSSiGlobAlloc(GAIDNO 418,GMEM_MOVEABLE,sizeof(HANDLE)*nPoly); 
 						LPHANDLE phPoly = (LPHANDLE)GlobalLock (hhPoly);
                         HPDPOINT	pPoints1=(HPDPOINT)GlobalLock (hPoints), pPoints2;
                         
 	                    for (i=0;i<nPoly;i++)
 	                    {   
-	                   		phPoly[i] = GSSiGlobAlloc ( 420,GMEM_MOVEABLE,sizeof(DPOINT)*(long)pNumPoints[i]);
+	                   		phPoly[i] = GSSiGlobAlloc(GAIDNO 420,GMEM_MOVEABLE,sizeof(DPOINT)*(long)pNumPoints[i]);
 		                    pPoints2= (HPDPOINT)GlobalLock (phPoly[i]);  
 		                    hmemmove ((HPSTR)pPoints2,(HPSTR)pPoints1,sizeof(DPOINT)*(long)pNumPoints[i]);
 	                        GlobalUnlock (phPoly[i]); 
@@ -7408,13 +7408,13 @@ badcode:
 					pNumPoints = (LPINT)GlobalLock (hPolyPartLenNew);//pNumPoints[1]
 					if (nPoly > 1)
 					{
-						HANDLE	hhPoly = GSSiGlobAlloc ( 418,GMEM_MOVEABLE,sizeof(HANDLE)*nPoly); 
+						HANDLE	hhPoly = GSSiGlobAlloc(GAIDNO 418,GMEM_MOVEABLE,sizeof(HANDLE)*nPoly); 
 						LPHANDLE phPoly = (LPHANDLE)GlobalLock (hhPoly);
                         HPDPOINT	pPoints1=(HPDPOINT)GlobalLock (hPoints), pPoints2;
                         
 	                    for (i=0;i<nPoly;i++)
 	                    {   
-	                   		phPoly[i] = GSSiGlobAlloc ( 420,GMEM_MOVEABLE,sizeof(DPOINT)*(long)pNumPoints[i]);
+	                   		phPoly[i] = GSSiGlobAlloc(GAIDNO 420,GMEM_MOVEABLE,sizeof(DPOINT)*(long)pNumPoints[i]);
 		                    pPoints2= (HPDPOINT)GlobalLock (phPoly[i]);  
 		                    hmemmove ((HPSTR)pPoints2,(HPSTR)pPoints1,sizeof(DPOINT)*(long)pNumPoints[i]);
 	                        GlobalUnlock (phPoly[i]); 

@@ -58,9 +58,9 @@ HANDLE  BMPFromPCX (LPSTR ImageFile)
 			if (bytes%4)
 				bmbytes += 4 - bytes%4;
 			nFileBytes = filelen-sizeof(PCXHEAD);   
-			hFileBuf = GSSiGlobAlloc ( 406,GMEM_MOVEABLE,nFileBytes);
+			hFileBuf = GSSiGlobAlloc(GAIDNO 406,GMEM_MOVEABLE,nFileBytes);
 			pFileBuf = GlobalLock (hFileBuf);
-            hBits = GSSiGlobAlloc ( 407,GHND,sizeof(BITMAPINFOHEADER) + (sizeof(RGBQUAD) * 2)+
+            hBits = GSSiGlobAlloc(GAIDNO 407,GHND,sizeof(BITMAPINFOHEADER) + (sizeof(RGBQUAD) * 2)+
             							(long)bmbytes*(long)depth);
             pbmi = (LPBITMAPINFO)GlobalLock (hBits); 
             pImage = (LPSTR)pbmi; 

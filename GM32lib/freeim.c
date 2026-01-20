@@ -1610,7 +1610,7 @@ HANDLE WriteDIBToMem (HDIB32 hDib,int Format, int flags,LPINT pSize)
 	hmem = FreeImage_OpenMemory(0,0);
 	rtn=FreeImage_SaveToMemory(Format, dib, hmem, flags);
 	FreeImage_AcquireMemory(hmem, &mem_buffer, &size_in_bytes);
-	hMem = GSSiGlobAlloc (0,GMEM_MOVEABLE,size_in_bytes);
+	hMem = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,size_in_bytes);
 	pMem = GlobalLock (hMem);
 	memmove (pMem,mem_buffer,size_in_bytes);
 	*pSize = size_in_bytes;

@@ -137,12 +137,12 @@ C
     }
     	
 Start:
-    hTemp = GSSiGlobAlloc (1281,GMEM_MOVEABLE,(long)MAXTRANPOINTS*16*2);
+    hTemp = GSSiGlobAlloc(GAIDNO 1281,GMEM_MOVEABLE,(long)MAXTRANPOINTS*16*2);
     XT1 = (LPDOUBLE)GlobalLock (hTemp);
     XT2 = XT1 + MAXTRANPOINTS;
     YT1 = XT2 + MAXTRANPOINTS;
     YT2 = YT1 + MAXTRANPOINTS;
-    hTran = GSSiGlobAlloc (ID,GHND,sizeof(TRANDATA));
+    hTran = GSSiGlobAlloc(GAIDNO ID,GHND,sizeof(TRANDATA));
 	if (ID == 1628)
 		ii=1;
     TranPtr = (LPTRANDATA) GlobalLock (hTran);
@@ -283,7 +283,7 @@ C
       TranPtr->C2 =-SINANG * SCLRAT;
       TranPtr->A1 = 0;
       TranPtr->A2 = 0;
-	  hPoints = GSSiGlobAlloc (1827,GMEM_MOVEABLE,sizeof(DPOINT)*N);
+	  hPoints = GSSiGlobAlloc(GAIDNO 1827,GMEM_MOVEABLE,sizeof(DPOINT)*N);
 	  pPoints = GlobalLock (hPoints);
 	  xmin = DBL_MAX;
 	  xmax = -DBL_MAX;
@@ -408,7 +408,7 @@ HANDLE ReadTranData (HFILE Fid)
     LPTRANDATA TranPtr;    
     long	ii;
     
-    hTran = GSSiGlobAlloc (1283,GHND,sizeof(TRANDATA));
+    hTran = GSSiGlobAlloc(GAIDNO 1283,GHND,sizeof(TRANDATA));
     TranPtr = (LPTRANDATA) GlobalLock (hTran); 
     ii=BigRead (Fid,(HPSTR)TranPtr,sizeof(TRANDATA));
 	if (TranPtr->TriHandle)
@@ -421,7 +421,7 @@ HANDLE ReadTranData (HFILE Fid)
         BigRead (Fid,(HPSTR)&TranTri,sizeof(TRANTRI)); 
         GSSillseek (Fid,Loc,0);
         NumTri = TranTri.NumTri;
-        TranPtr->TriHandle = GSSiGlobAlloc (1284,GMEM_MOVEABLE,(long)NumTri*sizeof(TRANTRI));
+        TranPtr->TriHandle = GSSiGlobAlloc(GAIDNO 1284,GMEM_MOVEABLE,(long)NumTri*sizeof(TRANTRI));
         Tri=(HPTRANTRI)GlobalLock (TranPtr->TriHandle);
 	    while (NumTri--)
 	    {
@@ -487,7 +487,7 @@ HANDLE LoadTranFile (LPSTR Name,int dir,int InType,LPSHORT pNumPoints,LPDOUBLE p
 	HFILE Fid=HFILE_ERROR;
 	char	str[260], curproject[64]="", Marker;
 	BOOL	First=TRUE, SetTrans=FALSE, HaveLimits=FALSE, HaveBounds=FALSE; 
-	HANDLE	handle=0, hcoord=GSSiGlobAlloc (1285,GMEM_MOVEABLE,(long)MAXTRANPOINTS*16*2); 
+	HANDLE	handle=0, hcoord=GSSiGlobAlloc(GAIDNO 1285,GMEM_MOVEABLE,(long)MAXTRANPOINTS*16*2); 
 	float	RSQMIN=0;
 	short	N=0, ConvertID=0, i; 
 	LPSTR	lpCVT;
@@ -919,7 +919,7 @@ HANDLE STRANPoints (int id,LPDPOINT FromPt,LPDPOINT ToPt,int nPt,LPFLOAT pRSQMIN
 {
 	HANDLE hTran; 
 	//double	XFROM[4],YFROM[4],XTO[4],YTO[4]; 
-	HANDLE hFromTo = GSSiGlobAlloc(0, GMEM_MOVEABLE, nPt * 4 * sizeof(double));
+	HANDLE hFromTo = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, nPt * 4 * sizeof(double));
 	LPDOUBLE XFROM = GlobalLock(hFromTo);
 	LPDOUBLE YFROM = &XFROM[nPt];
 	LPDOUBLE XTO = &YFROM[nPt];
@@ -955,7 +955,7 @@ POINT TRANDPointToPoint (HPDPOINT pDPoint,HANDLE hTran)
 
 HANDLE DPolyToPPoly (LPINT pnpnts, HANDLE hDPoly,HANDLE hTran)
 {
-	HANDLE handle = GSSiGlobAlloc ( 761,GMEM_MOVEABLE,(*pnpnts)*sizeof(POINT));
+	HANDLE handle = GSSiGlobAlloc(GAIDNO 761,GMEM_MOVEABLE,(*pnpnts)*sizeof(POINT));
 	HPPOINT	pPoints = (HPPOINT)GlobalLock (handle);
 	HPDPOINT	pDPoints = GlobalLock(hDPoly);
 	DWORD	i,np=*pnpnts, nnewpnts=1;
@@ -1358,25 +1358,25 @@ typedef POINTINFO	HUGE	*HPPOINTINFO;
 typedef struct {char	left,right;} TRACK;
 typedef TRACK	FAR	*LPTRACK;
 
-    HANDLE	TriHandle = GSSiGlobAlloc (1286,GHND,MXT*(long)sizeof(TRANTRI));    
+    HANDLE	TriHandle = GSSiGlobAlloc(GAIDNO 1286,GHND,MXT*(long)sizeof(TRANTRI));    
     HPTRANTRI	Tri=(HPTRANTRI)GlobalLock (TriHandle);
-	HANDLE	hNLATPT=GSSiGlobAlloc (1287,GHND,MXT*2);
+	HANDLE	hNLATPT=GSSiGlobAlloc(GAIDNO 1287,GHND,MXT*2);
 	LPSHORT	NLATPT = (LPSHORT)GlobalLock (hNLATPT);
-	HANDLE	hPointInfo=GSSiGlobAlloc (1288,GHND,(long)NSETPT*sizeof(POINTINFO));
+	HANDLE	hPointInfo=GSSiGlobAlloc(GAIDNO 1288,GHND,(long)NSETPT*sizeof(POINTINFO));
 	HPPOINTINFO PointInfo = (HPPOINTINFO)GlobalLock (hPointInfo);
-	HANDLE	hORDERD=GSSiGlobAlloc (1289,GMEM_MOVEABLE,MXPF*4);
+	HANDLE	hORDERD=GSSiGlobAlloc(GAIDNO 1289,GMEM_MOVEABLE,MXPF*4);
 	HPLONG	ORDERD = (HPLONG)GlobalLock (hORDERD);
-	HANDLE	hDIST=GSSiGlobAlloc (1290,GMEM_MOVEABLE,MXPF*8);
+	HANDLE	hDIST=GSSiGlobAlloc(GAIDNO 1290,GMEM_MOVEABLE,MXPF*8);
 	HPDOUBLE DIST = (HPDOUBLE)GlobalLock (hDIST);
-	HANDLE	hP1=GSSiGlobAlloc (1291,GMEM_MOVEABLE,MXPF*2);
+	HANDLE	hP1=GSSiGlobAlloc(GAIDNO 1291,GMEM_MOVEABLE,MXPF*2);
 	HPSHORT P1 = (HPSHORT)GlobalLock (hP1);
-	HANDLE	hP2=GSSiGlobAlloc (1292,GMEM_MOVEABLE,MXPF*2);
+	HANDLE	hP2=GSSiGlobAlloc(GAIDNO 1292,GMEM_MOVEABLE,MXPF*2);
 	HPSHORT P2 = (HPSHORT)GlobalLock (hP2);
-	HANDLE	hLP1=GSSiGlobAlloc (1293,GMEM_MOVEABLE,MXPF*2);
+	HANDLE	hLP1=GSSiGlobAlloc(GAIDNO 1293,GMEM_MOVEABLE,MXPF*2);
 	HPSHORT LP1 = (HPSHORT)GlobalLock (hLP1);
-	HANDLE	hLP2=GSSiGlobAlloc (1294,GMEM_MOVEABLE,MXPF*2);
+	HANDLE	hLP2=GSSiGlobAlloc(GAIDNO 1294,GMEM_MOVEABLE,MXPF*2);
 	HPSHORT LP2 = (HPSHORT)GlobalLock (hLP2);
-	HANDLE	hTrack=GSSiGlobAlloc (1295,GHND,MXPF*sizeof(TRACK));
+	HANDLE	hTrack=GSSiGlobAlloc(GAIDNO 1295,GHND,MXPF*sizeof(TRACK));
 	LPTRACK Track = (LPTRACK)GlobalLock (hTrack);
 	
 	double	D;
@@ -1799,7 +1799,7 @@ HANDLE TransformBitmap (HANDLE hBMP,HANDLE hTran,HANDLE hTranBack,LPMNMXCORD pBo
 			GlobalUnlock (hAreaPts);
 		return 0;
 	}
-	hBMPNew = GSSiGlobAlloc (1296,GHND,NewSize);
+	hBMPNew = GSSiGlobAlloc(GAIDNO 1296,GHND,NewSize);
 	pDibNew = (LPBITMAPINFOHEADER)GlobalLock (hBMPNew); 
 	pDibNewInfo = (LPBITMAPINFO)pDibNew;
 	*pDibNew = *pDib;

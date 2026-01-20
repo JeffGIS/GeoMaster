@@ -15,7 +15,7 @@ static	BOOL		Closed[MAXPOINTLIST];
 
 HANDLE GetParcelFront2(LPINT pnumOutPoints, int numPointsInStreet, HANDLE hStreetPoints, int numPointsInParcel, HANDLE hParcelPoints,LPINT pstartPointIndex)
 {
-	HANDLE hOutPoints = GSSiGlobAlloc (1862,GMEM_MOVEABLE,numPointsInParcel*sizeof(DPOINT)+4);
+	HANDLE hOutPoints = GSSiGlobAlloc(GAIDNO 1862,GMEM_MOVEABLE,numPointsInParcel*sizeof(DPOINT)+4);
 	int numOutPoints = 0;
 	int endPointIndex = -1;
 	int startPointIndex = *pstartPointIndex;
@@ -77,7 +77,7 @@ static 	void JointFirstToLast(LPINT pnumLines, LPINT pnumOutPoints, LPHANDLE phO
 	double d = ldistpp(&firstPt, &lastPt);
 	if (d <= P_TOL)
 	{
-		HANDLE hNewPoints = GSSiGlobAlloc(1863, GMEM_MOVEABLE, sizeof(DPOINT) * (pnumOutPoints[0] + pnumOutPoints[*pnumLines - 1] - 1) + 4);
+		HANDLE hNewPoints = GSSiGlobAlloc(GAIDNO 1863, GMEM_MOVEABLE, sizeof(DPOINT) * (pnumOutPoints[0] + pnumOutPoints[*pnumLines - 1] - 1) + 4);
 		LPDPOINT pPtNew = GlobalLock(hNewPoints);
 		LPDPOINT pPt1 = GlobalLock(phOutPoints[0]);
 		LPDPOINT pPt2 = GlobalLock(phOutPoints[*pnumLines - 1]);
@@ -163,7 +163,7 @@ HANDLE GetPointListPoints (LPSTR ID,LPINT pnPoints)
 			*pnPoints = nPointsInList[i];
 			if (nPointsInList[i])
 			{
-				hList = GSSiGlobAlloc (1571,GMEM_MOVEABLE,(nPointsInList[i])*sizeof(DPOINT));
+				hList = GSSiGlobAlloc(GAIDNO 1571,GMEM_MOVEABLE,(nPointsInList[i])*sizeof(DPOINT));
 				Points1 = GlobalLock (hPointList[i]);
 				Points2 = GlobalLock (hList);
 				for (j=0;j<nPointsInList[i];j++)
@@ -350,7 +350,7 @@ DestroyAll:
 			nPointsInList[iList] = GetPointsFromList (Arg[4],&hList);
 			if (nPointsInList[iList])
 			{
-				hPointList[iList] = GSSiGlobAlloc (1596,GMEM_MOVEABLE,(nPointsInList[iList])*sizeof(DPOINT));
+				hPointList[iList] = GSSiGlobAlloc(GAIDNO 1596,GMEM_MOVEABLE,(nPointsInList[iList])*sizeof(DPOINT));
 				Points1 = GlobalLock (hList);
 				Points2 = GlobalLock (hPointList[iList]);
 				memcpy (Points2,Points1,nPointsInList[iList]*sizeof(DPOINT));
@@ -417,7 +417,7 @@ DestroyAll:
 				LPDPOINT pPoints1 = GlobalLock(hPointList[list1]);
 				LPDPOINT pPoints2 = GlobalLock(hPointList[list2]);
 
-				hPointList[iList] = GSSiGlobAlloc(1597, GMEM_MOVEABLE, ((nPointsInList[list1] + nPointsInList[list2])) * sizeof(DPOINT) + 4);
+				hPointList[iList] = GSSiGlobAlloc(GAIDNO 1597, GMEM_MOVEABLE, ((nPointsInList[list1] + nPointsInList[list2])) * sizeof(DPOINT) + 4);
 				LPDPOINT outPoints = GlobalLock(hPointList[iList]);
 				double d, minDist = DBL_MAX;
 				int opt;
@@ -493,7 +493,7 @@ DestroyAll:
 			if (list1 > -1)
 			{
 				LPDPOINT pPoints1 = GlobalLock(hPointList[list1]);
-				hPointList[iList] = GSSiGlobAlloc(1597, GMEM_MOVEABLE, nPointsInList[list1] * sizeof(DPOINT) + 4);
+				hPointList[iList] = GSSiGlobAlloc(GAIDNO 1597, GMEM_MOVEABLE, nPointsInList[list1] * sizeof(DPOINT) + 4);
 				LPDPOINT outPoints = GlobalLock(hPointList[iList]);
 				for (int i = 0; i < nPointsInList[list1]; i++)
 					*outPoints++ = *pPoints1++;
@@ -515,7 +515,7 @@ DestroyAll:
 			nPointsInList[iList] = npt + 1;
 			if (nPointsInList[iList])
 			{
-				hPointList[iList] = GSSiGlobAlloc(1597, GMEM_MOVEABLE, (nPointsInList[iList]) * sizeof(DPOINT));
+				hPointList[iList] = GSSiGlobAlloc(GAIDNO 1597, GMEM_MOVEABLE, (nPointsInList[iList]) * sizeof(DPOINT));
 				Points1 = GlobalLock(hPointList[iList]);
 				double azinc = TWOPI / npt;
 				double az = 0;
@@ -542,7 +542,7 @@ DestroyAll:
 					nPointsInList[iList] = nPointsInList[i];
 					if (nPointsInList[iList])
 					{
-						hPointList[iList] = GSSiGlobAlloc (1597,GMEM_MOVEABLE,(nPointsInList[iList])*sizeof(DPOINT));
+						hPointList[iList] = GSSiGlobAlloc(GAIDNO 1597,GMEM_MOVEABLE,(nPointsInList[iList])*sizeof(DPOINT));
 						Points1 = GlobalLock (hPointList[i]);
 						Points2 = GlobalLock (hPointList[iList]);
 						memcpy (Points2,Points1,nPointsInList[iList]*sizeof(DPOINT));
@@ -594,7 +594,7 @@ DestroyAll:
 					nPointsInList[iList] = nPointsInList[i];
 					if (nPointsInList[iList])
 					{
-						hPointList[iList] = GSSiGlobAlloc (1597,GMEM_MOVEABLE,(nPointsInList[iList])*sizeof(DPOINT));
+						hPointList[iList] = GSSiGlobAlloc(GAIDNO 1597,GMEM_MOVEABLE,(nPointsInList[iList])*sizeof(DPOINT));
 						Points1 = GlobalLock (hPointList[i]);
 						Points2 = GlobalLock (hPointList[iList]);
 						memcpy (Points2,Points1,nPointsInList[iList]*sizeof(DPOINT));
@@ -730,7 +730,7 @@ DestroyAll:
 								GWPolylineD(CurView->hDC, Points1, nPointsInList[i], 0);
 							else
 							{
-								HANDLE hPoints = GSSiGlobAlloc(1864, GMEM_MOVEABLE, nPointsInList[i] * sizeof(POINT) + 4);
+								HANDLE hPoints = GSSiGlobAlloc(GAIDNO 1864, GMEM_MOVEABLE, nPointsInList[i] * sizeof(POINT) + 4);
 								LPPOINT pPoints = GlobalLock(hPoints);
 								for (int j = 0; j < nPointsInList[i]; j++)
 								{
@@ -952,7 +952,7 @@ DestroyAll:
 				double		begpct[2], endpct[2];
 				double		atd, atpct, doff, nextd, nextpct;
 				BOOL		skip;
-				HANDLE		hList = GSSiGlobAlloc (0,GMEM_MOVEABLE,(nPointsInList[i]+2)*sizeof(DPOINT));
+				HANDLE		hList = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,(nPointsInList[i]+2)*sizeof(DPOINT));
 				
 				if (frompct < throughpct && throughpct < topct)
 				{
@@ -1160,7 +1160,7 @@ DestroyAll:
 			if (!stricmp (PointListID[i],Arg[2]) && nPointsInList[i]>1)
 			{
 				HPDPOINT	Points = GlobalLock (hPointList[i]);
-				HANDLE		hList = GSSiGlobAlloc (0,GMEM_MOVEABLE,nPointsInList[i]*sizeof(DPOINT));
+				HANDLE		hList = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,nPointsInList[i]*sizeof(DPOINT));
 				
 				Points2 = GlobalLock (hList);
 				k = nPointsInList[i] - 1;
@@ -1182,7 +1182,7 @@ DestroyAll:
 			if (!stricmp (PointListID[i],Arg[2]) && nPointsInList[i]>1)
 			{
 				HPDPOINT	Points = GlobalLock (hPointList[i]);
-				HANDLE		hList = GSSiGlobAlloc (0,GMEM_MOVEABLE,(nPointsInList[i]+2)*sizeof(DPOINT));
+				HANDLE		hList = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,(nPointsInList[i]+2)*sizeof(DPOINT));
 				int np = 0;
 				Points2 = GlobalLock (hList);
 				double dist = atof(Arg[4]);

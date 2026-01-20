@@ -239,7 +239,7 @@ void LoadVoterFields (HWND hWndDlg)
 					*pNum++ = 0;
 					UserListNumValues[NumUserLists] = atoi(pNum);
 					_fstrcpy (UserListTitle[NumUserLists],str);
-	           		UserListValues[NumUserLists]=GSSiGlobAlloc (0,GMEM_MOVEABLE,4+(1+(long)UserListMaxValueLength[NumUserLists])*UserListNumValues[NumUserLists]);
+	           		UserListValues[NumUserLists]=GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,4+(1+(long)UserListMaxValueLength[NumUserLists])*UserListNumValues[NumUserLists]);
 					pValue = GlobalLock (UserListValues[NumUserLists]);
 					for (j=0;j<UserListNumValues[NumUserLists];j++,pValue+=(UserListMaxValueLength[NumUserLists]+1))
 					{
@@ -1525,7 +1525,7 @@ BOOL FAR PASCAL FIELD_TITLE_AND_NAMEMsgProc(HWND hWndDlg, UINT Message, WPARAM w
          				}
 						 if (!NewUserFieldIsNew)
 						 	GSSiGlobFree (phNewUserFieldValueList);  
-           				 *phNewUserFieldValueList=GSSiGlobAlloc (0,GMEM_MOVEABLE,4+(1+(long)*pNewUserFieldMaxValueLength)*(*pNewUserNumValues));
+           				 *phNewUserFieldValueList=GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,4+(1+(long)*pNewUserFieldMaxValueLength)*(*pNewUserNumValues));
 						 pValue = GlobalLock (*phNewUserFieldValueList);
 						 for (j=0;j<*pNewUserNumValues;j++,pValue+=(*pNewUserFieldMaxValueLength+1))
 						 {

@@ -447,7 +447,7 @@ BOOL FAR PASCAL ADDLOC_CREATEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, 
                  HANDLE hMem;
                  LPSTR  lpStr;
                  
-                 hMem = GSSiGlobAlloc ( 569,GHND,4096);
+                 hMem = GSSiGlobAlloc(GAIDNO 569,GHND,4096);
                  lpStr = GlobalLock (hMem); 
                  GetDlgItemText (hWndDlg,IDC_ALSQL,lpStr,1024);
                  if (GetSQLWhereClause (hWndDlg, hSQL, lpStr))
@@ -854,7 +854,7 @@ GSSiExitProg (441);
             	 	SaveMenuName = TRUE;
             	 	EmbedMenus = TRUE;
             	 	GSSiGlobFree (&hConfigDescription);
-			    	hConfigDescription = GSSiGlobAlloc (1315,GMEM_MOVEABLE,512);
+			    	hConfigDescription = GSSiGlobAlloc(GAIDNO 1315,GMEM_MOVEABLE,512);
 					pConfigDescription = GlobalLock (hConfigDescription);
 	     			GetDlgItemText (hWndDlg,IDC_CONFIGDESC,pConfigDescription,511); 
 	     			GlobalUnlock (hConfigDescription);
@@ -1341,7 +1341,7 @@ GSSiExitProg (444);
             	 	BigRead (Fid,(HPSTR)&HLTOutDataFile,128);
             	 	BigRead (Fid,(HPSTR)&HLTOutSQL,lnHLTOutSQL);
             	 	BigRead (Fid,(HPSTR)&nItems,sizeof(int));
-	                 HLTOutFields = GSSiGlobAlloc (  21,GHND,nItems*4+4);
+	                 HLTOutFields = GSSiGlobAlloc(GAIDNO  21,GHND,nItems*4+4);
 	                 lpItems = (LPINT)GlobalLock(HLTOutFields);
 			         *lpItems = nItems;
 			         lpItems++;       
@@ -1377,7 +1377,7 @@ GSSiExitProg (444);
                  HANDLE hMem;
                  LPSTR  lpStr;
                  
-                 hMem = GSSiGlobAlloc (  22,GHND,4096);
+                 hMem = GSSiGlobAlloc(GAIDNO  22,GHND,4096);
                  lpStr = GlobalLock (hMem); 
                  GetDlgItemText (hWndDlg,IDC_SQL,lpStr,1024);
                  if (GetSQLWhereClause (hWndDlg, HLTOuthDB, lpStr))
@@ -1412,7 +1412,7 @@ GSSiExitProg (444);
 				 	break;
 				 }  
 				 GSSiGlobFree (&HLTOutFields);
-                 HLTOutFields = GSSiGlobAlloc (  23,GHND,nItems*4+4);
+                 HLTOutFields = GSSiGlobAlloc(GAIDNO  23,GHND,nItems*4+4);
                  lpItems = (LPINT)GlobalLock(HLTOutFields);
 		         *lpItems = nItems;
 		         lpItems++;       
@@ -1586,7 +1586,7 @@ GSSiExitProg (445);
 					 OFSTRUCTGM	OFStruct;
 					 short		i, SaveFPT=CurView->FileProjectionType;
 					 HFILE		FidRestart;
-					 HANDLE	hSaveVP=GSSiGlobAlloc (  24,GMEM_MOVEABLE,sizeof(VIEWPORT));
+					 HANDLE	hSaveVP=GSSiGlobAlloc(GAIDNO  24,GMEM_MOVEABLE,sizeof(VIEWPORT));
 					 LPVIEWPORT	pSaveVP=(LPVIEWPORT)GlobalLock (hSaveVP);       
                      char	SaveAltProj[MAX_PATH]; 
                      BOOL	OpenedSeg=FALSE;
@@ -1642,7 +1642,7 @@ GSSiExitProg (445);
                    	 	LPSTR pMacro;
                    	 	
                    	 	ConvertTAGValues = 1;
-                   	 	hConvertTAGMacro = GSSiGlobAlloc (0,GMEM_MOVEABLE,256);
+                   	 	hConvertTAGMacro = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,256);
                    	 	pMacro = GlobalLock (hConvertTAGMacro); 
                    	 	sprintf (pMacro,"$MACRO(%s)",str);
                    	 	GlobalUnlock (hConvertTAGMacro);
@@ -1670,7 +1670,7 @@ GSSiExitProg (445);
 					 	DWORD	Err;
 					 	
 					 	
-					 	hReorgBUDir = GSSiGlobAlloc (  25,GMEM_MOVEABLE,256);
+					 	hReorgBUDir = GSSiGlobAlloc(GAIDNO  25,GMEM_MOVEABLE,256);
 					 	pFile = GlobalLock (hReorgBUDir);
 					 	if (!GetDlgItemText (hWndDlg,IDC_BUDIR,pFile,256))
 					 	{
@@ -1733,7 +1733,7 @@ GSSiExitProg (445);
 				    	 SetDlgItemText (hWndDlg,IDC_MESS,"Rebuild Quad Trees"); 
 				         ClearAllBounds();
 						 SetViewport(*pCommandViewport);
-						 hNewQuadFile = GSSiGlobAlloc (  26,GMEM_MOVEABLE,256);
+						 hNewQuadFile = GSSiGlobAlloc(GAIDNO  26,GMEM_MOVEABLE,256);
 					 	 pFile = GlobalLock (hNewQuadFile);
 						 GSSiGetTempFileName (0,"gm",0,pFile); 
 						 NewQuadFID = GSSiOpenFile (pFile,&OFStruct,OF_CREATE);
@@ -2522,7 +2522,7 @@ GSSiExitProg (1107);
 	            rtn=nItems=SendDlgItemMessage(hWndDlg,IDC_LIST,LB_GETSELCOUNT,0,0);
 	            if (nItems)
 				{
-	                HANDLE	hItems = GSSiGlobAlloc (1243,GMEM_MOVEABLE,nItems*4);
+	                HANDLE	hItems = GSSiGlobAlloc(GAIDNO 1243,GMEM_MOVEABLE,nItems*4);
 	                LPINT	lpItems = (LPINT)GlobalLock(hItems);
 	                LPSTR	pTAB;
 	                
@@ -2630,7 +2630,7 @@ GSSiExitProg (1107);
 			SendDlgItemMessage (hWndDlg,IDC_LIST,LB_SETTABSTOPS,1,(LPARAM)TabStops);
 	    if (OpenDataFile (Args,&Args[128],BT_READ,&hSQL))
 		{	    
-		    hStr = GSSiGlobAlloc (1245,GMEM_MOVEABLE,4096);
+		    hStr = GSSiGlobAlloc(GAIDNO 1245,GMEM_MOVEABLE,4096);
 		    pStr = GlobalLock (hStr);
 		    pStr1 = pStr+2048;
 		    pStr2 = pStr1+1024;
@@ -2716,9 +2716,9 @@ GSSiExitProg (1107);
 	                long	lReturnVals;
 	                short	lVal;
 	                
-				    hStr = GSSiGlobAlloc (1246,GMEM_MOVEABLE,4096);
+				    hStr = GSSiGlobAlloc(GAIDNO 1246,GMEM_MOVEABLE,4096);
 				    pStr = GlobalLock (hStr);
-					hReturnVals = GSSiGlobAlloc (1247,GHND,USHRT_MAX);
+					hReturnVals = GSSiGlobAlloc(GAIDNO 1247,GHND,USHRT_MAX);
 					SetGlobalValueHandle (VarName,hReturnVals);  
 					pReturnVals = GlobalLock (hReturnVals); 
 					_fstrcpy (pReturnVals,&Args[128+1024+256+1024+256]);
@@ -2861,7 +2861,7 @@ GSSiExitProg (1107);
 	            rtn=nItems=SendDlgItemMessage(hWndDlg,IDC_LIST,LB_GETSELCOUNT,0,0);
 	            if (nItems)
 				{
-	                HANDLE	hItems = GSSiGlobAlloc (1244,GMEM_MOVEABLE,nItems*4);
+	                HANDLE	hItems = GSSiGlobAlloc(GAIDNO 1244,GMEM_MOVEABLE,nItems*4);
 	                LPINT	lpItems = (LPINT)GlobalLock(hItems);
 	                LPSTR	pTAB;
 	                
@@ -3081,7 +3081,7 @@ BOOL FAR PASCAL DTMTOTEXTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPAR
                 BOOL    First, Rtn=FALSE;
                 LPSTR	lpDot, lpName; 
                 char    SQL[256],Type[32],DBName[128],fmt[34]; 
-                HANDLE	hOutRec = GSSiGlobAlloc (1101,GMEM_MOVEABLE,USHRT_MAX);
+                HANDLE	hOutRec = GSSiGlobAlloc(GAIDNO 1101,GMEM_MOVEABLE,USHRT_MAX);
                 LPSTR	OutRec = GlobalLock (hOutRec);
                 LPOPENFILEDATA  FilePtr, FilePtrATT;
                 LPOPENSQLDATA   SQLPtr, SQLPtrATT;
@@ -3869,7 +3869,7 @@ BOOL FAR PASCAL SETSHAPEPARAMMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, 
 						  }
 						  if (!rtn)
 							  break;
-						  hMem = GSSiGlobAlloc(1421, GHND, 4096);
+						  hMem = GSSiGlobAlloc(GAIDNO 1421, GHND, 4096);
 						  lpStr = GlobalLock(hMem);
 						  if (GetSQLWhereClause(hWndDlg, hSHPDBF, lpStr))
 						  {
@@ -3952,7 +3952,7 @@ BOOL FAR PASCAL SETSHAPEPARAMMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, 
 				HANDLE	hMem;
 				LPSTR	lpStr;
 
-				hMem = GSSiGlobAlloc(1422, GHND, 4096);
+				hMem = GSSiGlobAlloc(GAIDNO 1422, GHND, 4096);
 				lpStr = GlobalLock(hMem);
 				SendDlgItemMessage(hWndDlg, IDC_SQL_LIST, LB_GETTEXT, Choice, (DWORD)lpStr);
 				if (!hSHPDBF)
@@ -4427,7 +4427,7 @@ BOOL FAR PASCAL SETSQLITEPOINTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam,
 						  }
 						  if (!rtn)
 							  break;
-						  hMem = GSSiGlobAlloc(1421, GHND, 4096);
+						  hMem = GSSiGlobAlloc(GAIDNO 1421, GHND, 4096);
 						  lpStr = GlobalLock(hMem);
 						  if (GetSQLWhereClause(hWndDlg, hSHPDBF, lpStr))
 						  {
@@ -4510,7 +4510,7 @@ BOOL FAR PASCAL SETSQLITEPOINTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam,
 				HANDLE	hMem;
 				LPSTR	lpStr;
 
-				hMem = GSSiGlobAlloc(1422, GHND, 4096);
+				hMem = GSSiGlobAlloc(GAIDNO 1422, GHND, 4096);
 				lpStr = GlobalLock(hMem);
 				SendDlgItemMessage(hWndDlg, IDC_SQL_LIST, LB_GETTEXT, Choice, (DWORD)lpStr);
 				if (!hSHPDBF)
@@ -6018,7 +6018,7 @@ SelectFiles:
 	                 Processing = TRUE; 
 	                 setDoPaint( FALSE);
 	                 hcurSave = GSSiSetCursor(LoadCursor(0, IDC_WAIT));
-	                 Handle = GSSiGlobAlloc (1112,GHND,Num*4);
+	                 Handle = GSSiGlobAlloc(GAIDNO 1112,GHND,Num*4);
 	                 lpItems =(LPINT) GlobalLock (Handle);
 	                 SendDlgItemMessage((HWND) hWndDlg, LMD_NEWFILES, LB_GETSELITEMS,Num, (LPARAM) lpItems);
 	                 if (!GetDlgItemText(hWndDlg,IDC_DESTDIR,ToDir,255))
@@ -6039,7 +6039,7 @@ SelectFiles:
 	                 FidIndex = GSSiOpenFile (Index,(LPOFSTRUCTGM) &OFStruct,OF_CREATE); 
 				     if (FileErrMess (FidIndex,Index,&OFStruct,OF_CREATE))  
 				     	goto Exit;
-	                 hlpFI = GSSiGlobAlloc(1742,GHND,sizeof(FILEINDEX)+sizeof(FILEINDEXENTRY)); 
+	                 hlpFI = GSSiGlobAlloc(GAIDNO 1742,GHND,sizeof(FILEINDEX)+sizeof(FILEINDEXENTRY)); 
 	                 lpFI = (LPFILEINDEX) GlobalLock(hlpFI);    
 	                 lpFI->CurrentEntry=(FILEINDEXENTRY *) &lpFI->FirstIndex;
 	                 lpFI->Type = min (5,itype + 3);   
@@ -6264,7 +6264,7 @@ SelectFiles:
 	             if (itype == 1 && ContinueProcessing)
 	             {  
 	             	long	lmem=sizeof(VIEWPORT)+128*MAX_VIEWPORT_FILES; 
-	             	HANDLE	hVP=GSSiGlobAlloc (1113,GHND,lmem);
+	             	HANDLE	hVP=GSSiGlobAlloc(GAIDNO 1113,GHND,lmem);
 	             	LPVIEWPORT	pSaveVP = (LPVIEWPORT)GlobalLock (hVP);  
 	             	HANDLE		hSymDesc;
 	             	short		NumParent=0, NumSyms=0;
@@ -6294,12 +6294,12 @@ SelectFiles:
 				 	*CurVis = SaveVis; 
 				 	IgnoreBounds = FALSE; 
 	             	FidSyms = GSSiOpenFile (VisName,&OFStruct,OF_CREATE);
-				 	hSymDesc = GSSiGlobAlloc (1114,GMEM_MOVEABLE,USHRT_MAX);
+				 	hSymDesc = GSSiGlobAlloc(GAIDNO 1114,GMEM_MOVEABLE,USHRT_MAX);
 				    pSymDesc = (LPSYMDESC)GlobalLock (hSymDesc);
 				 	while (SendDlgItemMessage (hWndDlg,SYM_VIS_LB,LB_GETTEXT,NumSyms,(LPARAM)str)!=LB_ERR) 
 				 	{   
 						NumSyms++;
-				 		pSymDesc->Handle = GSSiGlobAlloc (1115,GHND,sizeof(SYMBOL));
+				 		pSymDesc->Handle = GSSiGlobAlloc(GAIDNO 1115,GHND,sizeof(SYMBOL));
 				        pSymbol = (LPSYMBOL)GlobalLock (pSymDesc->Handle); 
 				        lpTAB = _fstrrchr (str,'\t');
 				        *lpTAB++ = 0;
@@ -6319,7 +6319,7 @@ SelectFiles:
 				 	{   
 				 		NumSyms++;
 						NumParent++;
-				 		pSymDesc->Handle = GSSiGlobAlloc (1116,GHND,sizeof(SYMBOL));
+				 		pSymDesc->Handle = GSSiGlobAlloc(GAIDNO 1116,GHND,sizeof(SYMBOL));
 				        pSymbol = (LPSYMBOL)GlobalLock (pSymDesc->Handle); 
 				        lpTAB = _fstrrchr (str,'\t');
 				        *lpTAB++ = 0;
@@ -6409,7 +6409,7 @@ BOOL FAR PASCAL MULTIFILEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPAR
 												   0);
 				 if (!nItems) 
 				 	break;
-		         hItems = GSSiGlobAlloc ( 497,GHND,nItems*4);
+		         hItems = GSSiGlobAlloc(GAIDNO 497,GHND,nItems*4);
 		         pItems = (LPINT)GlobalLock(hItems);    
 		         SendDlgItemMessage(hWndDlg,IDC_AVAILABLE,
 										   LB_GETSELITEMS,
@@ -6736,7 +6736,7 @@ SetType:
             	 
 				 Num = SendDlgItemMessage(hWndDlg, IDC_SEARCHLIST, LB_GETSELCOUNT, 0, 0); 
 				 if (!Num) break;
-                 Handle = GSSiGlobAlloc ( 679,GHND,Num*4);
+                 Handle = GSSiGlobAlloc(GAIDNO 679,GHND,Num*4);
                  lpItems =(LPINT) GlobalLock (Handle);
                  SendDlgItemMessage((HWND) hWndDlg, IDC_SEARCHLIST, LB_GETSELITEMS, Num, (LPARAM) lpItems);
                  while (Num--)
@@ -7878,7 +7878,7 @@ BOOL FAR PASCAL TRAVERSE_ENTRYMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam,
 						{
 							WORD	nPnts=pLegData->Type; 
 							short	Type = nPnts,i;
-							HANDLE	hPnts=GSSiGlobAlloc (1084,GMEM_MOVEABLE,1024);
+							HANDLE	hPnts=GSSiGlobAlloc(GAIDNO 1084,GMEM_MOVEABLE,1024);
 							LPDPOINT	pPoints = (HPDPOINT)GlobalLock (hPnts);
 							
 							for (i=0;i<nPnts;i++)
@@ -7903,7 +7903,7 @@ BOOL FAR PASCAL TRAVERSE_ENTRYMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam,
 					{
 						int		nPnts=pLegData->Type; 
 						short	Type = nPnts,i;
-						HANDLE	hPnts=GSSiGlobAlloc (1084,GMEM_MOVEABLE,1024);
+						HANDLE	hPnts=GSSiGlobAlloc(GAIDNO 1084,GMEM_MOVEABLE,1024);
 						LPDPOINT	pPoints = (HPDPOINT)GlobalLock (hPnts);
 						
 						for (i=0;i<nPnts;i++)
@@ -9299,7 +9299,7 @@ GSSiExitProg (831);
          	return FALSE; 
 }
          lpTAGDef = (LPTAGDEF)GlobalLock (hTAGDef);
-		 hTAGDefSave = GSSiGlobAlloc ( 518,GMEM_MOVEABLE,(long)NumTAGDef*sizeof(TAGDEF));
+		 hTAGDefSave = GSSiGlobAlloc(GAIDNO 518,GMEM_MOVEABLE,(long)NumTAGDef*sizeof(TAGDEF));
          pSaveTAGDef = (LPTAGDEF)GlobalLock (hTAGDefSave);
          _fmemmove (pSaveTAGDef,lpTAGDef,(size_t)NumTAGDef*sizeof(TAGDEF));
          for (i=0;i<NumTAGDef;i++,lpTAGDef++) 
@@ -11279,7 +11279,7 @@ BOOL FAR PASCAL DIGCONTROLMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPA
 		if (FidCntl != HFILE_ERROR)
 		{
 			BigRead (FidCntl,(HPSTR)&nDigControlPoints,2);
-			hDigControlPoints = GSSiGlobAlloc ( 597,GHND,USHRT_MAX);  
+			hDigControlPoints = GSSiGlobAlloc(GAIDNO 597,GHND,USHRT_MAX);  
 	        pDigCtlPnt = (LPDIGCNTLPOINT)GlobalLock (hDigControlPoints); 
 	        BigRead (FidCntl,(HPSTR)pDigCtlPnt,nDigControlPoints*sizeof(DIGCNTLPOINT));
 	        GSSiClose2 (&FidCntl);  
@@ -11289,7 +11289,7 @@ BOOL FAR PASCAL DIGCONTROLMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPA
 		SendDlgItemMessage (hWndDlg,IDC_CONTROLPNTS,LB_RESETCONTENT,0,0); 
 		if (!hDigControlPoints)
 		{
-			hDigControlPoints = GSSiGlobAlloc ( 598,GHND,USHRT_MAX);  
+			hDigControlPoints = GSSiGlobAlloc(GAIDNO 598,GHND,USHRT_MAX);  
 			nDigControlPoints = 0;
 			Choice = -1;  
             EnableWindow (GetDlgItem(hWndDlg,IDC_SETDIGITIZERCOORDAUTO),FALSE); 
@@ -11300,7 +11300,7 @@ BOOL FAR PASCAL DIGCONTROLMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPA
 			hDigControlPoints = GSSiGlobalReAlloc (0,hDigControlPoints,USHRT_MAX,GHND);
 		} 
         pDigCtlPnt = (LPDIGCNTLPOINT)GlobalLock (hDigControlPoints);  
-        hCoord = GSSiGlobAlloc ( 599,GMEM_MOVEABLE,(1+nDigControlPoints)*4*sizeof(double));
+        hCoord = GSSiGlobAlloc(GAIDNO 599,GMEM_MOVEABLE,(1+nDigControlPoints)*4*sizeof(double));
         XDIG = (LPDOUBLE)GlobalLock (hCoord);
         YDIG = XDIG + nDigControlPoints; 
         XBASE = YDIG + nDigControlPoints; 
@@ -11607,7 +11607,7 @@ BOOL FAR PASCAL DECOMPPOLYMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPA
 				LINESDATA	LinesData;   
 				LPOINT	LastNode, NodePoint;
             	BOOL	First, FirstLoop,HaveMoreNodes=TRUE, HavePOC;
-            	HANDLE	hPoints=GSSiGlobAlloc ( 588,GMEM_MOVEABLE,(long)USHRT_MAX*(long)sizeof(DPOINT));
+            	HANDLE	hPoints=GSSiGlobAlloc(GAIDNO 588,GMEM_MOVEABLE,(long)USHRT_MAX*(long)sizeof(DPOINT));
             	HPDPOINT	pDPoint;
                 short    NumSyms=0, NoCurvePoints=-1;  
                 HANDLE hSymDesc=0;  
@@ -11679,7 +11679,7 @@ BOOL FAR PASCAL DECOMPPOLYMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPA
                 pos = BT_FIRST;
 		    	if (!LinkBetweenNodes) 
 				{   
-					HANDLE	hNewPoints=GSSiGlobAlloc ( 589,GMEM_MOVEABLE,USHRT_MAX*sizeof(DPOINT));
+					HANDLE	hNewPoints=GSSiGlobAlloc(GAIDNO 589,GMEM_MOVEABLE,USHRT_MAX*sizeof(DPOINT));
 					HPDPOINT	pNewPoints;
 					char	TempFile[MAX_PATH];
 					HFILE	FidTemp;
@@ -12323,7 +12323,7 @@ BOOL FAR PASCAL DXF_OUTPUTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPA
                 BOOL    First, Rtn=FALSE;
                 LPSTR	lpDot, lpName; 
                 char    SQL[256],Type[32],DBName[128],SymName[34],TableName[34],FldName[34], Layer[34]; 
-                HANDLE	hOutRec = GSSiGlobAlloc (1004,GMEM_MOVEABLE,USHRT_MAX);
+                HANDLE	hOutRec = GSSiGlobAlloc(GAIDNO 1004,GMEM_MOVEABLE,USHRT_MAX);
                 LPSTR	OutRec = GlobalLock (hOutRec);
 //                SHPPOLYHEADER   SHPPolyHeader;  
 //                SHPHEADER   SHPHeader;  
@@ -12452,7 +12452,7 @@ BOOL FAR PASCAL DXF_OUTPUTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPA
 				if (WantTables)
 				{   
 					short	NumPointSymbols = 0;
-					HANDLE	hPointSymbols = GSSiGlobAlloc (1005,GMEM_MOVEABLE,4096);
+					HANDLE	hPointSymbols = GSSiGlobAlloc(GAIDNO 1005,GMEM_MOVEABLE,4096);
 					LPSHORT	PointSymbols=(LPSHORT)GlobalLock (hPointSymbols);
 					
 	                SetDlgItemText(hWndDlg,IDC_TOT_ITEMS,"Creating symbol table");
@@ -12620,7 +12620,7 @@ BOOL FAR PASCAL DXF_OUTPUTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPA
 	                            {
 	                            	pPolyParts = (LPINT)GlobalLock (hSavePolyParts); 
 	                            	nareas = *pPolyParts++; 
-	                            	hIndex = GSSiGlobAlloc (1006,GHND,nareas*4);
+	                            	hIndex = GSSiGlobAlloc(GAIDNO 1006,GHND,nareas*4);
 	                            	pIndex = (LPLONG)GlobalLock (hIndex);
 	                            	i = nareas; 
 	                            	Totp = 0;
@@ -12645,9 +12645,9 @@ BOOL FAR PASCAL DXF_OUTPUTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPA
 	                            lpRect++;
 	                            lpDpoint = lpFirstPoint = (LPDPOINT) lpRect; 
 
-	                            hOutPoint = GSSiGlobAlloc (1007,GMEM_MOVEABLE,(nPnts+1)*(long)sizeof(DPOINT)); 
+	                            hOutPoint = GSSiGlobAlloc(GAIDNO 1007,GMEM_MOVEABLE,(nPnts+1)*(long)sizeof(DPOINT)); 
 	                            lpOutPoint = (HPDPOINT)GlobalLock (hOutPoint);
-	                            hOrigPoint = GSSiGlobAlloc (1008,GMEM_MOVEABLE,(nPnts+1)*(long)sizeof(DPOINT)); 
+	                            hOrigPoint = GSSiGlobAlloc(GAIDNO 1008,GMEM_MOVEABLE,(nPnts+1)*(long)sizeof(DPOINT)); 
 	                            lpOrigPoint = (HPDPOINT)GlobalLock (hOrigPoint);
 	                            First = TRUE;  
 	                            
@@ -12719,8 +12719,8 @@ BOOL FAR PASCAL DXF_OUTPUTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPA
                     	double	D1,D2,SizeFactor;
                         	
                     	CurView->PassID = 4;  
-                    	hExportText = GSSiGlobAlloc (1009,GHND,4096);
-                    	hExportTextPointer = GSSiGlobAlloc (1010,GHND,4096);
+                    	hExportText = GSSiGlobAlloc(GAIDNO 1009,GHND,4096);
+                    	hExportTextPointer = GSSiGlobAlloc(GAIDNO 1010,GHND,4096);
 	                    ProcessPickedItem (0,FALSE);            
 						pnText = (LPSHORT)GlobalLock (hExportText); 
 						pEXText = (LPEXPORTTEXT)(pnText+1); 
@@ -13261,7 +13261,7 @@ BOOL FAR PASCAL DGN_OUTPUTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPA
                 BOOL    First, Rtn=FALSE;
                 LPSTR	lpDot, lpName; 
                 char    SQL[256],Type[32],DBName[MAX_PATH],TableName[34],FldName[34], Layer[34]; 
-                HANDLE	hOutRec = GSSiGlobAlloc (1411,GMEM_MOVEABLE,USHRT_MAX);
+                HANDLE	hOutRec = GSSiGlobAlloc(GAIDNO 1411,GMEM_MOVEABLE,USHRT_MAX);
                 LPSTR	OutRec = GlobalLock (hOutRec);
 //                SHPPOLYHEADER   SHPPolyHeader;  
 //                SHPHEADER   SHPHeader;  
@@ -13298,10 +13298,10 @@ BOOL FAR PASCAL DGN_OUTPUTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPA
             	short	st;  
             	char	TmpName[MAX_PATH]=""; 
             	DPOINT	FirstPoint; 
-            	HANDLE	hSentPointSym=GSSiGlobAlloc (1412,GHND,4096*4);
+            	HANDLE	hSentPointSym=GSSiGlobAlloc(GAIDNO 1412,GHND,4096*4);
             	LPBYTE	SentPointSym=GlobalLock (hSentPointSym);
 				short	NumPointSymbols = 0;
-				HANDLE	hPointSymbols = GSSiGlobAlloc (1413,GMEM_MOVEABLE,4096*4);
+				HANDLE	hPointSymbols = GSSiGlobAlloc(GAIDNO 1413,GMEM_MOVEABLE,4096*4);
 				LPSHORT	PointSymbols=(LPSHORT)GlobalLock (hPointSymbols);  
 				BYTE	ColorTable[256][3];
 				int		line=0;
@@ -13773,7 +13773,7 @@ BOOL FAR PASCAL DGN_OUTPUTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPA
                             	
                             	pPolyParts = (LPWORD)GlobalLock (hSavePolyParts); 
                             	nareas = *pPolyParts++; 
-                            	hIndex = GSSiGlobAlloc (GHND,nareas*4);
+                            	hIndex = GSSiGlobAlloc(GAIDNO GHND,nareas*4);
                             	pIndex = (LPLONG)GlobalLock (hIndex);
                             	i = nareas; 
                             	Totp = 0;
@@ -13868,8 +13868,8 @@ BOOL FAR PASCAL DGN_OUTPUTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPA
                     	double	D1,D2,SizeFactor;
                         	
                     	CurView->PassID = 4;  
-                    	hExportText = GSSiGlobAlloc (1414,GHND,4096*4);
-                    	hExportTextPointer = GSSiGlobAlloc (1415,GHND,4096*4);
+                    	hExportText = GSSiGlobAlloc(GAIDNO 1414,GHND,4096*4);
+                    	hExportTextPointer = GSSiGlobAlloc(GAIDNO 1415,GHND,4096*4);
 	                    ProcessPickedItem (0,FALSE);            
 						pnText = (LPSHORT)GlobalLock (hExportText); 
 						pEXText = (LPEXPORTTEXT)(pnText+1); 
@@ -14016,7 +14016,7 @@ GSSiExitProg (1249);
    {
     case WM_INITDIALOG:
          cwCenter(hWndDlg, 0); 
-         hSaveTheme = GSSiGlobAlloc ( 637,GMEM_MOVEABLE,sizeof(THEME));
+         hSaveTheme = GSSiGlobAlloc(GAIDNO 637,GMEM_MOVEABLE,sizeof(THEME));
          pSaveTheme = (LPTHEME)GlobalLock (hSaveTheme);
          *pSaveTheme = *CurTheme;
          GlobalUnlock (hSaveTheme);
@@ -14477,7 +14477,7 @@ GSSiExitProg (613);
 			     HANDLE hMem;
 			     LPSTR  lpStr, lpWhere;
 				                 
-			     hMem = GSSiGlobAlloc ( 248,GHND,4096);
+			     hMem = GSSiGlobAlloc(GAIDNO 248,GHND,4096);
 			     lpStr = GlobalLock (hMem); 
 			     GetDlgItemText (hWndDlg,IDC_SQL,lpStr,1024);
 			     if (GetSQLWhereClause (hWndDlg, hSQLCombo, lpStr))
@@ -14699,7 +14699,7 @@ BOOL FAR PASCAL ORACLEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM 
                  HANDLE hMem;
                  LPSTR  lpStr;
                  
-                 hMem = GSSiGlobAlloc ( 683,GHND,4096);
+                 hMem = GSSiGlobAlloc(GAIDNO 683,GHND,4096);
                  lpStr = GlobalLock (hMem); 
                  GetDlgItemText (hWndDlg,IDC_SQL,lpStr,1024);
                  if (GetSQLWhereClause (hWndDlg, MIFOuthDB, lpStr))
@@ -14766,7 +14766,7 @@ BOOL FAR PASCAL ORACLEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM 
                     BigRead (Fid,MIFOutDataFile,MAX_PATH);
                     BigRead (Fid,MIFOutSQL,lnMIFOutSQL);
                     BigRead (Fid,(HPSTR)&nItems,sizeof(int));
-                     MIFOutFields = GSSiGlobAlloc ( 684,GHND,nItems*4+4);
+                     MIFOutFields = GSSiGlobAlloc(GAIDNO 684,GHND,nItems*4+4);
                      lpItems = (LPINT)GlobalLock(MIFOutFields);
                      *lpItems = nItems;
                      lpItems++;       
@@ -14838,7 +14838,7 @@ BOOL FAR PASCAL ORACLEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM 
                     break;
                  }  
                  GSSiGlobFree (&MIFOutFields);
-                 MIFOutFields = GSSiGlobAlloc ( 685,GHND,nItems*4+4);
+                 MIFOutFields = GSSiGlobAlloc(GAIDNO 685,GHND,nItems*4+4);
                  lpItems = (LPINT)GlobalLock(MIFOutFields);
                  *lpItems = nItems;
                  lpItems++;       
@@ -14899,7 +14899,7 @@ BOOL FAR PASCAL ORACLEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM 
                 BOOL    First, Rtn=FALSE;
                 LPSTR	lpDot, lpName; 
                 char    SQL[256],Type[32],DBName[MAX_PATH],SymName[34],TableName[64],FldName[34]; 
-                HANDLE	hOutRec = GSSiGlobAlloc ( 686,GMEM_MOVEABLE,USHRT_MAX);
+                HANDLE	hOutRec = GSSiGlobAlloc(GAIDNO 686,GMEM_MOVEABLE,USHRT_MAX);
                 LPSTR	OutRec = GlobalLock (hOutRec);
 //                SHPPOLYHEADER   SHPPolyHeader;  
 //                SHPHEADER   SHPHeader;  
@@ -14989,7 +14989,7 @@ BOOL FAR PASCAL ORACLEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM 
                 }
 				CloseTRANS2 (&hTranExport[0]);
 				CloseTRANS2 (&hTranExport[1]);
-                MIFOutFields = GSSiGlobAlloc ( 687,GHND,nItems*4+4);
+                MIFOutFields = GSSiGlobAlloc(GAIDNO 687,GHND,nItems*4+4);
                 lpItems = (LPINT)GlobalLock(MIFOutFields);
                 SendDlgItemMessage(hWndDlg,IDC_FIELDS,
                                            LB_GETSELITEMS,
@@ -15012,8 +15012,8 @@ BOOL FAR PASCAL ORACLEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM 
 				Processing = TRUE;
                 //GetBTHeader (hHighlight,&BTHead); 
                 NumItems = BT_NUM_IN_INDEX (hHighlight);                              
-            	hExportText = GSSiGlobAlloc ( 688,GHND,4096);
-            	hExportTextPointer = GSSiGlobAlloc ( 689,GHND,4096);
+            	hExportText = GSSiGlobAlloc(GAIDNO 688,GHND,4096);
+            	hExportTextPointer = GSSiGlobAlloc(GAIDNO 689,GHND,4096);
       TPLPass:  
       			CurItem = 0;
                 GetDlgItemText (hWndDlg,IDC_MIF_FILE,Name,sizeof(Name));
@@ -15371,7 +15371,7 @@ INSERT INTO SDO_GEOM_METADATA (TABLE_NAME, COLUMN_NAME, DIMINFO)
 	                            {
 	                            	pPolyParts = (LPINT)GlobalLock (hSavePolyParts); 
 	                            	nareas = *pPolyParts++; 
-	                            	hIndex = GSSiGlobAlloc ( 690,GHND,nareas*4);
+	                            	hIndex = GSSiGlobAlloc(GAIDNO 690,GHND,nareas*4);
 	                            	pIndex = (LPLONG)GlobalLock (hIndex);
 	                            	i = nareas; 
 	                            	Totp = 0;
@@ -15409,9 +15409,9 @@ INSERT INTO SDO_GEOM_METADATA (TABLE_NAME, COLUMN_NAME, DIMINFO)
 		                            lpRect++;
 		                            lpDpoint = lpFirstPoint = (LPDPOINT) lpRect; 
 		                        } 
-	                            hOutPoint = GSSiGlobAlloc ( 691,GMEM_MOVEABLE,(nPnts+1)*(long)sizeof(DPOINT)); 
+	                            hOutPoint = GSSiGlobAlloc(GAIDNO 691,GMEM_MOVEABLE,(nPnts+1)*(long)sizeof(DPOINT)); 
 	                            lpOutPoint = (HPDPOINT)GlobalLock (hOutPoint);
-	                            hOrigPoint = GSSiGlobAlloc ( 692,GMEM_MOVEABLE,(nPnts+1)*(long)sizeof(DPOINT)); 
+	                            hOrigPoint = GSSiGlobAlloc(GAIDNO 692,GMEM_MOVEABLE,(nPnts+1)*(long)sizeof(DPOINT)); 
 	                            lpOrigPoint = (HPDPOINT)GlobalLock (hOrigPoint);
 	                            First = TRUE;  
 	                            RemoveDupPolyPoints (&nPnts,lpDpoint, P_TOL*2);
@@ -16121,7 +16121,7 @@ GSSiExitProg (1151);
 	                 GSSiEndDialog(hWndDlg, FALSE,hSaveBM);
 	                 break;
 	            }
-	            hSTR = GSSiGlobAlloc (1248,GMEM_MOVEABLE,1024);
+	            hSTR = GSSiGlobAlloc(GAIDNO 1248,GMEM_MOVEABLE,1024);
 	            str = GlobalLock (hSTR);
 		        FileLength = GSSillseek (Fid,0,2);
 	         	Loc = GSSillseek (Fid,0,0);
@@ -16213,7 +16213,7 @@ GSSiExitProg (1151);
                 	 		GeneratedInc = HIWORD (CBData);
 						}
 			         	Fid = GSSiOpenFile (pTEXTSTRINGLIST,&OFStruct,OF_READ);
-			            hSTR = GSSiGlobAlloc (1249,GMEM_MOVEABLE,1024);
+			            hSTR = GSSiGlobAlloc(GAIDNO 1249,GMEM_MOVEABLE,1024);
 			            str = GlobalLock (hSTR);  
 			            GSSillseek (Fid,Loc,0);
 			         	fgetstring (str,1020,Fid); 

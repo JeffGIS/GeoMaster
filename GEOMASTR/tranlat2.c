@@ -645,7 +645,7 @@ BOOL ImportAttributes (HANDLE hSQL)
     SQLPtr = (LPOPENSQLDATA)GlobalLock (hSQL);
     FilePtr = (LPOPENFILEDATA)GlobalLock (SQLPtr->OFHandle); 
     lpGWDHead = (LPGWDHEADER)GlobalLock (FilePtr->FileHandle);  
-    hTemp = GSSiGlobAlloc ( 535,GMEM_MOVEABLE,4096);
+    hTemp = GSSiGlobAlloc(GAIDNO 535,GMEM_MOVEABLE,4096);
     pTemp = GlobalLock (hTemp);
 	while (*++lpStr)
 	{   
@@ -687,7 +687,7 @@ BOOL OpenImportAttributesFile (LPHANDLE phDB)
     _fstrcpy (AttImportDataFile,lpStr);
     if (!ExistFile (AttImportDataFile))
     {   
-		HANDLE	hDefStr=GSSiGlobAlloc (1501,GHND,USHRT_MAX);
+		HANDLE	hDefStr=GSSiGlobAlloc(GAIDNO 1501,GHND,USHRT_MAX);
 		LPSTR	pDefStr=GlobalLock (hDefStr); 
 		BOOL	First = TRUE;  
 		
@@ -890,7 +890,7 @@ BOOL ProcessImportFilter (void)
 	
 	if (!hImportFilter)
 		return TRUE;
-	hStr = GSSiGlobAlloc ( 541,GMEM_MOVEABLE,4096);
+	hStr = GSSiGlobAlloc(GAIDNO 541,GMEM_MOVEABLE,4096);
 	pStr = GlobalLock (hStr);    
 	pFilter = (LPIMPORTFILTER)GlobalLock (hImportFilter);
 	_fstrcpy (pStr,pFilter->Filter);
@@ -908,7 +908,7 @@ BOOL ProcessImportFilter (void)
 
 HANDLE GRTextFromTextHeader (LPGRTEXTHEADER	pGRTextHead,LPSTR Text) 
 {
-	HANDLE		hGRText = GSSiGlobAlloc (0,GHND,sizeof(GRTEXT));
+	HANDLE		hGRText = GSSiGlobAlloc(GAIDNO 0,GHND,sizeof(GRTEXT));
 	LPGRTEXT	pGRText;   
 	double		dHeight;   
 	
@@ -1047,7 +1047,7 @@ BOOL GetDOQCoord (LPSTR Name,LPMNMXCORD pBounds, LPDOUBLE pResolution,LPRECT32 C
 							 LPHANDLE phDibInfo, LPLONG ImageOffset)
 {
 	OFSTRUCTGM OFStruct;
-	HANDLE	hTxt=GSSiGlobAlloc ( 545,GMEM_MOVEABLE,USHRT_MAX);
+	HANDLE	hTxt=GSSiGlobAlloc(GAIDNO 545,GMEM_MOVEABLE,USHRT_MAX);
 	LPSTR	txt=GlobalLock (hTxt);  
 	long	BeginBitmap, l, EndFile;
 	LPBITMAPINFO    pDibInfo; 
@@ -1061,7 +1061,7 @@ BOOL GetDOQCoord (LPSTR Name,LPMNMXCORD pBounds, LPDOUBLE pResolution,LPRECT32 C
 	l = (long)fgetstring (txt,82,*Fid);
 	if (_fstrncmp (txt,"BEGIN_USGS_DOQ_HEADER",21))
 		goto RtnFalse;  
-	*phDibInfo = GSSiGlobAlloc ( 546,GHND,sizeof(BITMAPINFO)+256*sizeof(COLORREF));
+	*phDibInfo = GSSiGlobAlloc(GAIDNO 546,GHND,sizeof(BITMAPINFO)+256*sizeof(COLORREF));
 	pDibInfo = (LPBITMAPINFO)GlobalLock (*phDibInfo); 
 	pDibInfo->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
 	pDibInfo->bmiHeader.biPlanes = 1;
@@ -1335,7 +1335,7 @@ BOOL AddMapToDir (HWND hWnd,LPSTR File, LPSTR Dir, LPFILEINDEX lpFI, short Type,
 						GSSiFreeImage_Unload(hDib);
 						hDib = hDib24;
 					}
-					hDibInfo = GSSiGlobAlloc(1000,GMEM_MOVEABLE,sizeof(BITMAPINFOHEADER));
+					hDibInfo = GSSiGlobAlloc(GAIDNO 1000,GMEM_MOVEABLE,sizeof(BITMAPINFOHEADER));
 					pDibInfo = GlobalLock(hDibInfo);
 					*pDibInfo = dibInfo;
 					GlobalUnlock(hDibInfo);
@@ -1533,8 +1533,8 @@ ProcessBitmap:
             	TIFFrowinc = rowinc;
             ncol = 1+(ClipWidth-1) / approx_width;
             nrow = 1+(ClipHeight-1) / approx_height;
-            hRow = GSSiGlobAlloc ( 547,GMEM_MOVEABLE,OrigBMRowLen);
-            h0s = GSSiGlobAlloc ( 548,GHND,OrigBMRowLen);
+            hRow = GSSiGlobAlloc(GAIDNO 547,GMEM_MOVEABLE,OrigBMRowLen);
+            h0s = GSSiGlobAlloc(GAIDNO 548,GHND,OrigBMRowLen);
             p0s = GlobalLock (h0s);
             width  = IDNINT(BytesPerPel*approx_width)/2;  
             
@@ -1544,7 +1544,7 @@ ProcessBitmap:
             last_height = ClipHeight - ((nrow-1) * (long)height); 
             
             HeadLen = sizeof(BITMAPINFOHEADER)+pDibInfo->bmiHeader.biClrUsed*sizeof(RGBQUAD);
-            hDibInfoOut = GSSiGlobAlloc ( 549,GHND,HeadLen);
+            hDibInfoOut = GSSiGlobAlloc(GAIDNO 549,GHND,HeadLen);
             pDibInfoOut = (LPBITMAPINFO)GlobalLock (hDibInfoOut); 
             _fmemmove (pDibInfoOut,pDibInfo,HeadLen);  
             if (!pDibInfoOut->bmiHeader.biSize)
@@ -1615,7 +1615,7 @@ ProcessBitmap:
 						goto WriteIndex;
 					OutLen = rowlen;
 					GSSiGlobFree(&hOutRow);
-					hOutRow = GSSiGlobAlloc(550, GMEM_MOVEABLE, OutLen);
+					hOutRow = GSSiGlobAlloc(GAIDNO 550, GMEM_MOVEABLE, OutLen);
 					if (irow == nrow - 1 && !AviOut)
 						pDibInfoOut->bmiHeader.biHeight = last_height;
 					else
@@ -1696,7 +1696,7 @@ ProcessBitmap:
 
 								if (!hRowBufs)
 								{
-									hRowBufs = GSSiGlobAlloc(551, GHND, sizeof(HANDLE)*height);
+									hRowBufs = GSSiGlobAlloc(GAIDNO 551, GHND, sizeof(HANDLE)*height);
 									phOrigRow = (LPHANDLE)GlobalLock(hRowBufs);
 									if (ImageIsFliped)
 									{
@@ -1709,7 +1709,7 @@ ProcessBitmap:
 										DWORD	OffsetD;
 										if (ThisRow < OrigBMHeight)
 										{
-											*phOrigRow = GSSiGlobAlloc(552, GMEM_MOVEABLE, rowinc);
+											*phOrigRow = GSSiGlobAlloc(GAIDNO 552, GMEM_MOVEABLE, rowinc);
 											OrigRowData = GlobalLock(*phOrigRow);
 											if (hTIFFOffsets)
 											{
@@ -1725,7 +1725,7 @@ ProcessBitmap:
 													OffsetD = (DWORD)*pOffset;// + StripOffset; 
 													Length = *pLength;
 													GSSiGlobFree(&hTIFFStrip);
-													hTIFFStrip = GSSiGlobAlloc(553, GMEM_MOVEABLE, max(rowinc*RowsPerStrip, Length));
+													hTIFFStrip = GSSiGlobAlloc(GAIDNO 553, GMEM_MOVEABLE, max(rowinc*RowsPerStrip, Length));
 													pTIFFStrip = GlobalLock(hTIFFStrip);
 													GSSillseek2(FidBMOrig, OffsetD, 0);
 													BigRead(FidBMOrig, pTIFFStrip, Length);

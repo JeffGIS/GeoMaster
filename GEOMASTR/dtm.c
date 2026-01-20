@@ -168,7 +168,7 @@ HANDLE NEXPND (short INUM,LPSHORT INPUTI)
 	UINT	I, NEXT=0, J, LAST; 
 	short	NOFJ, ELV;
 	long	INC;
-	HANDLE	handle=GSSiGlobAlloc (1089,GMEM_MOVEABLE,1024*sizeof(short));
+	HANDLE	handle=GSSiGlobAlloc(GAIDNO 1089,GMEM_MOVEABLE,1024*sizeof(short));
 	LPSHORT	OUTPUT=(LPSHORT)GlobalLock (handle);
 	
     for (I=0;I<INUM;I++)
@@ -598,7 +598,7 @@ BOOL LoadERDASDem (void)
 	long	INTX,INTY, DTMKeyl;  
 	short	IELV;
 	double	SPX,SPY, ymod;  
-	HANDLE	hData=GSSiGlobAlloc (1090,GMEM_MOVEABLE,4096+2048);
+	HANDLE	hData=GSSiGlobAlloc(GAIDNO 1090,GMEM_MOVEABLE,4096+2048);
 	LPLONG		DTMElev, DTMData2=(LPLONG)GlobalLock (hData);  
 	LPSHORT		SubcellData=(LPSHORT)(DTMData2+1024);
 	
@@ -690,10 +690,10 @@ BOOL LoadERDASDem (void)
 	LastLen = eh.cols % 32;  
 	if (!LastLen)
 		LastLen = 32;
-	hSubcellHandles = GSSiGlobAlloc (1091,GHND,nSubcells*sizeof(HANDLE));
+	hSubcellHandles = GSSiGlobAlloc(GAIDNO 1091,GHND,nSubcells*sizeof(HANDLE));
 	SubcellHandles = (LPHANDLE)GlobalLock (hSubcellHandles); 
 	for (i=0;i<nSubcells;i++)
-		SubcellHandles[i] = GSSiGlobAlloc (1092,GMEM_MOVEABLE,1024*4);
+		SubcellHandles[i] = GSSiGlobAlloc(GAIDNO 1092,GMEM_MOVEABLE,1024*4);
 	SubcellRow=31; 
 	SPY = eh.yt - 16 * eh.ycell;
 	while (ContinueProcessing && irow--)
@@ -851,7 +851,7 @@ BOOL LoadASCDTM(LPSTR InFile, LPSTR OutFile)
 		long	INTX, INTY, DTMKeyl;
 		short	IELV;
 		double	SPX, SPY, ymod;
-		HANDLE	hData = GSSiGlobAlloc(1090, GMEM_MOVEABLE, 4096 + 2048);
+		HANDLE	hData = GSSiGlobAlloc(GAIDNO 1090, GMEM_MOVEABLE, 4096 + 2048);
 		LPLONG		DTMElev, DTMData2 = (LPLONG)GlobalLock(hData);
 		LPSHORT		SubcellData = (LPSHORT)(DTMData2 + 1024);
 
@@ -927,7 +927,7 @@ BOOL LoadASCDTM(LPSTR InFile, LPSTR OutFile)
 		GSSillseek(Fid, 0, 0);
 		CreateStatusWind(hWndMain, 1, 0);
 #define MAX_LINE 1024*1024
-		HANDLE hLine = GSSiGlobAlloc(1858, GMEM_MOVEABLE, MAX_LINE);
+		HANDLE hLine = GSSiGlobAlloc(GAIDNO 1858, GMEM_MOVEABLE, MAX_LINE);
 		LPSTR pLine = GlobalLock(hLine);
 		/*			ncols 2450
 					nrows 3489
@@ -978,10 +978,10 @@ BOOL LoadASCDTM(LPSTR InFile, LPSTR OutFile)
 		LastLen = eh.cols % 32;
 		if (!LastLen)
 			LastLen = 32;
-		hSubcellHandles = GSSiGlobAlloc(1091, GHND, nSubcells * sizeof(HANDLE));
+		hSubcellHandles = GSSiGlobAlloc(GAIDNO 1091, GHND, nSubcells * sizeof(HANDLE));
 		SubcellHandles = (LPHANDLE)GlobalLock(hSubcellHandles);
 		for (i = 0; i < nSubcells; i++)
-			SubcellHandles[i] = GSSiGlobAlloc(1092, GMEM_MOVEABLE, 1024 * 4);
+			SubcellHandles[i] = GSSiGlobAlloc(GAIDNO 1092, GMEM_MOVEABLE, 1024 * 4);
 		SubcellRow = 31;
 		SPY = eh.yt - 16 * eh.ycell;
 		while (ContinueProcessing && irow--)
@@ -1133,7 +1133,7 @@ BOOL LoadBILDTM(LPSTR InFile, LPSTR OutFile, BOOL new)
 		long	INTX, INTY, DTMKeyl;
 		short	IELV;
 		double	SPX, SPY, ymod;
-		HANDLE	hData = GSSiGlobAlloc(1090, GMEM_MOVEABLE, 4096 + 2048);
+		HANDLE	hData = GSSiGlobAlloc(GAIDNO 1090, GMEM_MOVEABLE, 4096 + 2048);
 		LPLONG		DTMElev, DTMData2 = (LPLONG)GlobalLock(hData);
 		LPSHORT		SubcellData = (LPSHORT)(DTMData2 + 1024);
 		LPGWDHEADER	lpGWDHead;
@@ -1226,7 +1226,7 @@ BOOL LoadBILDTM(LPSTR InFile, LPSTR OutFile, BOOL new)
 		TotLen = GSSillseek2(Fid, 0, 2);
 		GSSillseek(Fid, 0, 0);
 #define MAX_LINE 1024*1024
-		hLine = GSSiGlobAlloc(1858, GMEM_MOVEABLE, MAX_LINE);
+		hLine = GSSiGlobAlloc(GAIDNO 1858, GMEM_MOVEABLE, MAX_LINE);
 		LPSTR pLine = GlobalLock(hLine);
 		/*BYTEORDER      I
 		LAYOUT         BIL
@@ -1371,10 +1371,10 @@ BOOL LoadBILDTM(LPSTR InFile, LPSTR OutFile, BOOL new)
 		LastLen = ncols % 32;
 		if (!LastLen)
 			LastLen = 32;
-		hSubcellHandles = GSSiGlobAlloc(1091, GHND, nSubcells * sizeof(HANDLE));
+		hSubcellHandles = GSSiGlobAlloc(GAIDNO 1091, GHND, nSubcells * sizeof(HANDLE));
 		SubcellHandles = (LPHANDLE)GlobalLock(hSubcellHandles);
 		for (i = 0; i < nSubcells; i++)
-			SubcellHandles[i] = GSSiGlobAlloc(1092, GMEM_MOVEABLE, 1024 * 4);
+			SubcellHandles[i] = GSSiGlobAlloc(GAIDNO 1092, GMEM_MOVEABLE, 1024 * 4);
 		SubcellRow = 31;
 		SPY = ulYMap - 16 * DTMData.GridSpace;
 		while (ContinueProcessing && irow--)
@@ -1542,7 +1542,7 @@ BOOL LoadTIFDTM(LPSTR InFile, LPSTR OutFile, BOOL new)
 		long	INTX, INTY, DTMKeyl;
 		short	IELV;
 		double	SPX, SPY, ymod;
-		HANDLE	hData = GSSiGlobAlloc(1090, GMEM_MOVEABLE, 4096 + 2048);
+		HANDLE	hData = GSSiGlobAlloc(GAIDNO 1090, GMEM_MOVEABLE, 4096 + 2048);
 		LPLONG		DTMElev, DTMData2 = (LPLONG)GlobalLock(hData);
 		LPSHORT		SubcellData = (LPSHORT)(DTMData2 + 1024);
 		LPGWDHEADER	lpGWDHead;
@@ -1643,7 +1643,7 @@ BOOL LoadTIFDTM(LPSTR InFile, LPSTR OutFile, BOOL new)
 		LPSTR proj4def = SHPGetNVP(InFile, &coordFactor);
 
 #define MAX_LINE 1024*1024
-		hLine = GSSiGlobAlloc(1858, GMEM_MOVEABLE, MAX_LINE);
+		hLine = GSSiGlobAlloc(GAIDNO 1858, GMEM_MOVEABLE, MAX_LINE);
 		LPSTR pLine = GlobalLock(hLine);
 		/*BYTEORDER      I
 		LAYOUT         BIL
@@ -1788,10 +1788,10 @@ BOOL LoadTIFDTM(LPSTR InFile, LPSTR OutFile, BOOL new)
 		LastLen = ncols % 32;
 		if (!LastLen)
 			LastLen = 32;
-		hSubcellHandles = GSSiGlobAlloc(1091, GHND, nSubcells * sizeof(HANDLE));
+		hSubcellHandles = GSSiGlobAlloc(GAIDNO 1091, GHND, nSubcells * sizeof(HANDLE));
 		SubcellHandles = (LPHANDLE)GlobalLock(hSubcellHandles);
 		for (i = 0; i < nSubcells; i++)
-			SubcellHandles[i] = GSSiGlobAlloc(1092, GMEM_MOVEABLE, 1024 * 4);
+			SubcellHandles[i] = GSSiGlobAlloc(GAIDNO 1092, GMEM_MOVEABLE, 1024 * 4);
 		SubcellRow = 31;
 		SPY = ulYMap - 16 * DTMData.GridSpace;
 		while (ContinueProcessing && irow--)
@@ -2435,7 +2435,7 @@ BOOL LoadGRIDDTM (LPSTR InFile, LPSTR OutFile)
 	UINT	irow, icol;   
 	DPOINT	Point;
 	HFILE		Fid1, Fid2;
-	HANDLE		hRec=GSSiGlobAlloc (1093,GMEM_MOVEABLE,USHRT_MAX);
+	HANDLE		hRec=GSSiGlobAlloc(GAIDNO 1093,GMEM_MOVEABLE,USHRT_MAX);
 	LPSTR		pRec;
 	short		ii, length;  
 	UINT		i, n, pos;
@@ -2474,7 +2474,7 @@ BOOL LoadGRIDDTM (LPSTR InFile, LPSTR OutFile)
 	long	INTX,INTY, DTMKeyl, nRows, nCols, RowLen, VoidVal;  
 	short	IELV, nCharPerCell=10;
 	double	SPX,SPY, Maxy;  
-	HANDLE	hData=GSSiGlobAlloc (1094,GMEM_MOVEABLE,4096+2048);
+	HANDLE	hData=GSSiGlobAlloc(GAIDNO 1094,GMEM_MOVEABLE,4096+2048);
 	LPLONG		DTMElev, DTMData2=(LPLONG)GlobalLock (hData);  
 	LPSHORT		SubcellData=(LPSHORT)(DTMData2+1024); 
 	BOOL	rtn=FALSE;
@@ -2578,10 +2578,10 @@ BOOL LoadGRIDDTM (LPSTR InFile, LPSTR OutFile)
 	LastLen = nCols % 32;  
 	if (!LastLen)
 		LastLen = 32;
-	hSubcellHandles = GSSiGlobAlloc (1095,GHND,nSubcells*sizeof(HANDLE));
+	hSubcellHandles = GSSiGlobAlloc(GAIDNO 1095,GHND,nSubcells*sizeof(HANDLE));
 	SubcellHandles = (LPHANDLE)GlobalLock (hSubcellHandles); 
 	for (i=0;i<nSubcells;i++)
-		SubcellHandles[i] = GSSiGlobAlloc (1096,GMEM_MOVEABLE,1024*4);
+		SubcellHandles[i] = GSSiGlobAlloc(GAIDNO 1096,GMEM_MOVEABLE,1024*4);
 	SubcellRow=31; 
 	SPY = Maxy - 16 * DTMData.GridSpace;  
 	RowLen = nCols * nCharPerCell;
@@ -2705,7 +2705,7 @@ BOOL LoadAREADTM (LPSTR InFile, LPSTR OutFile)
 	UINT	irow, icol;   
 	DPOINT	Point;
 	HFILE		Fid1, Fid2;
-	HANDLE		hRec=GSSiGlobAlloc (1093,GMEM_MOVEABLE,USHRT_MAX);
+	HANDLE		hRec=GSSiGlobAlloc(GAIDNO 1093,GMEM_MOVEABLE,USHRT_MAX);
 	LPSTR		pRec;
 	short		ii, length;  
 	UINT		i, n, pos;
@@ -2744,7 +2744,7 @@ BOOL LoadAREADTM (LPSTR InFile, LPSTR OutFile)
 	long	INTX,INTY, DTMKeyl, nRows, nCols, RowLen, VoidVal;  
 	short	IELV, nCharPerCell=10;
 	double	SPX,SPY, Maxy;  
-	HANDLE	hData=GSSiGlobAlloc (1094,GMEM_MOVEABLE,4096+2048);
+	HANDLE	hData=GSSiGlobAlloc(GAIDNO 1094,GMEM_MOVEABLE,4096+2048);
 	LPLONG		DTMElev, DTMData2=(LPLONG)GlobalLock (hData);  
 	LPSHORT		SubcellData=(LPSHORT)(DTMData2+1024); 
 	BOOL	rtn=FALSE;
@@ -2848,10 +2848,10 @@ BOOL LoadAREADTM (LPSTR InFile, LPSTR OutFile)
 	LastLen = nCols % 32;  
 	if (!LastLen)
 		LastLen = 32;
-	hSubcellHandles = GSSiGlobAlloc (1095,GHND,nSubcells*sizeof(HANDLE));
+	hSubcellHandles = GSSiGlobAlloc(GAIDNO 1095,GHND,nSubcells*sizeof(HANDLE));
 	SubcellHandles = (LPHANDLE)GlobalLock (hSubcellHandles); 
 	for (i=0;i<nSubcells;i++)
-		SubcellHandles[i] = GSSiGlobAlloc (1096,GMEM_MOVEABLE,1024*4);
+		SubcellHandles[i] = GSSiGlobAlloc(GAIDNO 1096,GMEM_MOVEABLE,1024*4);
 	SubcellRow=31; 
 	SPY = Maxy - 16 * DTMData.GridSpace;  
 	RowLen = nCols * nCharPerCell;
@@ -3247,7 +3247,7 @@ ReOpen:
 																							#endif
 			return 0;
 }
-		hSurf = GSSiGlobAlloc (1097,GHND,sizeof(DTMINFO));
+		hSurf = GSSiGlobAlloc(GAIDNO 1097,GHND,sizeof(DTMINFO));
 		pDTMInfo = (LPDTMINFO)GlobalLock (hSurf);
 		pDTMInfo->Type = Type;
 		pDTMInfo->hDB = hDB;   
@@ -3299,7 +3299,7 @@ ReOpen:
 			short		TinSymbol,i;
 			LPSTR		pDot;
 			
-			hSurf = GSSiGlobAlloc (1098,GHND,sizeof(DTMINFO));
+			hSurf = GSSiGlobAlloc(GAIDNO 1098,GHND,sizeof(DTMINFO));
 			pDTMInfo = (LPDTMINFO)GlobalLock (hSurf);
 			pDTMInfo->Type = Type; 
 			if (PRJ_BASEUNITS[1] == 1)
@@ -3340,7 +3340,7 @@ ReOpen:
 			FidSurf = GSSiOpenFile(FileName, 0, OF_READ);
 			if (FidSurf == HFILE_ERROR)
 				return FALSE;
-			hSurf = GSSiGlobAlloc(1097, GHND, sizeof(DTMINFO));
+			hSurf = GSSiGlobAlloc(GAIDNO 1097, GHND, sizeof(DTMINFO));
 			BigRead(FidSurf, (HPSTR)&Header, sizeof(LIDARFILEHEADER));
 
 			pDTMInfo = (LPDTMINFO)GlobalLock(hSurf);
@@ -3379,7 +3379,7 @@ ReOpen:
 			strcpy(FileNameBin, FileName);
 			pDot = strrchr(FileNameBin, '.');
 			strcpy(pDot, ".bin");
-			hSurf = GSSiGlobAlloc(1097, GHND, sizeof(DTMINFO));
+			hSurf = GSSiGlobAlloc(GAIDNO 1097, GHND, sizeof(DTMINFO));
 
 			pDTMInfo = (LPDTMINFO)GlobalLock(hSurf);
 			pDTMInfo->Type = Type;
@@ -3428,7 +3428,7 @@ ReOpen:
 			if (sqlite3_open(FileName, &db) != SQLITE_OK)
 				return FALSE;
 
-			hSurf = GSSiGlobAlloc(1097, GHND, sizeof(DTMINFO));
+			hSurf = GSSiGlobAlloc(GAIDNO 1097, GHND, sizeof(DTMINFO));
 
 			pDTMInfo = (LPDTMINFO)GlobalLock(hSurf);
 			pDTMInfo->Type = Type;
@@ -3459,7 +3459,7 @@ ReOpen:
 			if (sqlite3_open(FileName, &db) != SQLITE_OK)
 				return FALSE;
 
-			hSurf = GSSiGlobAlloc(1097, GHND, sizeof(DTMINFO));
+			hSurf = GSSiGlobAlloc(GAIDNO 1097, GHND, sizeof(DTMINFO));
 
 			pDTMInfo = (LPDTMINFO)GlobalLock(hSurf);
 			pDTMInfo->Type = Type;
@@ -3825,7 +3825,7 @@ HANDLE GetDTMSubCell (long GeoSeg, short SubCell,LPDTMINFO pDTMInfo)
 			BigRead(lpGWDHead->Fid, (HPSTR)&len, 2);
 			BigRead(lpGWDHead->Fid, (HPSTR)&lpGWDHead->GWDData, len);
 			SetGWDCurrentOffset(lpGWDHead, Offset);
-			pDTMInfo->hCell[MinUseID] = GSSiGlobAlloc(1099, GMEM_MOVEABLE, 4096);
+			pDTMInfo->hCell[MinUseID] = GSSiGlobAlloc(GAIDNO 1099, GMEM_MOVEABLE, 4096);
 			pCell = (LPLONG)GlobalLock(pDTMInfo->hCell[MinUseID]);
 			int expLen = ExpandSubcell(pCell, *pSUBCELLInfo, CompressedDTMData, pBias);
 			GlobalUnlock(pDTMInfo->hCell[MinUseID]);
@@ -3859,7 +3859,7 @@ HANDLE GetDTMSubCell (long GeoSeg, short SubCell,LPDTMINFO pDTMInfo)
 				LPSTR pDeCompressedRec = malloc(lenDecompressed + 4);
 				BigRead(pDTMInfo->Fid,pCompressedRec, len);
 				int lDecompRec = DecompressBinaryRecordUnsafe(pDeCompressedRec, pCompressedRec, len);
-				pDTMInfo->hCell[MinUseID] = GSSiGlobAlloc(1099, GMEM_MOVEABLE, 4096);
+				pDTMInfo->hCell[MinUseID] = GSSiGlobAlloc(GAIDNO 1099, GMEM_MOVEABLE, 4096);
 				pCell = (LPLONG)GlobalLock(pDTMInfo->hCell[MinUseID]);
 				pSUBCELLInfo = (LPSUBCELLINFO)(pDeCompressedRec + (sizeof(DTMKEY)));
 				pBias = (LPLONG)(pDeCompressedRec + (sizeof(DTMKEY) + sizeof(SUBCELLINFO)));
@@ -3956,7 +3956,7 @@ BOOL SetDTMSubCell (long GeoSeg, short SubCell,int node,double Elev,short Units,
 	    GSSillseek (lpGWDHead->Fid,Offset,0);
 	    BigRead (lpGWDHead->Fid,(HPSTR)&len,2);
 	    BigRead (lpGWDHead->Fid,(HPSTR)&lpGWDHead->GWDData,len); 
-	    hCell = GSSiGlobAlloc (1100,GMEM_MOVEABLE,4096);
+	    hCell = GSSiGlobAlloc(GAIDNO 1100,GMEM_MOVEABLE,4096);
 	    pCell = (LPLONG)GlobalLock (hCell);
 		int expLen = ExpandSubcell (pCell,*pSUBCELLInfo,CompressedDTMData,pBias);
 		pCell[node] = IElev;
@@ -4009,7 +4009,7 @@ BOOL GetLIDARCell (long CellID,LPHANDLE phCell,LPDTMINFO pDTMInfo)
 	if (CellOffset)
 	{
 		if (*phCell < (HANDLE)2)
-			*phCell = GSSiGlobAlloc (0,GMEM_MOVEABLE,sizeof(LIDARCELL));
+			*phCell = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,sizeof(LIDARCELL));
 		pCell = (LPLIDARCELL)GlobalLock (*phCell);   
 		CellRow = CellID / pDTMInfo->NumCols;
 		CellCol = CellID % pDTMInfo->NumCols;
@@ -4336,7 +4336,7 @@ double NGIELV2 (DPOINT Point,HANDLE hSurf,short DesiredUnits)
 		  	LPVISLIST	SaveVis=CurVis;
 	    	short	SaveMaxPick=MaxPick, SaveNFiles, SaveMT, SaveTimer, SavePT;
 	    	HFILE	SaveFid; 
-	    	HANDLE	hSaveVP = GSSiGlobAlloc (1835,GMEM_MOVEABLE,sizeof(VIEWPORT)+256);
+	    	HANDLE	hSaveVP = GSSiGlobAlloc(GAIDNO 1835,GMEM_MOVEABLE,sizeof(VIEWPORT)+256);
 	    	HANDLE	SavehDTM, SavehProfilePoints;
 	    	LPVIEWPORT	pSaveVP = (LPVIEWPORT)GlobalLock (hSaveVP); 
 	    	LPSTR	pSaveFile1=(LPSTR)(pSaveVP+1); 
@@ -4390,7 +4390,7 @@ double NGIELV2 (DPOINT Point,HANDLE hSurf,short DesiredUnits)
 			SaveCRType = CurrentType;
 		    SetPickAp(0);    
 		    SavehProfilePoints = hProfilePoints;
-			hSavePicklist = GSSiGlobAlloc (1836,GMEM_MOVEABLE,sizeof(PickList));
+			hSavePicklist = GSSiGlobAlloc(GAIDNO 1836,GMEM_MOVEABLE,sizeof(PickList));
 			pSavePicklist = GlobalLock (hSavePicklist);
 			NumPickedSave = NumPicked;
 			memmove (pSavePicklist,PickList,sizeof(PickList));
@@ -4500,7 +4500,7 @@ double NGIELV2 (DPOINT Point,HANDLE hSurf,short DesiredUnits)
 
 			  if (pDTMInfo->db)
 			  {
-				  HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, 1024);
+				  HANDLE hCmd = GSSiGlobAlloc(GAIDNO 1796, GMEM_MOVEABLE, 1024);
 				  LPSTR  pCmd = GlobalLock(hCmd);
 				  sqlite3_stmt *statement;
 				  sprintf(pCmd, "SELECT LIDAR.id, LIDAR.Name FROM LIDAR, LIDAR_index WHERE LIDAR.id=LIDAR_index.id AND maxX>=%f AND minX<=%f AND maxY>=%f AND minY<=%f", Bounds.xmn, Bounds.xmx, Bounds.ymn, Bounds.ymx);
@@ -5061,7 +5061,7 @@ BOOL GetNextDTMSegment (BOOL Init)
 			DTMPoint.y -= fmod (DTMPoint.y,DTMRenderGridSpacing);  
 			DTMRenderRowBeginPoint[2] = DTMPoint;
 			DTMNumPointsInRenderGridRow = 2+ (DTMBounds.xmx - DTMPoint.x)/DTMRenderGridSpacing; 
-			hDTMRenderGridRow[2] = GSSiGlobAlloc (0,GMEM_MOVEABLE,DTMNumPointsInRenderGridRow*8);
+			hDTMRenderGridRow[2] = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,DTMNumPointsInRenderGridRow*8);
 			pRenderNode = (HPDOUBLE)GlobalLock (hDTMRenderGridRow[2]);
 			Point = DTMPoint;
 			for (i=0;i<DTMNumPointsInRenderGridRow;i++)
@@ -5144,8 +5144,8 @@ NextLidar:
 	GSSiGlobFree (&hDTMRenderGridRow[1]);
 	hDTMRenderGridRow[0] = hDTMRenderGridRow[2];  
 	DTMRenderRowBeginPoint[0] = DTMRenderRowBeginPoint[2];
-	hDTMRenderGridRow[1] = GSSiGlobAlloc (0,GMEM_MOVEABLE,DTMNumPointsInRenderGridRow*8);
-	hDTMRenderGridRow[2] = GSSiGlobAlloc (0,GMEM_MOVEABLE,DTMNumPointsInRenderGridRow*8);
+	hDTMRenderGridRow[1] = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,DTMNumPointsInRenderGridRow*8);
+	hDTMRenderGridRow[2] = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,DTMNumPointsInRenderGridRow*8);
 	DTMPoint.y += DTMRenderGridSpacing/2; 
 /*	pRenderNode = (HPDOUBLE)GlobalLock (hDTMRenderGridRow[1]);
 	Point = DTMPoint;
@@ -5591,7 +5591,7 @@ void LinkContourLines (short Line1,short Line2,short Type2, short Type1)
 	}
 	if (Type1 == 1 && Type2 == 1)
 	{
-		hTemp = GSSiGlobAlloc (0,GMEM_MOVEABLE,MAXPOINTSINCONTOUR*sizeof(POINT)+6);	
+		hTemp = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,MAXPOINTSINCONTOUR*sizeof(POINT)+6);	
 		pTempNumPoints = (LPSHORT)GlobalLock (hTemp);
 		pTempElev = (LPLONG) (pTempNumPoints+1);
 		*pTempElev = *pElev1;	
@@ -5789,7 +5789,7 @@ BOOL AddPointToContourPolygon (LPDOUBLE pZC,LPDPOINT Point1, LPDPOINT Point2)
 		} 
 		if (ConnectedTo == -1 && nContourLines < MAXCONTOURLINES)
 		{
-			hContourLines[nContourLines] = GSSiGlobAlloc (0,GMEM_MOVEABLE,MAXPOINTSINCONTOUR*sizeof(POINT)+6);		
+			hContourLines[nContourLines] = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,MAXPOINTSINCONTOUR*sizeof(POINT)+6);		
 			pNumPoints = (LPSHORT)GlobalLock (hContourLines[nContourLines]);
 			*pNumPoints = 2; 
 			pElev = (LPLONG)(pNumPoints+1);  
@@ -6682,7 +6682,7 @@ BOOL SurfToFile (LPSTR DTMFile,LPMNMXCORD pBounds,double GridSpace,LPSTR OutFile
 			double	minx, miny, maxx, maxy, Elv;
 			DWORD	nRow, nCol, Col, Row, NumItems, CurItem=0;
 			DPOINT	BP, BeginPoint,Point;
-			HANDLE	hMem = GSSiGlobAlloc (0,GMEM_MOVEABLE,USHRT_MAX);
+			HANDLE	hMem = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,USHRT_MAX);
 			LPSTR	OutRec = GlobalLock (hMem);
 			
 			ConvertRectCoord (&NewBounds, pBounds, 1,3); 

@@ -80,7 +80,7 @@ LPTHEME CreateNewTheme (int Choice)
 	{
 		LPCOORDINATEDISPLAY CD;
 
-		handle=GSSiGlobAlloc ( 133,GHND,sizeof(THEME));
+		handle=GSSiGlobAlloc(GAIDNO 133,GHND,sizeof(THEME));
 		CD = (LPCOORDINATEDISPLAY)GlobalLock(handle);
 		pTheme = (LPTHEME)CD; 
 		CD->Version = 104;
@@ -96,7 +96,7 @@ LPTHEME CreateNewTheme (int Choice)
 	}
 	else
 	{
-		handle=GSSiGlobAlloc ( 630,GHND,sizeof(THEME));
+		handle=GSSiGlobAlloc(GAIDNO 630,GHND,sizeof(THEME));
 		pTheme=(LPTHEME)GlobalLock(handle);
 		pTheme->handle = handle; 
 		pTheme->TargetViewport = *pCommandViewport;
@@ -388,7 +388,7 @@ BOOL PickThemeClass (int iclass,POINT MousePoint)
 {   
 	if (CurTheme->NumCols == MAX_THEME_CLASSES)
 	{ 
-		HANDLE	hPoints=GSSiGlobAlloc (0,GMEM_MOVEABLE,360*sizeof(POINT));
+		HANDLE	hPoints=GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,360*sizeof(POINT));
 		LPPOINT	Points = (LPPOINT)GlobalLock (hPoints);
 		short	nPnts;
 		BOOL	rtn;
@@ -407,7 +407,7 @@ void DrawUnSelectedClass (int iclass,RECT ClassClrBox)
 {
 	if (CurTheme->NumCols == MAX_THEME_CLASSES)
 	{ 
-		HANDLE	hPoints=GSSiGlobAlloc (0,GMEM_MOVEABLE,360*sizeof(POINT));
+		HANDLE	hPoints=GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,360*sizeof(POINT));
 		LPPOINT	Points = (LPPOINT)GlobalLock (hPoints);
 		short	nPnts;
 		LOGBRUSH    NDB;
@@ -715,7 +715,7 @@ GSSiExitProg (1234);
 					    SetDisplayMode (CurView->hDC, GF_TEXTMODE); 
 					    if (pDesc) 
 					    {
-					    	HANDLE hTmp=GSSiGlobAlloc ( 631,GMEM_MOVEABLE,1024);
+					    	HANDLE hTmp=GSSiGlobAlloc(GAIDNO 631,GMEM_MOVEABLE,1024);
 					    	LPSTR pTmp=GlobalLock (hTmp); 
 					    	LPSTR	pEnd;
 					    	
@@ -760,7 +760,7 @@ GSSiExitProg (1234);
 				if (pSemiColon)
 					*pSemiColon = ';';
 				if (!*phCmd)
-					*phCmd = GSSiGlobAlloc ( 632,GMEM_MOVEABLE,256);
+					*phCmd = GSSiGlobAlloc(GAIDNO 632,GMEM_MOVEABLE,256);
 				pCmd = GlobalLock (*phCmd);
 				*pCmd = 0; 
 				vpid=SelectViewport (CurrentLBUTDOWNLoc,FALSE,FALSE,TRUE);
@@ -848,7 +848,7 @@ GSSiExitProg (1234);
 		    		pSaveScreen->UserID = iclass+1;
 	                GlobalUnlock (*phBox);
 					if (!*phCmd)
-						*phCmd = GSSiGlobAlloc ( 633,GMEM_MOVEABLE,256);
+						*phCmd = GSSiGlobAlloc(GAIDNO 633,GMEM_MOVEABLE,256);
 					pCmd = GlobalLock (*phCmd);
 					*pCmd = 0; 
 					sprintf (pCmd,"$GFLIST(THEME,%s)",CurView->Name);  
@@ -1344,7 +1344,7 @@ GSSiExitProg (1246);
 				BigWrite(Fid,(HPSTR)&lrec,2,-1);
 				if (NumRecs)
 				{   
-					hRecs = GSSiGlobAlloc (1748,GMEM_MOVEABLE,NumRecs*(4+lrec));
+					hRecs = GSSiGlobAlloc(GAIDNO 1748,GMEM_MOVEABLE,NumRecs*(4+lrec));
 					pRecs = GlobalLock(hRecs);  
 					pos = BT_FIRST;
 					while (!BT_FIND(hBT,pRecs,pos,BT_ANY,(LPSTR)&ClassNo))
@@ -1955,7 +1955,7 @@ void ProcessShowValMacro (BOOL Begin)
 {   
 	if (*CurTheme->ShowValMacro)
 	{
-		HANDLE	hMem=GSSiGlobAlloc (0,GMEM_MOVEABLE,1024);
+		HANDLE	hMem=GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,1024);
 		LPSTR	pMacro = GlobalLock (hMem);
 		
 		sprintf (pMacro,"$MACRO(%s,%i)",CurTheme->ShowValMacro,Begin);
@@ -2158,7 +2158,7 @@ GSSiExitProg (1260);
 				pStreetData->SavePAE = ProcessAllElements;
 				ProcessAllElements = pStreetData->ShowAllElements;
 		    	GSSiGlobFree (&CurTheme->hScatterFile); 
-				CurTheme->hScatterFile = GSSiGlobAlloc ( 638+ CurTheme->TargetViewport * 100000,GMEM_MOVEABLE,(long)sizeof(MIDPOINT)*(long)MaxMidpoints);
+				CurTheme->hScatterFile = GSSiGlobAlloc(GAIDNO 638+ CurTheme->TargetViewport * 100000,GMEM_MOVEABLE,(long)sizeof(MIDPOINT)*(long)MaxMidpoints);
 				CurTheme->NumMidpoint=0;
 				_fmemset (HaveStates,0,74*sizeof(BYTE));
 			}                                   
@@ -2169,7 +2169,7 @@ GSSiExitProg (1260);
 				LPSHORT	pInt;
 			    
 			    GSSiGlobFree (&CurTheme->hScatterFile);
-				CurTheme->hScatterFile = GSSiGlobAlloc ( 639,GMEM_MOVEABLE,USHRT_MAX); 
+				CurTheme->hScatterFile = GSSiGlobAlloc(GAIDNO 639,GMEM_MOVEABLE,USHRT_MAX); 
 				pInt = (LPSHORT)GlobalLock(CurTheme->hScatterFile);
 				*pInt = 0;
 				GlobalUnlock (CurTheme->hScatterFile);   
@@ -2268,7 +2268,7 @@ GSSiExitProg (1260);
 						}
 					}
 				}
-				CurTheme->hPoints = GSSiGlobAlloc(1854, GMEM_MOVEABLE, maxValues * sizeof(DPOINT) + 4);
+				CurTheme->hPoints = GSSiGlobAlloc(GAIDNO 1854, GMEM_MOVEABLE, maxValues * sizeof(DPOINT) + 4);
 			}
 			break;
 
@@ -2359,7 +2359,7 @@ HANDLE SetThemeVisList (short SymNum)
     HANDLE		handle;
 		    
 	SetCurView (pViewports[CurTheme->TargetViewport-1]);
-    handle=GSSiGlobAlloc (CurTheme->TargetViewport*100000 + 640,GHND,sizeof(VISLIST));
+    handle=GSSiGlobAlloc(GAIDNO CurTheme->TargetViewport*100000 + 640,GHND,sizeof(VISLIST));
     CurVis = (LPVISLIST)GlobalLock (handle); 
     if (SaveVis) 
     	*CurVis = *SaveVis;
@@ -2515,7 +2515,7 @@ GSSiExitProg (1264);
 CheckTheme:
 	CurTheme->InTestChar = TRUE;
 	*CurTheme->CurValue = 0;
-	hMEM = GSSiGlobAlloc ( 641,GMEM_MOVEABLE,2048);  
+	hMEM = GSSiGlobAlloc(GAIDNO 641,GMEM_MOVEABLE,2048);  
 	Value = GlobalLock(hMEM);
 	KeyVal = Value+512;
 	VarVal = KeyVal+512;

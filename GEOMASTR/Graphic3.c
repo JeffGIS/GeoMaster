@@ -359,7 +359,7 @@ GSSiExitProg (694);
     	InvalidItem (0,TRUE);
     	goto Exit;
     }
-    hpltBuf = GSSiGlobAlloc ( 170,GMEM_MOVEABLE,(DWORD)nBytes+4);
+    hpltBuf = GSSiGlobAlloc(GAIDNO 170,GMEM_MOVEABLE,(DWORD)nBytes+4);
     LPpltBuf = GlobalLock (hpltBuf);
     nRead = BigRead (FidMap,LPpltBuf,nBytes); 
     if (nRead != nBytes || PickList[Item].Offset > nRead) 
@@ -392,7 +392,7 @@ GSSiExitProg (694);
 		GSSiGlobUlFree (&hpltBuf);
 	    GSSillseek (FidMap,ContinuationOffset,0);
 	    nRead = BigRead (FidMap,(HPSTR)&nBytes,2);
-	    hpltBuf = GSSiGlobAlloc ( 319,GMEM_MOVEABLE,(DWORD)nBytes+2);
+	    hpltBuf = GSSiGlobAlloc(GAIDNO 319,GMEM_MOVEABLE,(DWORD)nBytes+2);
 	    LPpltBuf = GlobalLock (hpltBuf);
 	    nRead = BigRead (FidMap,LPpltBuf,nBytes);
 		ipnt = (LPSHORT)LPpltBuf;
@@ -500,7 +500,7 @@ short GetNextPickFile (LPLONG pStartRef)
     
 		if (hHighlight)
 	    {
-			hSaveVP = GSSiGlobAlloc ( 171,GMEM_MOVEABLE,sizeof(VIEWPORT));
+			hSaveVP = GSSiGlobAlloc(GAIDNO 171,GMEM_MOVEABLE,sizeof(VIEWPORT));
 			SaveVP = (LPVIEWPORT)GlobalLock (hSaveVP);
 			*SaveVP = *CurView;
 	Next:	
@@ -605,7 +605,7 @@ GSSiExitProg (698);
 		if (CurVis && (CurVis->WantType[1] || CurVis->WantType[2] || CurVis->WantType[3]))
 		{
 			DoMultiPass = 2;
-			hRestoreVis = GSSiGlobAlloc ( 172,GMEM_MOVEABLE,sizeof(VISLIST));
+			hRestoreVis = GSSiGlobAlloc(GAIDNO 172,GMEM_MOVEABLE,sizeof(VISLIST));
 			pRestoreVis = (LPVISLIST)GlobalLock (hRestoreVis);
 			*pRestoreVis = *CurVis;
 			GlobalUnlock (hRestoreVis); 
@@ -662,7 +662,7 @@ NextPass:
 
 			if (hHighlight)
 			{
-				hSaveVP = GSSiGlobAlloc(171, GMEM_MOVEABLE, sizeof(VIEWPORT));
+				hSaveVP = GSSiGlobAlloc(GAIDNO 171, GMEM_MOVEABLE, sizeof(VIEWPORT));
 				SaveVP = (LPVIEWPORT)GlobalLock(hSaveVP);
 				*SaveVP = *CurView;
 			Next:
@@ -2128,7 +2128,7 @@ GSSiExitProg (867);
     	return FALSE;
 }
 	int lMem = *pNumViewports * sizeof(SAVEDZOOM) + sizeof(short);
-    hSavedZooms = GSSiGlobAlloc ( 178,GHND,lMem);
+    hSavedZooms = GSSiGlobAlloc(GAIDNO 178,GHND,lMem);
     pNumSavedViews = (LPSHORT)GlobalLock (hSavedZooms);
     *pNumSavedViews = 1;
     pNumSavedViews++;
@@ -2229,7 +2229,7 @@ BOOL GetVisBounds2 (LPMNMXCORD	pBounds,HDC hDC)
 	short	FileNum;
 	HANDLE	handle;  
 	BOOL	rtn=FALSE;   
-	HANDLE	hMem=GSSiGlobAlloc (1828,GMEM_MOVEABLE,1024);
+	HANDLE	hMem=GSSiGlobAlloc(GAIDNO 1828,GMEM_MOVEABLE,1024);
 	LPSTR	str=GlobalLock (hMem);
 	int		MapType;
 
@@ -2438,7 +2438,7 @@ BOOL GetSegCoorByPct (long Segid,double PCT,DPOINT *CLPoint,double *AZ,double *L
     	BigRead (FidStreetPolys,(HPSTR)&nPnts,4); 
     	BigRead (FidStreetPolys,(HPSTR)Length,8); 
     	Size = nPnts * sizeof(DPOINT);
-    	hPoly = GSSiGlobAlloc (0,GMEM_MOVEABLE,Size);
+    	hPoly = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,Size);
     	Points = (HPDPOINT)GlobalLock (hPoly);
     	BigRead (FidStreetPolys,(HPSTR)Points,Size); 
     	AtDist = *Length * PCT;
@@ -2474,7 +2474,7 @@ BOOL GetSegCoorByPct (long Segid,double PCT,DPOINT *CLPoint,double *AZ,double *L
     else
 	    GSSillseek (FidMap,PickList[Item].Segment,0);
     nRead = BigRead (FidMap,(HPSTR)&nBytes,2);
-    hpltBuf = GSSiGlobAlloc ( 179,GMEM_MOVEABLE,(DWORD)nBytes);
+    hpltBuf = GSSiGlobAlloc(GAIDNO 179,GMEM_MOVEABLE,(DWORD)nBytes);
     LPpltBuf = GlobalLock (hpltBuf);
     nRead = BigRead (FidMap,LPpltBuf,nBytes); 
     if (HaveSeg)
@@ -2714,7 +2714,7 @@ short ScanForFieldTypes (LPSTR DBName,LPHANDLE phFieldTypes,BOOL DoScan,long Num
 	long	lval, nScanned;
 	double	dval;
     USHORT	i;
-    HANDLE	hStr=GSSiGlobAlloc (0,GMEM_MOVEABLE,MAXLINE);
+    HANDLE	hStr=GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,MAXLINE);
     LPSTR	str=GlobalLock (hStr);
     short	NumFields=0;
     BOOL	ReScan=FALSE, useFileLength=FALSE;
@@ -2723,7 +2723,7 @@ short ScanForFieldTypes (LPSTR DBName,LPHANDLE phFieldTypes,BOOL DoScan,long Num
     if (!OpenDataFile (DBName,"",BT_READ,&hSQL))
         goto Exit;
     if (!*phFieldTypes)
-    	*phFieldTypes = GSSiGlobAlloc ( 243,GHND,USHRT_MAX); 
+    	*phFieldTypes = GSSiGlobAlloc(GAIDNO 243,GHND,USHRT_MAX); 
     pFieldTypes = (LPGWFLDINFO)GlobalLock (*phFieldTypes);
     while (*pFieldTypes->Name)
     	pFieldTypes++;
@@ -3010,7 +3010,7 @@ GSSiExitProg (603);
 #endif
         return FALSE;   
 }
-    hStr = GSSiGlobAlloc (0,GMEM_MOVEABLE,MAXLINE);
+    hStr = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,MAXLINE);
     str = GlobalLock (hStr);
     if (UseHLT)
 	{
@@ -3034,8 +3034,8 @@ GSSiExitProg (603);
 		if (!TotRecs)
     		goto Exit; 
     }
-    hHead = GSSiGlobAlloc ( 180,GHND,USHRT_MAX);
-    hRec  = GSSiGlobAlloc ( 181,GMEM_MOVEABLE,USHRT_MAX);   
+    hHead = GSSiGlobAlloc(GAIDNO 180,GHND,USHRT_MAX);
+    hRec  = GSSiGlobAlloc(GAIDNO 181,GMEM_MOVEABLE,USHRT_MAX);   
     lpRec = GlobalLock(hRec);
     lpHead = GlobalLock(hHead);
 	if (!GetPathType (File))
@@ -3065,7 +3065,7 @@ GSSiExitProg (603);
 			hFields = hFieldsIN;
 		else
 		{
-			hMyFields = GSSiGlobAlloc ( 182,GMEM_MOVEABLE,USHRT_MAX);
+			hMyFields = GSSiGlobAlloc(GAIDNO 182,GMEM_MOVEABLE,USHRT_MAX);
 			hFields = hMyFields; 
 			pNumFields = (LPINT)GlobalLock (hFields); 
 			*pNumFields = 0;
@@ -3747,7 +3747,7 @@ GSSiExitProg (61);
     FirstIndex.EndOffset = EndOffset; 
     FirstIndex.FirstFoundFile=TRUE;
     _fstrcpy(FirstIndex.FileName,OFStruct.szPathName);
-    Handle = GSSiGlobAlloc (  51,GMEM_MOVEABLE,sizeof(FILEINDEX)+FirstIndex.Length);
+    Handle = GSSiGlobAlloc(GAIDNO  51,GMEM_MOVEABLE,sizeof(FILEINDEX)+FirstIndex.Length);
     lpIndex = (LPFILEINDEX)GlobalLock(Handle);
     *lpIndex = FirstIndex;
     lpIndex->FirstIndexFileOffset = GSSillseek (FidIndex,0,1);
@@ -3895,7 +3895,7 @@ GetNextIndex:
 	        goto Next;
 	    } 
 	}
-    *pHandle = GSSiGlobAlloc (  52,GMEM_MOVEABLE,sizeof(FILEINDEX)+NextIndex.Length);
+    *pHandle = GSSiGlobAlloc(GAIDNO  52,GMEM_MOVEABLE,sizeof(FILEINDEX)+NextIndex.Length);
     lpIndex = (LPFILEINDEX)GlobalLock(*pHandle);
     *lpIndex = NextIndex;
     lpIndex->FirstIndexFileOffset = GSSillseek (FidIndex,0,1);
@@ -4469,7 +4469,7 @@ GSSiExitProg (718);
 #endif
     	return 0;
 }
-    hPoints = GSSiGlobAlloc ( 330,GMEM_MOVEABLE,(long)(TotHLTPoints+2)*sizeof(DPOINT)); 
+    hPoints = GSSiGlobAlloc(GAIDNO 330,GMEM_MOVEABLE,(long)(TotHLTPoints+2)*sizeof(DPOINT)); 
     pPoints = (HPDPOINT)GlobalLock (hPoints);
     *pNumPoints = 0; 
 	st = BT_FIND (hHighlight2,(LPSTR)&Sequence,BT_FIRST,BT_ANY,(LPSTR)&Refno);
@@ -4981,7 +4981,7 @@ GotTAG:
 	*len += DiffLen;
 	if (DiffLen)
 	{
-		HANDLE	hRest=GSSiGlobAlloc (0,GMEM_MOVEABLE,lRest);
+		HANDLE	hRest=GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,lRest);
 		HPSTR	pRest = GlobalLock (hRest);
 		
 		hmemmove (pRest,EndRefno,lRest);

@@ -217,7 +217,7 @@ LPTHEME	AddTheme (int ThemeID)
 
 	if (ThemeID == GF_SAVEPOLY_THEME)
 		DestroySavedPolys ();
-	handle = GSSiGlobAlloc (  56,GHND,sizeof(THEME));
+	handle = GSSiGlobAlloc(GAIDNO  56,GHND,sizeof(THEME));
 	pTheme = (LPTHEME) GlobalLock (handle);
 	pTheme->ID = ThemeID;
 	pTheme->IsActive = TRUE;
@@ -1421,7 +1421,7 @@ LPVOID BoundsDisplayInit (int Type, int DisplayVP, int TargetVP)
 {   HANDLE Handle;
 	LPBOUNDSDISPLAY lpBoundsDisplay;
 
-	Handle = GSSiGlobAlloc (  68,GHND,sizeof(THEME));
+	Handle = GSSiGlobAlloc(GAIDNO  68,GHND,sizeof(THEME));
 	lpBoundsDisplay = (LPBOUNDSDISPLAY)GlobalLock(Handle); 
 	lpBoundsDisplay->ID = PF_BOUNDS_DISPLAY;
 	lpBoundsDisplay->Handle = Handle;
@@ -2598,7 +2598,7 @@ GSSiExitProg (137);
 	else if (hHighlight2)
 		ii=1;
 	
-	hHLT = GSSiGlobAlloc (  70,GMEM_MOVEABLE,sizeof(HIGHLIGHTDATA));
+	hHLT = GSSiGlobAlloc(GAIDNO  70,GMEM_MOVEABLE,sizeof(HIGHLIGHTDATA));
 	pHighlightData = (LPHIGHLIGHTDATA)GlobalLock (hHLT); 
 	pPickData = &pHighlightData->PD; 
 	if (Name1)
@@ -2708,7 +2708,7 @@ int AddToHighlightList (long Refno,LPPICKDATA pPickData,BOOL Show)
 {GSSiEnterProg (138);
 #endif
 {   long	LastRef;
-	HANDLE	hPHLT = GSSiGlobAlloc (  71,GMEM_MOVEABLE,sizeof(HIGHLIGHTDATA)*2);
+	HANDLE	hPHLT = GSSiGlobAlloc(GAIDNO  71,GMEM_MOVEABLE,sizeof(HIGHLIGHTDATA)*2);
     LPHIGHLIGHTDATA	pHighlightData = (LPHIGHLIGHTDATA)GlobalLock (hPHLT);
     LPHIGHLIGHTDATA	pPrevHighlightData = pHighlightData + 1;
     short	st,ii;
@@ -2831,7 +2831,7 @@ void AddToHighlightListSeq (long Refno,LPPICKDATA pPickData,long Sequence,BOOL S
 {GSSiEnterProg (139);
 #endif
 {
-	HANDLE	hHLT = GSSiGlobAlloc (  72,GMEM_MOVEABLE,sizeof(HIGHLIGHTDATA));
+	HANDLE	hHLT = GSSiGlobAlloc(GAIDNO  72,GMEM_MOVEABLE,sizeof(HIGHLIGHTDATA));
 	LPHIGHLIGHTDATA pHighlightData = (LPHIGHLIGHTDATA)GlobalLock (hHLT); 
 	
 	OpenHighlightList(0,0);
@@ -2870,7 +2870,7 @@ void RemoveFromHighlightList (long Refno,int mode)
 #endif
 {   long	iref;
 	LPPICKDATA pPickData;
-	HANDLE	hHLT = GSSiGlobAlloc (  73,GMEM_MOVEABLE,sizeof(HIGHLIGHTDATA));
+	HANDLE	hHLT = GSSiGlobAlloc(GAIDNO  73,GMEM_MOVEABLE,sizeof(HIGHLIGHTDATA));
 	LPHIGHLIGHTDATA	pHighlightData = (LPHIGHLIGHTDATA)GlobalLock (hHLT); 
 	
 	OpenHighlightList(0,0);  
@@ -2992,7 +2992,7 @@ BOOL ReadHighlightListFromConfig (HFILE *Fid)
 	long	lFile1, lFile2, pos;  
 	long	maxread=(long)USHRT_MAX, lr;  
 	HFILE	FidOut;
-	HANDLE	hBuf=GSSiGlobAlloc (0,GMEM_MOVEABLE,maxread);
+	HANDLE	hBuf=GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,maxread);
 	HPSTR	pbuf=GlobalLock (hBuf);
 
 /*	if (!GetOpenFilePathname (*Fid, Name))
@@ -3577,7 +3577,7 @@ int GetSymbolNames (int Desc, LPHANDLE phNames, int From)
 #endif
 {
     short	nNames = 0, maxnames=16, parent, symnum=Desc;
-    HANDLE	hNames = GSSiGlobAlloc (  74,GHND,maxnames*36);  
+    HANDLE	hNames = GSSiGlobAlloc(GAIDNO  74,GHND,maxnames*36);  
     char	Name[66];  
     LPSTR	pName; 
     BOOL	IsPar=FALSE;

@@ -347,7 +347,7 @@ BOOL OpenTAGIndex (BOOL Delete,BOOL StoreBounds,LPSTR ReopenName)
     		GSSiRemove (TAGIndexFile);
     }
 	ltime = 0;
-	hTAGIdx = GSSiGlobAlloc(1840, GHND, sizeof(TAGINDEX) + 2);
+	hTAGIdx = GSSiGlobAlloc(GAIDNO 1840, GHND, sizeof(TAGINDEX) + 2);
 	pTI = GlobalLock(hTAGIdx);
 	if (ForceTAGIndex)
 	{
@@ -481,7 +481,7 @@ long GetMaxRefno (int PickFile,LPLONG pMinRef)
     SaveView = CurView;
     SaveVis = CurVis;
 
-	hVisList=GSSiGlobAlloc ( 965,GHND,sizeof(VISLIST));
+	hVisList=GSSiGlobAlloc(GAIDNO 965,GHND,sizeof(VISLIST));
 	CurVis = (LPVISLIST)GlobalLock (hVisList);
 	CurVis->hVisList=hVisList;
 	InitVis (); 
@@ -1166,7 +1166,7 @@ SkipPoly:
 	 		    ipnt++;
 DoPolyline:
 	 		    {
-		 		    HANDLE	hPnts = GSSiGlobAlloc ( 969,GMEM_MOVEABLE,(long)nPnts*PointSize);
+		 		    HANDLE	hPnts = GSSiGlobAlloc(GAIDNO 969,GMEM_MOVEABLE,(long)nPnts*PointSize);
 	 		        HPPOINTS	lpCPBeg = lpCurPoints =(HPPOINTS)GlobalLock (hPnts);
 	 		        
 		 			PolyIsHiPrecis = FALSE;
@@ -1216,7 +1216,7 @@ SkipPolyD:
 	 		    ipnt++; 
 DoPolylineD:
 	 		    {
-		 		    HANDLE	hPnts = GSSiGlobAlloc ( 970,GMEM_MOVEABLE,(long)nPnts*sizeof(DPOINT));
+		 		    HANDLE	hPnts = GSSiGlobAlloc(GAIDNO 970,GMEM_MOVEABLE,(long)nPnts*sizeof(DPOINT));
 	 		        HPDPOINT	lpCPBeg = lpDCurPoints = (HPDPOINT)GlobalLock (hPnts);
 	 		        
 		 			PolyIsHiPrecis = TRUE;
@@ -1606,7 +1606,7 @@ void DisplayTransformThemeLegend(short From)
 	OFSTRUCTGM OFStruct;
 	char	str[260]; 
 	long	BeginLoc;
-	HANDLE	hTran1=0, hTran2=0, hcoord=GSSiGlobAlloc ( 971,GMEM_MOVEABLE,2*16*(long)MAXTRANPOINTS+MAXTRANPOINTS*2); 
+	HANDLE	hTran1=0, hTran2=0, hcoord=GSSiGlobAlloc(GAIDNO 971,GMEM_MOVEABLE,2*16*(long)MAXTRANPOINTS+MAXTRANPOINTS*2); 
 	float	RSQMIN, RSQAll, RSQBest=0;
 	short	N=0,i,n, nmaxresid,TotN, GetBest=1,BestN, NCoord, maxresidID, Type;   
 	double	X, Y, resid, maxresid=-1;
@@ -1875,13 +1875,13 @@ BOOL GetMapBounds (LPSTR File,LPMNMXCORD pBounds)
 	
     if (!CurView) 
     {
-    	hCurView = GSSiGlobAlloc (0,GHND,sizeof(VIEWPORT));
+    	hCurView = GSSiGlobAlloc(GAIDNO 0,GHND,sizeof(VIEWPORT));
     	CurView = (LPVIEWPORT)GlobalLock (hCurView);
     }
 	ft = MapFileType(File, 0, 0);
 	if (ft != MT_FILE_GEO_DB && FileType(File) == 2)
     {   
-    	HANDLE	handle, hMem = GSSiGlobAlloc ( 972,GMEM_MOVEABLE,256);
+    	HANDLE	handle, hMem = GSSiGlobAlloc(GAIDNO 972,GMEM_MOVEABLE,256);
     	LPSTR	pName = GlobalLock (hMem);
     	sprintf (pName,"%s\\index",File);
     	
@@ -2023,7 +2023,7 @@ BOOL LoadVPToolBar (void)
 		Fid = GSSiOpenFile (CurView->PickMacroFile,&OFStruct,OF_READ);
 		if (Fid != HFILE_ERROR)
 		{   
-			CurView->ToolbarHandle = GSSiGlobAlloc ( 973,GHND,USHRT_MAX);   
+			CurView->ToolbarHandle = GSSiGlobAlloc(GAIDNO 973,GHND,USHRT_MAX);   
 			pTB = GlobalLock (CurView->ToolbarHandle);
 			fgetstring (str,1024,Fid);while (*str == '#'){line++;fgetstring (str,1024,Fid);}  
 			if (sscanf (str,"%i %i",&height,&width) != 2) 
@@ -2192,7 +2192,7 @@ GSSiExitProg (1046);
 			} 
 			if (phCmd)
 			{
-		    	*phCmd = GSSiGlobAlloc ( 974,GMEM_MOVEABLE,4096);
+		    	*phCmd = GSSiGlobAlloc(GAIDNO 974,GMEM_MOVEABLE,4096);
 		    	pCmd = GlobalLock (*phCmd); 
 		    	*pCmd = 0;
 		    	if (*pType == 1)
@@ -2283,10 +2283,10 @@ GSSiExitProg (1048);
 	}
 	strcpy (LastMenuFile,Name);
 	AddToMacroStack(2, 0, Name, 0, 0);
-	hNewPopups = GSSiGlobAlloc ( 975,GHND,4096);
+	hNewPopups = GSSiGlobAlloc(GAIDNO 975,GHND,4096);
 	phWhichCmdList = &hToolCmd; 
 	if (!hToolCmd)
-		hToolCmd = GSSiGlobAlloc ( 976,GHND,USHRT_MAX);
+		hToolCmd = GSSiGlobAlloc(GAIDNO 976,GHND,USHRT_MAX);
 	hMenu = GMCreateMenu (MFid,&line,Name); 
 	GSSiClose2 (&MFid); 
 	*phPopups = hNewPopups;
@@ -2360,7 +2360,7 @@ long FillProjectionList (HWND hWndDlg,UINT cntl,LPSHORT pCurProj,UINT unitscntl,
 
     if (!hProjectionFile)
     {
-    	hProjectionFile = GSSiGlobAlloc (1879,GMEM_MOVEABLE,256);
+    	hProjectionFile = GSSiGlobAlloc(GAIDNO 1879,GMEM_MOVEABLE,256);
     	pName = GlobalLock (hProjectionFile);
 		GSSiGetTempFileName(0,"gma",0,pName); 
 	}	
@@ -2594,11 +2594,11 @@ GSSiExitProg (1056);
 	    ConvertCoordClose ();
 	    ConvertCoordInit();
 	}
-    hPoints = GSSiGlobAlloc ( 977,GMEM_MOVEABLE,USHRT_MAX); 
+    hPoints = GSSiGlobAlloc(GAIDNO 977,GMEM_MOVEABLE,USHRT_MAX); 
     pPoints = (HPDPOINT)GlobalLock (hPoints);
-    hWeights = GSSiGlobAlloc ( 978,GMEM_MOVEABLE,USHRT_MAX); 
+    hWeights = GSSiGlobAlloc(GAIDNO 978,GMEM_MOVEABLE,USHRT_MAX); 
     pWeights = (LPDOUBLE)GlobalLock (hWeights);   
-    hFitPoints = GSSiGlobAlloc ( 979,GMEM_MOVEABLE,2*sizeof(DPOINT));
+    hFitPoints = GSSiGlobAlloc(GAIDNO 979,GMEM_MOVEABLE,2*sizeof(DPOINT));
     pRtnPoints = (HPDPOINT)GlobalLock (hFitPoints);
 	while (fgetstring (File,128,Fid1))
 	{
@@ -2941,7 +2941,7 @@ BOOL EndPointMacros (LPSTR PrePickMacro,LPSTR BPMacro,LPSTR EPMacro,LPSTR PostPi
 	short	pos=BT_FIRST;
 	long	Sequence, Refno; 
 	HIGHLIGHTDATA	HighlightData;  
-	HANDLE	hStr=GSSiGlobAlloc ( 980,GMEM_MOVEABLE,2048);
+	HANDLE	hStr=GSSiGlobAlloc(GAIDNO 980,GMEM_MOVEABLE,2048);
 	LPSTR	str = GlobalLock(hStr);
 	HCURSOR	hcurSave;
 	
@@ -3028,7 +3028,7 @@ GSSiExitProg (1067);
 #endif
 		return FALSE;  
 }
-	hStr = GSSiGlobAlloc ( 981,GMEM_MOVEABLE,512);
+	hStr = GSSiGlobAlloc(GAIDNO 981,GMEM_MOVEABLE,512);
 	pString = GlobalLock (hStr);
 	GSSillseek (Fid,CurGCmdStringLoc,0);
 	BigRead (Fid,(HPSTR)&ID,2);

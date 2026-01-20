@@ -1051,7 +1051,7 @@ void AutoInsert (HWND hWnd,HANDLE hFile,HMENU *phMenu)
 		return;
 
 	GSSiGlobFree (&hInsertOpts);
-	hInsertOpts = GSSiGlobAlloc (1785,GHND,USHRT_MAX);
+	hInsertOpts = GSSiGlobAlloc(GAIDNO 1785,GHND,USHRT_MAX);
 	pInsertOpts = GlobalLock (hInsertOpts);
 	pFile = GlobalLock (hFile);
 
@@ -1401,7 +1401,7 @@ BOOL CopyToClipboard (HANDLE hWnd,HANDLE hFile,int ib,int ie)
 	
 	pFile = GlobalLock (hFile);
    	KeepMemLength = TRUE;  
-    hStr = GSSiGlobAlloc (1228,GHND,ln+1);  
+    hStr = GSSiGlobAlloc(GAIDNO 1228,GHND,ln+1);  
     KeepMemLength = KeepMemLengthSave;
    	str = GlobalLock (hStr);  
    	strncpy0 (str,&pFile[ib],ln);
@@ -1590,7 +1590,7 @@ LRESULT CALLBACK WndProcGMEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 				LINES = 1;
 				lFile = GSSifilelength (fid);
 				ln = lFile;
-				hFile = GSSiGlobAlloc (1786,GMEM_MOVEABLE,MAX_FILE_SIZE+4);
+				hFile = GSSiGlobAlloc(GAIDNO 1786,GMEM_MOVEABLE,MAX_FILE_SIZE+4);
 				pFile = GlobalLock (hFile);
 				while (fgetstring (pFile,ln,fid))
 				{
@@ -1752,7 +1752,7 @@ LRESULT CALLBACK WndProcGMEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 					IgnoreLock = FALSE;
 					if (lText)
 					{
-						HANDLE hText2 = GSSiGlobAlloc (1784,GMEM_MOVEABLE,lText+1);
+						HANDLE hText2 = GSSiGlobAlloc(GAIDNO 1784,GMEM_MOVEABLE,lText+1);
 						LPSTR  pText2 = GlobalLock (hText2);
 
 						IgnoreLock = TRUE;

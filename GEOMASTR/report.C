@@ -35,13 +35,13 @@ HANDLE LoadReport2 (HFILE Fid,HANDLE hBuf)
 	HPSTR pBuf=GlobalLock (hBuf);
 	LPSTR	lpBeg, lpEnd, lpEnd2, pEnd, pRow;
 	long	len; 
-	HANDLE	hLine=GSSiGlobAlloc ( 728,GMEM_MOVEABLE,1024);
+	HANDLE	hLine=GSSiGlobAlloc(GAIDNO 728,GMEM_MOVEABLE,1024);
 	LPSTR	pLine = GlobalLock (hLine);
 	LPSTR	pNextLine, lpComma;
 	int		LineNum=0;
 	
 	reptype=1;
-	hReport = GSSiGlobAlloc (1583,GHND,sizeof(REPORT));
+	hReport = GSSiGlobAlloc(GAIDNO 1583,GHND,sizeof(REPORT));
 	pReport = (LPREPORT)GlobalLock (hReport);  
 	pReport->Type = 2;   
 	pReport->First = TRUE;
@@ -108,7 +108,7 @@ HANDLE LoadReport2 (HFILE Fid,HANDLE hBuf)
 			lpBeg += 6;
 			if (!(lpEnd = MatchLev (lpBeg,'}'))) goto ErrExit; 
 			len = lpEnd - lpBeg + 1; 
-			pReport->hRows = GSSiGlobAlloc ( 729,GMEM_MOVEABLE,len);
+			pReport->hRows = GSSiGlobAlloc(GAIDNO 729,GMEM_MOVEABLE,len);
 			pRow = GlobalLock (pReport->hRows);  
 			pReport->NumRows=1;
 			*lpEnd = 0;
@@ -147,17 +147,17 @@ HANDLE LoadReport (LPSTR Name)
 	SetCurVal (Name,IDS_FILERPT);
 	len = GSSillseek (Fid,0,2); 
 	GSSillseek (Fid,0,0);
-	hBuf = GSSiGlobAlloc (1584,GHND,len+1);
+	hBuf = GSSiGlobAlloc(GAIDNO 1584,GHND,len+1);
 	fgetstring (HeadLine,32,Fid);
 	GSSillseek (Fid,0,0);
 	if (!_fstrnicmp (HeadLine,"HEADER",6))
 		return LoadReport2 (Fid,hBuf);
 	pBuf = GlobalLock (hBuf);
-	hTempLine = GSSiGlobAlloc (1579,GMEM_MOVEABLE,2096);
+	hTempLine = GSSiGlobAlloc(GAIDNO 1579,GMEM_MOVEABLE,2096);
 	templine = GlobalLock (hTempLine);
 	BigRead (Fid,pBuf,len); 
 	GSSiClose2 (&Fid); 
-	hReport = GSSiGlobAlloc (1580,GHND,sizeof(REPORT));
+	hReport = GSSiGlobAlloc(GAIDNO 1580,GHND,sizeof(REPORT));
 	pReport = (LPREPORT)GlobalLock (hReport);  
 	pReport->Type = 1; 
 	if (!strnicmp (HeadLine,"GMREPORT ",9))
@@ -250,7 +250,7 @@ HANDLE LoadReport (LPSTR Name)
 			long	TotLen;
 			
 			pReport->Type = 2;   
-			pReport->hRows = GSSiGlobAlloc ( 730,GMEM_MOVEABLE,USHRT_MAX);
+			pReport->hRows = GSSiGlobAlloc(GAIDNO 730,GMEM_MOVEABLE,USHRT_MAX);
 			pRow = GlobalLock (pReport->hRows);  
 			pReport->NumRows=1;
 			*pRow = 0;
@@ -400,7 +400,7 @@ int LoadStrings (int nstrings ,HANDLE *hstrings,LPSTR *pNextLine,LPINT LineNum)
     
     if (!nstrings)
     	nstrings = MaxStrings;
-	hTemp = GSSiGlobAlloc (1581,GMEM_MOVEABLE,(long)nstrings*4);
+	hTemp = GSSiGlobAlloc(GAIDNO 1581,GMEM_MOVEABLE,(long)nstrings*4);
 	pTemp = (LPLONG)GlobalLock (hTemp);
 	for (i = 0;i<nstrings;i++,pTemp++)
 	{   
@@ -421,7 +421,7 @@ int LoadStrings (int nstrings ,HANDLE *hstrings,LPSTR *pNextLine,LPINT LineNum)
 		TotLen += _fstrlen (pLine)+2;
 	}                       
 EndStrings:
-	*hstrings = GSSiGlobAlloc (1582,GMEM_MOVEABLE, nstrings*4+TotLen); 
+	*hstrings = GSSiGlobAlloc(GAIDNO 1582,GMEM_MOVEABLE, nstrings*4+TotLen); 
 	pStrings = GlobalLock (*hstrings);
 	GlobalUnlock (hTemp);
 	pTemp = (LPLONG)GlobalLock (hTemp);
@@ -632,7 +632,7 @@ BOOL DisplayReport (HDC hDC, HANDLE hReport, RECT InRect,LPRECT pClipRect,double
 		pReport->WantSize = FALSE;
  
     SaveDC (hDC);
-	hStr = GSSiGlobAlloc ( 731,GMEM_MOVEABLE,4096);
+	hStr = GSSiGlobAlloc(GAIDNO 731,GMEM_MOVEABLE,4096);
 	str = GlobalLock (hStr);
 	SetDisplayMode (hDC, GF_TEXTMODE);    
 	if (pClipRect)
@@ -945,7 +945,7 @@ BOOL ProcessMacroReport (LPSTR Name, LPSTR Prefix, LPSTR UDI, long ref)
 	HANDLE	hView;
 	
 	SaveView = CurView;
-	hView = GSSiGlobAlloc ( 734,GHND,sizeof(VIEWPORT));
+	hView = GSSiGlobAlloc(GAIDNO 734,GHND,sizeof(VIEWPORT));
 	CurView = SaveView2 = (LPVIEWPORT)GlobalLock (hView); 
 	if (Prefix)
 		_fstrcpy (CurView->Prefix,Prefix); 
@@ -999,7 +999,7 @@ BOOL DisplayScrollReport (LPSTR Name, LPSTR Prefix, LPSTR UDI, long ref)
 	HANDLE	hView;
 	
 	SaveView = CurView;
-	hView = GSSiGlobAlloc ( 735,GHND,sizeof(VIEWPORT));
+	hView = GSSiGlobAlloc(GAIDNO 735,GHND,sizeof(VIEWPORT));
 	CurView = SaveView2 = (LPVIEWPORT)GlobalLock (hView); 
 	if (Prefix)
 		_fstrcpy (CurView->Prefix,Prefix); 
@@ -1036,7 +1036,7 @@ BOOL DisplayScrollReport2 (LPSTR Name, LPSTR Prefix, LPSTR UDI, long ref)
 		 GlobalUnlock (hViewScroll); 
 		 GSSiGlobUlFree (&hViewScroll);
 	}    
-	hViewScroll = GSSiGlobAlloc ( 736,GHND,sizeof(VIEWPORT));
+	hViewScroll = GSSiGlobAlloc(GAIDNO 736,GHND,sizeof(VIEWPORT));
 	CurView = SaveView2 = (LPVIEWPORT)GlobalLock (hViewScroll); 
 	if (Prefix)
 		_fstrcpy (CurView->Prefix,Prefix); 
@@ -1077,7 +1077,7 @@ BOOL ReportToFile (LPSTR Name, LPSTR Prefix, LPSTR UDI, long ref,LPSTR File)
 	OFSTRUCTGM	OFStruct;
 	
 	SaveView = CurView;
-	hView = GSSiGlobAlloc ( 737,GHND,sizeof(VIEWPORT));
+	hView = GSSiGlobAlloc(GAIDNO 737,GHND,sizeof(VIEWPORT));
 	CurView = SaveView2 = (LPVIEWPORT)GlobalLock (hView); 
 	if (Prefix)
 		_fstrcpy (CurView->Prefix,Prefix); 
@@ -1205,10 +1205,10 @@ BOOL DisplayReport2 (HDC hDC, HANDLE hReport, RECT Rect, double Factor,BOOL Clos
 		DBU = (float)(LOWORD(GetDialogBaseUnits())) / 4;
 		for (i=0;i<pReport->NumTabs;i++)
 			pReport->TabLen[i]=IDNINT(((float)pReport->TabLen[i]/100)*(PixPerInch/DBU));
-		pReport->hScrollLine = GSSiGlobAlloc ( 738,GHND,1024);
+		pReport->hScrollLine = GSSiGlobAlloc(GAIDNO 738,GHND,1024);
 		if (ScrollRptDlg)
 		{
-	    	HANDLE	hTabs=GSSiGlobAlloc ( 739,GMEM_MOVEABLE,pReport->NumTabs*sizeof(int));
+	    	HANDLE	hTabs=GSSiGlobAlloc(GAIDNO 739,GMEM_MOVEABLE,pReport->NumTabs*sizeof(int));
 	    	LPINT	pTabs=(LPINT)GlobalLock (hTabs); 
 	    	pTabs[0] = pReport->TabLen[0];
 	    	for (i=1;i<pReport->NumTabs;i++)
@@ -1218,7 +1218,7 @@ BOOL DisplayReport2 (HDC hDC, HANDLE hReport, RECT Rect, double Factor,BOOL Clos
 		}
     }  
     else
-		pReport->hScrollLine = GSSiGlobAlloc ( 740,GHND,1024);
+		pReport->hScrollLine = GSSiGlobAlloc(GAIDNO 740,GHND,1024);
 	SaveCurReport = CurReport;
 	CurReport = pReport; 
 	
@@ -1227,7 +1227,7 @@ BOOL DisplayReport2 (HDC hDC, HANDLE hReport, RECT Rect, double Factor,BOOL Clos
 		LPSTR	pRowBeg, pRowEnd;
 		
 		pRow = GlobalLock (pReport->hRows); 
-		hTemp = GSSiGlobAlloc ( 741,GMEM_MOVEABLE,USHRT_MAX);
+		hTemp = GSSiGlobAlloc(GAIDNO 741,GMEM_MOVEABLE,USHRT_MAX);
 		pRow2 = GlobalLock (hTemp);
 		pRowBeg = pRow;
 		do
@@ -1552,7 +1552,7 @@ BOOL FAR PASCAL SCROLLREPORTMsgProc2(HWND hWndDlg, UINT Message, WPARAM wParam, 
                 {    
                      case LBN_DBLCLK:
                      {
-                     	HANDLE	hStr=GSSiGlobAlloc ( 742,GMEM_MOVEABLE,4096);
+                     	HANDLE	hStr=GSSiGlobAlloc(GAIDNO 742,GMEM_MOVEABLE,4096);
                      	LPSTR	pStr=GlobalLock (hStr);
 						if (GetGlobalCVal ("[%REPORT2MACRODBLCLK]",pStr,""))
 							ExpandText (pStr);
@@ -1561,7 +1561,7 @@ BOOL FAR PASCAL SCROLLREPORTMsgProc2(HWND hWndDlg, UINT Message, WPARAM wParam, 
 		         	 }
                      case LBN_SELCHANGE: 
                      {
-                     	HANDLE	hStr=GSSiGlobAlloc ( 743,GMEM_MOVEABLE,4096);
+                     	HANDLE	hStr=GSSiGlobAlloc(GAIDNO 743,GMEM_MOVEABLE,4096);
                      	LPSTR	pStr=GlobalLock (hStr);
                      	
 						Choice=SendDlgItemMessage(hWndDlg,IDC_SCROLLBOX,LB_GETCURSEL,0,0); 
@@ -1651,7 +1651,7 @@ BOOL FAR PASCAL BROWSETEXTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPA
             break;
 
 		    case IDM_PRINT:
-		 		 hSTR = GSSiGlobAlloc ( 732,GMEM_MOVEABLE,4096);
+		 		 hSTR = GSSiGlobAlloc(GAIDNO 732,GMEM_MOVEABLE,4096);
 		 		 str = GlobalLock (hSTR);
 		 		 SendDlgItemMessage (hWndDlg,IDC_SCROLLBOX,LB_RESETCONTENT,0,0);
 		
@@ -1691,7 +1691,7 @@ BOOL FAR PASCAL BROWSETEXTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPA
 				LPLONG	pBackLines;
 				DWORD dwStringExt, CurExtent=SendDlgItemMessage(hWndDlg, IDC_SCROLLBOX, LB_GETHORIZONTALEXTENT,0, 0L);  
 				
-		 		 hSTR = GSSiGlobAlloc ( 733,GMEM_MOVEABLE,4096);
+		 		 hSTR = GSSiGlobAlloc(GAIDNO 733,GMEM_MOVEABLE,4096);
 		 		 str = GlobalLock (hSTR);
 		 		 SendDlgItemMessage (hWndDlg,IDC_SCROLLBOX,LB_RESETCONTENT,0,0);
 		

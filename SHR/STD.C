@@ -100,7 +100,7 @@ BOOL LoadCustomStreenNameConversions (BOOL Reload)
 		int		l = GSSifilelength (Fid);
 		LPSTR	pConv;
 
-		hCustomConversions = GSSiGlobAlloc (1591,GHND,l+128);
+		hCustomConversions = GSSiGlobAlloc(GAIDNO 1591,GHND,l+128);
 		pConv = GlobalLock (hCustomConversions);
 		while (fgetstring (pConv,64,Fid))
 		{
@@ -1214,7 +1214,7 @@ Start:
       _fstrncpy(TestString,"HWY",13);
       HASHF (ID,TestString,&HWYLOC); 
       
-      hSTDNAMES = GSSiGlobAlloc ( 395,GMEM_MOVEABLE,41*14);
+      hSTDNAMES = GSSiGlobAlloc(GAIDNO 395,GMEM_MOVEABLE,41*14);
       STDNAMv=GlobalLock(hSTDNAMES);
       NRONAMv=STDNAMv+41;
       NMONLYv=NRONAMv+41;

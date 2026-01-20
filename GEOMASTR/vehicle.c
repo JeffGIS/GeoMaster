@@ -204,7 +204,7 @@ BOOL RecallFencesFromFile (LPSTR Pathname,LPSTR CAN)
 	{
 		BigRead (FidIn,SaveName,NameLen);
 		BigRead (FidIn,&FileLen,4);
-		hFile = GSSiGlobAlloc (0,GMEM_MOVEABLE,FileLen);
+		hFile = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,FileLen);
 		pFile = GlobalLock (hFile);
 		BigRead (FidIn,pFile,FileLen);
 		pName = strrchr (SaveName,'\\');
@@ -307,7 +307,7 @@ BOOL SaveFencesToFile (LPSTR Pathname,LPSTR CAN)
 		if (FileLen < 1)
 			MessageBox (0,str,0,MB_ICONEXCLAMATION);
 
-		hFile = GSSiGlobAlloc (0,GMEM_MOVEABLE,FileLen);
+		hFile = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,FileLen);
 		pFile = GlobalLock (hFile);
 		BigRead (Fid2,pFile,FileLen);
 		GSSiClose2 (&Fid2);
@@ -321,7 +321,7 @@ BOOL SaveFencesToFile (LPSTR Pathname,LPSTR CAN)
 			Fid2 = GSSiOpenFile (TempPlt,0,OF_READ);
 			FileLen = GSSifilelength (Fid2);
 			GSSiGlobUlFree (&hFile);
-			hFile = GSSiGlobAlloc (0,GMEM_MOVEABLE,FileLen);
+			hFile = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,FileLen);
 			pFile = GlobalLock (hFile);
 			BigRead (Fid2,pFile,FileLen);
 			GSSiClose2 (&Fid2);
@@ -472,9 +472,9 @@ BOOL ImportFences (LPSTR IPAddress,LPSTR CPort,LPSTR Account)
 			recv (sock,(LPSTR)&lFileCmp,4,0);
 			if (lFileCmp > 0)
 			{
-				HANDLE hFileCmp = GSSiGlobAlloc (0,GMEM_MOVEABLE,lFileCmp+4096);
+				HANDLE hFileCmp = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,lFileCmp+4096);
 				LPSTR  pFileCmp = GlobalLock (hFileCmp);
-				HANDLE hFile = GSSiGlobAlloc (0,GMEM_MOVEABLE,2*1024*1024);
+				HANDLE hFile = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,2*1024*1024);
 				LPSTR  pFile = GlobalLock (hFile);
 
 				do
@@ -545,7 +545,7 @@ BOOL ImportFences_old (LPSTR IPAddress,LPSTR CPort,LPSTR Account)
 
 	if (OpenTCPIPSocket (hWndMain,IPAddress,port,&sock,"","","","",FALSE))
 	{
-		hIB = GSSiGlobAlloc (0,GMEM_MOVEABLE,Buflen);
+		hIB = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,Buflen);
 		InputBuffer = GlobalLock (hIB);
 		sprintf (InputBuffer,"$FENCE(GetList,%s,ALL)\r\n",Account);
 		send (sock,InputBuffer,strlen(InputBuffer),0);
@@ -752,7 +752,7 @@ BOOL ImportFences_old (LPSTR IPAddress,LPSTR CPort,LPSTR Account)
 			else
 				FenceMethod[i] = 0;
 			lArea = labs(nPoints) * sizeof(DPOINT);
-			hArea = GSSiGlobAlloc (0,GMEM_MOVEABLE,lArea);
+			hArea = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,lArea);
 			pArea = GlobalLock (hArea);
 			n = 0;
 			do
@@ -1320,7 +1320,7 @@ BOOL ExportFencesLinks (LPSTR IPAddress,LPSTR CPort,LPSTR Account)
 		send (sock,(LPSTR)&lBuffer,4,0);
 		if (lBuffer)
 		{
-			hBuffer = GSSiGlobAlloc (1576,GMEM_MOVEABLE,lBuffer);
+			hBuffer = GSSiGlobAlloc(GAIDNO 1576,GMEM_MOVEABLE,lBuffer);
 			pBuffer = GlobalLock (hBuffer);
 			BigRead (Fid,pBuffer,lBuffer);
 			send (sock,pBuffer,lBuffer,0);
@@ -1401,7 +1401,7 @@ BOOL ExportRouteStops (LPSTR IPAddress,LPSTR CPort,LPSTR Account)
 		send (sock,(LPSTR)&lBuffer,4,0);
 		if (lBuffer)
 		{
-			hBuffer = GSSiGlobAlloc (1576,GMEM_MOVEABLE,lBuffer);
+			hBuffer = GSSiGlobAlloc(GAIDNO 1576,GMEM_MOVEABLE,lBuffer);
 			pBuffer = GlobalLock (hBuffer);
 			BigRead (Fid,pBuffer,lBuffer);
 			send (sock,pBuffer,lBuffer,0);
@@ -1489,12 +1489,12 @@ BOOL ExportFences (LPSTR IPAddress,LPSTR CPort,LPSTR Account)
 	}
 	BlockSocketProcessing (FALSE);
 	lFile = GSSiLength (TempName);
-	hMem = GSSiGlobAlloc (0,GMEM_MOVEABLE,lFile);
+	hMem = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,lFile);
 	pMem = GlobalLock (hMem);
 	Fid = GSSiOpenFile (TempName,0,OF_READ);
 	BigRead (Fid,pMem,lFile);
 	GSSiClose2 (&Fid);
-	hMemCmp = GSSiGlobAlloc (0,GMEM_MOVEABLE,lFile+4096);
+	hMemCmp = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,lFile+4096);
 	pMemCmp = GlobalLock (hMemCmp);
 	lFileCmp = CompressBinaryRecord (pMem,pMemCmp,lFile);
 	GSSiGlobUlFree (&hMem);
@@ -1660,7 +1660,7 @@ HANDLE	LoadFence (LPSTR Type,LPSTR TAG,LPDPOINT pPoint,double Offset,char Offset
 	switch (itype)
 	{
 	case FT_CIRCLE:
-		handle = GSSiGlobAlloc (0,GMEM_MOVEABLE,sizeof(FENCEHEADER));
+		handle = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,sizeof(FENCEHEADER));
 		pFenceHeader = GlobalLock (handle);
 		pFenceHeader->Type = itype;
 		pFenceHeader->Offset = Offset;
@@ -1676,7 +1676,7 @@ HANDLE	LoadFence (LPSTR Type,LPSTR TAG,LPDPOINT pPoint,double Offset,char Offset
 		if (!GetPolyPnts ((LPPICKDATAHEADER)&PickList[0],FALSE,&NumPoints,&hPoly,TRUE))
 			return 0;
 		Points = GlobalLock (hPoly);
-		handle = GSSiGlobAlloc (1574,GMEM_MOVEABLE,sizeof(FENCEHEADER)+NumPoints * sizeof(DPOINT));
+		handle = GSSiGlobAlloc(GAIDNO 1574,GMEM_MOVEABLE,sizeof(FENCEHEADER)+NumPoints * sizeof(DPOINT));
 		pFenceHeader = GlobalLock (handle);
 		if (NumPoints == 2)
 		{
@@ -2017,7 +2017,7 @@ BOOL OpenDummyVehicleFile(LPSTR FileName,long InDelay)
 	if (Fid == HFILE_ERROR)
 		return FALSE;
 	_splitpath (OFStruct.szPathName,Drive,Dir,0,0);
-	hDummyVehicles = GSSiGlobAlloc (1336,GHND,USHRT_MAX);  
+	hDummyVehicles = GSSiGlobAlloc(GAIDNO 1336,GHND,USHRT_MAX);  
 	pDummyVehicle = (LPDUMMYVEHICLE)GlobalLock (hDummyVehicles);
 	while (fgetstring (str,256,Fid))
 	{
@@ -2040,7 +2040,7 @@ BOOL OpenDummyVehicleFile(LPSTR FileName,long InDelay)
 		if ((Fid2 = GSSiOpenFile (MoveListFile,&OFStruct,OF_READ)) != HFILE_ERROR)
 		{   
 			StartTime = 0;
-			pDummyVehicle->hMoveList = GSSiGlobAlloc (1337,GHND,USHRT_MAX);
+			pDummyVehicle->hMoveList = GSSiGlobAlloc(GAIDNO 1337,GHND,USHRT_MAX);
 			pMoveList = (LPMOVELIST)GlobalLock (pDummyVehicle->hMoveList);
 			while (fgetstring (str,64,Fid2))
 			{   
@@ -2438,7 +2438,7 @@ BOOL GetVehicleHistory (LPSTR VehID, LPSTR VarName,BOOL Clear)
 		{
 			if (VarName)
 			{
-				HANDLE	hStr=GSSiGlobAlloc (1697,GMEM_MOVEABLE,USHRT_MAX*4);
+				HANDLE	hStr=GSSiGlobAlloc(GAIDNO 1697,GMEM_MOVEABLE,USHRT_MAX*4);
 				LPSTR	pStr = GlobalLock (hStr);
 				UINT	i;
 
@@ -2573,7 +2573,7 @@ BOOL DefineVehicle (LPSTR VehID,LPSTR ID2,LPSTR VehDesc,LPSTR SymName,LPSTR Colo
 		MessageBox (0,"Vehicle limit reached",0,MB_ICONEXCLAMATION);
 	else
 		NumVehicles++;
-	hVehicle[iveh] = GSSiGlobAlloc (1338,GHND,sizeof(VEHLOCATION));  
+	hVehicle[iveh] = GSSiGlobAlloc(GAIDNO 1338,GHND,sizeof(VEHLOCATION));  
 	pVehLoc = (LPVEHLOCATION)GlobalLock (hVehicle[iveh]);   
 SetVals:
 	_fstrcpy (pVehLoc->ID,VehID);
@@ -2686,7 +2686,7 @@ BOOL SetVehicleLoc (LPSTR VehID,DPOINT DPoint,int Speed,int Heading,int Status,B
 			goto GotVeh;
 		GlobalUnlock (hVehicle[iveh]);
 	}             
-	hVehicle[iveh] = GSSiGlobAlloc (1338,GHND,sizeof(VEHLOCATION));  
+	hVehicle[iveh] = GSSiGlobAlloc(GAIDNO 1338,GHND,sizeof(VEHLOCATION));  
 	pVehLoc = (LPVEHLOCATION)GlobalLock (hVehicle[iveh]);
 	_fstrcpy (pVehLoc->ID,VehID); 
 	_fstrcpy (pVehLoc->ID2,VehID); 
@@ -2747,7 +2747,7 @@ GotVeh:
 	{
 		if (!pVehLoc->NumHist)
 		{
-			pVehLoc->hHist = GSSiGlobAlloc (1571,GMEM_MOVEABLE,MAX_VEHICLE_TRACK_POINTS*sizeof(DPOINT)+MAX_VEHICLE_TRACK_POINTS*sizeof(long));
+			pVehLoc->hHist = GSSiGlobAlloc(GAIDNO 1571,GMEM_MOVEABLE,MAX_VEHICLE_TRACK_POINTS*sizeof(DPOINT)+MAX_VEHICLE_TRACK_POINTS*sizeof(long));
 		}
 		HistPoints = GlobalLock (pVehLoc->hHist);
 		HistTimes = (LPLONG)(HistPoints + MAX_VEHICLE_TRACK_POINTS);
@@ -3479,7 +3479,7 @@ BOOL CreateVehHistMap (LPSTR DataFile,LPSTR MapFile,LPSTR vehid,LPSTR radio,
 	strcpy (PltName,MapFile);
 	CreateNewMap (PltName,pBounds,0,0,0,0,0,0,FALSE);
 	AddToSymList (SymNum,&NumSyms,&hSymDesc); 
-	hGRText = GSSiGlobAlloc (0,GHND,sizeof(GRTEXT));
+	hGRText = GSSiGlobAlloc(GAIDNO 0,GHND,sizeof(GRTEXT));
 	if (!Connect)
 		pass++;
 NextPass:
@@ -3517,7 +3517,7 @@ NextPass:
 		{
 			if (!FirstPoint)
 			{
-				HANDLE hPt=GSSiGlobAlloc (0,GMEM_MOVEABLE,2*sizeof(DPOINT));
+				HANDLE hPt=GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,2*sizeof(DPOINT));
 				LPDPOINT	pPoints = GlobalLock (hPt);
 				int	nPt = 2;
 
@@ -3578,10 +3578,10 @@ BOOL AddVehicleToPMMap (LPSTR VDCONNID,LPSTR VehID,COLORREF Color,BOOL Connect,s
 	sprintf (SQL,"VHCONNID==%s",VDCONNID);
 	if (!OpenDataFile (DBName,SQL,BT_READ,&hSQL))
 		return FALSE;
-	hGRText = GSSiGlobAlloc (0,GHND,sizeof(GRTEXT));
+	hGRText = GSSiGlobAlloc(GAIDNO 0,GHND,sizeof(GRTEXT));
 	if (Connect)
 	{
-		hPoints = GSSiGlobAlloc (0,GMEM_MOVEABLE,USHRT_MAX*sizeof(DPOINT));
+		hPoints = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,USHRT_MAX*sizeof(DPOINT));
 		PolyPoints = GlobalLock (hPoints);
 		while (FetchDBRec (hSQL))
 		{
@@ -3672,7 +3672,7 @@ BOOL CreateProgressMonitoringMap (LPSTR DataFile,LPSTR MapFile,LPSTR vehid,LPSTR
 	CreateNewMap (PltName,pBounds,0,0,0,0,0,0,FALSE);
 	AddToSymList (SymNum,&NumSyms,&hSymDesc); 
 	GSSillseek (FidTemp,0,0);
-	hGRText = GSSiGlobAlloc (0,GHND,sizeof(GRTEXT));
+	hGRText = GSSiGlobAlloc(GAIDNO 0,GHND,sizeof(GRTEXT));
 	while (fgetstring (str,250,FidTemp))
 	{
 		LPGRTEXT lpGRText;
@@ -3918,7 +3918,7 @@ void DisplayVehicleStatus (int iveh,LPDRAWITEMSTRUCT lpdis,LPRECT pRect)
 
 BOOL DisplayVehicleInfo (LPSTR VehID,BOOL Force)
 {
-	HANDLE	htxt=GSSiGlobAlloc (0,GMEM_MOVEABLE,4096);
+	HANDLE	htxt=GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,4096);
 	LPSTR	txt = GlobalLock (htxt);
 	int		l;
 	BOOL	rtn;
@@ -5652,7 +5652,7 @@ Reload:
 					{
 						if (!hGFVehList)
 						{
-							hGFVehList = GSSiGlobAlloc (0,GMEM_MOVEABLE,MAX_PATH);
+							hGFVehList = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,MAX_PATH);
 							TempName = GlobalLock (hGFVehList);
 							GSSiGetTempFileName (0,"gm",0,(LPSTR)TempName);
 							pDot = strrchr (TempName,'.');
