@@ -2960,6 +2960,7 @@ BOOL OpenConfig (HWND hWnd,HDC hDC)
 	int		MaxFileLength = MAX_PATH;
 	LPSTR	pTE, pTEend;
 	char	setTestEnv[MAX_PATH + 64] = { 0 };
+	int		loc=0;
 
 	if (FidConfig != HFILE_ERROR)
 {
@@ -3271,7 +3272,12 @@ GSSiExitProg (100);
             GSSiGlobUlFree (&hVP7);
         }
 		else
-            i=GSSilread (FidConfig,CurView,sizeof(VIEWPORT));  
+		{
+			int loc = GSSillseek(FidConfig, 0, 1);
+			i = GSSilread(FidConfig, CurView, sizeof(VIEWPORT));
+			loc = GSSillseek(FidConfig, 0, 1);
+			loc = 0;
+		}
         if (CurView->ID < 1 || CurView->ID > MAX_VIEWPORTS)
         {
 			BlowOut ("Corrupted configuration file",FullPath);
@@ -3417,16 +3423,19 @@ GSSiExitProg (100);
 
         ReadObject(&FidConfig,FALSE,0,OB_SAVEMASK);
         ReadObject(&FidConfig,FALSE,0,OB_SAVEBACKGROUND);
-        
+		loc = GSSillseek(FidConfig, 0, 1);
+
         if (CurView->pTheme)
         {
             if (ReadObject(&FidConfig,FALSE,&CurView->pTheme,0))
             	CurView->pTheme->DisplayViewport = CurView->ID;
         }
+		loc = GSSillseek(FidConfig, 0, 1);
         if (CurView->BoundsDisplayID)
         {
             BoundsDisplayRead (&CurView->lpBoundsDisplay,FidConfig);
         }
+		loc = GSSillseek(FidConfig, 0, 1);
         if (CurView->ZoomTarget && CurView->ZoomTarget < CurView->ID)
         {
             pViewportsD[iv] = pViewportsD[CurView->ZoomTarget-1];
@@ -3436,6 +3445,8 @@ GSSiExitProg (100);
 //          AddActivateSwitch();
 // 		sprintf (str,"VP %i %i %i",CurView->ID,CurView->NumPickList,CurView->NumFiles);
 //		MessageBox (0,str,0,MB_OK);
+		loc = GSSillseek(FidConfig, 0, 1);
+		loc = 0;
     }
     n = 0; 
     for (iv=0;iv<NumViews;iv++)
