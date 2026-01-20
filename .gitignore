@@ -211,3 +211,4 @@ $RECYCLE.BIN/
 *.vsidx
 /GEOMASTR/.vs/geomastr/v17/Solution.VC.db
 /GEOMASTR/.vs/geomastr/v17/DocumentLayout.json
+/GEOMASTR/lastcmdline.txt
