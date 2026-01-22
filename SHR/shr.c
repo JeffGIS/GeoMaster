@@ -4217,7 +4217,7 @@ GSSiExitProg (1398);
 #endif
 }  
 
-HGLOBAL GSSiGlobAlloc(GAIDNO int From,UINT fuAlloc, long cbAlloc)
+HGLOBAL GSSiGlobAlloc(int From,UINT fuAlloc, long cbAlloc)
 #if ENABLETRACE
 {GSSiEnterProg (238);
 #endif
