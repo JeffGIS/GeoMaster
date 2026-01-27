@@ -586,6 +586,8 @@ BOOL	HaveIndexParmFile=FALSE;
 BOOL	DGNVisSetFromIndex=FALSE; 
 HANDLE	PGDBHandle=0;
 HANDLE	FGDBHandle=0;
+HANDLE	hFGDBUsedVars=0;
+int		numFGDBUsedVars = 0;
 HFILE	SHPFid=HFILE_ERROR;
 long	SHPType; 
 long	SLTType=1;

@@ -1903,6 +1903,8 @@ GSSiExitProg (524);
 		{
 			ClearCurVals (FilePtr);
 			CloseFGDB ((int)FilePtr->FileHandle);
+			numFGDBUsedVars = 0;
+			GSSiGlobUlFree(&hFGDBUsedVars);
 		}
 		break;
         case PGDB_DATAFILE:

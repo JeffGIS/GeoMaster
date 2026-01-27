@@ -162,6 +162,8 @@ BOOL SwitchThemeSHPFile (void)
 		SQLPtr = (LPOPENSQLDATA) GlobalLock (CurTheme->hThemeDB);
 	    FilePtr = (LPOPENFILEDATA)GlobalLock (SQLPtr->OFHandle); 
 	    _fstrcpy (DBFullPath,FilePtr->fullpath);
+		if (*FilePtr->table)
+			sprintf(strchr(DBFullPath, 0),"(%s)", FilePtr->table);
 		GlobalUnlock (SQLPtr->OFHandle);
 		GlobalUnlock (CurTheme->hThemeDB); 
 		if (CurTheme->DataFileType == FGDB_DATAFILE)

@@ -3131,6 +3131,7 @@ int GetCharFieldData (HANDLE hSQL,LPFIELDINFO lpField, long iref, short Function
 #define MAX_COMBINED_ELEMENT_LENGTH 32
 	int			nValues[MAX_COMBINED_VALUES];
 	int i,j;
+	int isFGDBVar = _stricmp(CmdString, "[FGDB.");
 
 	*Value = 0;
 	if (combineOption == 4)
@@ -3138,10 +3139,11 @@ int GetCharFieldData (HANDLE hSQL,LPFIELDINFO lpField, long iref, short Function
 		memset (nValues,0,sizeof(nValues));
 		hCombined = GSSiGlobAlloc(GAIDNO 1782,GHND,MAX_COMBINED_VALUES*(MAX_COMBINED_ELEMENT_LENGTH+1));
 	}
-	while (FetchDBRec (hSQL))
+	while (FetchDBRec (hSQL) || isFGDBVar != 0)
 	{
 		LPSTR	pEnd;
 
+		isFGDBVar = 0;
     	irc = 0;
 		if (FunctionID == 1)
     		_fstrcpy (str,CmdString);

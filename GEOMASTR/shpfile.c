@@ -506,6 +506,9 @@ BOOL LoadSHPParm (LPSTR SHPFileName,long Type,HWND hWnd)
     {
     	goto RtnTrue;
     }
+	numFGDBUsedVars = 0;
+	GSSiGlobUlFree(&hFGDBUsedVars);
+
 	*SHPBeginDate = 0;
 	*SHPEndDate = 0;
 	SHPParmTime = 0;
@@ -719,8 +722,29 @@ BOOL LoadSHPParm (LPSTR SHPFileName,long Type,HWND hWnd)
 		_fstrcpy (SHPBeginDate,str);
 	if (fgetstring (str,256,Fid))
 		_fstrcpy (SHPEndDate,str);
-	
-	GSSiClose2 (&Fid); 
+	numFGDBUsedVars = 0;
+	GSSiGlobUlFree(&hFGDBUsedVars);
+	if (fgetstring(str, 256, Fid))
+	{
+		if (!strnicmp(str, "USED VAR", 8))
+		{
+			hFGDBUsedVars = GSSiGlobAlloc(GAIDNO 1891, GMEM_MOVEABLE, 4096);
+			LPSTR pFGDBUsedVars = GlobalLock(hFGDBUsedVars);
+			*pFGDBUsedVars = 0;
+			while (fgetstring(str, 256, Fid))
+			{
+				if (*str == '#')
+					break;
+				sprintf(pFGDBUsedVars, "%s", str);
+				pFGDBUsedVars += strlen(str);
+				*pFGDBUsedVars = 0;
+				pFGDBUsedVars += 1;
+				numFGDBUsedVars++;
+			}
+			GlobalUnlock(hFGDBUsedVars);
+		}
+	}
+	GSSiClose2 (&Fid);
 RtnTrue:
 {
 #if ENABLETRACE
@@ -2567,6 +2591,9 @@ BOOL OpenFGDB (LPSTR DBName,LPSTR Table,LPSTR SQL)
 	//sprintf(SQL2, "OBJECTID = 2372183");
     CloseDataFile (TRUE, &FGDBHandle); 
     hSHPDBF = 0; 
+	numFGDBUsedVars = 0;
+	GSSiGlobUlFree(&hFGDBUsedVars);
+
 	if (DBName)
     {  
     	if (Table)
@@ -2948,6 +2975,9 @@ long ReadFGDBHeader (LPSTR DBNameIN,LPMNMXCORD pMinMaxCoord)
 	else
 		rc = FGDBGetTableInfo(iDB, FGDBTable, &ShapeType, 0, pMinMaxCoord, 0);
 	CloseFGDB (iDB);
+	numFGDBUsedVars = 0;
+	GSSiGlobUlFree(&hFGDBUsedVars);
+
 	if (!rc)
 		goto RtnFalse;
 

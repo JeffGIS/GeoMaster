@@ -1394,9 +1394,19 @@ BOOL ReadObject (HFILE *Fid, BOOL UpdateTarget,LPVOID *RtnAdd,short WantID)
 			SaveCfgSizePos = TRUE;
 			if (!IsRectEmpty(&InitWindowRect))
 			{
-				MoveWindow(hWndMain, InitWindowRect.left, InitWindowRect.top,
-					InitWindowRect.right - InitWindowRect.left,
-					InitWindowRect.bottom - InitWindowRect.top, FALSE);
+				RECT destRect;
+				for (int i = 0; i < numMonitors; i++)
+				{
+					BOOL doesIntersect = IntersectRect(&destRect, &MonitorRectangle[i], &InitWindowRect);
+					if (doesIntersect)
+					{
+						MoveWindow(hWndMain, InitWindowRect.left, InitWindowRect.top,
+							InitWindowRect.right - InitWindowRect.left,
+							InitWindowRect.bottom - InitWindowRect.top, FALSE);
+						break;
+					}
+				}
+
 			}
 			goto RtnTrue;
 			

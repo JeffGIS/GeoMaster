@@ -952,6 +952,8 @@ extern BOOL			HaveIndexParmFile;
 extern BOOL			DGNVisSetFromIndex;  
 extern HANDLE			PGDBHandle;
 extern HANDLE			FGDBHandle;
+extern HANDLE		hFGDBUsedVars;
+extern int			numFGDBUsedVars;
 extern HFILE			SHPFid;
 extern long			SHPType;
 extern long			SLTType;

@@ -2070,22 +2070,31 @@ GSSiExitProg (437);
 		 {
 			 char value[128];
 			 GetPrivateProfileString("User", "LastWindowPos", "0", value, sizeof(value), GMIni);
-			 if (strlen(value) <= 1)
-			 {
-				 winw = CW_USEDEFAULT;
-				 winh = 0;
-				 winx = CW_USEDEFAULT;
-				 winy = 0;
-				 GetWindowRect(GetDesktopWindow(), &lastRect);
-			 }
-			 else
+			 winw = CW_USEDEFAULT;
+			 winh = 0;
+			 winx = CW_USEDEFAULT;
+			 winy = 0;
+ 			 GetWindowRect(GetDesktopWindow(), &lastRect);
+			 if (strlen(value) > 1)
 			 {
 				 BOOL err;
 				 lastRect = atorect(value, &err);
-				 winx = lastRect.left;
-				 winy = lastRect.top;
-				 winw = RECTWIDTH (&lastRect);
-				 winh = RECTHEIGHT (&lastRect);
+				 if (!err)
+				 {
+					 RECT destRect;
+					 for (int i = 0; i < numMonitors; i++)
+					 {
+						 err = IntersectRect(&destRect, &MonitorRectangle[i], &lastRect);
+						 if (err)
+						 {
+							 winx = lastRect.left;
+							 winy = lastRect.top;
+							 winw = RECTWIDTH(&lastRect);
+							 winh = RECTHEIGHT(&lastRect);
+
+						 }
+					 }
+				 }
 			 }
 		}
 	 }
@@ -2111,6 +2120,8 @@ GSSiExitProg (437);
 		 }
 		 CreateMainWindow(winx, winy, winw, winh,useStyle);
 	 }
+	 RECT rect;
+	 GetWindowRect(hWndMain, &rect);
  if (hWndLinkedTo)
 	 PostMessage (hWndLinkedTo,GF_CONNECT_PROCESS,(WPARAM)hWndMain,0);
  //TraceWnd = hWndMain;
@@ -2145,7 +2156,7 @@ GSSiExitProg (437);
 	 }
 
  }
- MoveWindow(hWndMain, lastRect.left, lastRect.top, RECTWIDTH (&lastRect), RECTHEIGHT(&lastRect), FALSE);
+ //MoveWindow(hWndMain, lastRect.left, lastRect.top, RECTWIDTH (&lastRect), RECTHEIGHT(&lastRect), FALSE);
  
    PromptFocus = hWndMain;
     {
@@ -2171,7 +2182,6 @@ GSSiExitProg (437);
  // added by LDA 
  GotItUp = FALSE;
  Ready = FALSE; 
- RECT	rect;
 
   //  aFormats[0].atom = CF_TEXT; // exception - predefined.
   //  for (i = 1; i < CFORMATS; i++) 

@@ -4824,6 +4824,7 @@ DoSid:
 			CloseTRANS2 (&hTranBaseToFile);  
 			CloseTRANS2 (&hTranFileToVP);  
 			strcpy (ShapeFieldName,"SHAPE");
+			LoadSHPParm(PltName, SHPType, CurView->hWnd);
 			if (hDC)
 			{
 				if (!(SHPType = ReadFGDBHeader(PltName, &CurView->FileMNMX)))
@@ -4831,7 +4832,6 @@ DoSid:
 					CloseMap(FALSE);
 					goto RtnFalse;
 				}
-				LoadSHPParm(PltName, SHPType, CurView->hWnd);
 				Points[0].x = CurView->FileMNMX.xmn;
 				Points[0].y = CurView->FileMNMX.ymn;
 				Points[1].x = CurView->FileMNMX.xmn;
