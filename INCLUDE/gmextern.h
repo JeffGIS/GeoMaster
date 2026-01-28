@@ -197,6 +197,7 @@ extern BOOL			SaveHLTList;
 extern BOOL			ReorgUpdateBounds;
 extern BOOL			ReorgUpdateTime;
 extern BOOL			EmbedMenus;  
+extern BOOL			ZoomToProjectBounds;
 extern long			EmbededMenuLoc;
 extern BOOL			SaveMenuName;
 extern HANDLE			hWindowDib32;

@@ -727,8 +727,9 @@ GSSiExitProg (441);
     	 SendDlgItemMessage (hWndDlg,IDC_SAVEHLTLIST,BM_SETCHECK,SaveHLTList,0);
 //    	 SendDlgItemMessage (hWndDlg,IDC_SAVEIMAGE,BM_SETCHECK,SaveCfgImage,0);
     	 SendDlgItemMessage (hWndDlg,IDC_LINKMENUS,BM_SETCHECK,SaveMenuName,0);
-    	 SendDlgItemMessage (hWndDlg,IDC_SAVEPOS,BM_SETCHECK,SaveCfgSizePos,0);
-    	 if (EmbededMenuLoc) 
+		 SendDlgItemMessage(hWndDlg, IDC_SAVEPOS, BM_SETCHECK, SaveCfgSizePos, 0);
+		 SendDlgItemMessage(hWndDlg, IDC_ZOOMPROJECT, BM_SETCHECK, ZoomToProjectBounds, 0);
+		 if (EmbededMenuLoc)
     	 {
 	   	 	 EnableWindow (GetDlgItem(hWndDlg,IDC_LINKMENUS),FALSE);
 	    	 SendDlgItemMessage (hWndDlg,IDC_EMBEDMENUS,BM_SETCHECK,TRUE,0);
@@ -837,7 +838,8 @@ GSSiExitProg (441);
             	 SaveCfgSizePosAll = SendDlgItemMessage (hWndDlg,IDC_SAVEPOS_ALL,BM_GETCHECK,0,0);    
             	 SaveMenuName = SendDlgItemMessage (hWndDlg,IDC_LINKMENUS,BM_GETCHECK,0,0);    
             	 SavePrintSetup = SendDlgItemMessage (hWndDlg,IDC_SAVEPRINTSETUP,BM_GETCHECK,0,0);    
-            	 EmbedMenus = SendDlgItemMessage (hWndDlg,IDC_EMBEDMENUS,BM_GETCHECK,0,0); 
+				 EmbedMenus = SendDlgItemMessage(hWndDlg, IDC_EMBEDMENUS, BM_GETCHECK, 0, 0);
+				 ZoomToProjectBounds = SendDlgItemMessage(hWndDlg, IDC_ZOOMPROJECT, BM_GETCHECK, 0, 0);
 				 if (SaveCfgSizePosAll)
 				 {
 					ShowWindow (GetDlgItem(hWndDlg,IDC_PROGRESS),SW_SHOW);

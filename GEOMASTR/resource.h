@@ -2672,6 +2672,8 @@
 #define IDC_USEFONTWT                   1647
 #define IDC_INCLUDEPROMPT               1648
 #define IDC_FILLROW                     1649
+#define IDC_INCLUDEPROMPT2              1649
+#define IDC_ZOOMPROJECT                 1649
 #define IDC_VPAUTOSIZE                  1650
 #define IDC_FILLROW2                    1650
 #define IDC_LINKMENUS                   1652
@@ -3817,7 +3819,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        1282
+#define _APS_NEXT_RESOURCE_VALUE        1283
 #define _APS_NEXT_COMMAND_VALUE         1250
 #define _APS_NEXT_CONTROL_VALUE         2331
 #define _APS_NEXT_SYMED_VALUE           1036

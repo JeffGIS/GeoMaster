@@ -3182,10 +3182,14 @@ GSSiExitProg (100);
     if (Version >= 3)
     {   
     	LPSTR	pVB;
-    	
+		char  zoomProject=0;
     	pStr = GlobalLock (hStartupCommand);
-        GSSilread (FidConfig,pStr,256);
-        GlobalUnlock (hStartupCommand);
+		GSSilread(FidConfig, pStr, 255);
+		GSSilread(FidConfig, &zoomProject,1);
+		ZoomToProjectBounds = TRUE;
+		if (zoomProject != 'Y')
+			ZoomToProjectBounds = FALSE;
+		GlobalUnlock (hStartupCommand);
     	pStr = GlobalLock (hStartupMenu);
         GSSilread (FidConfig,pStr,128);
         OneSpace (pStr);
@@ -3709,6 +3713,7 @@ BOOL SaveConfig (LPSTR Name,BOOL UseCompression)
     LPTHEME	SaveTheme;  
     LPVIEWPORT	SaveVP=CurView;   
     char	TempName[MAX_PATH]=""; 
+	char	zoomProject = 'N';
     
     if (CurrentConfig && EmbedMenus)
     {   
@@ -3765,8 +3770,11 @@ GSSiExitProg (101);
 	SetVarSaveStatus ("%CFGDESC",FALSE);
     SetGlobalValue("%P","");	 
     pStr = GlobalLock (hStartupCommand);
-    BigWrite (FidConfig,(HPSTR)pStr,256,-1);
-    GlobalUnlock (hStartupCommand);
+	BigWrite(FidConfig, (HPSTR)pStr, 255, -1);
+	if (ZoomToProjectBounds)
+		zoomProject = 'Y';
+	BigWrite(FidConfig, (HPSTR)&zoomProject, 1, -1);
+	GlobalUnlock (hStartupCommand);
     pStr = GlobalLock (hStartupMenu);
     BigWrite (FidConfig,(HPSTR)pStr,128,-1); 
     GlobalUnlock (hStartupMenu);

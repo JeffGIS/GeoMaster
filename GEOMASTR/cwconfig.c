@@ -1529,7 +1529,7 @@ WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, 
 
 	CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
 	numMonitors = GetNumMonitors();
-//	GetMonitorRectangles(numMonitors, hInstance);
+	GetMonitorRectangles(numMonitors, hInstance);
 	typeChassis = ChassisType();
 	//mouseType = MouseType();
 	if (typeChassis == 3)

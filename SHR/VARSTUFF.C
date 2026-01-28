@@ -3714,6 +3714,9 @@ GSSiExitProg (532);
 		case 421:
 			GMDUPDATEDebug = atob(Value);
 			break;
+		case 422:
+			ZoomToProjectBounds = atob(Value);
+			break;
 		default:
  			break;
 	}
@@ -4153,6 +4156,7 @@ void CreateInternalGlobals (void)
 	AllocateTypeVar("%TEXTEPOINT", 419, FALSE);
 	AllocateTypeVar("%FILEUSAGEFILE2", 420, FALSE);
 	AllocateTypeVar("%GMDUPDATEDEBUG", 421, FALSE);
+	AllocateTypeVar("%ZOOMTOPROJECT", 422, FALSE);
 
 //	AllocateTypeVar("%DL",191,FALSE);
 	
@@ -5448,6 +5452,9 @@ GSSiExitProg (533);
 			break;
 		case 419:
 			itoa(textEpoint, OutStr, 10);
+			break;
+		case 422:
+			btoa(ZoomToProjectBounds, OutStr);
 			break;
 	}
 	GlobalUnlock (hGlobal);
