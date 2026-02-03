@@ -1399,7 +1399,7 @@ GSSiExitProg (118);
 	RestoreDC (hDC,-1);
 	ReleaseDC (DisplayView->hWnd,hDC);
     SetCurView (SaveView);
-
+	DisplayCloseIcon();
 {
 #if ENABLETRACE
 GSSiExitProg (118);

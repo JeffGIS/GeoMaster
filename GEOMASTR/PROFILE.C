@@ -1450,8 +1450,12 @@ GSSiExitProg (1316);
 	SelectObject (CurView->hDC,hOldPen);
 	DeleteObject (hPen);
    	SetROP2(CurView->hDC,OldMode);
+	int saveDisplay = CurView->Display;
+	CurView->Display = 1;
+	DisplayCloseIcon();
+	CurView->Display = saveDisplay;
 	SetCurView (SaveVP);
-	RestoreDC (CurView->hDC,-1);  
+	RestoreDC (CurView->hDC,-1); 
 {
 #if ENABLETRACE
 GSSiExitProg (1316);
