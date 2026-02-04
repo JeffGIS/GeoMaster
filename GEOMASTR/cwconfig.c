@@ -2690,6 +2690,9 @@ SetLastMessage(Message,wParam);
  	ii=1;
 	 }
 #endif
+
+  if (Message == 0x0092)
+	  goto ReturnDefault;
  if (ProcessDataDisplayInput (hWnd,Message, wParam,lParam))
 	goto Return0;
  if (ProcessCloseIcon (hWnd,Message, wParam,lParam))

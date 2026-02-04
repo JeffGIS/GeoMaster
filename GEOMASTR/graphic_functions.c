@@ -1894,7 +1894,7 @@ Next:
 			}
 			break;
 		}
-    /*	if (hLastBox)
+    	if (hLastBox)
     	{
 			LPSAVESCREEN	pSaveScreen=(LPSAVESCREEN)GlobalLock (hLastBox);
 				
@@ -1914,7 +1914,7 @@ Next:
 		   			CurrentPrompt = 0;
 
     		}
-    	}*/
+    	}
 			
 	case GF_EXECUTE:
 LButUp:
@@ -2201,6 +2201,7 @@ DoCmd:
 		   		CurrentPrompt = PRMT_PANZOOM1;
 		        SetPrompt (CurrentPrompt,TRUE);
 				GSSiGlobUlFree (&hLastCmd);
+				SetMaskArea(0, 0, 1);
 				ZoomToRect (CurView->NewBounds,FALSE);
 		      /*  if (ClearFullDisplay)
 					PostMessage(hWndMain, WM_COMMAND, IDM_REDISPLAY, 0L);
@@ -2982,7 +2983,7 @@ NextPickItem:
 							HDC		hDC;
 
 							GetWindowRect(hWndMain,&ScreenRect);
-							YellowTextBox(hWnd, pTxt, pt, &LastBoxRect, (LPRECT)1, FALSE, 0);
+							hLastBox = YellowTextBox(hWnd, pTxt, pt, &LastBoxRect, (LPRECT)1, FALSE, 0);
 							IntersectRect (&SelectedItemRect,&SelectedItemRect,&LastBoxRect);
 							w = LastBoxRect.right - LastBoxRect.left;
 							h = LastBoxRect.bottom - LastBoxRect.top;

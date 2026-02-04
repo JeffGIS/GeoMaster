@@ -456,7 +456,6 @@ GSSiExitProg (1348);
 			short	SaveCurrentConfig=CurrentConfig;
 			
 			nArgs = GetFunArgs(Args, Arg, 9, &hMem, pBrkPt, bpOffset, bpLen);
-			
 			SaveVP = CurView; 
 			Err = 0;
 			SetConfig(1);
@@ -472,6 +471,19 @@ GSSiExitProg (1348);
 					goto RtnFalse;
 				else
 					goto RtnTrue;
+			}
+			
+			if (!_fstrcmp(Arg[1], "MASK"))
+			{
+				if (!_fstrcmp(Arg[3], "CLEAR"))
+				{
+					ClearMaskArea();
+					goto RtnTrue;
+				}
+				else if (CurView->hMaskArea)
+					goto RtnTrue;
+				else
+					goto RtnFalse;
 			}
 			if (!_fstrcmp(Arg[1], "CLEAR"))
 			{

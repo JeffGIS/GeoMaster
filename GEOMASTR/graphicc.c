@@ -8161,12 +8161,12 @@ BOOL  RoundRctWithPointer(HDC hdc, int left, int top,int right,int bottom, int w
 			{
 				int iStart = 0;
 				dist = 0;
-				while (dist < fromDist)
+				while (dist < fromDist && ipt < np)
 				{
 					dist += ldistpp(&pPolyDPoints[ipt++], &pPolyDPoints[ipt]);
 				}
 				iStart = ipt;
-				while (dist < toDist)
+				while (dist < toDist && ipt < np)
 				{
 					dist += ldistpp(&pPolyDPoints[ipt++], &pPolyDPoints[ipt]);
 				}

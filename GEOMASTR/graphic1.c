@@ -4567,7 +4567,7 @@ void DisplayCloseIcon (void)
 	char	str[MAX_PATH];
 	int		x,y;
 	
-	if (CurView && CurView->Display && CurView->hDC && !InShowZoomArea && !Printing && !InSmoothZoom && !MemMap)
+	if (CurView && CurView->Display && CurView->Active && CurView->hDC && !InShowZoomArea && !Printing && !InSmoothZoom && !MemMap)
 	{
 	    SaveDC (CurView->hDC);
 		SetDisplayMode (CurView->hDC, GF_SCREENMODE); 
@@ -4586,6 +4586,8 @@ void DisplayCloseIcon (void)
 			Rect.right -= 2;
 			Rect.bottom = Rect.top + 18;  
 			Rect.left = Rect.right - 18;
+			if (CurView->ID != 4)
+				ii = 1;
 			FillRect (CurView->hDC,&Rect,GetStockObject(LTGRAY_BRUSH));
 			//	FrameRect (CurView->hDC,&Rect,GetStockObject(BLACK_BRUSH));
 			hSavePen = SelectObject(CurView->hDC, hBlackPenDW);
