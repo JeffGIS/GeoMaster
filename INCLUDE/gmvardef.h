@@ -1234,6 +1234,7 @@ HWND	VideoWnd;
 long	AddRefno=0;
 long	AddressFrame;
 BOOL	noDupDesc = FALSE;
+BOOL	allowDupDesc = FALSE;
 long	MaxDisplayPoints=LONG_MAX/2;
 long	MostPoints=0;
 double	PickLimit=DBL_MAX;

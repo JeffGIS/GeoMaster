@@ -4832,7 +4832,7 @@ DisplayParcel:
 				 			
 	    					if (AutoHighlight)
 	    						AddToHighlightList (PickList[0].Refno,&PickList[0],TRUE);
-							ZoomToPickedItem (0,LocationOffset,OffsetFromLimits,FALSE,AddToView);
+							ZoomToPickedItem (0,LocationOffset,OffsetFromLimits,TRUE,AddToView);
 					 	}
 					 	else 
 					 	{

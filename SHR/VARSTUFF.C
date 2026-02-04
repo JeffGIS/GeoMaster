@@ -3717,8 +3717,11 @@ GSSiExitProg (532);
 		case 422:
 			ZoomToProjectBounds = atob(Value);
 			break;
+		case 423:
+			allowDupDesc = atob(Value);
+			break;
 		default:
- 			break;
+			break;
 	}
 /*	if (TraceOn)
 	{
@@ -4157,6 +4160,7 @@ void CreateInternalGlobals (void)
 	AllocateTypeVar("%FILEUSAGEFILE2", 420, FALSE);
 	AllocateTypeVar("%GMDUPDATEDEBUG", 421, FALSE);
 	AllocateTypeVar("%ZOOMTOPROJECT", 422, FALSE);
+	AllocateTypeVar("%ALLOWDUPDESC", 423, FALSE);
 
 //	AllocateTypeVar("%DL",191,FALSE);
 	
@@ -5455,6 +5459,9 @@ GSSiExitProg (533);
 			break;
 		case 422:
 			btoa(ZoomToProjectBounds, OutStr);
+			break;
+		case 423:
+			btoa(allowDupDesc, OutStr);
 			break;
 	}
 	GlobalUnlock (hGlobal);

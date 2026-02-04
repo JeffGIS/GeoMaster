@@ -1723,7 +1723,7 @@ GSSiExitProg (119);
 Next:
   InPanZoom = TRUE;
   pickedAreaOffsetDist = 0;
-  noDupDesc = TRUE;
+  noDupDesc = !allowDupDesc;
   switch (Message)
    { 
     case GF_REINIT:
