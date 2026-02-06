@@ -1680,7 +1680,7 @@ GSSiExitProg (1158);
 		}
 		else
 		{
-			HANDLE	hPoints = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, Header.np*sizeof(DPOINT));
+			HANDLE	hPoints = GSSiGlobAlloc(GAIDNO 1902, GMEM_MOVEABLE, Header.np*sizeof(DPOINT));
 
 			lpDpoint = (LPDPOINT)GlobalLock(hPoints);
 			BigRead(FidAO, lpDpoint, Header.np*sizeof(DPOINT));
@@ -1869,7 +1869,7 @@ BOOL ChangeAreaOffset (double NewOffset)
     	return FALSE;
 	BigRead (FidAO,&Version,2);
 	BigRead (FidAO,&NumEntries,4);
-	hEntries = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,NumEntries*sizeof(HAINDEX));
+	hEntries = GSSiGlobAlloc(GAIDNO 1903,GMEM_MOVEABLE,NumEntries*sizeof(HAINDEX));
 	pEntries = GlobalLock (hEntries);
 	GSSillseek (FidAO,-NumEntries*sizeof(HAINDEX),2);
 	BigRead (FidAO,pEntries,NumEntries*sizeof(HAINDEX));
@@ -1923,7 +1923,7 @@ BOOL AddAreaToOffsetFile (long Refno,int Type,int np, HPDPOINT lpDPoint,int nPol
 		NumEntries = 0;
 		BigWrite (FidAO,&Version,2,-1);
 		BigWrite (FidAO,&NumEntries,4,-1);
-		hIndex = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,(NumEntries+1)*sizeof(HAINDEX));
+		hIndex = GSSiGlobAlloc(GAIDNO 1904,GMEM_MOVEABLE,(NumEntries+1)*sizeof(HAINDEX));
 		pIndex = GlobalLock (hIndex);
 		loc = 6;
 	}
@@ -1932,7 +1932,7 @@ BOOL AddAreaToOffsetFile (long Refno,int Type,int np, HPDPOINT lpDPoint,int nPol
 		BigRead (FidAO,&Version,2);
 		BigRead (FidAO,&NumEntries,4);
 		GSSillseek (FidAO,-NumEntries*sizeof(HAINDEX),2);
-		hIndex = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,(NumEntries+1)*sizeof(HAINDEX));
+		hIndex = GSSiGlobAlloc(GAIDNO 1905,GMEM_MOVEABLE,(NumEntries+1)*sizeof(HAINDEX));
 		pIndex = GlobalLock (hIndex);
 		BigRead (FidAO,pIndex,NumEntries*sizeof(HAINDEX));
 		loc = GSSillseek (FidAO,-NumEntries*sizeof(HAINDEX),2);
@@ -3169,7 +3169,7 @@ GSSiExitProg (1176);
 
 void TempPolylineD (HDC hDC, HPDPOINT lpPoints, short nPnts, LPSTR TopText, LPSTR BottomText)
 {
-	HANDLE hPoints=GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,(long)nPnts*sizeof(DPOINT));
+	HANDLE hPoints=GSSiGlobAlloc(GAIDNO 1906,GMEM_MOVEABLE,(long)nPnts*sizeof(DPOINT));
 	HPPOINT	pPoints=(HPPOINT)GlobalLock (hPoints);
 	USHORT	i;
 
@@ -5610,7 +5610,7 @@ BOOL FAR PASCAL OWNERLOCMsgProc2(HWND hWndDlg, UINT Message, WPARAM wParam, LPAR
 						WORDINDEX	Rec;
 						HANDLE	hPartOffsets[MAXPARTS];
 						int		nPartOffsets[MAXPARTS];
-						int		nHits;
+						int		nHits=0;
        		      		BOOL	GetNext = TRUE;   
    		      			MSG     msg; 
 						char	Name[66];
@@ -5657,9 +5657,9 @@ BOOL FAR PASCAL OWNERLOCMsgProc2(HWND hWndDlg, UINT Message, WPARAM wParam, LPAR
 										ii = 1;
 			        				nOffsets = nSeqRec * 100 + pRec->nOffsets;
 									if (!nPartOffsets[ipart])
-										hPartOffsets[ipart] = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, nOffsets * sizeof(int));
+										hPartOffsets[ipart] = GSSiGlobAlloc(GAIDNO 1892, GMEM_MOVEABLE, nOffsets * sizeof(int));
 									else
-										hPartOffsets[ipart] = GSSiGlobalReAlloc(0, hPartOffsets[ipart], (nPartOffsets[ipart]+nOffsets) * sizeof(int), GMEM_MOVEABLE);
+										hPartOffsets[ipart] = GSSiGlobalReAlloc(1893, hPartOffsets[ipart], (nPartOffsets[ipart]+nOffsets) * sizeof(int), GMEM_MOVEABLE);
 
 									pOffsets = (LPLONG)GlobalLock (hPartOffsets[ipart]);
 									if (nPartOffsets[ipart] + pRec->nOffsets >= MAXOFFSETS)
@@ -5728,8 +5728,34 @@ BOOL FAR PASCAL OWNERLOCMsgProc2(HWND hWndDlg, UINT Message, WPARAM wParam, LPAR
 								OneSpace (str); 
 								ReplaceChar (str,0x01,0x09);
  								strcpy (teststr,str);
-								if ((pTab = strchr (teststr,'\t')))
- 									*pTab = 0;
+								if ((pTab = strchr(teststr, '\t')))
+								{
+									*pTab++ = 0;
+									int ls = strlen(teststr);
+									int n = ls % 2;
+									if (n)
+									{
+										n = ls / 2;
+										int j = n;
+										if (teststr[j++] == ' ')
+										{
+											BOOL same = TRUE;
+											for (int i = 0; i < n; i++)
+											{
+												if (teststr[i] != teststr[j++])
+													same = FALSE;
+											}
+											if (same)
+											{
+												teststr[n] = 0;
+												sprintf(str, "%s\t%s", teststr, pTab);
+												strcpy(teststr, str);
+												if ((pTab = strchr(teststr, '\t')))
+													*pTab++ = 0;
+											}
+										}
+									}
+								}
 								nPartsTest = GetNameParts (teststr,PartLocTest,PartLenTest,MAXPARTS);
 								for (ipart = 0;ipart < nParts;ipart++)
 								{
@@ -5761,14 +5787,14 @@ FoundPart:							;
 										if ((idx = SendDlgItemMessage(hWndDlg, IDC_OWNERLIST, LB_FINDSTRING,(WPARAM)-1, (LPARAM)str)) !=
 											LB_ERR)
 										{
-											HANDLE hLongStr = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE,USHRT_MAX);
+											HANDLE hLongStr = GSSiGlobAlloc(GAIDNO 1895, GMEM_MOVEABLE,USHRT_MAX);
 											LPSTR longstr = GlobalLock(hLongStr);
 											SendDlgItemMessage(hWndDlg, IDC_OWNERLIST, LB_GETTEXT, idx, (LPARAM)longstr);
 											pPIDS = strrchr(longstr, '\t');
 											pPIDS++;
 											int nPids = GetNumPIDS(pPIDS)+1;
 											int lStr = strlen(longstr);
-											HANDLE hLongStr2 = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, lStr+32);
+											HANDLE hLongStr2 = GSSiGlobAlloc(GAIDNO 1896, GMEM_MOVEABLE, lStr+32);
 											LPSTR longstr2 = GlobalLock(hLongStr2);
 											sprintf(longstr2, "%s\t%5i PIDs\t%s,%s", str,nPids, pPIDS, savePID);
 											int nInList = SendDlgItemMessage(hWndDlg, IDC_OWNERLIST, LB_DELETESTRING, idx, 0);
@@ -5905,9 +5931,9 @@ FoundPart:							;
 					SendDlgItemMessage (hWndDlg,IDC_PROPERTYLIST,LB_RESETCONTENT,0,0);
 					if (n)
 					{
-						HANDLE hLongStr = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, USHRT_MAX);
+						HANDLE hLongStr = GSSiGlobAlloc(GAIDNO 1897, GMEM_MOVEABLE, USHRT_MAX);
 						LPSTR  pLongStr = GlobalLock(hLongStr);
-						HANDLE hWantStr2 = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, USHRT_MAX);
+						HANDLE hWantStr2 = GSSiGlobAlloc(GAIDNO 1898, GMEM_MOVEABLE, USHRT_MAX);
 						LPSTR  WantStr2 = GlobalLock(hWantStr2);
 						pItem = (LPINT)GlobalLock (hItems);
 						while (n--)
@@ -6007,7 +6033,7 @@ FoundPart:							;
 				LPINT	pItem=(LPINT)GlobalLock (hItems);  
 				LPSTR	pTAB; 
 				BOOL	Err=TRUE;
-				HANDLE hLongStr = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, USHRT_MAX);
+				HANDLE hLongStr = GSSiGlobAlloc(GAIDNO 1899, GMEM_MOVEABLE, USHRT_MAX);
 				LPSTR  pLongStr = GlobalLock(hLongStr);
 
 				if (n == 1)
@@ -6267,7 +6293,7 @@ BOOL FAR PASCAL OWNERLOCMsgProc3(HWND hWndDlg, UINT Message, WPARAM wParam, LPAR
 									nSeqRec = -(pRec->Seq + 1);
 			        				nOffsets = nSeqRec * 100 + pRec->nOffsets;
 									if (!nPartOffsets[ipart])
-										hPartOffsets[ipart] = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,MAXOFFSETS * sizeof(int));
+										hPartOffsets[ipart] = GSSiGlobAlloc(GAIDNO 1900,GMEM_MOVEABLE,MAXOFFSETS * sizeof(int));
 									pOffsets = (LPLONG)GlobalLock (hPartOffsets[ipart]);
 									if (nPartOffsets[ipart] + pRec->nOffsets >= MAXOFFSETS)
 										GetNext = FALSE;
@@ -6770,7 +6796,7 @@ BOOL FAR PASCAL OWNERLOCMsgProc4(HWND hWndDlg, UINT Message, WPARAM wParam, LPAR
 									nSeqRec = -(pRec->Seq + 1);
 			        				nOffsets = nSeqRec * 100 + pRec->nOffsets;
 									if (!nPartOffsets[ipart])
-										hPartOffsets[ipart] = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,MAXOFFSETS * sizeof(int));
+										hPartOffsets[ipart] = GSSiGlobAlloc(GAIDNO 1901,GMEM_MOVEABLE,MAXOFFSETS * sizeof(int));
 									pOffsets = (LPLONG)GlobalLock (hPartOffsets[ipart]);
 									if (nPartOffsets[ipart] + pRec->nOffsets >= MAXOFFSETS)
 										GetNext = FALSE;

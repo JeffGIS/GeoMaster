@@ -6793,7 +6793,7 @@ BOOL CreateWordIndex (LPSTR FromFile,LPSTR FromField,LPSTR ToFile,BOOL Append)
 		{   
 			if (WordLen[iword] > 1)
 			{
-				if (!isdigit((unsigned char)*pWord[iword]))
+				//if (!isdigit((unsigned char)*pWord[iword]))
 				{
 					_fstrncpy(pRecTmp->Word, pWord[iword], WordMax);
 					pRecTmp->Seq = 0;
@@ -6822,8 +6822,8 @@ BOOL CreateWordIndex (LPSTR FromFile,LPSTR FromField,LPSTR ToFile,BOOL Append)
 						}
 					}
 				}
-				else
-					ii = 1;
+				//else
+				//	ii = 1;
 			}
 		}
 Next:
@@ -7286,7 +7286,7 @@ BOOL AddPolyToBuffer (int nPolyIn, LPINT lpnPntsIn,LPHANDLE phDPoints,short Type
 	nPoly = abs (nPolyIn);
 	if (Type == 1 && nPoly > 1)
 		nPoly = ReducePoly(nPoly, lpnPntsIn, phDPoints);
-	hPnts = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,max (1,nPoly) * sizeof (int));
+	hPnts = GSSiGlobAlloc(GAIDNO 1907,GMEM_MOVEABLE,max (1,nPoly) * sizeof (int));
 	lpnPnts = GlobalLock (hPnts);
 	for (i=0;i<max (1,nPoly);i++)
 	{
