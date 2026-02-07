@@ -212,3 +212,5 @@ $RECYCLE.BIN/
 /GEOMASTR/.vs/geomastr/v17/Solution.VC.db
 /GEOMASTR/.vs/geomastr/v17/DocumentLayout.json
 /GEOMASTR/lastcmdline.txt
+/GEOMASTR/NVServer/GeoMaster34n_s.exe.recipe
+/GEOMASTR/NVServer/geomastr.vcxproj.FileListAbsolute.txt
