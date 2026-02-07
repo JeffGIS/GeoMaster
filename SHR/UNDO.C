@@ -187,7 +187,7 @@ BOOL CreateUndoPoint (LPSTR InName)
 		ii=1;
 	if (!UndoEnabled)
 		return TRUE; 
-	hMem=GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,2048);
+	hMem=GSSiGlobAlloc(GAIDNO 1489,GMEM_MOVEABLE,2048);
 	str=GlobalLock (hMem);
 	Name=str+1024;
     _fstrcpy (Name,InName);

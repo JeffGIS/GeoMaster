@@ -422,7 +422,7 @@ int GetSQLITEDistinct(sqlite3 *db, LPSTR tableName, LPSTR fieldsIN, LPSTR where,
 	HANDLE hCmd = GSSiGlobAlloc(GAIDNO 1796, GMEM_MOVEABLE, USHRT_MAX);
 	LPSTR  pCmd = GlobalLock(hCmd);
 	sqlite3_stmt *statement;
-	HANDLE hOutstr = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, USHRT_MAX);
+	HANDLE hOutstr = GSSiGlobAlloc(GAIDNO 1436, GMEM_MOVEABLE, USHRT_MAX);
 	LPSTR outstr = GlobalLock(hOutstr);
 	int rtn = -1;
 	HFILE Fid;
@@ -488,7 +488,7 @@ int SQLITEQuery(sqlite3 *db, LPSTR tableName, LPSTR fieldsIN, LPSTR where, LPSTR
 	HANDLE hCmd = GSSiGlobAlloc(GAIDNO 1796, GMEM_MOVEABLE, USHRT_MAX);
 	LPSTR  pCmd = GlobalLock(hCmd);
 	sqlite3_stmt *statement;
-	HANDLE hOutstr = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, USHRT_MAX);
+	HANDLE hOutstr = GSSiGlobAlloc(GAIDNO 1437, GMEM_MOVEABLE, USHRT_MAX);
 	LPSTR outstr = GlobalLock(hOutstr);
 	int rtn = -1;
 	HFILE Fid=NO_FILE;
@@ -758,7 +758,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 		db = (sqlite3*)atoi(ARG[2]);
 		if (fid != HFILE_ERROR)
 		{
-			HANDLE hstr = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, MAXSTR);
+			HANDLE hstr = GSSiGlobAlloc(GAIDNO 1438, GMEM_MOVEABLE, MAXSTR);
 			LPSTR cmd = GlobalLock(hstr);
 			int totLen = GSSifilelength(fid);
 			int curPos = 0;
@@ -775,7 +775,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 				{
 					MAXSTR = atol(&cmd[4]) + 2;
 					GSSiGlobUlFree(&hstr);
-					hstr = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, MAXSTR);
+					hstr = GSSiGlobAlloc(GAIDNO 1439, GMEM_MOVEABLE, MAXSTR);
 					cmd = GlobalLock(hstr);
 
 					continue;
@@ -2268,9 +2268,9 @@ NextCrimeRec:
 							pDPoints = (HPDPOINT)(pBounds + 1);
 							pDPoints += offsetPoints;
 							sqMeters = ComputeAreaAreaD(pDPoints, nPnts, &perimeter);
-							hPoints = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, nPnts * sizeof(POINT));
+							hPoints = GSSiGlobAlloc(GAIDNO 1440, GMEM_MOVEABLE, nPnts * sizeof(POINT));
 							pPoints = GlobalLock(hPoints);
-							hPointsCVT = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, nPnts * sizeof(DPOINT));
+							hPointsCVT = GSSiGlobAlloc(GAIDNO 1441, GMEM_MOVEABLE, nPnts * sizeof(DPOINT));
 							pPointsCVT = GlobalLock(hPointsCVT);
 							midPt = MinMaxMidPointD(pBounds);
 							nTotal++;
@@ -2514,7 +2514,7 @@ NextCrimeRec:
 								GlobalUnlock(hPolyPartLen);
 							}
 							pDPoints = (HPDPOINT)(pBounds + 1);
-							hPoints = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, nPnts * sizeof(POINT));
+							hPoints = GSSiGlobAlloc(GAIDNO 1442, GMEM_MOVEABLE, nPnts * sizeof(POINT));
 							pPoints = GlobalLock(hPoints);
 							midPt = MinMaxMidPointD(pBounds);
 							nTotal++;

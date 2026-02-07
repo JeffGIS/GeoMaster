@@ -263,7 +263,7 @@ void DisplaySavedGraphicsFile (HDC hDC,int Type)
 				BigRead (Fid,&npt,4);
 				if (npt)
 				{
-					hpt = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,npt*sizeof(POINT));
+					hpt = GSSiGlobAlloc(GAIDNO 2059,GMEM_MOVEABLE,npt*sizeof(POINT));
 					ppt = (LPPOINT)GlobalLock (hpt);
 					BigRead (Fid,ppt,npt*sizeof(POINT));
 					if (FidSTG == HFILE_ERROR)
@@ -340,7 +340,7 @@ void DisplaySavedGraphicsFile (HDC hDC,int Type)
 
 					BigRead (Fid,&BitBltStruct.xDest,sizeof(BitBltStruct)-2);
 					lnBits = BitBltStruct.bm.bmWidthBytes*BitBltStruct.bm.bmHeight;
-					hBits = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,lnBits);
+					hBits = GSSiGlobAlloc(GAIDNO 2060,GMEM_MOVEABLE,lnBits);
 					pBits = GlobalLock (hBits);
 					BigRead (Fid,pBits,lnBits);
 					memset (&bmi,0,sizeof(BITMAPINFO));
@@ -376,7 +376,7 @@ void DisplaySavedGraphicsFile (HDC hDC,int Type)
 
 					BigRead (Fid,&BitBltStruct.xDest,sizeof(BitBltStruct)-2);
 					lnBits = BitBltStruct.bm.bmWidthBytes*BitBltStruct.bm.bmHeight;
-					hBits = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,lnBits);
+					hBits = GSSiGlobAlloc(GAIDNO 2061,GMEM_MOVEABLE,lnBits);
 					pBits = GlobalLock (hBits);
 					BigRead (Fid,pBits,lnBits);
 					memset (&bmi,0,sizeof(BITMAPINFO));

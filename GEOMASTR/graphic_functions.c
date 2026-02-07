@@ -2549,7 +2549,7 @@ NoBox:
 					char AutoIDPickList[MAX_PATH];
 					if (GetGlobalCVal("[%AUTOIDPICKABILITY]", AutoIDPickList, 0))
 					{
-						HANDLE hMem = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, MAX_PATH * 2);
+						HANDLE hMem = GSSiGlobAlloc(GAIDNO 1979, GMEM_MOVEABLE, MAX_PATH * 2);
 						LPSTR pMem = GlobalLock(hMem);
 						GSSiGetTempFileName(0, "gmp", 0, (LPSTR)CurView->PickabilityRestoreFile);
 						sprintf(pMem, "$SAVEPIK(%s,,%s)", CurView->PickabilityRestoreFile, CurView->Name);
@@ -2724,7 +2724,7 @@ DoPick:
 			MaxPick = SaveMaxPick; 
 			if (GSSiLength(CurView->PickabilityRestoreFile) > 0)
 			{
-				HANDLE hMem = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, MAX_PATH * 2);
+				HANDLE hMem = GSSiGlobAlloc(GAIDNO 1980, GMEM_MOVEABLE, MAX_PATH * 2);
 				LPSTR pMem = GlobalLock(hMem);
 				sprintf(pMem, "$LOADPIK(%s,%s)", CurView->PickabilityRestoreFile, CurView->Name);
 				ProcessText(pMem);
@@ -6364,7 +6364,7 @@ RButUp:
 				HPDPOINT	pDistPoints;
 	
 				GSSiGlobFree (&CurView->hDistanceLine);
-				CurView->hDistanceLine = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,USHRT_MAX);
+				CurView->hDistanceLine = GSSiGlobAlloc(GAIDNO 1981,GMEM_MOVEABLE,USHRT_MAX);
 				pNumDistPoints = (LPLONG)GlobalLock (CurView->hDistanceLine);
 				pDistPoints = (HPDPOINT)(pNumDistPoints+1);
 				*pNumDistPoints = -nCurPolyPoints;
@@ -6407,7 +6407,7 @@ RButUp:
         else if (AllowSinglePoint)
         {
         	NumNewPolyPoints = 1;
-        	hNewPolyPoints = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,sizeof(DPOINT));
+        	hNewPolyPoints = GSSiGlobAlloc(GAIDNO 1982,GMEM_MOVEABLE,sizeof(DPOINT));
         	lpDPoint = (HPDPOINT)GlobalLock (hNewPolyPoints);
         	*lpDPoint = BasePoint;
         	GlobalUnlock (hNewPolyPoints);
@@ -6668,7 +6668,7 @@ BOOL CreateHLTArea (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
     		lpDPoints = (HPDPOINT)GlobalLock (hNewPolyPoints);
 			if (!SameDPoint(lpDPoints, &lpDPoints[NumNewPolyPoints - 1]))
 			{
-				HANDLE hPoints = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, (NumNewPolyPoints+1) * sizeof(DPOINT));
+				HANDLE hPoints = GSSiGlobAlloc(GAIDNO 1983, GMEM_MOVEABLE, (NumNewPolyPoints+1) * sizeof(DPOINT));
 				LPDPOINT pPt = GlobalLock(hPoints);
 				for (int i = 0; i < NumNewPolyPoints; i++)
 				{
@@ -7199,7 +7199,7 @@ BOOL DistancePolyline (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam, sh
 					GSSiGlobFree (&CurView->hDistanceLine);
 					NewPolyPoints = (HPDPOINT)GlobalLock (hNewPolyPoints); 
 					NewPolyPoints[NumNewPolyPoints++] = NewPolyPoints[0];
-					CurView->hDistanceLine = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,USHRT_MAX);
+					CurView->hDistanceLine = GSSiGlobAlloc(GAIDNO 1984,GMEM_MOVEABLE,USHRT_MAX);
 					pNumDistPoints = (LPLONG)GlobalLock (CurView->hDistanceLine);
 					pDistPoints = (HPDPOINT)(pNumDistPoints+1);
 					*pNumDistPoints = NumNewPolyPoints;
@@ -9186,7 +9186,7 @@ BOOL SplitPolygon (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam,short F
 		    ClearHighlightList (FALSE); 
        		GSSiGlobUlFree (&hUpdateMultiPolygon); 
 		    nUpdatePolyPoints = NumNewPolyPoints + npnts; 
-       		hUpdatePoly = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,(nUpdatePolyPoints+1)*sizeof(DPOINT));  
+       		hUpdatePoly = GSSiGlobAlloc(GAIDNO 1985,GMEM_MOVEABLE,(nUpdatePolyPoints+1)*sizeof(DPOINT));
        		Points = (HPDPOINT)GlobalLock (hUpdatePoly);
         	NewPoints = (HPDPOINT)GlobalLock (hNewPolyPoints); 
         	OldPoints = (HPDPOINT)GlobalLock (hPoly);
@@ -9465,7 +9465,7 @@ BOOL ReplacePolyPoints (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam,sh
 		    ClearHighlightList (FALSE); 
        		GSSiGlobUlFree (&hUpdateMultiPolygon); 
 		    nUpdatePolyPoints = NumNewPolyPoints + npnts; 
-       		hUpdatePoly = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,(nUpdatePolyPoints+1)*sizeof(DPOINT));  
+       		hUpdatePoly = GSSiGlobAlloc(GAIDNO 1986,GMEM_MOVEABLE,(nUpdatePolyPoints+1)*sizeof(DPOINT));
        		Points = (HPDPOINT)GlobalLock (hUpdatePoly);
         	NewPoints = (HPDPOINT)GlobalLock (hNewPolyPoints); 
         	OldPoints = (HPDPOINT)GlobalLock (hPoly);

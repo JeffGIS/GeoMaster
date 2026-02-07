@@ -1810,7 +1810,7 @@ void SetPhotoAndNotesFiles (HWND hWndDlg,UINT dlgList,UINT ibtnPHOTO1,UINT ibtnP
 		if (Fid != HFILE_ERROR)
 		{
 			int	ln = GSSifilelength (Fid);
-			HANDLE htxt = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,ln+4);
+			HANDLE htxt = GSSiGlobAlloc(GAIDNO 2044,GMEM_MOVEABLE,ln+4);
 			LPSTR ptxt = GlobalLock (htxt);
 			
 			BigRead (Fid,ptxt,ln);
@@ -2335,7 +2335,7 @@ BOOL FAR PASCAL IDENTIFYMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARA
 						}
 						else if (Type == ODBC_DATAFILE)
 						{
-							HANDLE	hUpStr = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, 4096);
+							HANDLE	hUpStr = GSSiGlobAlloc(GAIDNO 2045, GMEM_MOVEABLE, 4096);
 							LPSTR	pUpStr = GlobalLock(hUpStr);
 							char	DBName[MAX_PATH], sql[256];
 							LPSTR	pTable;
@@ -2350,7 +2350,7 @@ BOOL FAR PASCAL IDENTIFYMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARA
 									GetDlgItemText(hWndDlg, IDENTIFY_SQL, sql, 256);
 								if (lpAutoUpdateFieldList)
 								{
-									HANDLE	hAutoFields = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, 4096);
+									HANDLE	hAutoFields = GSSiGlobAlloc(GAIDNO 2046, GMEM_MOVEABLE, 4096);
 									LPSTR	pAutoFields = GlobalLock(hAutoFields);
 
 									strcpy(pAutoFields, lpAutoUpdateFieldList);
@@ -2996,7 +2996,7 @@ BOOL FAR PASCAL IDENTIFY_WITH_PHOTOMsgProc(HWND hWndDlg, UINT Message, WPARAM wP
 						}
 						else if (Type == ODBC_DATAFILE)
 						{
-							HANDLE	hUpStr = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, 4096);
+							HANDLE	hUpStr = GSSiGlobAlloc(GAIDNO 2047, GMEM_MOVEABLE, 4096);
 							LPSTR	pUpStr = GlobalLock(hUpStr);
 							char	DBName[MAX_PATH], sql[256];
 							LPSTR	pTable;
@@ -3011,7 +3011,7 @@ BOOL FAR PASCAL IDENTIFY_WITH_PHOTOMsgProc(HWND hWndDlg, UINT Message, WPARAM wP
 									GetDlgItemText(hWndDlg, IDENTIFY_SQL, sql, 256);
 								if (lpAutoUpdateFieldList)
 								{
-									HANDLE	hAutoFields = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, 4096);
+									HANDLE	hAutoFields = GSSiGlobAlloc(GAIDNO 2048, GMEM_MOVEABLE, 4096);
 									LPSTR	pAutoFields = GlobalLock(hAutoFields);
 
 									strcpy(pAutoFields, lpAutoUpdateFieldList);
@@ -10627,7 +10627,7 @@ BOOL FAR PASCAL VIRTUALPRINTERMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam,
 			        Length = GlobalSize (lpPDChunk->hDevMode);
 					if (Length)
 					{ 
-						lpPDChunkLocal->hDevMode = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,Length);
+						lpPDChunkLocal->hDevMode = GSSiGlobAlloc(GAIDNO 2049,GMEM_MOVEABLE,Length);
 						pDevModeLocal = (LPDEVMODE)GlobalLock (lpPDChunkLocal->hDevMode);
 						pDevMode = (LPDEVMODE)GlobalLock (lpPDChunk->hDevMode); 
 						_fmemmove (pDevModeLocal,pDevMode,Length);
@@ -10639,7 +10639,7 @@ BOOL FAR PASCAL VIRTUALPRINTERMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam,
 			        Length = GlobalSize (lpPDChunk->hDevNames);
 					if (Length)
 					{ 
-						lpPDChunkLocal->hDevNames = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,Length);
+						lpPDChunkLocal->hDevNames = GSSiGlobAlloc(GAIDNO 2050,GMEM_MOVEABLE,Length);
 						pDevNamesLocal = (LPDEVNAMES)GlobalLock (lpPDChunkLocal->hDevNames);
 						pDevNames = (LPDEVNAMES)GlobalLock (lpPDChunk->hDevNames); 
 						_fmemmove (pDevNamesLocal,pDevNames,Length);
@@ -11992,7 +11992,7 @@ BOOL FAR PASCAL ZOOMLIST2MsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPAR
 			if (AutoZoomNext)
 			{
 				nItems = 1;
-				hItems = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, sizeof(int) + 4);
+				hItems = GSSiGlobAlloc(GAIDNO 2051, GMEM_MOVEABLE, sizeof(int) + 4);
 				LPINT pItems = (LPINT)GlobalLock(hItems);
 				*pItems = currentLocInList + AutoZoomNext;
 				GlobalUnlock(hItems);
@@ -12283,7 +12283,7 @@ BOOL FAR PASCAL AltAccelMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARA
 						if (i == j)
 						{
 							int		lMacro = strlen (Tab);
-    						HANDLE	hMacro = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,lMacro+1);   
+    						HANDLE	hMacro = GSSiGlobAlloc(GAIDNO 2052,GMEM_MOVEABLE,lMacro+1);
     						LPSTR	pMacro = GlobalLock (hMacro);
 
     						_fstrcpy (pMacro,Tab);  
@@ -17624,7 +17624,7 @@ NextFileInList:    		GSSillseek (FidFL,FileListLoc,0);
 		 		 {
 					GSSiGlobFree (&hItems);
 		 		 	nSel = 1;
-				 	hItems = GSSiGlobAlloc(GAIDNO 0,GHND,2);
+				 	hItems = GSSiGlobAlloc(GAIDNO 2053,GHND,2);
 				 }
 				 if (nSel)
 				 {
@@ -32726,7 +32726,7 @@ BOOL FAR PASCAL TXT_OUTPUTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPA
                      SV_SET_FILE, SV_DATABASE_LIST, SV_TABLE_NAMES,SV_TABLE_HEADING, 0,0,
                      MIFOutDataFile, &MIFOutDataFileType, &hSQL,0,TRUE))  return TRUE;
  {
-     HANDLE	hMem=GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,4096);
+     HANDLE	hMem=GSSiGlobAlloc(GAIDNO 2054,GMEM_MOVEABLE,4096);
      LPSTR	str=GlobalLock (hMem); 
      
 	 switch(Message)
@@ -33180,7 +33180,7 @@ BOOL FAR PASCAL CAPTURE_CLIPBOARDMsgProc(HWND hWndDlg, UINT Message, WPARAM wPar
 		SetWindowText(hWndDlg, captureClipboardTitle);
 
 		{
-			HANDLE hCmd = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, USHRT_MAX);
+			HANDLE hCmd = GSSiGlobAlloc(GAIDNO 2055, GMEM_MOVEABLE, USHRT_MAX);
 			LPSTR pCmd = GlobalLock(hCmd);
 			sprintf(pCmd, "$OPEN(DAT=[%DL]attribut\\countydata.gmd,COUNTYID=%s);$ADDRESS(SET,I4,%i,[DAT.DATASTATUS]);$ADDRESS(SET,I4,%i,[DAT.OTHERDATASTATUS]);$ADDRESS(SET,I4,%i,[DAT.MAPSTATUS]);\
 $DIALOGITEM(%i,%i,SETTEXT,[DAT.CONTACT]);\
@@ -33276,7 +33276,7 @@ $DIALOGITEM(%i,%i,SETTEXT,[DAT.DISCLAIMER]);$CLOSE(DAT););",
 				IgnoreLock = TRUE;
 				pText = GlobalLock(hText);
 				ltxt = strlen(pText)+1;
-				htxt = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, ltxt);
+				htxt = GSSiGlobAlloc(GAIDNO 2056, GMEM_MOVEABLE, ltxt);
 				txt = GlobalLock(htxt);
 				strcpy(txt, pText);
 				SetGlobalValue("%CLIPBOARDTEXT",pText);
@@ -33350,7 +33350,7 @@ $DIALOGITEM(%i,%i,SETTEXT,[DAT.DISCLAIMER]);$CLOSE(DAT););",
 		{
 		case IDOK:
 		{
-			HANDLE hCmd = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, USHRT_MAX);
+			HANDLE hCmd = GSSiGlobAlloc(GAIDNO 2057, GMEM_MOVEABLE, USHRT_MAX);
 			LPSTR pCmd = GlobalLock(hCmd);
 			sprintf(pCmd, "$GMDUPDATE([%DL]attribut\\countydata.gmd,COUNTYID=%s,DATASTATUS=%i;OTHERDATASTATUS=%i;MAPSTATUS=%i;\
 CONTACT=$DIALOGITEM(%i,%i,GETTEXT,128);\

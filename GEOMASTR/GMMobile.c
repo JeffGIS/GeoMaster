@@ -87,9 +87,9 @@ int GMMCompression(LPSTR INFile, LPSTR OUTFile)
 {
 	int rtn = 0;
 	int flen = GSSiLength(INFile);
-	HANDLE hMem = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, 4096*8);
+	HANDLE hMem = GSSiGlobAlloc(GAIDNO 2018, GMEM_MOVEABLE, 4096*8);
 	LPSTR pFile = GlobalLock(hMem);
-	HANDLE hMemCmp = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, 4096*8);
+	HANDLE hMemCmp = GSSiGlobAlloc(GAIDNO 2019, GMEM_MOVEABLE, 4096*8);
 	LPSTR pFileCmp = GlobalLock(hMemCmp);
 	HFILE fid = GSSiOpenFile(INFile, 0, OF_READ);
 	int flenCmp=0;

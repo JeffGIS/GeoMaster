@@ -854,7 +854,7 @@ ErrMes:
 	    	 SWORD lmes; 
 	    	 LPSTR	cError, Mess, DispStr;
 	    	 HANDLE	hMem; 
-	    	 HANDLE	hParms = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,4096);
+	    	 HANDLE	hParms = GSSiGlobAlloc(GAIDNO 2087,GMEM_MOVEABLE,4096);
 	    	 LPSTR	pParms = GlobalLock (hParms);
 	    	 RETCODE	rcer;
 	    	 BOOL	FirstErr=TRUE;
@@ -1072,7 +1072,7 @@ ErrMes:
 		    	}
 		    	
 		    	BinSize = lenanswer+32; 
-    			hBinVal=GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,BinSize);
+    			hBinVal=GSSiGlobAlloc(GAIDNO 2088,GMEM_MOVEABLE,BinSize);
     			binval=GlobalLock (hBinVal);
     			hmemmove (binval,pTemp,BinSize-1);
 		    	BinSize = lenanswer; 
@@ -1139,7 +1139,7 @@ ErrMes:
 		    	}
 		    	
 		    	BinSize = lenanswer+1; 
-    			hBinVal=GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,BinSize);
+    			hBinVal=GSSiGlobAlloc(GAIDNO 2089,GMEM_MOVEABLE,BinSize);
     			binval=GlobalLock (hBinVal);
     			hmemmove (binval,pTemp,BinSize-1);
 				binval[lenanswer] = 0;
@@ -1822,7 +1822,7 @@ void SubstituteDBQ (LPSTR str,LPSTR pDBQ)
 		return;
 	if (!*pDBQ)
 		return;
-	hDBQ = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,2048);
+	hDBQ = GSSiGlobAlloc(GAIDNO 2089,GMEM_MOVEABLE,2048);
 	DBQ = GlobalLock (hDBQ);
 	strcpy (DBQ,pDBQ);
 	pDB = DBQ + 1024;
@@ -1850,7 +1850,7 @@ void SubstituteDBQ (LPSTR str,LPSTR pDBQ)
 		strcat (pDB,DBQ);
 	else
 	{
-		HANDLE	hNewStr=GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,4096);
+		HANDLE	hNewStr=GSSiGlobAlloc(GAIDNO 2090,GMEM_MOVEABLE,4096);
 		LPSTR	pNewStr=GlobalLock (hNewStr);
 		LPSTR	pEndStr;
 

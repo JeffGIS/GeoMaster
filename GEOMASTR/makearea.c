@@ -1486,7 +1486,7 @@ LPOINT AddRefToLink (LPREFCONNECT pRC,BOOL Reverse,LPLONG pNumLinkPoints,LPHANDL
 	}
 	else
 	{
-		*phLinkPoints = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,sizeof(DPOINT)*(long)USHRT_MAX*16);
+		*phLinkPoints = GSSiGlobAlloc(GAIDNO 2080,GMEM_MOVEABLE,sizeof(DPOINT)*(long)USHRT_MAX*16);
 		pLinkPoints = (HPDPOINT)GlobalLock (*phLinkPoints); 
 		hmemmove ((HPSTR)pLinkPoints,(HPSTR)pPoints,nPnts*sizeof(DPOINT)); 
 		*pNumLinkPoints = nPnts;
@@ -1664,7 +1664,7 @@ Exit:
     	{   
     		BigRead (FidLinkFile,(HPSTR)&SymNum,2);
     		BigRead (FidLinkFile,(HPSTR)&np,4); 
-    		hPoints = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,(long)np*sizeof(DPOINT)); 
+    		hPoints = GSSiGlobAlloc(GAIDNO 2081,GMEM_MOVEABLE,(long)np*sizeof(DPOINT));
     		pPoints = (HPDPOINT)GlobalLock (hPoints);
     		BigRead (FidLinkFile,(HPSTR)pPoints,(long)np*sizeof(DPOINT));  
     		GlobalUnlock (hPoints);
@@ -2429,7 +2429,7 @@ BOOL DisplayBadArea (void)
 	i=SelectClipRgn (CurView->hDC,CurView->hRgn);
 	GSSiDeleteObject(&CurView->hRgn); 
 	BigRead (FidBad,(HPSTR)&np,2);
-	hLoop = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,(long)np*(long)sizeof(DPOINT));
+	hLoop = GSSiGlobAlloc(GAIDNO 2082,GMEM_MOVEABLE,(long)np*(long)sizeof(DPOINT));
 	pPoint = (HPDPOINT)GlobalLock (hLoop);
 	BigRead (FidBad,(LPSTR)pPoint,(long)np*(long)sizeof(DPOINT));  
 	hPen = CreatePen(PS_SOLID,0,RGB(0,0,255));
@@ -2437,7 +2437,7 @@ BOOL DisplayBadArea (void)
 	GWPolylineD (CurView->hDC,pPoint,np,idesc);
 	GSSiGlobUlFree (&hLoop);  
 	BigRead (FidBad,(HPSTR)&np,2);
-	hLoop = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,(long)np*(long)sizeof(DPOINT));
+	hLoop = GSSiGlobAlloc(GAIDNO 2083,GMEM_MOVEABLE,(long)np*(long)sizeof(DPOINT));
 	pPoint = (HPDPOINT)GlobalLock (hLoop);
 	BigRead (FidBad,(LPSTR)pPoint,(long)np*(long)sizeof(DPOINT));
 	GWPolylineD (CurView->hDC,pPoint,np,idesc);
@@ -2520,7 +2520,7 @@ GotSym:;
 			GSSiGlobFree (&hLoop);  
 			GSSiGlobFree (&hLoop2);
 			BigWrite (FidBad,(HPSTR)&np,4,-1); 
-			hLoop = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,(long)np*(long)sizeof(DPOINT));
+			hLoop = GSSiGlobAlloc(GAIDNO 2084,GMEM_MOVEABLE,(long)np*(long)sizeof(DPOINT));
 			pPoint = (HPDPOINT)GlobalLock (hLoop);
 			BigRead (FidLinks,(HPSTR)pPoint,(long)np*sizeof(DPOINT)); 
 			BigWrite (FidBad,(HPSTR)pPoint,(long)np*(long)sizeof(DPOINT),-1);   

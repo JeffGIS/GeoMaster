@@ -5302,7 +5302,7 @@ static	int	nxw, nxh, nxlft, nxbot, prvlft, prvbot,DisplayHeight,ImageWidth,Image
 				 break;
 			 case IDC_GETFILES:
 				{
-    				 HANDLE	hFileMem=GSSiGlobAlloc(GAIDNO 0,GHND,USHRT_MAX);
+    				 HANDLE	hFileMem=GSSiGlobAlloc(GAIDNO 1461,GHND,USHRT_MAX);
     				 LPSTR	ImageFiles = GlobalLock (hFileMem);
 					 LPSTR	pName = ImageFiles;
 					 if (GetMultFiles(hWndDlg,ImageFiles,USHRT_MAX,IDS_FILTERALLIMAGE,IDS_FILEIMAGE)) 

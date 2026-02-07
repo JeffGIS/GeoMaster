@@ -54,7 +54,7 @@ void GetMassShapeFiles(void)
 {
 	char file[] = "c:\\temp\\maparcels2.txt";
 	int lfile = GSSiLength(file), i, i2;
-	HANDLE hFile = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, lfile + 1);
+	HANDLE hFile = GSSiGlobAlloc(GAIDNO 1990, GMEM_MOVEABLE, lfile + 1);
 	LPSTR pFile = GlobalLock(hFile);
 	//HANDLE hFile2 = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, lfile + 1);
 	//LPSTR pFile2 = GlobalLock(hFile2);
@@ -1251,7 +1251,7 @@ GSSiExitProg (1348);
 					{
 						case 1:
 							{
-								HANDLE	hstr=GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,4096*2);
+								HANDLE	hstr=GSSiGlobAlloc(GAIDNO 1991,GMEM_MOVEABLE,4096*2);
 								LPSTR	str = GlobalLock (hstr);
 								LPSTR	ExpArgs = str + 4096;
 								char	err[64]="[%LASTERR]";
@@ -1285,7 +1285,7 @@ GSSiExitProg (1348);
 		    				goto RtnFalse; 
 						case 4:
 							{
-								HANDLE	hstr=GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,4096*2+256);
+								HANDLE	hstr=GSSiGlobAlloc(GAIDNO 1992,GMEM_MOVEABLE,4096*2+256);
 								LPSTR	str = GlobalLock (hstr);
 								LPSTR	ExpArgs = str + 4096;
 								LPSTR	pMacro = ExpArgs + 4096;
@@ -1918,7 +1918,7 @@ SetVis:
 					CloseDataFile (FALSE,&hDB); 
             		goto RtnFalse;
 				}
-            	hVal = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,4096*2);
+            	hVal = GSSiGlobAlloc(GAIDNO 1993,GMEM_MOVEABLE,4096*2);
             	val = GlobalLock (hVal);  
             	str = val + 4096;
     			SQLPtr = (LPOPENSQLDATA)GlobalLock(hDB);
@@ -3661,8 +3661,8 @@ SetVis:
 				}
 				else 
 				{
-					LPINT	nLoopPoints = (LPINT)GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,USHRT_MAX*sizeof(int));
-					LPHANDLE	hLoopPoints = (LPHANDLE)GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,USHRT_MAX*sizeof(HANDLE));
+					LPINT	nLoopPoints = (LPINT)GSSiGlobAlloc(GAIDNO 1987,GMEM_MOVEABLE,USHRT_MAX*sizeof(int));
+					LPHANDLE	hLoopPoints = (LPHANDLE)GSSiGlobAlloc(GAIDNO 1988,GMEM_MOVEABLE,USHRT_MAX*sizeof(HANDLE));
 					int nLoops;
 					double NearDist;
 
@@ -3727,7 +3727,7 @@ SetVis:
 			ExpandText (Arg1); 
 			if (*Arg1)
 			{
-				hExitMessage = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, 512);
+				hExitMessage = GSSiGlobAlloc(GAIDNO 1989, GMEM_MOVEABLE, 512);
 				ExitMessage = GlobalLock(hExitMessage);
 				_fstrcpy(ExitMessage, Arg1);
 				GlobalUnlock(hExitMessage);

@@ -846,7 +846,7 @@ void UpdateConnectLabel (HWND hWndDlg)
 BOOL SendMessageToServer(HWND hWnd, LPSTR message)
 {
 	BOOL rtn = FALSE;
-	HANDLE hCmd = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, strlen(message) + 256);
+	HANDLE hCmd = GSSiGlobAlloc(GAIDNO 1444, GMEM_MOVEABLE, strlen(message) + 256);
 	LPSTR pCmd = GlobalLock(hCmd);
 
 	sprintf(pCmd, "$M(SendMessageToServer,%ld,%s)", (long)hWnd, message);

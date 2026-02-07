@@ -150,7 +150,7 @@ long PointsBetweenMP (long Path,double FromMP, double ToMP,LPHANDLE phPoints)
 	}
 	if (!OpenNetLinkAndRef (NetworkID,FALSE,&Opened))
 		return 0;  
-	*phPoints = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,USHRT_MAX);      
+	*phPoints = GSSiGlobAlloc(GAIDNO 2085,GMEM_MOVEABLE,USHRT_MAX);
 	OutPoints = (HPDPOINT)GlobalLock (*phPoints);
 	NetRefsKey.Path = Path;
 	NetRefsKey.MP = FromMP; 
@@ -2244,7 +2244,7 @@ long GetStreetSegsBetweenMPs (HANDLE hDBDestSegs,long OnStreet,STREETMP FromMP,S
 	BOOL	First=TRUE; 
 	NETREFINTKEY	NetRefIntKey;
 	NETREFINTDATA	NetRefIntData;  
-	HANDLE	hSegs=GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,USHRT_MAX); 
+	HANDLE	hSegs=GSSiGlobAlloc(GAIDNO 2086,GMEM_MOVEABLE,USHRT_MAX);
 	LPSTREETSEGMENT	pSegs= (LPSTREETSEGMENT)GlobalLock (hSegs);
     LPGWDHEADER lpGWDHead; 
 	BOOL	Opened=FALSE, Opened2=FALSE;

@@ -1399,7 +1399,7 @@ BOOL SplitGridFile (LPSTR INFile,LPSTR OutFile,int nLevels)
 	BTVar[1].BT_VARLEN=4;
 	BTVar[1].BT_VAROFF=4;
 	BT_CREATE (File, 4, FALSE, 2, 1,(LPBTVARDESC)BTVar,FALSE, 0, 0, FALSE);
-	hLev[0] = GSSiGlobAlloc(GAIDNO 0,GHND,sizeof(HANDLE));
+	hLev[0] = GSSiGlobAlloc(GAIDNO 2037,GHND,sizeof(HANDLE));
 	ph1 = GlobalLock (hLev[0]);
 	*ph1 = BT_OPEN (File, 0, BT_WRITE, 0);
 	while (!BT_FIND (hBTIn,(LPSTR)&GridCellID,pos,BT_ANY,(LPSTR)&Offset))
@@ -1416,7 +1416,7 @@ BOOL SplitGridFile (LPSTR INFile,LPSTR OutFile,int nLevels)
 	nfiles = 2;
 	for (i=1,k=1;i<nLevels;i++,k*=2)
 	{
-		hLev[i] = GSSiGlobAlloc(GAIDNO 0,GHND,nfiles*sizeof(HANDLE));
+		hLev[i] = GSSiGlobAlloc(GAIDNO 2038,GHND,nfiles*sizeof(HANDLE));
 		ph2 = GlobalLock (hLev[i]);
 		for (j=0;j<nfileslast;j++,ph2+=2,ph1++)
 			SplitCoordFile (*ph1,ph2,(ph2+1));
@@ -4320,7 +4320,7 @@ GSSiExitProg (1121);
     CurView->NumMaskPoints = nSavePoly;
     CurView->NumMaskAreaParts = nareas;
     Size = sizeof(MNMXCORD) + (long)CurView->NumMaskPoints * sizeof(DPOINT) + (CurView->NumMaskAreaParts+1) * sizeof(int);   
-    CurView->hMaskArea = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,Size);
+    CurView->hMaskArea = GSSiGlobAlloc(GAIDNO 2039,GMEM_MOVEABLE,Size);
     CurView->MaskAreaRefno = PickList[Item].Refno;
 	pBounds1 = (LPMNMXCORD)GlobalLock (hSavePoly);       
 	pBounds2 = (LPMNMXCORD)GlobalLock (CurView->hMaskArea);       

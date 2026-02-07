@@ -242,7 +242,7 @@ void GetWindowsText(HWND hWnd,LPSTR OutFile)
 	WINPROCESSANDTHREAD wpt;
 
 	wpt.thread = GetWindowThreadProcessId(hWnd, &wpt.process);
-	HANDLE hFile = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, 258);
+	HANDLE hFile = GSSiGlobAlloc(GAIDNO 2003, GMEM_MOVEABLE, 258);
 	LPSTR file = GlobalLock (hFile);
 	strcpy (file, OutFile);
 	GlobalUnlock (hFile);
@@ -972,7 +972,7 @@ GSSiExitProg (1348);
 			{  
 				HFILE Fid;
 				int	Class;
-				HANDLE	hKey=GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,4096);
+				HANDLE	hKey=GSSiGlobAlloc(GAIDNO 2004,GMEM_MOVEABLE,4096);
 				LPSTR	pKey=GlobalLock (hKey);
 				LPSTR	str=pKey+1024;
 
@@ -2329,9 +2329,9 @@ GotCloseFilehSQL:
 					if (pDot && !stricmp (pDot,".gfc"))
 					{
 						int	   lFileDCmp, lFileCmp = GSSifilelength (Fid);
-						HANDLE hFileCmp = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,lFileCmp);
+						HANDLE hFileCmp = GSSiGlobAlloc(GAIDNO 2005,GMEM_MOVEABLE,lFileCmp);
 						LPBYTE pFileCmp = GlobalLock (hFileCmp);
-						HANDLE hFileDCmp = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,1024L*1024L*4);
+						HANDLE hFileDCmp = GSSiGlobAlloc(GAIDNO 2006,GMEM_MOVEABLE,1024L*1024L*4);
 						LPBYTE pFileDCmp = GlobalLock (hFileDCmp);
 
 						BigRead (Fid,pFileCmp,lFileCmp);
@@ -3053,7 +3053,7 @@ GotCloseFilehSQL:
 		{	 
 			if (InInfoBox && !InAtPrint)
 			{
-				HANDLE	hMem = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,1024);
+				HANDLE	hMem = GSSiGlobAlloc(GAIDNO 1998,GMEM_MOVEABLE,1024);
 				LPSTR	pMem = GlobalLock (hMem);
 
 				sprintf (pMem,"$REPORT(%s)",Args);
@@ -3072,7 +3072,7 @@ GotCloseFilehSQL:
 				HWND	hWnd = GetFocus();
 				RECT	TBRect;
 				POINT	ScreenPoint;
-				HANDLE	hTxt=GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,4096);
+				HANDLE	hTxt=GSSiGlobAlloc(GAIDNO 1999,GMEM_MOVEABLE,4096);
 				LPSTR	ptxt=GlobalLock (hTxt);
 				MSG		msg;
 				HANDLE	hSaveScreen;
@@ -4007,7 +4007,7 @@ GotCloseFilehSQL:
 					memSize = max(memSize, maxMemSize);
 					{
 						HFILE Fid = GSSiOpenFile(Arg[1], 0, OF_READ);
-						HANDLE hFile = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, memSize);
+						HANDLE hFile = GSSiGlobAlloc(GAIDNO 2000, GMEM_MOVEABLE, memSize);
 						LPSTR pFile = GlobalLock(hFile);
 						int len = memSize;
 						LPSTR pLoc = pFile;
@@ -4636,7 +4636,7 @@ GotCloseFilehSQL:
 			}
 			else if (!stricmp(Arg[2], "MESSAGE"))
 			{
-				HANDLE hMessage = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, strlen(Arg[3]) + 4);
+				HANDLE hMessage = GSSiGlobAlloc(GAIDNO 2001, GMEM_MOVEABLE, strlen(Arg[3]) + 4);
 				LPSTR pMessage = GlobalLock(hMessage);
 				strcpy(pMessage, Arg[3]);
 				GlobalUnlock(hMessage);
@@ -5234,7 +5234,7 @@ GotCloseFilehSQL:
 			if (nArgs < 3)
 				goto RtnFalse;
 			{
-				HANDLE hFile = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, 1024);
+				HANDLE hFile = GSSiGlobAlloc(GAIDNO 2002, GMEM_MOVEABLE, 1024);
 				LPSTR  pFile = GlobalLock(hFile);
 				LPSTR  pVar = pFile + 300;
 				LPSTR  pVal = pVar + 128;

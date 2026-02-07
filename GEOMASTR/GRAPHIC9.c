@@ -1875,7 +1875,7 @@ BOOL GetMapBounds (LPSTR File,LPMNMXCORD pBounds)
 	
     if (!CurView) 
     {
-    	hCurView = GSSiGlobAlloc(GAIDNO 0,GHND,sizeof(VIEWPORT));
+    	hCurView = GSSiGlobAlloc(GAIDNO 2036,GHND,sizeof(VIEWPORT));
     	CurView = (LPVIEWPORT)GlobalLock (hCurView);
     }
 	ft = MapFileType(File, 0, 0);

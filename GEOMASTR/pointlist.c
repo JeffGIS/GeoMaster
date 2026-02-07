@@ -952,7 +952,7 @@ DestroyAll:
 				double		begpct[2], endpct[2];
 				double		atd, atpct, doff, nextd, nextpct;
 				BOOL		skip;
-				HANDLE		hList = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,(nPointsInList[i]+2)*sizeof(DPOINT));
+				HANDLE		hList = GSSiGlobAlloc(GAIDNO 2111,GMEM_MOVEABLE,(nPointsInList[i]+2)*sizeof(DPOINT));
 				
 				if (frompct < throughpct && throughpct < topct)
 				{
@@ -1160,7 +1160,7 @@ DestroyAll:
 			if (!stricmp (PointListID[i],Arg[2]) && nPointsInList[i]>1)
 			{
 				HPDPOINT	Points = GlobalLock (hPointList[i]);
-				HANDLE		hList = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,nPointsInList[i]*sizeof(DPOINT));
+				HANDLE		hList = GSSiGlobAlloc(GAIDNO 2112,GMEM_MOVEABLE,nPointsInList[i]*sizeof(DPOINT));
 				
 				Points2 = GlobalLock (hList);
 				k = nPointsInList[i] - 1;
@@ -1182,7 +1182,7 @@ DestroyAll:
 			if (!stricmp (PointListID[i],Arg[2]) && nPointsInList[i]>1)
 			{
 				HPDPOINT	Points = GlobalLock (hPointList[i]);
-				HANDLE		hList = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,(nPointsInList[i]+2)*sizeof(DPOINT));
+				HANDLE		hList = GSSiGlobAlloc(GAIDNO 2113,GMEM_MOVEABLE,(nPointsInList[i]+2)*sizeof(DPOINT));
 				int np = 0;
 				Points2 = GlobalLock (hList);
 				double dist = atof(Arg[4]);

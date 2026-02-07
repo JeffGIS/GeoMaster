@@ -1311,7 +1311,7 @@ GSSiExitProg (1350);
 			{
 				int	Level=40960*2;
 				MNMXCORL FileBounds;
-				HANDLE	hFiles=GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,1024);
+				HANDLE	hFiles=GSSiGlobAlloc(GAIDNO 2007,GMEM_MOVEABLE,1024);
 				LPSTR	pFile=GlobalLock (hFiles), pOutFile=pFile+512;
 				char	Subfile='A';
 				HFILE	FidOut;
@@ -1455,7 +1455,7 @@ GSSiExitProg (1350);
 				if (ld > 0)
 
 				GSSiGlobUlFree (&hPNGrid);
-				hPNGrid = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,ld);
+				hPNGrid = GSSiGlobAlloc(GAIDNO 2008,GMEM_MOVEABLE,ld);
 				pDataInit = GlobalLock (hPNGrid);
 				Fid = GSSiOpenFile (Arg[2],0,OF_READ);
 				BigRead (Fid,pDataInit,ld);
@@ -1770,7 +1770,7 @@ GSSiExitProg (1350);
 					int whichat = 0;
 					GSSillseek(fid, 0, SEEK_SET);
 					int lFile = GSSifilelength(fid);
-					HANDLE hFile = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, lFile+4);
+					HANDLE hFile = GSSiGlobAlloc(GAIDNO 2009, GMEM_MOVEABLE, lFile+4);
 					LPSTR pFile = GlobalLock(hFile);
 					LPSTR pAt = pFile, pBeg, pEnd;
 					LPSTR pStart = pFile;
@@ -2234,9 +2234,9 @@ GSSiExitProg (1350);
 				{
 					BTVARDESC	BTVar[2];
 					HANDLE	hBTTemp;
-					HANDLE hTmp = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, MAX_PATH);
+					HANDLE hTmp = GSSiGlobAlloc(GAIDNO 2010, GMEM_MOVEABLE, MAX_PATH);
 					LPSTR pTempFile = GlobalLock(hTmp);
-					HANDLE hLine = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, 4096);
+					HANDLE hLine = GSSiGlobAlloc(GAIDNO 2011, GMEM_MOVEABLE, 4096);
 					LPSTR pLine = GlobalLock(hLine);
 					int offset=0;
 					int pos = BT_FIRST;
@@ -5700,7 +5700,7 @@ GSSiExitProg (1350);
 			if (Fid != HFILE_ERROR)
 			{
 				int	ln = GSSifilelength (Fid);
-				HANDLE	hMem = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,ln+1);
+				HANDLE	hMem = GSSiGlobAlloc(GAIDNO 2012,GMEM_MOVEABLE,ln+1);
 
 				if (hMem)
 				{
@@ -5736,7 +5736,7 @@ GSSiExitProg (1350);
 				int i;
 				char replaceChar='0x1';
 				int	ln = GSSifilelength (Fid);
-				HANDLE	hMem = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,ln+1);
+				HANDLE	hMem = GSSiGlobAlloc(GAIDNO 2013,GMEM_MOVEABLE,ln+1);
 
 				if (*Arg[3])
 					replaceChar = *Arg[3];
@@ -6180,7 +6180,7 @@ GSSiExitProg (1350);
 					HPDPOINT	pPoints=GlobalLock (hPoints), pNewPoints;
 
 					if (!NumNewPolyPoints)
-						hNewPolyPoints = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,USHRT_MAX*sizeof(DPOINT));
+						hNewPolyPoints = GSSiGlobAlloc(GAIDNO 2005,GMEM_MOVEABLE,USHRT_MAX*sizeof(DPOINT));
 
 					pNewPoints=GlobalLock (hNewPolyPoints);
 					for (i=0;i<nlong;i++)
@@ -6261,7 +6261,7 @@ GSSiExitProg (1350);
 			{
 				int loc = GSSillseek (Fid1,0,2);
 				int	ln;
-				HANDLE	hBuf = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,lBuf);
+				HANDLE	hBuf = GSSiGlobAlloc(GAIDNO 2006,GMEM_MOVEABLE,lBuf);
 				LPSTR	pBuf = GlobalLock (hBuf);
 
 				Fid2 = GSSiOpenFile (Arg[2],0,OF_READ);

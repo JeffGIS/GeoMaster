@@ -810,7 +810,7 @@ BOOL LoadTiltFile (LPSTR TINPath)
 	if (FidTr != HFILE_ERROR)
 	{
 		int ln = GSSifilelength (FidTr);
-		HANDLE	hTr = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,ln);
+		HANDLE	hTr = GSSiGlobAlloc(GAIDNO 2065,GMEM_MOVEABLE,ln);
 		LPBYTE pTile = GlobalLock (hTr);
 
 		BigRead (FidTr,pTile,ln);
@@ -1082,7 +1082,7 @@ FoundDepth:
 				if (FidTr != HFILE_ERROR)
 				{
 					int ln = GSSifilelength (FidTr);
-					HANDLE	hTr = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,ln);
+					HANDLE	hTr = GSSiGlobAlloc(GAIDNO 2066,GMEM_MOVEABLE,ln);
 					LPSTR	pTr = GlobalLock (hTr);
 
 					BigRead (FidTr,pTr,ln);
@@ -1112,9 +1112,9 @@ FoundDepth:
 		GSSillseek (FidSTG,0,0);
 		BigWrite (FidSTG,(LPSTR)&tileGraphicsHeader,sizeof(tileGraphicsHeader),-1);
 		GSSillseek (FidSTG,0,0);
-		hMem = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,len);
+		hMem = GSSiGlobAlloc(GAIDNO 206,GMEM_MOVEABLE,len);
 		pMem = GlobalLock (hMem);
-		hMemCmp = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,len+1024);
+		hMemCmp = GSSiGlobAlloc(GAIDNO 2068,GMEM_MOVEABLE,len+1024);
 		pMemCmp = GlobalLock (hMemCmp);
 		BigRead (FidSTG,pMem,len);
 		lcmp = CompressBinaryRecord ((LPBYTE)pMem,pMemCmp,len);
@@ -1374,7 +1374,7 @@ ipt = pPoints[ii];
 void SaveTileGraphics (HFILE Fid,HDC hDC,int type,LPPOINT points,int np)
 {
 #define MAXPOLYSEGS	4096
-	HANDLE hInPt = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,(np+4) * sizeof(BPOINT));
+	HANDLE hInPt = GSSiGlobAlloc(GAIDNO 2069,GMEM_MOVEABLE,(np+4) * sizeof(BPOINT));
 	LPBPOINT pInPt = GlobalLock (hInPt);
 	static	BPOINT	completeTile[4]={0,255,0,0,255,0,255,255};
 	int		nInPt=0, i;
@@ -2580,7 +2580,7 @@ HDIB32 Create8BitBMPSixteenth (HDIB32 dibin,RGBQUAD	*rgbpal, LPLONG plPalette,in
 	inrow  = (iSixteenth / 4) * Height;
 	incol  = (iSixteenth % 4) * Width;
 	lByte2 = Height*Width;
-	hByte2  = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,lByte2*sizeof(short));
+	hByte2  = GSSiGlobAlloc(GAIDNO 2070,GMEM_MOVEABLE,lByte2*sizeof(short));
 	pByte2 = GlobalLock (hByte2);
 	for (row = 0;row < Height; row++)
 	{
@@ -2782,7 +2782,7 @@ BOOL ConvertHBirdImages (LPSTR InName, LPSTR OutName,LPSTR TitleMess,LPSTR Color
 				_fstrcpy (pDot,".gmd");	 
 				if (FidBIN != HFILE_ERROR)
 				{
-					HANDLE	hMem=GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,pMAPFILE->Size);
+					HANDLE	hMem=GSSiGlobAlloc(GAIDNO 2071,GMEM_MOVEABLE,pMAPFILE->Size);
 					HPSTR	pMem=GlobalLock (hMem);
 					
 					GSSillseek2 (FidBIN,pMAPFILE->Loc,0);
@@ -2833,7 +2833,7 @@ BOOL ConvertHBirdImages (LPSTR InName, LPSTR OutName,LPSTR TitleMess,LPSTR Color
 								LPBITMAPINFOHEADER	pbmInfoHeader;
 
 								l = GSSiLength (OutFile2);
-								hMem = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,l);
+								hMem = GSSiGlobAlloc(GAIDNO 2072,GMEM_MOVEABLE,l);
 								pMem = GlobalLock (hMem);
 								Fid  = GSSiOpenFile (OutFile2,0,OF_READ);
 								BigRead (Fid,pMem,l);
@@ -2844,9 +2844,9 @@ BOOL ConvertHBirdImages (LPSTR InName, LPSTR OutName,LPSTR TitleMess,LPSTR Color
 								l = pbmFileHeader->bfSize;
 								memset (pbmFileHeader,0,sizeof(BITMAPFILEHEADER));//zero out for compression since not used on HB side
 								memset (pbmInfoHeader,0,sizeof(BITMAPINFOHEADER));//zero out for compression since not used on HB side
-								hMembin = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,l+1024);
+								hMembin = GSSiGlobAlloc(GAIDNO 2073,GMEM_MOVEABLE,l+1024);
 								pMembin = GlobalLock (hMembin);
-								hMemCmp = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,l+1024);
+								hMemCmp = GSSiGlobAlloc(GAIDNO 2074,GMEM_MOVEABLE,l+1024);
 								pMemCmp = GlobalLock (hMemCmp);
 								lMemCmp = CompressByteArray (pMem,pMemCmp,l);
 								lbin = CompressBinaryRecord (pMemCmp,pMembin,lMemCmp); 

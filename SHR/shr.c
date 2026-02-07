@@ -560,7 +560,7 @@ BOOL ApplyJournal (LPSTR FileName)
 			else if (JournalHeader.OrigFileLength < 0) //file created
 			{
 				HANDLE	FidFile = OpenFileGM(FileName,&OFStruct,OF_CREATE);
-				HANDLE	hJournalRecord = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,USHRT_MAX);
+				HANDLE	hJournalRecord = GSSiGlobAlloc(GAIDNO 1427,GMEM_MOVEABLE,USHRT_MAX);
 				LPBYTE	pJournalRecord = GlobalLock (hJournalRecord);
 				int		nread;
 
@@ -606,7 +606,7 @@ BOOL ApplyJournal (LPSTR FileName)
 					int	BytesToRead = JournalHeader.BlockSize*pIndexRecord->NumBlocks;
 					if (BytesToRead > 0)
 					{
-						HANDLE	hJournalRecord = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,BytesToRead);
+						HANDLE	hJournalRecord = GSSiGlobAlloc(GAIDNO 1428,GMEM_MOVEABLE,BytesToRead);
 						LPBYTE	pJournalRecord = GlobalLock (hJournalRecord);
 
 						llFileSeek (FidJnl,pIndexRecord->JournalFileOffset,0);
@@ -1240,7 +1240,7 @@ int GetLongPathFromBuffer (LPSTR Name,short MaxLen)
 	{
 		if (!MaxLen)
 			return 0;
-		hGLPBuffer = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,USHRT_MAX);
+		hGLPBuffer = GSSiGlobAlloc(GAIDNO 1429,GMEM_MOVEABLE,USHRT_MAX);
 		pGLPBuffer = GlobalLock (hGLPBuffer);
 Top:
 		lGLPBuffer = 4;
@@ -8154,7 +8154,7 @@ BOOL ConvertToMemFile (HFILE Fid,int MaxMem)
 	case OF_READ:
 		OpenFilePosition[Fid] = GSSillseek (Fid,0,1);
 		MaxMem = GSSillseek (Fid,0,2);
-		OpenFileHandle[Fid] = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,MaxMem);
+		OpenFileHandle[Fid] = GSSiGlobAlloc(GAIDNO 1430,GMEM_MOVEABLE,MaxMem);
 		if (!OpenFileHandle[Fid])
 		{
 			GSSillseek (Fid,OpenFilePosition[Fid],0);
@@ -8171,7 +8171,7 @@ BOOL ConvertToMemFile (HFILE Fid,int MaxMem)
 	case OF_CREATE:
 	case OF_READWRITE:
 		OpenFilePosition[Fid] = GSSillseek (Fid,0,1);
-		OpenFileHandle[Fid] = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,MaxMem);
+		OpenFileHandle[Fid] = GSSiGlobAlloc(GAIDNO 1431,GMEM_MOVEABLE,MaxMem);
 		if (!OpenFileHandle[Fid])
 		{
 			GSSillseek (Fid,OpenFilePosition[Fid],0);
@@ -9104,7 +9104,7 @@ BOOL CopyFileToCache (LPSTR ToFileIN, LPSTR FromFileIN)
 	}
 	if (TraceOn)
 	{
-		HANDLE hMem = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, 1024);
+		HANDLE hMem = GSSiGlobAlloc(GAIDNO 1432, GMEM_MOVEABLE, 1024);
 		LPSTR pMem = (LPSTR)GlobalLock(hMem);
 		int st = rtn;
 		if (!st)
@@ -13013,7 +13013,7 @@ GSSiExitProg (405);
 
 BOOL PolylineF(HDC hDC, LPFPOINT pt, int npt)
 {
-	HANDLE hPoints = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, npt * sizeof(POINT)+4);
+	HANDLE hPoints = GSSiGlobAlloc(GAIDNO 1434, GMEM_MOVEABLE, npt * sizeof(POINT)+4);
 	LPPOINT Points = GlobalLock(hPoints);
 	BOOL rtn;
 
@@ -13026,7 +13026,7 @@ BOOL PolylineF(HDC hDC, LPFPOINT pt, int npt)
 
 BOOL PolygonF(HDC hDC, LPFPOINT pt, int npt)
 {
-	HANDLE hPoints = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, npt * sizeof(POINT)+4);
+	HANDLE hPoints = GSSiGlobAlloc(GAIDNO 1435, GMEM_MOVEABLE, npt * sizeof(POINT)+4);
 	LPPOINT Points = GlobalLock(hPoints);
 	BOOL rtn;
 

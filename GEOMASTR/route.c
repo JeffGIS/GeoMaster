@@ -966,7 +966,7 @@ BOOL AddContourSplitLines (LPMNMXCORD pBounds,int nGrid)
 	double		GridWidth = maxd / nGrid, GridHeight;
 	int			nGridCols = BoundsWidth (pBounds) / GridWidth + 1;
 	int			nGridRows = BoundsHeight (pBounds) / GridWidth + 1;
-	HANDLE		hPnts = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,2*sizeof(DPOINT));
+	HANDLE		hPnts = GSSiGlobAlloc(GAIDNO 2125,GMEM_MOVEABLE,2*sizeof(DPOINT));
 	int			irow, icol;
 	int			SymNum = GetSymbolNum ("SPLITLINE");
 	int			SymNum2 = GetSymbolNum ("SPLITLINE2");
@@ -1504,7 +1504,7 @@ BOOL SplitHighlightedPolys (int MaxPolyPoints)
 							NumNewPoints = RemPoints / 2;
 						else
 							NumNewPoints = MaxPolyPoints;
-						hNewPoly = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,((long)NumNewPoints)*sizeof(DPOINT)); 
+						hNewPoly = GSSiGlobAlloc(GAIDNO 2126,GMEM_MOVEABLE,((long)NumNewPoints)*sizeof(DPOINT));
 						pNewPoints = (HPDPOINT)GlobalLock (hNewPoly);
 						hmemmove ((HPSTR)pNewPoints,(HPSTR)pOrigPoints,((long)NumNewPoints)*sizeof(DPOINT));
 						GlobalUnlock (hNewPoly);

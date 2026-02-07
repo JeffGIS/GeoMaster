@@ -919,7 +919,7 @@ HANDLE STRANPoints (int id,LPDPOINT FromPt,LPDPOINT ToPt,int nPt,LPFLOAT pRSQMIN
 {
 	HANDLE hTran; 
 	//double	XFROM[4],YFROM[4],XTO[4],YTO[4]; 
-	HANDLE hFromTo = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, nPt * 4 * sizeof(double));
+	HANDLE hFromTo = GSSiGlobAlloc(GAIDNO 1462, GMEM_MOVEABLE, nPt * 4 * sizeof(double));
 	LPDOUBLE XFROM = GlobalLock(hFromTo);
 	LPDOUBLE YFROM = &XFROM[nPt];
 	LPDOUBLE XTO = &YFROM[nPt];

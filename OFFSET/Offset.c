@@ -1808,7 +1808,7 @@ GSSiExitProg (715);
 		     TestPoint  = BasePtToWinPt(&BasePoint);
 		  }
 		  {
-			  HANDLE hDP = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,USHRT_MAX);
+			  HANDLE hDP = GSSiGlobAlloc(GAIDNO 2091,GMEM_MOVEABLE,USHRT_MAX);
 			  LPDPOINT	 pPointD = GlobalLock (hDP);
 			  long	ndp=0;
               st =  CURVPLT(OutArea->Lines, &ndp,  &pPointD);

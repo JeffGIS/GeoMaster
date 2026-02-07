@@ -2137,7 +2137,7 @@ BOOL ExecuteLocationFailedMacro(LPSTR locatedTo,LPSTR errorMess)
 	GSSiEnterProg(978);
 #endif
 	{
-		HANDLE hStr = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, 4096);
+		HANDLE hStr = GSSiGlobAlloc(GAIDNO 2034, GMEM_MOVEABLE, 4096);
 		LPSTR  pStr = GlobalLock(hStr);
 		char   file[MAX_PATH];
 		BOOL	rtn = FALSE;
@@ -3163,7 +3163,7 @@ GSSiExitProg (991);
 			_fstrcpy (pBS,"\\images.gmd");
         if (!hTempImageFile)
         {
-        	hTempImageFile = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,256);
+        	hTempImageFile = GSSiGlobAlloc(GAIDNO 2035,GMEM_MOVEABLE,256);
         	pName = GlobalLock (hTempImageFile); 
        		GSSiGetTempFileName (0,"gml",0,pName);
 			strcpy (pName,"c:\\temp\\mapimage.bmp");

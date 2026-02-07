@@ -453,7 +453,7 @@ HANDLE LoadColorMap (LPSTR Name,LPSHORT pnPalColors)
 	*pnPalColors = 0;
 	if (Fid == HFILE_ERROR)
 		return 0;
-	hMapColors = GSSiGlobAlloc(GAIDNO 0,GHND,256*sizeof(COLORREF));
+	hMapColors = GSSiGlobAlloc(GAIDNO 2040,GHND,256*sizeof(COLORREF));
     pMapColors = (RGBQUAD *)GlobalLock (hMapColors);
 	BigRead (Fid,(HPSTR)pnPalColors,2);
 	BigRead (Fid,(HPSTR)MapColors,256*sizeof(COLORREF)); 
@@ -520,7 +520,7 @@ BOOL CreateColorMap (LPSTR Name)
 	
 	if (Fid == HFILE_ERROR)
 		return FALSE;     
-	hMapColors = GSSiGlobAlloc(GAIDNO 0,GHND,256*sizeof(COLORREF));
+	hMapColors = GSSiGlobAlloc(GAIDNO 2041,GHND,256*sizeof(COLORREF));
 	AddColorToMap (CurView->BackGroundColor,&NumMapColors,hMapColors);
 	CreateRandomBrushes (CurView,0);
 	for (i=0;i<NumRandomColors;i++)
@@ -1133,7 +1133,7 @@ BOOL SaveMemMap (void)
 		    
 		    sprintf (pDot,"%i.bin",MemMapSubDir);
    			{
-				HANDLE	hMem=GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,sizeMM);
+				HANDLE	hMem=GSSiGlobAlloc(GAIDNO 2042,GMEM_MOVEABLE,sizeMM);
 				HPSTR	pMem=GlobalLock (hMem);
 				HFILE	FidBIN=GSSiOpenFile (MemMapName,0,OF_READWRITE);
 				DWORD	loc;
@@ -2431,7 +2431,7 @@ BOOL MapImageCityLakeNameExport (LPSTR PointFile,LPSTR Type,LPSTR OutFile,long G
 	int		i, FirstIndex, RecSize, nCellRecs=0,ii,maxname=0;
 	char	GridName[16];
 	BOOL	Done = FALSE,limitReached = FALSE;
-	HANDLE	hGridDef = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,SHRT_MAX);
+	HANDLE	hGridDef = GSSiGlobAlloc(GAIDNO 2043,GMEM_MOVEABLE,SHRT_MAX);
 	LPSTR	pGridDef = GlobalLock (hGridDef);
 	LPCITYLAKENAMEOUTREC 	pMapPointOutRec;
 	BOOL	Google = FALSE;

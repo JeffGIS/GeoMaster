@@ -1009,7 +1009,7 @@ BOOL FAR PASCAL DeconstructMsgProc (HWND hWndDlg, UINT message, WPARAM wParam, L
 		 NumItem = 0;
 		 Curloc  = 0;
 		 CurCharLen = 0;
-		 hMem = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,len+1024);
+		 hMem = GSSiGlobAlloc(GAIDNO 2114,GMEM_MOVEABLE,len+1024);
 		 pMem = (LPSTR)GlobalLock(hMem);
 
 		 BigRead (Fid,pMem,len);
@@ -3952,7 +3952,7 @@ BOOL ReadPrintSetupData (HFILE Fid)
 	GSSilread (Fid,&Length,2);
 	FreePrintDlg ();
 	if (!hPDChunk)
-		hPDChunk= GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,sizeof(PRINTDLG));
+		hPDChunk= GSSiGlobAlloc(GAIDNO 2115,GMEM_MOVEABLE,sizeof(PRINTDLG));
 	lpPDChunk = (LPPRINTDLG) GlobalLock (hPDChunk);
 	GSSilread (Fid,lpPDChunk,Length);
 	GSSilread (Fid,&Length,2); 
@@ -3960,7 +3960,7 @@ BOOL ReadPrintSetupData (HFILE Fid)
     IgnoreLock = TRUE;
 	if (Length)
 	{ 
-		lpPDChunk->hDevMode = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,Length);
+		lpPDChunk->hDevMode = GSSiGlobAlloc(GAIDNO 211,GMEM_MOVEABLE,Length);
 		pDevMode = (LPDEVMODE)GlobalLock (lpPDChunk->hDevMode);
 		GSSilread (Fid,pDevMode,Length);
 		GlobalUnlock (lpPDChunk->hDevMode);
@@ -3968,7 +3968,7 @@ BOOL ReadPrintSetupData (HFILE Fid)
 	GSSilread (Fid,&Length,2); 
 	if (Length)
 	{ 
-		lpPDChunk->hDevNames = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,Length);
+		lpPDChunk->hDevNames = GSSiGlobAlloc(GAIDNO 2117,GMEM_MOVEABLE,Length);
 		pDevNames = (LPDEVNAMES)GlobalLock (lpPDChunk->hDevNames);
 		GSSilread (Fid,pDevNames,Length);
 		GlobalUnlock (lpPDChunk->hDevNames);
@@ -4056,7 +4056,7 @@ void DisplayVirtualPrintAreas (void)
 	
 	if (!hVirtualPrintFile)
 	{
-		hVirtualPrintFile = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,256);
+		hVirtualPrintFile = GSSiGlobAlloc(GAIDNO 2118,GMEM_MOVEABLE,256);
 		pFile = GlobalLock (hVirtualPrintFile);
 		GSSiGetTempFileName(0,"gmb",0,pFile); 
 	}

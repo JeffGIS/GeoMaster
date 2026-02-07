@@ -1489,7 +1489,7 @@ BOOL OpenDGNCellLibrary (LPSTR InName)
 	hDGNCell = DGN7Open (Name,0,0);  
 	if (!hDGNCell)
 		return FALSE;
-	hElement = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,MaxDGNElementSize);
+	hElement = GSSiGlobAlloc(GAIDNO 1944,GMEM_MOVEABLE,MaxDGNElementSize);
 	pElement = (LPDGNElementCore)GlobalLock (hElement);
 	while (DGNLibReadElement (hDGNCell,pElement,MaxDGNElementSize,0,&FillColor,&NumAttributes,Attributes))
 	{

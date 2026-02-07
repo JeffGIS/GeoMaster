@@ -664,7 +664,7 @@ BOOL DrawDelayedText (void)
 					BigRead (CurTheme->FidDelayedText,(HPSTR)&x,sizeof(int));
 					BigRead (CurTheme->FidDelayedText,(HPSTR)&y,sizeof(int));
 					BigRead (CurTheme->FidDelayedText,(HPSTR)&ltext,sizeof(short));
-					hMem = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,ltext+1);
+					hMem = GSSiGlobAlloc(GAIDNO 1968,GMEM_MOVEABLE,ltext+1);
 					Text = GlobalLock (hMem);
 					BigRead (CurTheme->FidDelayedText,Text,ltext);  
 					Text[ltext] = 0;					
@@ -674,7 +674,7 @@ BOOL DrawDelayedText (void)
 				case DT_CREATEFONT: 
 					SelectObject (CurView->hDC,GetStockObject(SYSTEM_FONT)); 
 					GSSiDeleteObject (&CurTheme->hDelayedFont);
-					hMem = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,sizeof(LOGFONT));
+					hMem = GSSiGlobAlloc(GAIDNO 1969,GMEM_MOVEABLE,sizeof(LOGFONT));
 					pLogFont = (LPLOGFONT)GlobalLock (hMem);
 					BigRead (CurTheme->FidDelayedText,(HPSTR)pLogFont,sizeof(LOGFONT));
 					pLogFont->lfOrientation = pLogFont->lfEscapement;
@@ -1861,7 +1861,7 @@ BOOL CreateSEGBETWEEN_INT_MATCHTable (LPSTR File,char OrigKeyType,short OrigKeyL
 	char	DefStr3[]="OnStreet(C32),FromStreet(C32),ToStreet(C32),Symbol(C32),OriginalKey(%c%i)";
 	HANDLE	hDB;
 	LPGWDHEADER lpGWDHead;  
-	HANDLE	hMem=GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,4096);
+	HANDLE	hMem=GSSiGlobAlloc(GAIDNO 1970,GMEM_MOVEABLE,4096);
 	LPSTR	DefStr=GlobalLock (hMem); 
 	LPSTR	Format=DefStr+2048;
 	BOOL	rtn;

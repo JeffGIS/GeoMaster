@@ -169,7 +169,7 @@ BOOL FAR PASCAL GMNGRID1DlgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARA
 			Delim = *DLTDelim; 
 			{
 				int		ivar, bu, row=0;
-				HANDLE	hTabStops = GSSiGlobAlloc(GAIDNO 0,GHND,sizeof(int)*nDLTvar);
+				HANDLE	hTabStops = GSSiGlobAlloc(GAIDNO 1467,GHND,sizeof(int)*nDLTvar);
 				LPINT	TabStops = GlobalLock (hTabStops);
 
 				bu = GetDialogBaseUnits ();

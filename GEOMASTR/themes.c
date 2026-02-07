@@ -388,7 +388,7 @@ BOOL PickThemeClass (int iclass,POINT MousePoint)
 {   
 	if (CurTheme->NumCols == MAX_THEME_CLASSES)
 	{ 
-		HANDLE	hPoints=GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,360*sizeof(POINT));
+		HANDLE	hPoints=GSSiGlobAlloc(GAIDNO 1447,GMEM_MOVEABLE,360*sizeof(POINT));
 		LPPOINT	Points = (LPPOINT)GlobalLock (hPoints);
 		short	nPnts;
 		BOOL	rtn;
@@ -407,7 +407,7 @@ void DrawUnSelectedClass (int iclass,RECT ClassClrBox)
 {
 	if (CurTheme->NumCols == MAX_THEME_CLASSES)
 	{ 
-		HANDLE	hPoints=GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,360*sizeof(POINT));
+		HANDLE	hPoints=GSSiGlobAlloc(GAIDNO 1445,GMEM_MOVEABLE,360*sizeof(POINT));
 		LPPOINT	Points = (LPPOINT)GlobalLock (hPoints);
 		short	nPnts;
 		LOGBRUSH    NDB;
@@ -1955,7 +1955,7 @@ void ProcessShowValMacro (BOOL Begin)
 {   
 	if (*CurTheme->ShowValMacro)
 	{
-		HANDLE	hMem=GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,1024);
+		HANDLE	hMem=GSSiGlobAlloc(GAIDNO 1446,GMEM_MOVEABLE,1024);
 		LPSTR	pMacro = GlobalLock (hMem);
 		
 		sprintf (pMacro,"$MACRO(%s,%i)",CurTheme->ShowValMacro,Begin);

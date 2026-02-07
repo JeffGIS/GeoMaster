@@ -339,7 +339,7 @@ void DisplayCityNames(void)
 	int		CityTextVJust=1;
 	int		nDisplayed=0;
 	RECT	textRect, fullRect;
-	HANDLE	hTestRect = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,(CurTheme->CityUniqueInc+1)*sizeof(RECT));
+	HANDLE	hTestRect = GSSiGlobAlloc(GAIDNO 1448,GMEM_MOVEABLE,(CurTheme->CityUniqueInc+1)*sizeof(RECT));
 	LPRECT	pTestRect = GlobalLock (hTestRect);
 	int		nTestRect=0, i;
 	double	maxPop = CityPopConvert (CurTheme->MaxCityPopOnScreen);
@@ -1305,7 +1305,7 @@ SetClassChar:
 				
 				if (CurrentMidPoint (Type,Just,&MidPointAZ,&Length,&Height,TRUE, &MinMax,&WinPoint,&ShowVal.WPoint,&n,1,0,0)) 
 				{   
-					HANDLE hStr = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,1024);
+					HANDLE hStr = GSSiGlobAlloc(GAIDNO 1449,GMEM_MOVEABLE,1024);
 					LPSTR	str=GlobalLock (hStr);
 
 					ShowVal.pTheme = CurTheme;
@@ -4496,7 +4496,7 @@ void ProcessDataPassBeginMacro(void)
 {
 	if (*CurTheme->BeginDataPassMacro)
 	{
-		HANDLE hMem = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, 4096);
+		HANDLE hMem = GSSiGlobAlloc(GAIDNO 1450, GMEM_MOVEABLE, 4096);
 		LPSTR pMem = GlobalLock(hMem);
 
 		strcpy(pMem, CurTheme->BeginDataPassMacro);
@@ -4509,7 +4509,7 @@ void ProcessDisplayPassBeginMacro(void)
 {
 	if (*CurTheme->BeginDisplayMacro)
 	{
-		HANDLE hMem = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, 4096);
+		HANDLE hMem = GSSiGlobAlloc(GAIDNO 1451, GMEM_MOVEABLE, 4096);
 		LPSTR pMem = GlobalLock(hMem);
 
 		strcpy(pMem, CurTheme->BeginDisplayMacro);
@@ -4522,7 +4522,7 @@ void ProcessDisplayPassEndMacro(void)
 {
 	if (*CurTheme->EndDisplayMacro)
 	{
-		HANDLE hMem = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, 4096);
+		HANDLE hMem = GSSiGlobAlloc(GAIDNO 1452, GMEM_MOVEABLE, 4096);
 		LPSTR pMem = GlobalLock(hMem);
 		int saveVPID = CurView->ID;
 
@@ -4539,7 +4539,7 @@ void ProcessGraphicsAttributeMacro(void)
 {
 	if (*CurTheme->GraphicsAttributesMacro)
 	{
-		HANDLE hMem = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, 4096);
+		HANDLE hMem = GSSiGlobAlloc(GAIDNO 1453, GMEM_MOVEABLE, 4096);
 		LPSTR pMem = GlobalLock(hMem);
 
 		strcpy(pMem, CurTheme->GraphicsAttributesMacro);

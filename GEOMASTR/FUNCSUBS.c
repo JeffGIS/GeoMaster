@@ -302,7 +302,7 @@ BOOL FixAreaToOutfile(LPSTR OutFile, LPMNMXCORD pBounds,int numLines, FIXLINE *l
 	if (!OpenMap(CurView->hWnd, 0))
 		return FALSE;
 	AddToSymList(SymNum, &NumSyms, &hSymDesc);
-	hPoints = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, 2 * sizeof(DPOINT));
+	hPoints = GSSiGlobAlloc(GAIDNO 1913, GMEM_MOVEABLE, 2 * sizeof(DPOINT));
 	nPoints = 2;
 	for (i = 0; i < numLines; i++)
 	{
@@ -768,7 +768,7 @@ BOOL RunForAll(int nArgs, LPSTR *Arg, LPSTR OutLoc, LPBREAKPOINT pBrkPt, int bpO
 		char tempFile[MAX_PATH], value[130]={0};
 		BTVARDESC	BTVar[1]; 
 		HANDLE		hBT; 
-		HANDLE		hSTR = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,4096);
+		HANDLE		hSTR = GSSiGlobAlloc(GAIDNO 1914,GMEM_MOVEABLE,4096);
 		LPSTR		str = GlobalLock (hSTR);
 		BOOL		rtn=FALSE;   
 		int			count, lenValue=128;
@@ -1399,7 +1399,7 @@ void ProjectionFunction (LPSTR Arg1,LPSTR Arg2,LPSTR Arg3,LPSTR Arg4,LPSTR Arg5,
 		if (fid != HFILE_ERROR)
 		{
 			int l = GSSifilelength(fid);
-			HANDLE hMem = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, l + 4096 + 4);
+			HANDLE hMem = GSSiGlobAlloc(GAIDNO 1915, GMEM_MOVEABLE, l + 4096 + 4);
 			LPSTR pMem = GlobalLock(hMem);
 			LPSTR pMemOut = &pMem[l + 1];
 			BigRead(fid, pMem, l);
@@ -5803,7 +5803,7 @@ int GetOpenFileChecksum2 (HFILE Fid,int frombyte,int tobyte)
 	cl = _llseek (Fid,0,2);
 	if (!frombyte && !tobyte)
 	{
-		hMem = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,cl);
+		hMem = GSSiGlobAlloc(GAIDNO 1916,GMEM_MOVEABLE,cl);
 		prec = GlobalLock (hMem);
 		_lread (Fid,prec,cl);
 		checksum = ComputeCheckSum (prec,cl);
@@ -5814,7 +5814,7 @@ int GetOpenFileChecksum2 (HFILE Fid,int frombyte,int tobyte)
 		if (frombyte < cl && frombyte <= tobyte)
 		{
 			cl = min (cl,tobyte-frombyte+1);
-			hMem = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,cl);
+			hMem = GSSiGlobAlloc(GAIDNO 1917,GMEM_MOVEABLE,cl);
 			prec = GlobalLock (hMem);
 			_llseek (Fid,frombyte,0);
 			_lread (Fid,prec,cl);
@@ -5826,7 +5826,7 @@ int GetOpenFileChecksum2 (HFILE Fid,int frombyte,int tobyte)
 	{
 		cl = min (cl,-frombyte);
 		frombyte = _llseek (Fid,-cl,2);
-		hMem = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,cl);
+		hMem = GSSiGlobAlloc(GAIDNO 1918,GMEM_MOVEABLE,cl);
 		prec = GlobalLock (hMem);
 		_lread (Fid,prec,cl);
 		checksum = ComputeCheckSum (prec,cl);
@@ -5848,7 +5848,7 @@ int GetOpenFileChecksum (HFILE Fid,int frombyte,int tobyte)
 	cl = GSSifilelength (Fid);
 	if (!frombyte && !tobyte)
 	{
-		hMem = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,cl);
+		hMem = GSSiGlobAlloc(GAIDNO 1919,GMEM_MOVEABLE,cl);
 		prec = GlobalLock (hMem);
 		BigRead (Fid,prec,cl);
 		checksum = ComputeCheckSum (prec,cl);
@@ -5859,7 +5859,7 @@ int GetOpenFileChecksum (HFILE Fid,int frombyte,int tobyte)
 		if (frombyte < cl && frombyte <= tobyte)
 		{
 			cl = min (cl,tobyte-frombyte+1);
-			hMem = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,cl);
+			hMem = GSSiGlobAlloc(GAIDNO 1920,GMEM_MOVEABLE,cl);
 			prec = GlobalLock (hMem);
 			GSSillseek (Fid,frombyte,0);
 			BigRead (Fid,prec,cl);
@@ -5871,7 +5871,7 @@ int GetOpenFileChecksum (HFILE Fid,int frombyte,int tobyte)
 	{
 		cl = min (cl,-frombyte);
 		frombyte = GSSillseek (Fid,-cl,2);
-		hMem = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,cl);
+		hMem = GSSiGlobAlloc(GAIDNO 1908,GMEM_MOVEABLE,cl);
 		prec = GlobalLock (hMem);
 		BigRead (Fid,prec,cl);
 		checksum = ComputeCheckSum (prec,cl);
@@ -5899,7 +5899,7 @@ int GetFileList (LPSTR OutFile,BOOL New,LPSTR SearchLoc,LPSTR WildCard,BOOL Sear
      HFILE	OutFileFID, Fid;  
      long	TotFiles=0;
      HCURSOR	hcurSave; 
-	 HANDLE	hStr=GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,4096);
+	 HANDLE	hStr=GSSiGlobAlloc(GAIDNO 1908,GMEM_MOVEABLE,4096);
 	 LPSTR	str = GlobalLock (hStr);
 	 BOOL isSLTFile = FALSE;
 	 sqlite3 *db;
@@ -7733,9 +7733,9 @@ BOOL CreateCompressedFenceFromBitmap (LPSTR File,HDIB32 hDib,LPSTR cColors)
 		Fid = GSSiOpenFile (File,0,OF_CREATE);
 		if (Fid != HFILE_ERROR)
 		{
-			HANDLE	hOutArray = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,USHRT_MAX);
+			HANDLE	hOutArray = GSSiGlobAlloc(GAIDNO 1910,GMEM_MOVEABLE,USHRT_MAX);
 			LPBYTE	pOutArray = GlobalLock (hOutArray);
-			HANDLE	hLastRow = GSSiGlobAlloc(GAIDNO 0,GHND,USHRT_MAX);
+			HANDLE	hLastRow = GSSiGlobAlloc(GAIDNO 1911,GHND,USHRT_MAX);
 			LPBYTE	pLastRow = GlobalLock (hLastRow);
 
 			for (irow = 0;irow < nrow;irow++)
@@ -7790,7 +7790,7 @@ BOOL CreateCompressedFenceFromBitmap (LPSTR File,HDIB32 hDib,LPSTR cColors)
 			rtn = TRUE;
 			lFile = GSSillseek (Fid,0,2);
 			GSSillseek (Fid,0,0);
-			hFile = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,lFile);
+			hFile = GSSiGlobAlloc(GAIDNO 1912,GMEM_MOVEABLE,lFile);
 			pFile = GlobalLock (hFile);
 			BigRead (Fid,pFile,lFile);
 			GSSiClose2 (&Fid);

@@ -3939,7 +3939,7 @@ GSSiExitProg (101);
 	 		BigWrite (FidConfig,(HPSTR)&id,2,-1);  
 	 		BigWrite (FidConfig,(HPSTR)&CfgImageFormat,2,-1);  
 	 		BigWrite (FidConfig,(HPSTR)&CfgImageLen,4,-1); 
-			hTempMem = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,CfgImageLen);
+			hTempMem = GSSiGlobAlloc(GAIDNO 1952,GMEM_MOVEABLE,CfgImageLen);
 	 		pCfgImage = GlobalLock (hTempMem);
 			BigRead (FidTemp,pCfgImage,CfgImageLen);
 			GSSiClose2 (&FidTemp);
@@ -5018,7 +5018,7 @@ long BoundsDisplayRead (LPVOID *lpV,int Fid)
 	iread += GSSilread (Fid,&BV,sizeof(BV));
 	if (BV.version == 1)
 	{
-		HANDLE	hMem=GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,SizeBOUNDSDISPLAY16);
+		HANDLE	hMem=GSSiGlobAlloc(GAIDNO 1953,GMEM_MOVEABLE,SizeBOUNDSDISPLAY16);
 		LPSTR	pbd16 = GlobalLock (hMem);
 
 		iread += GSSilread (Fid,pbd16,(UINT)BV.nbytes-6);

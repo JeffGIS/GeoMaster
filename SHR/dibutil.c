@@ -3045,7 +3045,7 @@ BOOL SplitBitmap (LPSTR Infile,int numRows,int numCols,LPSTR OutDir,LPSTR OutExt
 		GSSillseek (FidIn,ImageOffset,0);
 		CreateStatusWind (hWndMain,1,"Split Bitmap");
 
-		hRow = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,origRowLen);
+		hRow = GSSiGlobAlloc(GAIDNO 1943,GMEM_MOVEABLE,origRowLen);
 		pRow = GlobalLock (hRow);
 		for (iRow=0;iRow<numRows;iRow++)
 		{

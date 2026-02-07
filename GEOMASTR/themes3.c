@@ -642,7 +642,7 @@ BOOL DisplayPointInAreaThemes (short CurrentVPID)
         	    PointTheme=pViewports[CurrentVPID-1]->pTheme;
 	        	if (!CurTheme->Pass)
 	        	{   
-	        		HANDLE		hAreas=GSSiGlobAlloc(GAIDNO 0,GHND,sizeof(THEMEAREAHEADER)*(CurTheme->NumAreas+1));
+	        		HANDLE		hAreas=GSSiGlobAlloc(GAIDNO 1456,GHND,sizeof(THEMEAREAHEADER)*(CurTheme->NumAreas+1));
 	        		LPTHEMEAREAHEADER	pAreaHeader=(LPTHEMEAREAHEADER)GlobalLock (hAreas);    
 	        		UINT		iarea;   
 	        		HANDLE		hMaskAccelerator=0;      
@@ -661,7 +661,7 @@ BOOL DisplayPointInAreaThemes (short CurrentVPID)
 		        		{ 
 		        			BigRead (CurTheme->FidAreas,(HPSTR)&pAreaHeader[iarea].Refno,4);
 		        			BigRead (CurTheme->FidAreas,(HPSTR)&pAreaHeader[iarea].NumPoints,4);  
-		        			pAreaHeader[iarea].hPoints = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,pAreaHeader[iarea].NumPoints * sizeof(DPOINT));
+		        			pAreaHeader[iarea].hPoints = GSSiGlobAlloc(GAIDNO 1454,GMEM_MOVEABLE,pAreaHeader[iarea].NumPoints * sizeof(DPOINT));
 		        			pAreaPoints = (HPDPOINT)GlobalLock (pAreaHeader[iarea].hPoints);
 		        			BigRead (CurTheme->FidAreas,(HPSTR)pAreaPoints,pAreaHeader[iarea].NumPoints * sizeof(DPOINT));   
 				      		GlobalUnlock (pAreaHeader[iarea].hPoints);
@@ -2181,7 +2181,7 @@ GSSiExitProg (620);
 			
 			  case IDC_SHOWDATA:
 			  {
-					  HANDLE	hStr = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,4096*2);
+					  HANDLE	hStr = GSSiGlobAlloc(GAIDNO 1455,GMEM_MOVEABLE,4096*2);
 					  LPSTR pstr=GlobalLock (hStr);
 
 					if (FirstShow)

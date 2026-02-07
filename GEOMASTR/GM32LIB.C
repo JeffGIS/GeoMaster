@@ -754,7 +754,7 @@ HANDLE  BMPFromEXT (LPSTR ImageFile)
 
    	{   
    		DWORD	Size=16000000L;
-		HANDLE	hBMP = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,Size); 
+		HANDLE	hBMP = GSSiGlobAlloc(GAIDNO 2014,GMEM_MOVEABLE,Size);
 		HPSTR	ToMem = (HPSTR)GlobalLock (hBMP);
 		
    		st = GMFIBMPFromEXT (ImageFile,ToMem,&Size);
@@ -1140,7 +1140,7 @@ int Plot3PointCurve (HDC hDC,LPDPOINT pPC,LPDPOINT pPOC,LPDPOINT pPT)
 DWORD DrawLineWithFlatEndF(HDC hDC, DWORD npt, HPFPOINT FPoints, DWORD Width, COLORREF Color)
 {
 	long rtn;
-	HANDLE hPoints = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, npt * sizeof(POINT)+4);
+	HANDLE hPoints = GSSiGlobAlloc(GAIDNO 2015, GMEM_MOVEABLE, npt * sizeof(POINT)+4);
 	LPPOINT Points = GlobalLock(hPoints);
 
 	for (int i = 0; i < npt; i++)

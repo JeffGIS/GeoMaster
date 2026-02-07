@@ -1507,7 +1507,7 @@ GSSiExitProg (487);
 	  	{
 	  		CheckSecIndexEQ = TRUE;
 	  		COND = BT_GE; 
-	  		hInKey = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,pBTree->BT_HEAD.BT_KYLEN);
+	  		hInKey = GSSiGlobAlloc(GAIDNO 1959,GMEM_MOVEABLE,pBTree->BT_HEAD.BT_KYLEN);
 	  		InKey = GlobalLock (hInKey);
 	  		_fmemmove (InKey,KEY,pBTree->BT_HEAD.BT_KYLEN);
 	  	}
@@ -3510,7 +3510,7 @@ HANDLE BT_FormKey(HANDLE hKeyList, LPSTR val)
 	{
 		LPBTVARDESC pFldInfo = &btHead.BT_VARDESC;
 
-		hKey = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, btHead.BT_KEYLEN + 2);
+		hKey = GSSiGlobAlloc(GAIDNO 1950, GMEM_MOVEABLE, btHead.BT_KEYLEN + 2);
 		pKey = GlobalLock(hKey);
 		for (i = 0; i < btHead.BT_NVARS; i++, pFldInfo++)
 		{

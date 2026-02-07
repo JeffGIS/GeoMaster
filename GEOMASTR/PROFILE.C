@@ -14,7 +14,7 @@ void SmoothProfile (HPDPOINT pProfile,long np)
 	
 	if (n && np)
 	{
-		HANDLE	h2=GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,sizeof(DPOINT)*np);
+		HANDLE	h2=GSSiGlobAlloc(GAIDNO 2119,GMEM_MOVEABLE,sizeof(DPOINT)*np);
 		HPDPOINT	pProfile2=(HPDPOINT)GlobalLock (h2);
 		
 		hmemmove ((HPSTR)pProfile2,(HPSTR)pProfile,sizeof(DPOINT)*np);
@@ -319,7 +319,7 @@ HPEN CreateTexturePen (int iWidth,LPSTR TextureFile)
 	else
 	{
 		GetBitmapInfoFromHandle (&DibInfo,hDIB);
-		hBMP = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,sizeof(BITMAPINFO));
+		hBMP = GSSiGlobAlloc(GAIDNO 2120,GMEM_MOVEABLE,sizeof(BITMAPINFO));
 		lpbi = GlobalLock (hBMP);
 		*lpbi = DibInfo;
 		if (lpbi->biSizeImage == 0)
@@ -632,7 +632,7 @@ EndRoute:
 					LPVISLIST	SaveVis=CurVis;
 					short	SaveMaxPick=MaxPick, SaveNFiles, SaveMT, SaveTimer, SavePT;
 					HFILE	SaveFid; 
-					HANDLE	hSaveVP = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,sizeof(VIEWPORT)+256);  
+					HANDLE	hSaveVP = GSSiGlobAlloc(GAIDNO 2121,GMEM_MOVEABLE,sizeof(VIEWPORT)+256);
 					HANDLE	SavehDTM;
 					LPVIEWPORT	pSaveVP = (LPVIEWPORT)GlobalLock (hSaveVP); 
 					LPSTR	pSaveFile1=(LPSTR)(pSaveVP+1); 
@@ -803,7 +803,7 @@ EndRoute:
 			hProfileRoute = hRoute;  
 			hCurProfile = hProfileD[0];
 			nCurProfile = nProfilePoints[0];
-			hProfileSymbols = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,USHRT_MAX);
+			hProfileSymbols = GSSiGlobAlloc(GAIDNO 2122,GMEM_MOVEABLE,USHRT_MAX);
 			NumProfileSymbols = 0;
 			HighlightInArea (CurView->hWnd,&PolyBounds,TRUE,TRUE,0);  
 			if (hProfileSymbols)
@@ -1109,7 +1109,7 @@ EndRoute:
 			pData = (LPPROFILEFILEDATA)&lpGWDHead->GWDData; 
 			CurView->nProfileDataRectangles = 0;
 			GSSiGlobFree (&CurView->hProfileDataRectangles);
-			CurView->hProfileDataRectangles = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,USHRT_MAX);
+			CurView->hProfileDataRectangles = GSSiGlobAlloc(GAIDNO 2123,GMEM_MOVEABLE,USHRT_MAX);
 			pProfileDataRectangles = (LPPROFILEDATARECTANGLE)GlobalLock (CurView->hProfileDataRectangles);
 					
 			_fmemset (&LogFont,0,sizeof(LOGFONT));
@@ -1245,7 +1245,7 @@ EndRoute:
 					nConnectedPipes = LinkPipesFunction (2,0,10,0,0,0,0);
 					for (i=0;i<nConnectedPipes;i++)
 					{
-						HANDLE hPoints3D = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,maxPoints3D * sizeof(DPOINT3D));
+						HANDLE hPoints3D = GSSiGlobAlloc(GAIDNO 2124,GMEM_MOVEABLE,maxPoints3D * sizeof(DPOINT3D));
 						LPDPOINT3D pPoints3D = GlobalLock (hPoints3D);
 						HANDLE	hPnts;
 						LPPOINT	pPnts;
@@ -1262,7 +1262,7 @@ EndRoute:
 						hFont1 = CreateFontIndirect((LPLOGFONT)&LogFont);
 
 						LinkPipesFunction (3,i,0,&nPnt3D,pPoints3D,&iWidth,Material);
-						hPnts = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,nPnt3D*sizeof(POINT));
+						hPnts = GSSiGlobAlloc(GAIDNO 2124,GMEM_MOVEABLE,nPnt3D*sizeof(POINT));
 						pPnts = GlobalLock (hPnts);
 						for (j=0;j<nPnt3D;j++)
 						{

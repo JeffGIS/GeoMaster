@@ -82,7 +82,7 @@ static BOOL GetAreaFromFile(HFILE Fid,LPMNMXCORD pBounds,LPINT pnPnts,LPHANDLE p
 	BigRead(Fid, &nLoops, sizeof(int));
 	if (nLoops > 1)
 	{
-		HANDLE hPartLen = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, nLoops*sizeof(int));
+		HANDLE hPartLen = GSSiGlobAlloc(GAIDNO 194, GMEM_MOVEABLE, nLoops*sizeof(int));
 		LPINT pPartLen = GlobalLock(hPartLen);
 		BigRead (Fid, pPartLen, sizeof(int)*nLoops);
 		GSSiGlobUlFree (&hPartLen);
@@ -245,7 +245,7 @@ BOOL ThemeCreateAreaInMask(int from)
 						if (IntersectBounds(&mareaBounds, &bounds, 0))
 						{
 							LPDPOINT pMareaPoints = GlobalLock(hMareaPoints);
-							hPoly = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, nMareaPoints * sizeof(POINT));
+							hPoly = GSSiGlobAlloc(GAIDNO 1950, GMEM_MOVEABLE, nMareaPoints * sizeof(POINT));
 							pPoly = GlobalLock(hPoly);
 							for (i = 0; i < nMareaPoints; i++)
 								pPoly[i] = TRANDPointToPoint(&pMareaPoints[i], hTranWtoBM);
@@ -265,7 +265,7 @@ BOOL ThemeCreateAreaInMask(int from)
 					SelectObject(hDC, hBlueBrush);
 					//SelectObject(hDC, hBluePen);
 					SelectObject(hDC, GetStockObject(NULL_PEN));
-					hPoly = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, nPnts * sizeof(POINT));
+					hPoly = GSSiGlobAlloc(GAIDNO 1951, GMEM_MOVEABLE, nPnts * sizeof(POINT));
 					pPoly = GlobalLock(hPoly);
 					for (i = 0; i < nPnts; i++)
 						pPoly[i] = TRANDPointToPoint(&lpDCurPoints[i], hTranWtoBM);

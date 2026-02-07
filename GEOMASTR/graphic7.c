@@ -1020,7 +1020,7 @@ BOOL ProcessErrorString (void)
 		    {
 		    	LPSTR pErrStr=GlobalLock (hError);  
 		    	long	size = GlobalSize (hError);
-		    	HANDLE	hNewError = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,size);
+		    	HANDLE	hNewError = GSSiGlobAlloc(GAIDNO 2033,GMEM_MOVEABLE,size);
 		    	LPSTR	pNewError = GlobalLock (hNewError);
 		    	
 		    	hmemmove (pNewError,pErrStr,size);

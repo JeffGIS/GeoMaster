@@ -280,7 +280,7 @@ void DisplayHotSpotThemeLegend(short From)
     {   
     	pMask = (HPSHORT)GlobalLock (pHSData->hMask);
     	pMask += (long)pHSData->MaskWidth/2 * (long)pHSData->MaskWidth;  
-    	hPoints = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,sizeof(POINT)*w);
+    	hPoints = GSSiGlobAlloc(GAIDNO 2075,GMEM_MOVEABLE,sizeof(POINT)*w);
     	Points = (LPPOINT)GlobalLock (hPoints);
     	j=0;  
     	factor =  (double)pHSData->MaskWidth/w; 
@@ -490,7 +490,7 @@ void AddItemToHotSpot (int Type)
 			Weight = atof (CWeight);
 			HaveWeight = TRUE;
 		}	
-		hPoints = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,(long)nPnts * (long)sizeof(DPOINT));
+		hPoints = GSSiGlobAlloc(GAIDNO 2076,GMEM_MOVEABLE,(long)nPnts * (long)sizeof(DPOINT));
 		pArea = (HPDPOINT)GlobalLock (hPoints); 
 		for (i=0;i<nPnts;i++)
 		{

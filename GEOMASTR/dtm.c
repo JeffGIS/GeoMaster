@@ -4009,7 +4009,7 @@ BOOL GetLIDARCell (long CellID,LPHANDLE phCell,LPDTMINFO pDTMInfo)
 	if (CellOffset)
 	{
 		if (*phCell < (HANDLE)2)
-			*phCell = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,sizeof(LIDARCELL));
+			*phCell = GSSiGlobAlloc(GAIDNO 1922,GMEM_MOVEABLE,sizeof(LIDARCELL));
 		pCell = (LPLIDARCELL)GlobalLock (*phCell);   
 		CellRow = CellID / pDTMInfo->NumCols;
 		CellCol = CellID % pDTMInfo->NumCols;
@@ -5061,7 +5061,7 @@ BOOL GetNextDTMSegment (BOOL Init)
 			DTMPoint.y -= fmod (DTMPoint.y,DTMRenderGridSpacing);  
 			DTMRenderRowBeginPoint[2] = DTMPoint;
 			DTMNumPointsInRenderGridRow = 2+ (DTMBounds.xmx - DTMPoint.x)/DTMRenderGridSpacing; 
-			hDTMRenderGridRow[2] = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,DTMNumPointsInRenderGridRow*8);
+			hDTMRenderGridRow[2] = GSSiGlobAlloc(GAIDNO 1923,GMEM_MOVEABLE,DTMNumPointsInRenderGridRow*8);
 			pRenderNode = (HPDOUBLE)GlobalLock (hDTMRenderGridRow[2]);
 			Point = DTMPoint;
 			for (i=0;i<DTMNumPointsInRenderGridRow;i++)
@@ -5144,8 +5144,8 @@ NextLidar:
 	GSSiGlobFree (&hDTMRenderGridRow[1]);
 	hDTMRenderGridRow[0] = hDTMRenderGridRow[2];  
 	DTMRenderRowBeginPoint[0] = DTMRenderRowBeginPoint[2];
-	hDTMRenderGridRow[1] = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,DTMNumPointsInRenderGridRow*8);
-	hDTMRenderGridRow[2] = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,DTMNumPointsInRenderGridRow*8);
+	hDTMRenderGridRow[1] = GSSiGlobAlloc(GAIDNO 1924,GMEM_MOVEABLE,DTMNumPointsInRenderGridRow*8);
+	hDTMRenderGridRow[2] = GSSiGlobAlloc(GAIDNO 1925,GMEM_MOVEABLE,DTMNumPointsInRenderGridRow*8);
 	DTMPoint.y += DTMRenderGridSpacing/2; 
 /*	pRenderNode = (HPDOUBLE)GlobalLock (hDTMRenderGridRow[1]);
 	Point = DTMPoint;
@@ -5591,7 +5591,7 @@ void LinkContourLines (short Line1,short Line2,short Type2, short Type1)
 	}
 	if (Type1 == 1 && Type2 == 1)
 	{
-		hTemp = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,MAXPOINTSINCONTOUR*sizeof(POINT)+6);	
+		hTemp = GSSiGlobAlloc(GAIDNO 1926,GMEM_MOVEABLE,MAXPOINTSINCONTOUR*sizeof(POINT)+6);
 		pTempNumPoints = (LPSHORT)GlobalLock (hTemp);
 		pTempElev = (LPLONG) (pTempNumPoints+1);
 		*pTempElev = *pElev1;	
@@ -5789,7 +5789,7 @@ BOOL AddPointToContourPolygon (LPDOUBLE pZC,LPDPOINT Point1, LPDPOINT Point2)
 		} 
 		if (ConnectedTo == -1 && nContourLines < MAXCONTOURLINES)
 		{
-			hContourLines[nContourLines] = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,MAXPOINTSINCONTOUR*sizeof(POINT)+6);		
+			hContourLines[nContourLines] = GSSiGlobAlloc(GAIDNO 1927,GMEM_MOVEABLE,MAXPOINTSINCONTOUR*sizeof(POINT)+6);
 			pNumPoints = (LPSHORT)GlobalLock (hContourLines[nContourLines]);
 			*pNumPoints = 2; 
 			pElev = (LPLONG)(pNumPoints+1);  
@@ -6682,7 +6682,7 @@ BOOL SurfToFile (LPSTR DTMFile,LPMNMXCORD pBounds,double GridSpace,LPSTR OutFile
 			double	minx, miny, maxx, maxy, Elv;
 			DWORD	nRow, nCol, Col, Row, NumItems, CurItem=0;
 			DPOINT	BP, BeginPoint,Point;
-			HANDLE	hMem = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,USHRT_MAX);
+			HANDLE	hMem = GSSiGlobAlloc(GAIDNO 1928,GMEM_MOVEABLE,USHRT_MAX);
 			LPSTR	OutRec = GlobalLock (hMem);
 			
 			ConvertRectCoord (&NewBounds, pBounds, 1,3); 

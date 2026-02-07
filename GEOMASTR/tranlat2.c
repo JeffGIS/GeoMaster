@@ -908,7 +908,7 @@ BOOL ProcessImportFilter (void)
 
 HANDLE GRTextFromTextHeader (LPGRTEXTHEADER	pGRTextHead,LPSTR Text) 
 {
-	HANDLE		hGRText = GSSiGlobAlloc(GAIDNO 0,GHND,sizeof(GRTEXT));
+	HANDLE		hGRText = GSSiGlobAlloc(GAIDNO 1463,GHND,sizeof(GRTEXT));
 	LPGRTEXT	pGRText;   
 	double		dHeight;   
 	

@@ -1463,7 +1463,7 @@ void ExpandSYMATTRKEY(LPSTR str)
 
 	if (pLoc)
 	{
-		HANDLE hMem = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, 4096*2);
+		HANDLE hMem = GSSiGlobAlloc(GAIDNO 1974, GMEM_MOVEABLE, 4096*2);
 		LPSTR  pMem = GlobalLock(hMem);
 		LPSTR  pRest = pMem + 4096;
 
@@ -5788,13 +5788,13 @@ int SetGlobalFromTextBox (HWND hWndDlg,UINT Control,LPSTR VarName,BOOL ConvertRe
 #endif
 {   
 	int	rtn;
-	HANDLE	hText = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,4098);
+	HANDLE	hText = GSSiGlobAlloc(GAIDNO 1975,GMEM_MOVEABLE,4098);
 	LPSTR	pStr  = GlobalLock (hText);
 
 	rtn = GetWindowText (GetDlgItem (hWndDlg,Control),pStr,4000);
 	if (ConvertReturns)
 	{
-		HANDLE hCvt = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,rtn*2+2);
+		HANDLE hCvt = GSSiGlobAlloc(GAIDNO 1976,GMEM_MOVEABLE,rtn*2+2);
 		LPSTR	pCvt2, pCvt = pCvt2 = GlobalLock (hCvt);
 
 		while (*pStr)
@@ -6850,7 +6850,7 @@ LPSTR ExpandTextDB(LPSTR InText, LPBREAKPOINT pBrkPt, int bpOffset, int bpLen)
 //	int lIn = strlen(InText);
 //	HANDLE hInput = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, l + 2);
 //	LPSTR  pInput = GlobalLock(hInput);
-	HANDLE hMem = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, USHRT_MAX);
+	HANDLE hMem = GSSiGlobAlloc(GAIDNO 1977, GMEM_MOVEABLE, USHRT_MAX);
 	
 	nRaw = 0;
 	LPSTR pMem = GlobalLock(hMem);
@@ -6874,7 +6874,7 @@ LPSTR ExpandTextDB(LPSTR InText, LPBREAKPOINT pBrkPt, int bpOffset, int bpLen)
 		{
 			LPSTR pRaw;
 			int l = pEnd - pBeg;
-			hMemRaw[nRaw] = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, l + 2);
+			hMemRaw[nRaw] = GSSiGlobAlloc(GAIDNO 1978, GMEM_MOVEABLE, l + 2);
 			pRaw = GlobalLock(hMemRaw[nRaw]);
 			strcpy(pRaw, pBeg);
 			GlobalUnlock(hMemRaw[nRaw]);
@@ -11118,7 +11118,7 @@ BOOL GetUpdateFieldValue (HWND hWndDlg,LPSTR SetFieldName,LPSTR NewValue)
 				HMENU	Menu = CreatePopupMenu(); 
 				POINT	position;
 				int		Choice=1, lv;
-				HANDLE	hValues = GSSiGlobAlloc(GAIDNO 0,GHND,USHRT_MAX);
+				HANDLE	hValues = GSSiGlobAlloc(GAIDNO 1973,GHND,USHRT_MAX);
 				LPSTR	Values = GlobalLock (hValues);
 			    
 				ploc += l + 1;

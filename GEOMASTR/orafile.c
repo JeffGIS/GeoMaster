@@ -64,7 +64,7 @@ static char				ORAazm[32]="[ORA.AZM]";
 long ORATypeFromName (LPSTR InName)
 {
 	long	Type = 0;
-	HANDLE	hName = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,256);
+	HANDLE	hName = GSSiGlobAlloc(GAIDNO 2092,GMEM_MOVEABLE,256);
 	LPSTR	Name=GlobalLock (hName);
 	short	l;
 	
@@ -286,7 +286,7 @@ long SortQuadLinks (HFILE FidSorted,ULONG NumRecs,USHORT XMid,HPLONG Offsets,HPQ
 	ULONG	iRec;
 	USHORT	i, FirstUpperQuad=0, FirstLowerQuad, UpperQuadID=0, NumUpperQuads=1, NumLowerQuads, NextQuadID=1;
 	short	QuadID;
-	HANDLE	hQuads=GSSiGlobAlloc(GAIDNO 0,GHND,USHRT_MAX); 
+	HANDLE	hQuads=GSSiGlobAlloc(GAIDNO 2093,GHND,USHRT_MAX);
     USHORT	LevelNext[MAXLEVELS], LevelSplitVal[MAXLEVELS], LevelUseX[MAXLEVELS];
     USHORT	SplitVal, NextLevelSplitVals[MAXLEVELS][2];
 	LPQUADS	Quads = (LPQUADS)GlobalLock (hQuads); 
@@ -397,8 +397,8 @@ HFILE SortORASpatially (HFILE Fid)
 	
 	HPQUADLINK	QuadLink;					 
 	
-	hQuadLink = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,MaxRecs * sizeof(QUADLINK));
-	hOffsets = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,MaxRecs * sizeof(long));
+	hQuadLink = GSSiGlobAlloc(GAIDNO 2094,GMEM_MOVEABLE,MaxRecs * sizeof(QUADLINK));
+	hOffsets = GSSiGlobAlloc(GAIDNO 2095,GMEM_MOVEABLE,MaxRecs * sizeof(long));
 	QuadLink = (HPQUADLINK)GlobalLock (hQuadLink);
 	Offsets = (LPLONG)GlobalLock (hOffsets);
 	
@@ -489,7 +489,7 @@ HFILE CreateORAFileIndex (HFILE FidORAFile,LPSTR IndexName,LPSTR ORAFileName,LPS
 	CreateStatusWind (CurView->hWnd,2,mess);      
 	DisableHalt = FALSE;
 	FidSortedOffsets = SortORASpatially (FidORAFile); 
-	hIndexBlocks = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,NumIndexBlocks*sizeof(mnmxCor));
+	hIndexBlocks = GSSiGlobAlloc(GAIDNO 2096,GMEM_MOVEABLE,NumIndexBlocks*sizeof(mnmxCor));
 	BlockMinMax = (LPMINMAX)GlobalLock (hIndexBlocks); 
 	for (i=0;i<NumIndexBlocks;i++)
 		MinMaxInit (&BlockMinMax[i]);

@@ -878,7 +878,7 @@ BOOL FillRectWithGrid (LPSTR EditName,LPSTR SymName,LPMNMXCORD pRect,double Grid
     nPointsy = RectHeight/GridSpaceY+2;
     for (i = 0;i<nPointsy;i++)
     {
-    	hPoints = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,nPointsx*sizeof(DPOINT));
+    	hPoints = GSSiGlobAlloc(GAIDNO 1971,GMEM_MOVEABLE,nPointsx*sizeof(DPOINT));
     	pPoints = (HPDPOINT)GlobalLock (hPoints);
     	for (j=0;j<nPointsx;j++) 
     	{
@@ -891,7 +891,7 @@ BOOL FillRectWithGrid (LPSTR EditName,LPSTR SymName,LPMNMXCORD pRect,double Grid
     }
     for (i = 0;i<nPointsx;i++)
     {
-    	hPoints = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,nPointsy*sizeof(DPOINT));
+    	hPoints = GSSiGlobAlloc(GAIDNO 1972,GMEM_MOVEABLE,nPointsy*sizeof(DPOINT));
     	pPoints = (HPDPOINT)GlobalLock (hPoints);
     	for (j=0;j<nPointsy;j++) 
     	{

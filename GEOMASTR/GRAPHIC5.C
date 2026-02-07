@@ -296,7 +296,7 @@ GSSiExitProg (729);
 }
 		BigRead (FidAO,&Version,2);
 		BigRead (FidAO,&NumEntries,4);
-		hEntries = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,NumEntries*sizeof(HAINDEX));
+		hEntries = GSSiGlobAlloc(GAIDNO 2031,GMEM_MOVEABLE,NumEntries*sizeof(HAINDEX));
 		pEntries = GlobalLock (hEntries);
 		GSSillseek (FidAO,-NumEntries*sizeof(HAINDEX),2);
 		BigRead (FidAO,pEntries,NumEntries*sizeof(HAINDEX));
@@ -999,7 +999,7 @@ short CompressCoordinates (LPUSHORT pNpnts,HPDPOINT lpDPoint,LPHANDLE phCompress
 		size = sizeof(double)+(long)sizeof(DPOINT)+(long)(1+(*pNpnts)*2)*(long)sizeof(short); 
 		if (size%16)
 			size += 16 - (size%16);
-		*phCompressedCoord = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,size);
+		*phCompressedCoord = GSSiGlobAlloc(GAIDNO 2032,GMEM_MOVEABLE,size);
 		pAccuracy = (LPDOUBLE)GlobalLock (*phCompressedCoord);
 		*pAccuracy = CompressAccuracy;
 		pBasePoint = (LPDPOINT)(pAccuracy + 1); 

@@ -478,7 +478,7 @@ BOOL GetTXTUniqueFieldValues (HANDLE hDB, LPSTR SQL,LPSTR FldName,short FieldLen
 	LPOPENSQLDATA	SQLPtr;
 	LPFIELDINFO	lpFieldInfo;
 	LPOPENFILEDATA	FilePtr;
-	HANDLE	hMem=GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,4096+2048);
+	HANDLE	hMem=GSSiGlobAlloc(GAIDNO 1483,GMEM_MOVEABLE,4096+2048);
 	LPSTR	str=GlobalLock (hMem); 
 	LPSTR	Value = str+4096;
 	LPSTR	pSQL = Value + 512;
@@ -547,7 +547,7 @@ BOOL GetFieldIDsFromNames(LPSTR DBName, LPHANDLE phFieldIDs, LPHANDLE phFieldTyp
 		return TRUE;
     if (!OpenDataFile (DBName,"",BT_READ,&hDB))
     	return FALSE;
-	hMem = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,lMem);
+	hMem = GSSiGlobAlloc(GAIDNO 1484,GMEM_MOVEABLE,lMem);
 	FieldList = GlobalLock (hMem);
 	strcpy (FieldList,FieldListIN);
     SQLPtr = (LPOPENSQLDATA)GlobalLock (hDB);
@@ -1056,7 +1056,7 @@ long ConvertPoint (LPSTR CvtFile,LPDPOINT Point,int Direction)
 	 LPSTR	lpDot, lpEnd;
 	 short	SaveUnits;
 	 long	rtn=0;
-	 HANDLE hMem = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,1024);
+	 HANDLE hMem = GSSiGlobAlloc(GAIDNO 1485,GMEM_MOVEABLE,1024);
 	 LPSTR	SaveProj=GlobalLock (hMem);
 	 LPSTR	project=SaveProj+512;
 	 BOOL	ProjChanged = FALSE, Err;
@@ -1301,7 +1301,7 @@ BOOL GetFieldTypeAndLenFromChar (LPSTR str,LPGWFLDINFO pGWFldInfo,LPHANDLE phSet
 			pEnd = MatchLev(pPar, ',');
 			if (pEnd)
 				*pEnd = 0;
-			*phSetClause = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,1024);
+			*phSetClause = GSSiGlobAlloc(GAIDNO 1486,GMEM_MOVEABLE,1024);
 			pSetClause = GlobalLock (*phSetClause);
 			_fstrcpy (pSetClause,pPar);
 			GlobalUnlock (*phSetClause);

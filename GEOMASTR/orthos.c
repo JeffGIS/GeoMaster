@@ -2426,7 +2426,7 @@ BOOL TransformImage (LPSTR TIFFile,LPSTR TranFile,LPSTR BMPFile,LPSTR BPWFile,LP
 	{   
 		HFILE FidArea = GSSiOpenFile (AreaFileOrTAG,NULL,OF_READ);
 		
-		hAreaPts = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,USHRT_MAX);
+		hAreaPts = GSSiGlobAlloc(GAIDNO 2097,GMEM_MOVEABLE,USHRT_MAX);
 		AreaPoints = (LPDPOINT)GlobalLock (hAreaPts);
 		if (FidArea != HFILE_ERROR)
 		{   
@@ -2859,7 +2859,7 @@ HRGN SetOrthoMask (LPSTR MaskAreaFileName)
 	if (Fid == HFILE_ERROR)
 		return FALSE;  
 	BigRead (Fid,(HPSTR)&nPnts,4); 
-	hPnts = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,nPnts*sizeof(DPOINT));
+	hPnts = GSSiGlobAlloc(GAIDNO 1517,GMEM_MOVEABLE,nPnts*sizeof(DPOINT));
 	lpPoints = lpPointsIn = (HPDPOINT)GlobalLock (hPnts); 
 	BigRead (Fid,(HPSTR)lpPoints,nPnts*sizeof(DPOINT));
 	GSSiClose2 (&Fid);

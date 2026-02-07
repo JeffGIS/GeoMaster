@@ -173,11 +173,11 @@ static BOOL loadParcelPoints(int npnts1, int npnts2, HANDLE hPoly1, HANDLE hPoly
 	int i,j,nGood=0, lastGood = -1, nLoops = 0;
 	MNMXCORD bounds1, bounds2;
 	HANDLE hTran;
-	HANDLE hMatchedPoints = GSSiGlobAlloc(GAIDNO 0, GHND, npnts2 * (sizeof(int)+sizeof(double)+npnts1*sizeof(int)));
+	HANDLE hMatchedPoints = GSSiGlobAlloc(GAIDNO 2098, GHND, npnts2 * (sizeof(int)+sizeof(double)+npnts1*sizeof(int)));
 	LPINT pMatchedPoints = GlobalLock(hMatchedPoints);
 	LPINT pMatchedOldToNew = &pMatchedPoints[npnts2];
 	LPDOUBLE pMatchedDist = (LPDOUBLE)&pMatchedOldToNew[npnts1];
-	HANDLE hGoodPoints = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, npnts1 * 2 * sizeof(DPOINT));
+	HANDLE hGoodPoints = GSSiGlobAlloc(GAIDNO 2099, GMEM_MOVEABLE, npnts1 * 2 * sizeof(DPOINT));
 	LPDPOINT goodPointsFrom = GlobalLock(hGoodPoints), goodPointsTo = &goodPointsFrom[npnts1];
 	float RSQMIN;
 	int nTran = 0;

@@ -2431,7 +2431,7 @@ BOOL ProcessConnectedCommand(UINT ID)
 	HaltMapDisplay(TRUE, FALSE);
 	lMem = llFileSeek(Fid, 0, 2);
 	llFileSeek(Fid, 0, 0);
-	hMem = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, lMem+4);
+	hMem = GSSiGlobAlloc(GAIDNO 1512, GMEM_MOVEABLE, lMem+4);
 	pMem = GlobalLock(hMem);
 	BigRead64(Fid, pMem, lMem);
 	GSSiClose64(&Fid);

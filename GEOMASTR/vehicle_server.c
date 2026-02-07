@@ -251,7 +251,7 @@ BOOL GetFenceDefs (LPSTR Account)
 	err = send (CurrentServerSocket,(LPSTR)&lFile,4,0); 
 	if (lFile > 0)
 	{
-		HANDLE	hFile = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,lFile);
+		HANDLE	hFile = GSSiGlobAlloc(GAIDNO 1504,GMEM_MOVEABLE,lFile);
 		LPSTR	pFile = GlobalLock (hFile);
 
 		Fid = GSSiOpenFile (FileName,0,OF_READ);
@@ -380,7 +380,7 @@ BOOL ActivateFence (LPSTR Account,LPSTR Name,BOOL AorD)
 	len = GSSiLength (Filelist);
 	if (len>0)
 	{
-		HANDLE	handle = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,len+1);
+		HANDLE	handle = GSSiGlobAlloc(GAIDNO 1505,GMEM_MOVEABLE,len+1);
 		LPSTR	pStr=GlobalLock (handle);
 
 		Fid = GSSiOpenFile (Filelist,0,OF_READWRITE);
@@ -617,7 +617,7 @@ BOOL CheckFence (LPSTR Account,LPSTR ID,LPSTR VehID,double x,double y)
 	len = GSSiLength (Filelist);
 	if (len>0)
 	{
-		HANDLE	handle = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,len+1);
+		HANDLE	handle = GSSiGlobAlloc(GAIDNO 1506,GMEM_MOVEABLE,len+1);
 		LPSTR	pStr=GlobalLock (handle);
 		LPSTR	pLoc=pStr,pNamePicked;
 
@@ -912,7 +912,7 @@ BOOL TCPSendFile (LPSTR FromPath,int BlockSize,BOOL Delete)
 {
 	int		lArea, la=0, st;
 	int		n, len, ln, lnsent, err;
-	HANDLE	htxt = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,BlockSize);
+	HANDLE	htxt = GSSiGlobAlloc(GAIDNO 1507,GMEM_MOVEABLE,BlockSize);
 	LPSTR	txt = GlobalLock (htxt);
 	HFILE	Fid;
 	long	Flen, totlen=0;
@@ -998,7 +998,7 @@ int UploadFence (LPSTR Account,LPSTR FileLength,LPSTR FileLengthCmp)
 	lFile = atoi (FileLength);
 	lFileCmp = atoi (FileLengthCmp);
 	st = send (CurrentServerSocket,"OK1",4,0);
-	hMemCmp = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,lFileCmp+4096);
+	hMemCmp = GSSiGlobAlloc(GAIDNO 1508,GMEM_MOVEABLE,lFileCmp+4096);
 	pFileCmp = GlobalLock (hMemCmp);
 	n = 0;
 	do
@@ -1022,7 +1022,7 @@ int UploadFence (LPSTR Account,LPSTR FileLength,LPSTR FileLengthCmp)
 	} while (n < 200 && TotLen < lFileCmp);
 	if (n < 200)
 	{
-		hMem = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,lFile+4096*4);
+		hMem = GSSiGlobAlloc(GAIDNO 1509,GMEM_MOVEABLE,lFile+4096*4);
 		pFile = GlobalLock (hMem);
 		len = DecompressBinaryRecordUnsafe (pFile,pFileCmp,lFileCmp);
 		sprintf (FenceBackupFile,"[%%DL]fences\\%s.gfc",Account);
@@ -1154,7 +1154,7 @@ int UploadFenceLinks (LPSTR Account)
 		n++;
 	} while (n < 100 && len < 4);
 	len = recv (CurrentServerSocket,(LPSTR)&lBuffer,4,0);
-	hBuffer = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,lBuffer);
+	hBuffer = GSSiGlobAlloc(GAIDNO 1510,GMEM_MOVEABLE,lBuffer);
 	pBuffer = GlobalLock (hBuffer);
 	n = 0;
 	Sleep (25);
@@ -1237,7 +1237,7 @@ int UploadRouteStops (LPSTR Account)
 		n++;
 	} while (n < 100 && len < 4);
 	len = recv (CurrentServerSocket,(LPSTR)&lBuffer,4,0);
-	hBuffer = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,lBuffer);
+	hBuffer = GSSiGlobAlloc(GAIDNO 1511,GMEM_MOVEABLE,lBuffer);
 	pBuffer = GlobalLock (hBuffer);
 	n = 0;
 	Sleep (25);

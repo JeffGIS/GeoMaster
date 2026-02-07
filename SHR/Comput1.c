@@ -554,7 +554,7 @@ double PercentOfPolyInHighlightAreas (int PolyType,LPMNMXCORD pBounds,int npnts,
 	LPDWORD	pDwordItem, pDwordArea;
 	BOOL	savebm=FALSE;  
     BITMAP	bm;   
-	HANDLE	hBitmapInfo = GSSiGlobAlloc(GAIDNO 0,GHND,sizeof(BITMAPINFO)+sizeof(RGBQUAD));
+	HANDLE	hBitmapInfo = GSSiGlobAlloc(GAIDNO 1954,GHND,sizeof(BITMAPINFO)+sizeof(RGBQUAD));
 	LPBITMAPINFO	BitmapInfo = GlobalLock (hBitmapInfo);
 	int		st;
 	HBRUSH	hOldBrush;
@@ -4322,7 +4322,7 @@ HANDLE  PointInAreaAcceleratorSetupMono (DWORD nPoints, HPDPOINT pAreaPoints, in
     	sprintf (str,"memsize too big:%ld",memsize);
     	MessageBox (0,str,0,MB_OK);  
     } */
-    hPIAA = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,memsize);
+    hPIAA = GSSiGlobAlloc(GAIDNO 1955,GMEM_MOVEABLE,memsize);
     pPIAA = (LPPIAAStruct)GlobalLock (hPIAA); 
     pPIAA->Offset = Offset;   
     pPIAA->Type = 0;
@@ -4341,7 +4341,7 @@ HANDLE  PointInAreaAcceleratorSetupMono (DWORD nPoints, HPDPOINT pAreaPoints, in
 	{
 		int		l = ((int)bm.bmWidthBytes * (int)bm.bmHeight); 
 		int		rowleninwords = bm.bmWidthBytes / 2;
-		HANDLE	hBits = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,l);
+		HANDLE	hBits = GSSiGlobAlloc(GAIDNO 1956,GMEM_MOVEABLE,l);
 		LPUSHORT	pBitsStart,pBits = (LPUSHORT)GlobalLock (hBits), pNextRow;//(long)pBits - (long)pBitsStart
 		ULONG	RowLenLoc, CurValLoc, CurRepeatLoc, nRepeat, RowLen;
 
@@ -5186,7 +5186,7 @@ HANDLE  PointInAreaAcceleratorSetupWindow (DWORD nPoints, HPDPOINT pAreaPoints, 
 	curProgID = -1;
 	GetObject(hBM, sizeof(bm), (LPSTR)&bm);
     biBits = bm.bmPlanes * bm.bmBitsPixel;
-	hBits = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,bm.bmWidthBytes * bm.bmHeight);
+	hBits = GSSiGlobAlloc(GAIDNO 1957,GMEM_MOVEABLE,bm.bmWidthBytes * bm.bmHeight);
 	pBits = GlobalLock (hBits);
 //    hBM = CreateCompatibleBitmap(hDC,Width,Height); 
 	ReleaseDC (hWndMain,hDCMain);
@@ -5266,7 +5266,7 @@ HANDLE  PointInAreaAcceleratorSetupWindow (DWORD nPoints, HPDPOINT pAreaPoints, 
     	sprintf (str,"memsize too big:%ld",memsize);
     	MessageBox (0,str,0,MB_OK);  
     } */
-    hPIAA = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,memsize);
+    hPIAA = GSSiGlobAlloc(GAIDNO 1958,GMEM_MOVEABLE,memsize);
     pPIAA = (LPPIAAStruct)GlobalLock (hPIAA);  
     pPIAA->Offset = Offset; 
     pPIAA->Type = 1;

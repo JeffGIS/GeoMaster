@@ -351,7 +351,7 @@ BOOL MakeMap (LPSTR Args)
 		{   
 			LPSTR	pName;
 			
-			hMemMapColorMap = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,256);  
+			hMemMapColorMap = GSSiGlobAlloc(GAIDNO 2100,GMEM_MOVEABLE,256);
 			pName = GlobalLock (hMemMapColorMap);
 			_fstrcpy (pName,Arg6);
 			GlobalUnlock (hMemMapColorMap);
@@ -363,7 +363,7 @@ BOOL MakeMap (LPSTR Args)
 			{   
 				LPSTR	pName;
 				
-				hMemMapColorMap = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,256);  
+				hMemMapColorMap = GSSiGlobAlloc(GAIDNO 2101,GMEM_MOVEABLE,256);
 				pName = GlobalLock (hMemMapColorMap);
 				_fstrcpy (pName,str);
 				GlobalUnlock (hMemMapColorMap);
@@ -419,7 +419,7 @@ BOOL MakeMap (LPSTR Args)
 			{   
 				LPSTR	pName;
 				
-				hMemMapColorMap = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,256);  
+				hMemMapColorMap = GSSiGlobAlloc(GAIDNO 2111,GMEM_MOVEABLE,256);
 				pName = GlobalLock (hMemMapColorMap);
 				_fstrcpy (pName,Arg4);
 				GlobalUnlock (hMemMapColorMap);
@@ -2575,10 +2575,10 @@ int GetPNAreaID (DPOINT Pt,LPSTR DataFile)
 	if (ld == 0)
 		goto Exit;
 
-	hData = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,ld);
+	hData = GSSiGlobAlloc(GAIDNO 2102,GMEM_MOVEABLE,ld);
 	pData = GlobalLock (hData);
 	pHead = (LPSTATEGRIDHEADER)pData;
-	Fid = GSSiOpenFile (DataFile,0,OF_READ);
+	Fid = GSSiOpenFile (DataFile, 0,OF_READ);
 	BigRead (Fid,pData,ld);
 	GSSiClose2 (&Fid);
 	rtn = GetAreaID (Pt.y,Pt.x);
@@ -2620,12 +2620,12 @@ BOOL LoadPNetStateGrid (LPSTR DataFile,LPSTR GridFile,LPSTR OutFile)
 	Fid = GSSiOpenFile (DataFile,0,OF_READ);
 	BigRead (Fid,&Head,sizeof(Head));
 	GSSiClose2 (&Fid);
-	hGrid = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,lg);
+	hGrid = GSSiGlobAlloc(GAIDNO 2104,GMEM_MOVEABLE,lg);
 	pGrid = GlobalLock (hGrid);
 	Fid = GSSiOpenFile (GridFile,0,OF_READ);
 	BigRead (Fid,pGrid,lg);
 	GSSiClose2 (&Fid);
-	hGridCmp = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,lg);
+	hGridCmp = GSSiGlobAlloc(GAIDNO 2105,GMEM_MOVEABLE,lg);
 	pGridCmp = GlobalLock (hGridCmp);
 	pGridRowOffsets = pGridCmp;
 	lGridCmp = Head.nrow;
@@ -2654,7 +2654,7 @@ BOOL LoadPNetStateGrid (LPSTR DataFile,LPSTR GridFile,LPSTR OutFile)
 		}
 	}
 
-	hData = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,ld);
+	hData = GSSiGlobAlloc(GAIDNO 2106,GMEM_MOVEABLE,ld);
 	pData = GlobalLock (hData);
 	pHead = (LPSTATEGRIDHEADER)pData;
 	Fid = GSSiOpenFile (DataFile,0,OF_READ);
@@ -2822,7 +2822,7 @@ int RemoveShortSegs (int nPntsIn,LPHANDLE hPoly,double Dis)
 
 	int	i, nPntsOut=1;
 	LPDPOINT	PointsIn = GlobalLock (*hPoly);
-	HANDLE		hPolyOut = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,nPntsIn*sizeof(DPOINT));
+	HANDLE		hPolyOut = GSSiGlobAlloc(GAIDNO 2107,GMEM_MOVEABLE,nPntsIn*sizeof(DPOINT));
 	LPDPOINT	PointsOut = GlobalLock (hPolyOut);
 
 	PointsOut[0] = PointsIn[0];
@@ -3211,7 +3211,7 @@ void CreatePNetStateGrid (int NumRows)
 	DPOINT		MidPoint, IntPoints[4],	CellArea[5];
 //	HANDLE		hCellPoint = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,USHRT_MAX);
 //	HPDPOINT	CellPoint=GlobalLock (hCellPoint);
-	HANDLE		hCellPoint16 = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,USHRT_MAX);
+	HANDLE		hCellPoint16 = GSSiGlobAlloc(GAIDNO 2108,GMEM_MOVEABLE,USHRT_MAX);
 	HPPOINTS	CellPoint16=GlobalLock (hCellPoint16);
 	HFILE		FidOut=GSSiOpenFile ("c:\\pntest.bin",0,OF_CREATE);
 	HFILE		FidOutOff=GSSiOpenFile ("c:\\pntestoff.bin",0,OF_CREATE);
@@ -3225,8 +3225,8 @@ void CreatePNetStateGrid (int NumRows)
 	int			MaxLines=0, MaxPoints=0,ii,lastoff=0;
 	short		LeftRight;
 	double		OffDis = 0.0003;
-	HANDLE		hCompressedCell = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,USHRT_MAX);
-	LPBYTE		CompressedCell = GlobalLock (hCompressedCell);
+	HANDLE		hCompressedCell = GSSiGlobAlloc(GAIDNO 2109, GMEM_MOVEABLE, USHRT_MAX);
+	LPBYTE		CompressedCell = GlobalLock(hCompressedCell);
 	char		str[256];
 	
 	int		nrow=NumRows,ncol=(nrow*90)/34.2;
@@ -3247,7 +3247,7 @@ void CreatePNetStateGrid (int NumRows)
 	ncol = (right - left - cellw/2) / cellw + 1;
 
 	fac = 32000 / max (cellw,cellh);
-	hOffsets  = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,nrow*ncol*4);
+	hOffsets  = GSSiGlobAlloc(GAIDNO 2110,GMEM_MOVEABLE,nrow*ncol*4);
 	Offsets = GlobalLock (hOffsets);
 	Header.ifac = ifac;
 	Header.fac  = fac;

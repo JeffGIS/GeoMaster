@@ -2854,7 +2854,7 @@ short GetNearHouse (long StreetNum,long WantHouse,long Munic,long ZIP,LPLONG pNe
 		goto Exit; 
 	if (ZIP || !Munic)
 	{
-		hZIPs = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,4);
+		hZIPs = GSSiGlobAlloc(GAIDNO 1961,GMEM_MOVEABLE,4);
 		pZIPs = (LPLONG)GlobalLock (hZIPs);
 		*pZIPs = ZIP;
 		GlobalUnlock (hZIPs);

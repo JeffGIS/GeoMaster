@@ -2438,7 +2438,7 @@ BOOL GetSegCoorByPct (long Segid,double PCT,DPOINT *CLPoint,double *AZ,double *L
     	BigRead (FidStreetPolys,(HPSTR)&nPnts,4); 
     	BigRead (FidStreetPolys,(HPSTR)Length,8); 
     	Size = nPnts * sizeof(DPOINT);
-    	hPoly = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,Size);
+    	hPoly = GSSiGlobAlloc(GAIDNO 1994,GMEM_MOVEABLE,Size);
     	Points = (HPDPOINT)GlobalLock (hPoly);
     	BigRead (FidStreetPolys,(HPSTR)Points,Size); 
     	AtDist = *Length * PCT;
@@ -2714,7 +2714,7 @@ short ScanForFieldTypes (LPSTR DBName,LPHANDLE phFieldTypes,BOOL DoScan,long Num
 	long	lval, nScanned;
 	double	dval;
     USHORT	i;
-    HANDLE	hStr=GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,MAXLINE);
+    HANDLE	hStr=GSSiGlobAlloc(GAIDNO 1995,GMEM_MOVEABLE,MAXLINE);
     LPSTR	str=GlobalLock (hStr);
     short	NumFields=0;
     BOOL	ReScan=FALSE, useFileLength=FALSE;
@@ -3010,7 +3010,7 @@ GSSiExitProg (603);
 #endif
         return FALSE;   
 }
-    hStr = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,MAXLINE);
+    hStr = GSSiGlobAlloc(GAIDNO 1996,GMEM_MOVEABLE,MAXLINE);
     str = GlobalLock (hStr);
     if (UseHLT)
 	{
@@ -4981,7 +4981,7 @@ GotTAG:
 	*len += DiffLen;
 	if (DiffLen)
 	{
-		HANDLE	hRest=GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,lRest);
+		HANDLE	hRest=GSSiGlobAlloc(GAIDNO 1997,GMEM_MOVEABLE,lRest);
 		HPSTR	pRest = GlobalLock (hRest);
 		
 		hmemmove (pRest,EndRefno,lRest);

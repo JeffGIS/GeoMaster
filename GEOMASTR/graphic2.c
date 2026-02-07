@@ -2992,7 +2992,7 @@ BOOL ReadHighlightListFromConfig (HFILE *Fid)
 	long	lFile1, lFile2, pos;  
 	long	maxread=(long)USHRT_MAX, lr;  
 	HFILE	FidOut;
-	HANDLE	hBuf=GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,maxread);
+	HANDLE	hBuf=GSSiGlobAlloc(GAIDNO 2029,GMEM_MOVEABLE,maxread);
 	HPSTR	pbuf=GlobalLock (hBuf);
 
 /*	if (!GetOpenFilePathname (*Fid, Name))

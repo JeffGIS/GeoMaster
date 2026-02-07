@@ -1949,7 +1949,7 @@ LPDEBUGARRAY	pDB=0;   */
 						if (Radius)
 						{
 							GSSiGlobFree (&hUnSplinedPoly);
-							hUnSplinedPoly = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,2*sizeof(DPOINT));
+							hUnSplinedPoly = GSSiGlobAlloc(GAIDNO 2030,GMEM_MOVEABLE,2*sizeof(DPOINT));
 							pUSPoints = GlobalLock (hUnSplinedPoly);
 							*pUSPoints++ = *lpDCurPoints;
 							*pUSPoints = *(lpDCurPoints+1);

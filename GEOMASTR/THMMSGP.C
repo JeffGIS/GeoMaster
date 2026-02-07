@@ -270,14 +270,14 @@ BOOL ThemeDisplayOffsetAreas (void)
 						Offset *= ClassMin;
 						if (nPoly > 1)
 						{
-							hPolyPartLen = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,(nPoly+1)*sizeof(int));
+							hPolyPartLen = GSSiGlobAlloc(GAIDNO 1460,GMEM_MOVEABLE,(nPoly+1)*sizeof(int));
 							pNumPoints = (LPINT)GlobalLock (hPolyPartLen);
 						
 							BigRead (CurTheme->FidAreas,(HPSTR)pNumPoints,(nPoly+1)*sizeof(int));
 							GlobalUnlock (hPolyPartLen);
 						}
 						BigRead (CurTheme->FidAreas,(HPSTR)&NumPoints,4);  
-						hPoints = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,NumPoints * sizeof(DPOINT));
+						hPoints = GSSiGlobAlloc(GAIDNO 1457,GMEM_MOVEABLE,NumPoints * sizeof(DPOINT));
 						lpPoints = (HPDPOINT)GlobalLock (hPoints);
 						BigRead (CurTheme->FidAreas,(HPSTR)lpPoints,NumPoints * sizeof(DPOINT)); 
 						width = 2*IDNINT (Offset/CurView->BaseUnitsPerPixel);
@@ -2030,7 +2030,7 @@ void CompareViewportsThemeLegend (short From,short FromVPID)
 					ii=BitBlt(hDCMem, 0, 0, bm.bmWidth,bm.bmHeight,CurView->hDC, 0,0, SRCCOPY);
 					hBitmapTemp = SelectObject (hDCMem,hBitmap);
 					lbits = bm.bmHeight*bm.bmWidthBytes;
-					hBits = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,lbits);
+					hBits = GSSiGlobAlloc(GAIDNO 1458,GMEM_MOVEABLE,lbits);
 					pBits = (LPBYTE)GlobalLock (hBits);
 					GetBitmapBits(hBitmapTemp,lbits,pBits);
 					bytesperpixel = bm.bmBitsPixel / 8;
@@ -3519,7 +3519,7 @@ GSSiExitProg (1330);
 		{
 			short SaveNumVehicles=NumVehicles; 
 			BOOL	SaveIPL=IgnorePrevLayers;
-			HANDLE	hSaveVis = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,sizeof(VISLIST));
+			HANDLE	hSaveVis = GSSiGlobAlloc(GAIDNO 1459,GMEM_MOVEABLE,sizeof(VISLIST));
 			LPVISLIST	pSaveVis = GlobalLock (hSaveVis);
 			BOOL	UseSymbolWidth;
 

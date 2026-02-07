@@ -6455,7 +6455,7 @@ BOOL GMDCloseJournal (LPSTR FileName)
 
 BOOL TransferCacheBlocks (int BlockID,HANDLE FidFrom,HANDLE FidTo,HFILE FidNetTransfer,int BlockSize,HWND hWndProgress,int TotBlocksToGet,int nseqblocks,int nblocks)
 {
-	HANDLE	hMem = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,BlockSize*nseqblocks);
+	HANDLE	hMem = GSSiGlobAlloc(GAIDNO 2062,GMEM_MOVEABLE,BlockSize*nseqblocks);
 	LPBYTE	pBlockData = GlobalLock (hMem);
 	int		FromLoc, ToLoc;
 	long	nBytes;
@@ -7485,7 +7485,7 @@ BOOL GMDFunctions (int nArgs,LPSTR *Arg,LPSTR OutLoc)
 					{
 						long nRead, didRead, totLen, curLoc, lastLoc,index;
 #define BUFFERSIZE USHRT_MAX
-						HANDLE hbuf = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, BUFFERSIZE);
+						HANDLE hbuf = GSSiGlobAlloc(GAIDNO 2063, GMEM_MOVEABLE, BUFFERSIZE);
 						LPSTR pbuf = GlobalLock(hbuf);
 
 						lpGWDHead->SplitLengthRequested = splitLen;
@@ -9029,7 +9029,7 @@ int NumBytesDifferent (LPSTR File1,LPSTR File2)
 	UINT	i;
 	int		nRead1, nRead2, minRead;
 	BOOL	SaveAllowCache = AllowCache;
-	HANDLE	hMem = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,BlockSize*2);
+	HANDLE	hMem = GSSiGlobAlloc(GAIDNO 2064,GMEM_MOVEABLE,BlockSize*2);
 	LPBYTE	pBuf1 = GlobalLock (hMem);
 	LPBYTE	pBuf2 = pBuf1 + BlockSize;
 

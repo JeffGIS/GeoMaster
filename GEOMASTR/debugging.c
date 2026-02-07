@@ -463,7 +463,7 @@ BOOL FAR PASCAL DEBUGGERMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARA
                         i = GetDlgItemText (hWndDlg,IDB_VALUETODISPLAY1,DisplayValue,sizeof(DisplayValue)-1);
 						if (i && DisplayValue[i-1] == '\n')
 						{
-							 hDisplay = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,4096);
+							 hDisplay = GSSiGlobAlloc(GAIDNO 1946,GMEM_MOVEABLE,4096);
 							 pDisplay = GlobalLock (hDisplay);
 							 strcpy (pDisplay,DisplayValue);
 							 doDebug=FALSE;
@@ -659,7 +659,7 @@ void AtBreakPoint (LPSTR Args,int bploc)
 
 	if (*BreakCondition)
 	{
-		HANDLE hCond = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,4096);
+		HANDLE hCond = GSSiGlobAlloc(GAIDNO 1947,GMEM_MOVEABLE,4096);
 		LPSTR pCond = GlobalLock (hCond);
 
 		strcpy (pCond,BreakCondition);
@@ -728,7 +728,7 @@ void SetFunctionDBOut(LPSTR OutLoc)
 		int lnOut = strlen(OutLoc);
 		LPSTR pIn = GlobalLock(hShowFunIn);
 		int lnIn = strlen(pIn);
-		HANDLE hStr = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, lnIn + lnOut + 256);
+		HANDLE hStr = GSSiGlobAlloc(GAIDNO 1948, GMEM_MOVEABLE, lnIn + lnOut + 256);
 		LPSTR pStr = GlobalLock(hStr);
 		sprintf(pStr, "In: %s\nOut: %s", pIn, OutLoc);
 		MessageBox(0, pStr, "Function In/Out", MB_OK);

@@ -1644,7 +1644,7 @@ GSSiExitProg (445);
                    	 	LPSTR pMacro;
                    	 	
                    	 	ConvertTAGValues = 1;
-                   	 	hConvertTAGMacro = GSSiGlobAlloc(GAIDNO 0,GMEM_MOVEABLE,256);
+                   	 	hConvertTAGMacro = GSSiGlobAlloc(GAIDNO 2058,GMEM_MOVEABLE,256);
                    	 	pMacro = GlobalLock (hConvertTAGMacro); 
                    	 	sprintf (pMacro,"$MACRO(%s)",str);
                    	 	GlobalUnlock (hConvertTAGMacro);
