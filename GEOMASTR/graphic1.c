@@ -5001,7 +5001,7 @@ Top:
 Next:
 	if (DisplayPartialBuffer)
 		ShowBufferedScreen (TRUE,TRUE,0,0);
-    ImediateProcessing (Imediate,2);
+    ImediateProcessing (ImediateIn,2);
 Exit:    
 	if (!idTimer && !IsRectEmpty (&MainRect))
 	{

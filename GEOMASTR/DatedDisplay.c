@@ -555,7 +555,7 @@ BOOL DisplayDatedOrthos(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam, s
 				case 4: //wait for redisplay to complete
 					KillTimer(hWnd, timerID);
 					windowToNotifyOnRedisplay = hWnd;
-					sprintf(txt, "$ZOOM(POINTANDSCALE,%f %f,%f,F,1:1);$REDISPLAY(T);", CurView->MidPointW.x, CurView->MidPointW.y, maxResolution);
+					sprintf(txt, "$ZOOM(POINTANDSCALE,%f %f,%f,F,1:1);$REDISPLAY(D);", CurView->MidPointW.x, CurView->MidPointW.y, maxResolution);
 					ProcessText(txt);
 					break;
 				case 1:
@@ -570,7 +570,7 @@ BOOL DisplayDatedOrthos(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam, s
 						CurrentPrompt = PRMT_PANZOOM2;
 						SetPrompt(CurrentPrompt, TRUE);
 						SetCurs(0, FALSE);
-						sprintf(txt, "[ORTHODATE]=%s;$ZOOM(POINTANDSCALE,%f %f,%f,F,1:1);$REDISPLAY(T);", orthoDates[0], CurView->MidPointW.x, CurView->MidPointW.y, CurView->Scale);
+						sprintf(txt, "[ORTHODATE]=%s;$ZOOM(POINTANDSCALE,%f %f,%f,F,1:1);$REDISPLAY(D);", orthoDates[0], CurView->MidPointW.x, CurView->MidPointW.y, CurView->Scale);
 						SaveMapServerTrace("SND0", nDatesReturned + 1, txt);
 						SendBackgroundMapServerCommand(hWndDatedOrthos, hBackGroundServer, txt, MAKELPARAM(1, CurView->ID));
 					}
@@ -707,7 +707,7 @@ BOOL DisplayDatedOrthos(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam, s
 			CurrentPrompt = PRMT_PANZOOM2;
 			SetPrompt(CurrentPrompt, TRUE);
 			SetCurs(0, FALSE);
-			sprintf(txt, "[ORTHODATE]=%s;$ZOOM(POINTANDSCALE,%f %f,%f,F,1:1);$REDISPLAY(T);", orthoDates[nDatesReturned], CurView->MidPointW.x, CurView->MidPointW.y, CurView->Scale);
+			sprintf(txt, "[ORTHODATE]=%s;$ZOOM(POINTANDSCALE,%f %f,%f,F,1:1);$REDISPLAY(D);", orthoDates[nDatesReturned], CurView->MidPointW.x, CurView->MidPointW.y, CurView->Scale);
 			SaveMapServerTrace("SND1", nDatesReturned + 1, txt);
 			int ID = nDatesReturned + 1;
 			SendBackgroundMapServerCommand(hWndDatedOrthos, hBackGroundServer, txt, MAKELPARAM(ID, CurView->ID));
@@ -732,7 +732,7 @@ BOOL DisplayDatedOrthos(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam, s
 			if (nDatesReturned < nDatesSelected)
 			{
 				//sprintf(txt, "[ORTHODATE]=%s;$REDISPLAY(T)", orthoDates[id-1]);
-				sprintf(txt, "[ORTHODATE]=%s;$ZOOM(POINTANDSCALE,%f %f,%f,F,1:1);$REDISPLAY(T);", orthoDates[nDatesReturned], CurView->MidPointW.x, CurView->MidPointW.y, CurView->Scale);
+				sprintf(txt, "[ORTHODATE]=%s;$ZOOM(POINTANDSCALE,%f %f,%f,F,1:1);$REDISPLAY(D);", orthoDates[nDatesReturned], CurView->MidPointW.x, CurView->MidPointW.y, CurView->Scale);
 				SaveMapServerTrace("SND2", nDatesReturned + 1, txt);
 				SendBackgroundMapServerCommand(hWnd, hBackGroundServer, txt, MAKELPARAM(nDatesReturned + 1, CurView->ID));
 			}

@@ -1957,7 +1957,7 @@ GSSiExitProg (1350);
 			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
 			if (*Arg[1] == 'D')
 			{
-				int delay = 1500;
+				int delay = 1000;
 				LPSTR pColon = strrchr(Arg[1], ':');
 				if (pColon)
 				{

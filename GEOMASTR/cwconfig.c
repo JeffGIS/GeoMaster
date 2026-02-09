@@ -2582,7 +2582,7 @@ LONG FAR PASCAL WndProcGeoMaster(HWND hWnd, UINT Message, WPARAM wParam, LPARAM 
  DWORD		lCursorLoc;
  POINT		CursorLoc; 
  HBRUSH		BkBrush;  
- BOOL		RedisplayMenu;
+ BOOL		RedisplayMenu=0;
  int		SDC, i, SaveDrive;
 short	vpid;  
 char	txt[32];
@@ -4461,7 +4461,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
 				{
 					CurView->HaveBounds = TRUE;
 					CurView->WindowIsZoomed = TRUE;
-					ProcessText("$REDISPLAY(T)");
+					ProcessText("$REDISPLAY(D)");
 					break;
 				}
             	 RedisplayMenu = TRUE;
@@ -6375,7 +6375,7 @@ GSSiExitProg (438);
 	case WM_PRINT:
 		for (i = 0; i < *pNumViewports; i++)
 			pViewports[i]->hDC = (HDC)wParam;
-		ProcessText("$REDISPLAY(T)");
+		ProcessText("$REDISPLAY(D)");
 
 		break;
 	case	WM_PRINTCLIENT:
