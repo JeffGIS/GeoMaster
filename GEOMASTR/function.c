@@ -2821,6 +2821,24 @@ SetVis:
 
 			goto RtnFalse;
 		}
+		case 361://$MSG(message,opt(0=create window,1=destroy window),vp(0 = current,-1 = main window,+ is vpid))
+		{
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
+			HWND hMess;
+			int wid = atoi(Arg[3]);
+			if (atoi(Arg[2]) == 0)
+			{
+				hMess = CreateGoogleMessage(Arg[1],wid);
+				lltoa((LONGLONG)hMess,OutLoc, 10);
+				goto Rtnl;
+			}
+			else
+			{
+				hMess = (HWND)atoll(Arg[1]);
+				DestroyWindow(hMess);
+				goto RtnTrue;
+			}
+		}
 
 		case 401: /* $ZOOM(HLT,hltnum,offset,fromlimits,immediate)
 						   ITEM,TAG or Refno,area offset,viewport offset,immediate,vpname(opt))	

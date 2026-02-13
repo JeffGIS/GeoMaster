@@ -58,7 +58,7 @@ static SDWORD	cbScale;
 int FindType(LPSTR szTypeName); 
 UDWORD display_size(SWORD coltype, UDWORD collen, UCHAR *colname);
 
-int FindType(char *szTypeName)
+int FindType(LPSTR szTypeName)
 {
 if(_fstrnicmp (szTypeName,"Char",4) ==0)          return SQL_VARCHAR;
 if(_fstrnicmp (szTypeName,"TEXT",4) ==0)          return SQL_VARCHAR;

@@ -3720,6 +3720,9 @@ GSSiExitProg (532);
 		case 423:
 			allowDupDesc = atob(Value);
 			break;
+		case 424:
+			StartupBounds = atobounds(Value, &err);
+			break;
 		default:
 			break;
 	}
@@ -4161,6 +4164,7 @@ void CreateInternalGlobals (void)
 	AllocateTypeVar("%GMDUPDATEDEBUG", 421, FALSE);
 	AllocateTypeVar("%ZOOMTOPROJECT", 422, FALSE);
 	AllocateTypeVar("%ALLOWDUPDESC", 423, FALSE);
+	AllocateTypeVar("%STARTUPBOUNDS", 424, FALSE);
 
 //	AllocateTypeVar("%DL",191,FALSE);
 	
@@ -5463,6 +5467,10 @@ GSSiExitProg (533);
 		case 423:
 			btoa(allowDupDesc, OutStr);
 			break;
+		case 424:
+			boundstoa(OutStr, &StartupBounds);
+			break;
+
 	}
 	GlobalUnlock (hGlobal);
 {

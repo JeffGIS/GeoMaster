@@ -1659,6 +1659,7 @@ short	nInSnapList=0;
 PICKDATA    SnapList[2];
 MNMXCORD	MultiLevelBounds[MAXMULTILEVELZOOM]; 
 MNMXCORD ProjectBounds = { 0 };
+MNMXCORD StartupBounds = { 0 };
 long	CurSegmentAdd=0;
 long	CurSegmentAddInc=0;
 long	NewAdd=0;

@@ -2097,7 +2097,7 @@ BOOL WordIndexRemoveDups(LPSTR File);
 short LayerFileType (short Layer);
 short MapFileType(LPSTR InName, LPSTR fileName, LPSTR tableName);
 BOOL RefConnectTableCreate(LPMNMXCORD pBounds);
-HWND CreateGoogleMessage(PTSTR pszText);
+HWND CreateGoogleMessage(PTSTR pszText,int windowID);
 BOOL RegisterPopupMessageClass(BOOL UnRegister);
 BOOL RegisterSmallMessageClass(BOOL UnRegister);
 void UpdateSmallMessage(HWND hwndTip, LPSTR pszText);

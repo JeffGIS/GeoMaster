@@ -4435,7 +4435,7 @@ GotCloseFilehSQL:
 						DestroyWindow(MessageWindow);
 					MessageWindow = 0;
 					if (*Arg[2])
-						MessageWindow = CreateGoogleMessage(Arg[2]);
+						MessageWindow = CreateGoogleMessage(Arg[2],0);
 					break;
 				default:
 					goto RtnFalse;

@@ -1044,7 +1044,7 @@ BOOL CreateAllSizes (HWND hWndDlg)
 	LPSTR	pComma;
 	HFILE Fid = GSSiOpenFile ("[%%DL]configs\\savesizes.txt",0,OF_READ);
 	HDC		OldDC, hMemDC;
-	MNMXCORD	LastBound = LastBounds;
+	MNMXCORD	LastBound = StartupBounds;
 	int	SaveBufferedScreen = BufferedScreen;
 	RECT	SaveConfigDisplayRect = ConfigDisplayRect;
 	HFILE	FidTemp;

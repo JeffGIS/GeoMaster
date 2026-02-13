@@ -88,6 +88,7 @@ int	GetFunctionID3 (LPSTR str)
 			if (!_fstrnicmp(str, "TIN", 3)) return 358;
 			if (!_fstrnicmp(str, "TCP", 3)) return 359;
 			if (!_fstrnicmp(str, "SHP", 3)) return 360;
+			if (!_fstrnicmp(str, "MSG", 3)) return 361;
 			return 0;
 }
 int	GetFunctionID4 (LPSTR str)

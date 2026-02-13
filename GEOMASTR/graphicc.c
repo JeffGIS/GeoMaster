@@ -4063,9 +4063,10 @@ BOOL RegisterSmallMessageClass(BOOL UnRegister)
 	return (RegisterClass(&wc));
 }
 
-HWND CreateGoogleMessage(PTSTR pszText)
+HWND CreateGoogleMessage(PTSTR pszText,int windowID)
 {
 	RegisterPopupMessageClass(FALSE);
+	LPVIEWPORT	SaveVP = CurView;
 
 	int width = 300;
 	int height = 38;
@@ -4074,8 +4075,18 @@ HWND CreateGoogleMessage(PTSTR pszText)
 	{
 		width = strlen(pszText) * 40;
 	}
-	x = CurView->ScreenRect.left + (RECTWIDTH(&CurView->ScreenRect) - width) / 2;
-	y = CurView->ScreenRect.top + (RECTHEIGHT(&CurView->ScreenRect) - height) / 2;
+	RECT rect;
+	if (windowID < 0)
+		GetWindowRect(hWndMain, &rect);
+	else if (windowID == 0)
+		rect = CurView->ScreenRect;
+	else
+	{
+		SetViewport(windowID);
+		rect = CurView->ScreenRect;
+	}
+	x = rect.left + (RECTWIDTH(&rect) - width) / 2;
+	y = rect.top + (RECTHEIGHT(&rect) - height) / 2;
 
 	HWND hwndTip = CreateWindowEx(WS_EX_TOPMOST, "PopupMessageWindowClass", "PopupMessage", WS_BORDER | WS_VISIBLE | WS_POPUP,
 		x, y, width, height,
@@ -4090,6 +4101,7 @@ HWND CreateGoogleMessage(PTSTR pszText)
 	if (pszText && *pszText)
 		SetWindowText(hwndTip, pszText);
 	UpdateWindow(hwndTip);
+	SetCurView(SaveVP);
 
 	return hwndTip;
 }
@@ -4175,7 +4187,7 @@ BOOL GetGoogleMapFile(int type)
 	{
 		int attempts = 0;
 #define MAX_ATTEMPTS	3
-		HWND hMess = CreateGoogleMessage("Getting Map from Google");
+		HWND hMess = CreateGoogleMessage("Getting Map from Google",0);
 		RemoveBMPFromCache32(CurView->CurrentGoogleImage);
 		TryAgain:
 		rtn = URLToFile(cmd, CurView->CurrentGoogleImage);
@@ -6782,11 +6794,17 @@ BOOL CreateWordIndex (LPSTR FromFile,LPSTR FromField,LPSTR ToFile,BOOL Append)
 	    LPOPENFILEDATA  FilePtr = (LPOPENFILEDATA) GlobalLock (SQLPtr->OFHandle);
 	    long	FileOffset=SQLPtr->Offset;
 		char Field2[512];
+		char pidField[32] = "[PID]";
     	
     	GlobalUnlock (SQLPtr->OFHandle);
     	GlobalUnlock (hDB);
 		strcpy (Field2,FromField);
+		ExpandText(pidField);
+		if (!stricmp(pidField, "2302924110279"))
+			ii = 1;
 		ExpandText (Field2); 
+		if (!stricmp(Field2, "403 6"))
+			ii = 1;
 		strncpy(Field, Field2, sizeof(Field));
 		nParts = GetNameParts (Field,pWord,WordLen,32);
 		for (iword=0;iword < nParts;iword++)

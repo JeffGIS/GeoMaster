@@ -1791,6 +1791,7 @@ extern	short	nInSnapList;
 extern	PICKDATA SnapList[2];
 extern	MNMXCORD	MultiLevelBounds[MAXMULTILEVELZOOM];   
 extern  MNMXCORD ProjectBounds;
+extern  MNMXCORD StartupBounds;
 extern	long	CurSegmentAdd;
 extern	long	CurSegmentAddInc;
 extern	long	NewAdd;
