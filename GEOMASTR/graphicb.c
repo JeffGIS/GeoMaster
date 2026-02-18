@@ -5542,7 +5542,7 @@ BOOL FAR PASCAL OWNERLOCMsgProc2(HWND hWndDlg, UINT Message, WPARAM wParam, LPAR
     	//hSaveBM = EnterBlockingWindow (hWndDlg);
 		First = TRUE;
 		SendDlgItemMessage (hWndDlg,IDC_AUTOHIGHLIGHT,BM_SETCHECK,AutoHighlight,0L);
-		GetGlobalCVal ("[%OWNERTABS]",str,"250 540 2000");
+		GetGlobalCVal ("[%OWNERTABS]",str,"300 600 2000");
 		nTabs = GetIntsFromList (str,&hList); 
 		if (nTabs)
 		{
@@ -5550,7 +5550,7 @@ BOOL FAR PASCAL OWNERLOCMsgProc2(HWND hWndDlg, UINT Message, WPARAM wParam, LPAR
 			SendDlgItemMessage (hWndDlg,IDC_OWNERLIST,LB_SETTABSTOPS,nTabs,(LPARAM)pTabs);
 			GSSiGlobUlFree (&hList);
 		}
-		GetGlobalCVal ("[%PROPERTYTABS]",str,"80 300 450 2000");
+		GetGlobalCVal ("[%PROPERTYTABS]",str,"80 350 500 2000");
 		nTabs = GetIntsFromList (str,&hList); 
 		if (nTabs)
 		{
