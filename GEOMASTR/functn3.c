@@ -5654,7 +5654,8 @@ GotCloseFilehSQL:
 					fputstring(Line, fid);
 					hBT = (HANDLE)atoi(Arg[2]);
 					vlen = GetBTKeyLen(hBT);
-					LPSTR value = malloc(vlen + 4);
+					LPSTR countvalue = malloc(vlen + 8);
+					LPSTR value = countvalue + 4;
 					if (abs(sortOn) > 1)
 					{
 						HANDLE hBT2 = CreateUniqueList2(vlen, 0);
@@ -5665,15 +5666,17 @@ GotCloseFilehSQL:
 							value[vlen] = 0;
 							if (sortOn == -2)
 								count = -count;
-							BT_PUT(hBT2, (LPSTR)&count, value);
+							LPINT pCount = (LPINT)countvalue;
+							*pCount = count;
+							BT_PUT(hBT2, countvalue, value);
 						}
 					
 						pos = BT_FIRST;
-						while (!BT_FIND(hBT2,(LPSTR) &count, pos, BT_ANY,value))
+						while (!BT_FIND(hBT2,(LPSTR)countvalue, pos, BT_ANY,value))
 						{
 							pos = BT_NEXT;
 							value[vlen] = 0;
-							sprintf(Line, "%s\t%i", value, abs(count));
+							sprintf(Line, "%s\t%i", value, abs(*(LPINT)countvalue));
 							fputstring(Line, fid);
 							rtn = TRUE;
 						}
@@ -5691,8 +5694,8 @@ GotCloseFilehSQL:
 							rtn = TRUE;
 						}
 					}
-					free(value);
 					GSSiClose(fid);
+					free(countvalue);
 				}
 				goto Rtnrtn;
 			}

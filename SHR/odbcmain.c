@@ -151,7 +151,10 @@ HANDLE CreateUniqueList2(int length, LPSTR Name)
 	BTVar[0].BT_VARTYP = BT_INT4;
 	BTVar[0].BT_VARLEN = 4;
 	BTVar[0].BT_VAROFF = 0;
-	BT_CREATE(Name, min(200, length), FALSE, 1, 1, (LPBTVARDESC)BTVar, FALSE, 0, 0, FALSE);
+	BTVar[1].BT_VARTYP = BT_CHAR;
+	BTVar[1].BT_VARLEN = min(200, length);
+	BTVar[1].BT_VAROFF = 4;
+	BT_CREATE(Name, min(200, length), FALSE, 2, 2, (LPBTVARDESC)BTVar, FALSE, 0, 0, FALSE);
 	hBT = BT_OPEN(Name, 0, BT_WRITE, 0);
 	GSSiGlobUlFree(&hMem);
 	return hBT;
