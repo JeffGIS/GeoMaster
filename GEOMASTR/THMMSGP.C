@@ -3622,6 +3622,9 @@ GSSiExitProg (1330);
 						MaskOffsetLine = CurTheme->AddCommas;
 		            	if (MaskOffsetLine || OutlineZoomArea)
 		            		GetMaskArea = TRUE;
+						else
+							GetMaskArea = FALSE;
+
 						SetMaskArea(NumPicked,0,1);
 						DisableHalt = TRUE; 
 						DisplayCycle--; 

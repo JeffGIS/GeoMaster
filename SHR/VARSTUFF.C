@@ -2709,6 +2709,11 @@ GSSiExitProg (532);
 		
 		case 104:
 			MaskOffsetLine = atob (Value);
+			if (MaskOffsetLine || OutlineZoomArea)
+				GetMaskArea = TRUE;
+			else
+				GetMaskArea = FALSE;
+
 			break;
 		
 		case 105:  
@@ -2832,10 +2837,20 @@ GSSiExitProg (532);
 		
 		case 132:
 			MaskOffsetLine = atob (Value);
+			if (MaskOffsetLine || OutlineZoomArea)
+				GetMaskArea = TRUE;
+			else
+				GetMaskArea = FALSE;
+
 			break;
 		
 		case 133:
 			OutlineZoomArea = atob (Value);
+			if (MaskOffsetLine || OutlineZoomArea)
+				GetMaskArea = TRUE;
+			else
+				GetMaskArea = FALSE;
+
 			break;
 		
 		case 134:

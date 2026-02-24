@@ -5645,7 +5645,7 @@ GotCloseFilehSQL:
 			{
 				int sortOn = atoi(Arg[4]);
 				int count;
-				rtn = FALSE;
+				int rtn = 0;
 				HFILE fid = GSSiOpenFile(Arg[3], 0, OF_CREATE);
 				if (fid != HFILE_ERROR)
 				{
@@ -5678,7 +5678,7 @@ GotCloseFilehSQL:
 							value[vlen] = 0;
 							sprintf(Line, "%s\t%i", value, abs(*(LPINT)countvalue));
 							fputstring(Line, fid);
-							rtn = TRUE;
+							rtn++;
 						}
 						BT_CLOSE(hBT2);
 					}
@@ -5691,13 +5691,14 @@ GotCloseFilehSQL:
 							value[vlen] = 0;
 							sprintf(Line, "%s\t%i", value, count);
 							fputstring(Line, fid);
-							rtn = TRUE;
+							rtn++;
 						}
 					}
 					GSSiClose(fid);
 					free(countvalue);
 				}
-				goto Rtnrtn;
+				itoa(rtn, OutLoc, 10);
+				goto Rtnl;
 			}
 			else if (!stricmp(Arg[1], "GET"))
 			{

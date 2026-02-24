@@ -2925,9 +2925,13 @@ Exit:
 		}
 		GSSiGlobUlFree (&hTemp);
 	} 
+	if (Final && *pNumViewports && !ConfigLevel)
+	{
+		for (int i = 0; i < *pNumViewports; i++)
+			ProcessText(pViewports[i]->EndDisplayCmd);
+	}
 	if (Final && *pNumViewports && CurView && !ConfigLevel)
 	{
-		ProcessText (CurView->EndDisplayCmd);
 		DisplayAllToolbars (2);
 		ClearToolbarTrackEvents (hWndMain);
 	}
