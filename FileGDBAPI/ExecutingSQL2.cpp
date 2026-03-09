@@ -22,6 +22,7 @@
 #include "FileGDBAPI.h"
 
 #define LONGWSDEF (L"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    ");
+#define GAIDNO
 
 typedef long *LPLONG;
 typedef short *LPSHORT;
@@ -304,7 +305,7 @@ int StringToWString(std::wstring &ws, const std::string &s)
 }
 HANDLE stringToMem (string str)
 {
-	HANDLE	hMem = GlobalAlloc (GMEM_MOVEABLE,str.size()+1);
+	HANDLE	hMem = GSSiGlobAlloc(GAIDNO 2056,GMEM_MOVEABLE,str.size()+1);
 	LPSTR	pMem = (LPSTR)GlobalLock (hMem);
 
 	strcpy (pMem,str.c_str());

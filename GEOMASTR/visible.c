@@ -2074,20 +2074,19 @@ OFSTRUCTGM	OFStruct;
 	return TRUE;
 }
 
-
-
-
-
-
-
-
 BOOL SetLayerVisibility (LPSTR Name,short setopt)
 {   
 	short	i, WantVP=-1;
 	BOOL	rtn=FALSE;
+	BOOL	turnOffAuto = TRUE;
 	 
 	if (!CurView || !CurVis)
 		return FALSE;
+	if (setopt < 0)
+	{
+		setopt = -setopt;
+		turnOffAuto = FALSE;
+	}
 	if (*Name == '#')
 	{
 		i = atoi (Name+1);
@@ -2122,7 +2121,8 @@ BOOL SetLayerVisibility (LPSTR Name,short setopt)
 				CurVis->FileIsVisible[i] = setopt;
 			rtn = TRUE;   
 			Pickability = FALSE;
-		    TurnOffAutoVis (TRUE);		   
+		    if (turnOffAuto) 
+				TurnOffAutoVis (TRUE);		   
 		}
 	}
 	return rtn;
@@ -2135,7 +2135,14 @@ BOOL SetLayerSymbolsVisibility (LPSTR Name,short setopt)
 	HFILE	Fid;  
 	char	FileName[MAX_PATH], str[130];   
 	short	idesc;
-	
+	BOOL	turnOffAuto = TRUE;
+
+	if (setopt < 0)
+	{
+		setopt = -setopt;
+		turnOffAuto = FALSE;
+	}
+
 	GSSiGetTempFileName (0,"gms",0,FileName); 
 	Fid = GSSiOpenFile (FileName,0,OF_CREATE);
 	for (i = 0; i < CurView->NumFiles; i++)
@@ -2164,7 +2171,8 @@ BOOL SetLayerSymbolsVisibility (LPSTR Name,short setopt)
 	GSSiClose2 (&Fid);
 	GSSiRemove (FileName);
     Pickability = FALSE;
-	TurnOffAutoVis (TRUE);		   
+	if (turnOffAuto)
+		TurnOffAutoVis (TRUE);
 	rtn = TRUE;
 	return rtn;
 }   
