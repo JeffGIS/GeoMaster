@@ -21,8 +21,6 @@ typedef struct {
 		BOOL	Removed;
 	} HELP1DATA;
 
-static	char	HouseBufSave[16]="";
-static	char	StreetBufSave[32]="";
 static short	AddTol=0;
 static	long	NumNoMatch, NumInvalid, NumMultMatch; 
 static DPOINT	NetPoint;

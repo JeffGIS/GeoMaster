@@ -1235,6 +1235,8 @@ long	AddRefno=0;
 long	AddressFrame;
 BOOL	noDupDesc = FALSE;
 BOOL	allowDupDesc = FALSE;
+char	HouseBufSave[16] = "";
+char	StreetBufSave[32] = "";
 long	MaxDisplayPoints=LONG_MAX/2;
 long	MostPoints=0;
 double	PickLimit=DBL_MAX;

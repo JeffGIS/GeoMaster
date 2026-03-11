@@ -191,6 +191,8 @@ extern BOOL			DoTime;
 extern double		pickedAreaOffsetDist;
 extern BOOL			noDupDesc;
 extern BOOL			allowDupDesc;
+extern char			HouseBufSave[16];
+extern char			StreetBufSave[32];
 extern BOOL			ContinueProcessing;  
 extern BOOL			DisplayFailure;
 extern BOOL			ForceHalfTone;

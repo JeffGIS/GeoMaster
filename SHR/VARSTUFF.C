@@ -3738,6 +3738,12 @@ GSSiExitProg (532);
 		case 424:
 			StartupBounds = atobounds(Value, &err);
 			break;
+		case 425:
+			strncpy(HouseBufSave,Value,sizeof(HouseBufSave)-1);
+			break;
+		case 426:
+			strncpy(StreetBufSave,Value,sizeof(StreetBufSave)-1);
+			break;
 		default:
 			break;
 	}
@@ -4180,6 +4186,8 @@ void CreateInternalGlobals (void)
 	AllocateTypeVar("%ZOOMTOPROJECT", 422, FALSE);
 	AllocateTypeVar("%ALLOWDUPDESC", 423, FALSE);
 	AllocateTypeVar("%STARTUPBOUNDS", 424, FALSE);
+	AllocateTypeVar("%HOUSEBUF", 425, FALSE);
+	AllocateTypeVar("%STREETBUF", 426, FALSE);
 
 //	AllocateTypeVar("%DL",191,FALSE);
 	
@@ -5485,6 +5493,13 @@ GSSiExitProg (533);
 		case 424:
 			boundstoa(OutStr, &StartupBounds);
 			break;
+		case 425:
+			strcpy(OutStr,HouseBufSave);
+			break;
+		case 426:
+			strcpy(OutStr, StreetBufSave);
+			break;
+
 
 	}
 	GlobalUnlock (hGlobal);
