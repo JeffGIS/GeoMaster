@@ -3,14 +3,17 @@
   "WorkspaceRootPath": "C:\\GSSi\\source\\repos\\geomaster2019\\GEOMASTR\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{1B60D38A-19E2-4C09-BE1B-70138EF8338F}|geomastr.vcxproj|C:\\GSSi\\source\\repos\\geomaster2019\\SHR\\VARSTUF2.C||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1B60D38A-19E2-4C09-BE1B-70138EF8338F}|geomastr.vcxproj|C:\\GSSi\\Source\\repos\\geomaster2019\\SHR\\VARSTUFF.C||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{1B60D38A-19E2-4C09-BE1B-70138EF8338F}|geomastr.vcxproj|C:\\GSSi\\source\\repos\\geomaster2019\\MrSid\\Raster_DSDK\\include\\lt_platform.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{1B60D38A-19E2-4C09-BE1B-70138EF8338F}|geomastr.vcxproj|C:\\GSSi\\source\\repos\\geomaster2019\\GEOMASTR\\graphic7.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{1B60D38A-19E2-4C09-BE1B-70138EF8338F}|geomastr.vcxproj|solutionrelative:graphic7.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{1B60D38A-19E2-4C09-BE1B-70138EF8338F}|geomastr.vcxproj|C:\\GSSi\\Source\\repos\\geomaster2019\\SHR\\VARSTUFF.C||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{1B60D38A-19E2-4C09-BE1B-70138EF8338F}|geomastr.vcxproj|C:\\GSSi\\source\\repos\\geomaster2019\\GEOMASTR\\cwconfig.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
@@ -143,6 +146,19 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
+              "Title": "VARSTUF2.C",
+              "DocumentMoniker": "C:\\GSSi\\source\\repos\\geomaster2019\\SHR\\VARSTUF2.C",
+              "RelativeDocumentMoniker": "..\\SHR\\VARSTUF2.C",
+              "ToolTip": "C:\\GSSi\\source\\repos\\geomaster2019\\SHR\\VARSTUF2.C",
+              "RelativeToolTip": "..\\SHR\\VARSTUF2.C",
+              "ViewState": "AgIAAO8CAAAAAAAAAAAAAM0DAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000423|",
+              "WhenOpened": "2026-03-20T21:12:47.154Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
               "Title": "lt_platform.h",
               "DocumentMoniker": "C:\\GSSi\\source\\repos\\geomaster2019\\MrSid\\Raster_DSDK\\include\\lt_platform.h",
               "RelativeDocumentMoniker": "..\\MrSid\\Raster_DSDK\\include\\lt_platform.h",
@@ -155,7 +171,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 33,
+              "DocumentIndex": 34,
               "Title": "xstring",
               "DocumentMoniker": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\include\\xstring",
               "RelativeDocumentMoniker": "..\\..\\..\\..\\..\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\include\\xstring",
@@ -167,7 +183,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 34,
+              "DocumentIndex": 35,
               "Title": "sqlite3.h",
               "DocumentMoniker": "C:\\GSSi\\source\\repos\\geomaster2019\\SQLite3 - Copy\\sqlite3.h",
               "RelativeDocumentMoniker": "..\\SQLite3 - Copy\\sqlite3.h",
@@ -179,7 +195,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 26,
+              "DocumentIndex": 27,
               "Title": "VARSTUFF.C",
               "DocumentMoniker": "C:\\Users\\Jeff\\source\\repos\\geomaster2019\\SHR\\VARSTUFF.C",
               "RelativeDocumentMoniker": "..\\..\\..\\..\\..\\Users\\Jeff\\source\\repos\\geomaster2019\\SHR\\VARSTUFF.C",
@@ -190,7 +206,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 19,
+              "DocumentIndex": 20,
               "Title": "GraphMsgProc.c",
               "DocumentMoniker": "C:\\GSSi\\source\\repos\\geomaster2019\\GEOMASTR\\GraphMsgProc.c",
               "RelativeDocumentMoniker": "GraphMsgProc.c",
@@ -202,7 +218,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 17,
+              "DocumentIndex": 18,
               "Title": "arcdot.c",
               "DocumentMoniker": "C:\\GSSi\\Source\\repos\\geomaster2019\\solar_calculator\\Version2\\arcdot.c",
               "RelativeDocumentMoniker": "..\\solar_calculator\\Version2\\arcdot.c",
@@ -214,7 +230,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 6,
               "Title": "CONVRT32.C",
               "DocumentMoniker": "C:\\GSSi\\source\\repos\\geomaster2019\\GEOMASTR\\CONVRT32.C",
               "RelativeDocumentMoniker": "CONVRT32.C",
@@ -226,19 +242,20 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 1,
               "Title": "VARSTUFF.C",
               "DocumentMoniker": "C:\\GSSi\\Source\\repos\\geomaster2019\\SHR\\VARSTUFF.C",
               "RelativeDocumentMoniker": "..\\SHR\\VARSTUFF.C",
               "ToolTip": "C:\\GSSi\\Source\\repos\\geomaster2019\\SHR\\VARSTUFF.C",
               "RelativeToolTip": "..\\SHR\\VARSTUFF.C",
-              "ViewState": "AgIAAAYTAAAAAAAAAAAAAAYTAAAdAAAAAAAAAA==",
+              "ViewState": "AgIAANMaAAAAAAAAAAAAAOUaAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000423|",
-              "WhenOpened": "2026-03-18T19:49:50.837Z"
+              "WhenOpened": "2026-03-18T19:49:50.837Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 5,
               "Title": "GM32.c",
               "DocumentMoniker": "C:\\GSSi\\Source\\repos\\geomaster2019\\GM32lib\\GM32.c",
               "RelativeDocumentMoniker": "..\\GM32lib\\GM32.c",
@@ -250,7 +267,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 3,
               "Title": "graphic7.c",
               "DocumentMoniker": "C:\\GSSi\\source\\repos\\geomaster2019\\GEOMASTR\\graphic7.c",
               "RelativeDocumentMoniker": "graphic7.c",
@@ -262,7 +279,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 10,
               "Title": "graphic1.c",
               "DocumentMoniker": "C:\\GSSi\\source\\repos\\geomaster2019\\GEOMASTR\\graphic1.c",
               "RelativeDocumentMoniker": "graphic1.c",
@@ -274,7 +291,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 7,
               "Title": "graphicc.c",
               "DocumentMoniker": "C:\\GSSi\\source\\repos\\geomaster2019\\GEOMASTR\\graphicc.c",
               "RelativeDocumentMoniker": "graphicc.c",
@@ -286,7 +303,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
+              "DocumentIndex": 13,
               "Title": "themes.c",
               "DocumentMoniker": "C:\\GSSi\\source\\repos\\geomaster2019\\GEOMASTR\\themes.c",
               "RelativeDocumentMoniker": "themes.c",
@@ -298,7 +315,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 8,
               "Title": "ExecutingSQL2.cpp",
               "DocumentMoniker": "C:\\GSSi\\Source\\repos\\geomaster2019\\FileGDBAPI\\ExecutingSQL2.cpp",
               "RelativeDocumentMoniker": "..\\FileGDBAPI\\ExecutingSQL2.cpp",
@@ -310,7 +327,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 9,
               "Title": "gwd.c",
               "DocumentMoniker": "C:\\GSSi\\Source\\repos\\geomaster2019\\DB\\gwd.c",
               "RelativeDocumentMoniker": "..\\DB\\gwd.c",
@@ -322,7 +339,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 24,
+              "DocumentIndex": 25,
               "Title": "gmextern.h",
               "DocumentMoniker": "C:\\GSSi\\Source\\repos\\geomaster2019\\INCLUDE\\gmextern.h",
               "RelativeDocumentMoniker": "..\\INCLUDE\\gmextern.h",
@@ -334,7 +351,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 32,
+              "DocumentIndex": 33,
               "Title": "gmvardef.h",
               "DocumentMoniker": "C:\\GSSi\\Source\\repos\\geomaster2019\\INCLUDE\\gmvardef.h",
               "RelativeDocumentMoniker": "..\\INCLUDE\\gmvardef.h",
@@ -346,7 +363,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 16,
+              "DocumentIndex": 17,
               "Title": "cpl_error.cpp",
               "DocumentMoniker": "C:\\GSSi\\Source\\repos\\geomaster2019\\dgnlib\\cpl_error.cpp",
               "RelativeDocumentMoniker": "..\\dgnlib\\cpl_error.cpp",
@@ -358,7 +375,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 11,
               "Title": "SHPFILE.C",
               "DocumentMoniker": "C:\\GSSi\\source\\repos\\geomaster2019\\GEOMASTR\\shpfile.c",
               "RelativeDocumentMoniker": "shpfile.c",
@@ -370,7 +387,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 28,
+              "DocumentIndex": 29,
               "Title": "functn2.c",
               "DocumentMoniker": "C:\\GSSi\\source\\repos\\geomaster2019\\GEOMASTR\\functn2.c",
               "RelativeDocumentMoniker": "functn2.c",
@@ -382,7 +399,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 29,
+              "DocumentIndex": 30,
               "Title": "DatedDisplay.c",
               "DocumentMoniker": "C:\\GSSi\\source\\repos\\geomaster2019\\GEOMASTR\\DatedDisplay.c",
               "RelativeDocumentMoniker": "DatedDisplay.c",
@@ -394,7 +411,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 4,
               "Title": "cwconfig.c",
               "DocumentMoniker": "C:\\GSSi\\source\\repos\\geomaster2019\\GEOMASTR\\cwconfig.c",
               "RelativeDocumentMoniker": "cwconfig.c",
@@ -406,7 +423,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 30,
+              "DocumentIndex": 31,
               "Title": "GRAPHIC5.C",
               "DocumentMoniker": "C:\\GSSi\\source\\repos\\geomaster2019\\GEOMASTR\\GRAPHIC5.C",
               "RelativeDocumentMoniker": "GRAPHIC5.C",
@@ -418,7 +435,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 18,
+              "DocumentIndex": 19,
               "Title": "function.c",
               "DocumentMoniker": "C:\\GSSi\\source\\repos\\geomaster2019\\GEOMASTR\\function.c",
               "RelativeDocumentMoniker": "function.c",
@@ -430,7 +447,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 12,
               "Title": "themes2.c",
               "DocumentMoniker": "C:\\GSSi\\source\\repos\\geomaster2019\\GEOMASTR\\themes2.c",
               "RelativeDocumentMoniker": "themes2.c",
@@ -442,7 +459,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 15,
+              "DocumentIndex": 16,
               "Title": "deltat.c",
               "DocumentMoniker": "C:\\GSSi\\Source\\repos\\geomaster2019\\solar_calculator\\Version2\\deltat.c",
               "RelativeDocumentMoniker": "..\\solar_calculator\\Version2\\deltat.c",
@@ -454,7 +471,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 14,
+              "DocumentIndex": 15,
               "Title": "epsiln.c",
               "DocumentMoniker": "C:\\GSSi\\Source\\repos\\geomaster2019\\solar_calculator\\Version2\\epsiln.c",
               "RelativeDocumentMoniker": "..\\solar_calculator\\Version2\\epsiln.c",
@@ -466,7 +483,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 13,
+              "DocumentIndex": 14,
               "Title": "THMMSGP.C",
               "DocumentMoniker": "C:\\GSSi\\source\\repos\\geomaster2019\\GEOMASTR\\THMMSGP.C",
               "RelativeDocumentMoniker": "THMMSGP.C",
@@ -478,7 +495,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 21,
+              "DocumentIndex": 22,
               "Title": "visible.c",
               "DocumentMoniker": "C:\\GSSi\\source\\repos\\geomaster2019\\GEOMASTR\\visible.c",
               "RelativeDocumentMoniker": "visible.c",
@@ -490,7 +507,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 22,
+              "DocumentIndex": 23,
               "Title": "FGDBStub.c",
               "DocumentMoniker": "C:\\GSSi\\Source\\repos\\geomaster2019\\FileGDBAPI\\FGDBStub.c",
               "RelativeDocumentMoniker": "..\\FileGDBAPI\\FGDBStub.c",
@@ -502,7 +519,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 23,
+              "DocumentIndex": 24,
               "Title": "graphint.h",
               "DocumentMoniker": "C:\\GSSi\\Source\\repos\\geomaster2019\\INCLUDE\\graphint.h",
               "RelativeDocumentMoniker": "..\\INCLUDE\\graphint.h",
@@ -514,7 +531,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 20,
+              "DocumentIndex": 21,
               "Title": "graphic2.c",
               "DocumentMoniker": "C:\\GSSi\\source\\repos\\geomaster2019\\GEOMASTR\\graphic2.c",
               "RelativeDocumentMoniker": "graphic2.c",
@@ -526,7 +543,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 25,
+              "DocumentIndex": 26,
               "Title": "graphic8.c",
               "DocumentMoniker": "C:\\GSSi\\source\\repos\\geomaster2019\\GEOMASTR\\graphic8.c",
               "RelativeDocumentMoniker": "graphic8.c",
@@ -538,7 +555,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 27,
+              "DocumentIndex": 28,
               "Title": "GRAPHIC9.c",
               "DocumentMoniker": "C:\\GSSi\\source\\repos\\geomaster2019\\GEOMASTR\\GRAPHIC9.c",
               "RelativeDocumentMoniker": "GRAPHIC9.c",
@@ -550,7 +567,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 31,
+              "DocumentIndex": 32,
               "Title": "FUNCSUBS.c",
               "DocumentMoniker": "C:\\GSSi\\source\\repos\\geomaster2019\\GEOMASTR\\FUNCSUBS.c",
               "RelativeDocumentMoniker": "FUNCSUBS.c",
