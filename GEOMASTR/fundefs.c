@@ -399,6 +399,7 @@ int	GetFunctionID8 (LPSTR str)
 			if (!_fstrnicmp(str, "FIRSTNON", 8)) return 859;
 			if (!_fstrnicmp(str, "LASTCHAR", 8)) return 860;
 			if (!_fstrnicmp(str, "PERSONAL", 8)) return 861;
+			if (!_fstrnicmp(str, "URLTOMEM", 8)) return 862;
 			return 0;
 }
 int	GetFunctionID9 (LPSTR str)

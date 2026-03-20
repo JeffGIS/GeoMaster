@@ -1498,7 +1498,7 @@ GSSiExitProg (1350);
 			goto RtnFalse;
 		} 
 		
-		case 845: // $FILELIST OutFile, New, SearchLoc, WildCard,SearchSubdir,WantDirectories,nameonly(TF or 0,1,2)
+		case 845: // $FILELIST OutFile, New, SearchLoc, WildCard,SearchSubdir,WantDirectories,nameonly(TF or 0,1,2,3=drop search loc from fullname)
 		{
 			int no;
 			nArgs = GetFunArgs(Args, Arg, 8, &hMem, pBrkPt, bpOffset, bpLen);
@@ -1933,6 +1933,57 @@ GSSiExitProg (1350);
 			st = PersonalStuff(Arg[1],Arg[2],Arg[3], OutLoc);
 			goto Rtnl;
 		}
+
+		case 862: //$URLTOMEM(URL,VARNAME) or $URLTOMEM(FREE,VARNAME) or $URLTOMEM(GETVAL,HANDLE,VARNAME,searchstr)
+		{
+			nArgs = GetFunArgs(Args, Arg, 4, &hMem, pBrkPt, bpOffset, bpLen);
+			if (nArgs < 2)
+				goto RtnFalse;
+			HANDLE hFile;
+			LPSTR pTempFile = malloc(300);
+			LPSTR pMem;
+			if (!stricmp(Arg[1], "GETVAL"))
+			{
+				hFile = (HANDLE)atol(Arg[2]);
+				LPSTR pMem = GlobalLock(hFile);
+				if (!pMem)
+					goto RtnFalse;
+				LPSTR pLoc = strstr(pMem, Arg[4]);
+				GlobalUnlock(hFile);
+				goto RtnTrue;
+			}
+			if (!stricmp(Arg[1], "FREE"))
+			{
+				sprintf(pTempFile, "[%s]", Arg[2]);
+				ExpandText(pTempFile);
+				hFile = (HANDLE)atol(pTempFile);
+				GSSiGlobFree(&hFile);
+				free(pTempFile);
+				goto RtnTrue;
+			}
+			GSSiGetTempFileName(0, "gmu", 0, pTempFile);
+			HCURSOR hOldCursor = SetCursor(hWaitCursor);
+			if (URLToFile(Arg[1], pTempFile))
+			{
+				HFILE fid = GSSiOpenFile(pTempFile,0, OF_READ);
+				long fileLen = (int) GSSifilelength(fid);
+				hFile = GSSiGlobAlloc(GAIDNO 2057, GMEM_MOVEABLE, fileLen + 8);
+				pMem = GlobalLock(hFile);
+				GSSilread(fid, pMem, fileLen);
+				pMem[fileLen] = 0;
+				GlobalUnlock(hFile);
+				GSSiClose2(&fid);
+				sprintf(pTempFile, "[%s]=%i", Arg[2], (long)hFile);
+				ProcessText(pTempFile);
+				free(pTempFile);
+				SetCursor(hOldCursor);
+				goto RtnTrue;
+			}
+			SetCursor(hOldCursor);
+			free(pTempFile);
+			goto RtnFalse;
+		}
+
 		case 901: // $ADDSEARCH(address,city,zip,outaddressvar,outcoordvar,matchOpt(1,2 or 3)) address search
 		{
 			nArgs = GetFunArgs(Args, Arg, 7, &hMem, pBrkPt, bpOffset, bpLen);
@@ -2580,9 +2631,9 @@ GSSiExitProg (1350);
 			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 2)
 				goto RtnFalse;
-			if (URLToFile (Arg[1],Arg[2]))
+			if (URLToFile(Arg[1], Arg[2]))
 				goto RtnTrue;
-			goto RtnFalse; 
+			goto RtnFalse;
 		}
 
 		case 934: //$STREETNUM(Name,Add(TorF))

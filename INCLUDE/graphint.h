@@ -2464,7 +2464,7 @@ BOOL MovePointItem (long Refno,DPOINT NewPoint);
 BOOL ViewImage (HWND hWnd,LPSTR ImagePath);
 double PercentOfItemInHighlightAreas (int item);
 double PercentOfPolyInHighlightAreas (int PolyType,LPMNMXCORD pBounds,int npnts,HPDPOINT pDPoint);
-int GetFileList (LPSTR OutFile,BOOL New,LPSTR SearchLoc,LPSTR WildCard,BOOL SearchSubdir,BOOL WantDirectories,BOOL nameOnly);
+int GetFileList (LPSTR OutFile,BOOL New,LPSTR SearchLoc,LPSTR WildCard,BOOL SearchSubdir,BOOL WantDirectories,int nameOnly);
 BOOL ComposeMessage (HWND hWnd,LPSTR Title,LPSTR InMessage,LPSTR ResponseAction);
 
 

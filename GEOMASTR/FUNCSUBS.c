@@ -5890,7 +5890,7 @@ int GetFileChecksum (LPSTR File,int frombyte,int tobyte)
 	return checksum;
 }
 
-int GetFileList (LPSTR OutFile,BOOL New,LPSTR SearchLoc,LPSTR WildCard,BOOL SearchSubdir,BOOL WantDirectories,BOOL nameOnly)
+int GetFileList (LPSTR OutFile,BOOL New,LPSTR SearchLoc,LPSTR WildCard,BOOL SearchSubdir,BOOL WantDirectories,int nameOnly)
 {
      int	Num,i, st;
      char	str2[_MAX_PATH+80],TempName[_MAX_FNAME],Name[_MAX_FNAME], drive[_MAX_DRIVE], dir[_MAX_DIR], extension[_MAX_EXT];
@@ -5902,6 +5902,7 @@ int GetFileList (LPSTR OutFile,BOOL New,LPSTR SearchLoc,LPSTR WildCard,BOOL Sear
 	 HANDLE	hStr=GSSiGlobAlloc(GAIDNO 1908,GMEM_MOVEABLE,4096);
 	 LPSTR	str = GlobalLock (hStr);
 	 BOOL isSLTFile = FALSE;
+	 BOOL dropSearchLoc = FALSE;
 	 sqlite3 *db;
 
 	 if (!OutFile || !*OutFile) //just return num hits
@@ -5928,6 +5929,8 @@ int GetFileList (LPSTR OutFile,BOOL New,LPSTR SearchLoc,LPSTR WildCard,BOOL Sear
 			 char	DefStr[] = "CREATE TABLE FILELIST (FULLNAME CHAR(255) PRIMARY KEY,FILENAME CHAR(128),DRIVE CHAR(8),DIRECTORY CHAR(255),LASTDIR CHAR(255),DRIVEDIR CHAR(255),EXTENSION CHAR(16),CREATTIME INT,LASTACCESS INT,LASTWRITE INT,FILELENGTH INT,STATUS INT)";
 			 GSSiRemove(OutFile);
 			 isSLTFile = TRUE;
+			 if (nameOnly == 3)
+				 dropSearchLoc = TRUE;
 			 nameOnly = 0;
 
 			 st = sqlite3_open(OutFile, &db);
@@ -5959,6 +5962,8 @@ int GetFileList (LPSTR OutFile,BOOL New,LPSTR SearchLoc,LPSTR WildCard,BOOL Sear
 	 GSSiGetTempFileName(0,"gm",0,TempName);
  	 Fid =	GSSiOpenFile (TempName,0,OF_CREATE);
      SearchFilesInDir (SearchLoc, "", Fid,&TotFiles,WildCard,1,SearchSubdir,FALSE); 
+	 
+	 int lSearchLoc = strlen(SearchLoc);
 	 GSSillseek (Fid,0,0);
 	 while (fgetstring (str2,_MAX_PATH+80-2,Fid))
 	 { 
@@ -5970,6 +5975,7 @@ int GetFileList (LPSTR OutFile,BOOL New,LPSTR SearchLoc,LPSTR WildCard,BOOL Sear
 		HFILE	Fid2;
 		char	timesAndLength[256]={0};
 	    LPSTR pTAB = strchr (str2,'\t');
+		LPSTR pFullName = str2;
 
 		if (pTAB)
 			*pTAB++ = 0;
@@ -5983,7 +5989,8 @@ int GetFileList (LPSTR OutFile,BOOL New,LPSTR SearchLoc,LPSTR WildCard,BOOL Sear
 			lfile = fstat.st_size;
 			GSSiClose2 (&Fid2);
 		}*/
- 		_splitpath (str2,drive,dir,Name,extension);  
+		REPLAC(str2, "\'", "\'\'", sizeof(str2));
+		_splitpath (str2,drive,dir,Name,extension);
 		strcpy (LastDir,dir);
 		if (*LastChr (LastDir) == '\\')
 			*LastChr (LastDir) = 0;
@@ -5993,6 +6000,8 @@ int GetFileList (LPSTR OutFile,BOOL New,LPSTR SearchLoc,LPSTR WildCard,BOOL Sear
 		else
 			pLastDir = _fstrchr (LastDir,0);
 		//sprintf (str,"%s\t%s\t%s\t%s\t%s\t%s\t%ld\t%ld",str2,Name,drive,dir,pLastDir,extension,lastup,lfile);
+		if (dropSearchLoc)
+			pFullName += lSearchLoc;
 		if (nameOnly == 1)
 		{
 			sprintf(str, "%s%s", Name, extension);
@@ -6006,7 +6015,7 @@ int GetFileList (LPSTR OutFile,BOOL New,LPSTR SearchLoc,LPSTR WildCard,BOOL Sear
 		else if (isSLTFile)
 		{
 			REPLAC(timesAndLength, "\t", ",", sizeof(timesAndLength) - 1);
-			sprintf(str, "INSERT INTO FILELIST VALUES ('%s','%s','%s','%s','%s','%s%s','%s',%s,0)", str2, Name, drive, dir, pLastDir, drive, dir, extension, timesAndLength);
+			sprintf(str, "INSERT INTO FILELIST VALUES ('%s','%s','%s','%s','%s','%s%s','%s',%s,0)", pFullName, Name, drive, dir, pLastDir, drive, dir, extension, timesAndLength);
 			strlwr(str);
 			SLT_Execute(str, db);
 		}
