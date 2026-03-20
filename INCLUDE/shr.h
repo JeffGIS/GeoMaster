@@ -457,6 +457,7 @@ long  IREAD (LPSTR NAME, long NUMDIG,long *IRC);
 BOOL IWRITE (long ival,LPSTR str ,short len);  
 BOOL IWRITEZ (long ival,LPSTR str ,short len);
 LPSTR REPLAC (LPSTR STRING, LPSTR OLD, LPSTR NEW, int MAXLEN);
+LPSTR ReplaceQuoteWithTwoQuotes(LPSTR STRING, int MAXLEN);
 void RestoreScreen (HDC hDC, HBITMAP hSavedBM, RECT Rect);
 void RestoreScreen2 (HDC hDC, HANDLE hSavedScreen,long ID,BOOL Clip);
 HBITMAP SaveScreen (HDC hDC, RECT Rect);   

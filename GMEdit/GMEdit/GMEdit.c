@@ -1039,7 +1039,7 @@ void AutoInsert (HWND hWnd,HANDLE hFile,HMENU *phMenu)
 	int		loc, ibeg, iend, keypos, endkey=128, lkey=0, ln;
 	char	nextKey[130];
 	char	str[1024];
-	char testFile[MAX_PATH + 128];
+	static char testFile[MAX_PATH + 128] = { 0 };
 	int iMenuOpt = 60000;
 	LPSTR pInsertOpts;
 	int isMacroFile = 0;
@@ -1175,7 +1175,9 @@ void AutoInsert (HWND hWnd,HANDLE hFile,HMENU *phMenu)
 			else if (!strnicmp(&pFile[loc + iend], ")", 1))
 			{
 				int i = loc + iend;
-				if (loc > 1 && !strnicmp(&pFile[loc - 3], "$M(", 3))
+				if (loc > 2 && !strnicmp(&pFile[loc - 3], "$M(", 3))
+					isMacroFile = 1;
+				else if (loc > 6 && !strnicmp(&pFile[loc - 7], "$MACRO(", 3))
 					isMacroFile = 1;
 				while (i-- > loc)
 				{
@@ -1219,8 +1221,11 @@ void AutoInsert (HWND hWnd,HANDLE hFile,HMENU *phMenu)
 			else if (isMacroFile == 1)
 			{
 				char file[MAX_PATH];
-				sprintf(file, "[%%DL]macros\\%s.txt", testFile);
-				strcpy(testFile, file);
+				if (!strchr(testFile, '\\'))
+				{
+					sprintf(file, "[%%DL]macros\\%s.txt", testFile);
+					strcpy(testFile, file);
+				}
 			}
 			if (itype == GMTEXT_DATAFILE ||
 				!itype && (StrStrI(testFile, ".txt") || StrStrI(testFile, ".sql")))

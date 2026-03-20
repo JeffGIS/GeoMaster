@@ -5989,7 +5989,7 @@ int GetFileList (LPSTR OutFile,BOOL New,LPSTR SearchLoc,LPSTR WildCard,BOOL Sear
 			lfile = fstat.st_size;
 			GSSiClose2 (&Fid2);
 		}*/
-		REPLAC(str2, "\'", "\'\'", sizeof(str2));
+		ReplaceQuoteWithTwoQuotes(str2, sizeof(str2));
 		_splitpath (str2,drive,dir,Name,extension);
 		strcpy (LastDir,dir);
 		if (*LastChr (LastDir) == '\\')

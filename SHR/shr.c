@@ -10480,6 +10480,31 @@ GSSiExitProg (323);
 }
 #endif
 }
+LPSTR ReplaceQuoteWithTwoQuotes(LPSTR STRING, int MAXLEN)
+{
+	if (!strchr(STRING, '\''))
+		return STRING;
+	LPSTR newSTRING = malloc(MAXLEN);
+	LPSTR pos = STRING;
+	int newLoc = 0;
+	while (*pos)
+	{
+		if (*pos != '\'')
+			newSTRING[newLoc++] = *pos;
+		else if (*(pos + 1) != '\'')
+		{
+			newSTRING[newLoc++] = '\'';
+			newSTRING[newLoc++] = '\'';
+		}
+		else
+			newSTRING[newLoc++] = *pos;
+		pos++;
+	}
+	newSTRING[newLoc] = 0;
+	strcpy(STRING, newSTRING);
+	free(newSTRING);
+	return STRING;
+}
 
 LPSTR REPLAC (LPSTR STRING, LPSTR OLD, LPSTR NEW, int MAXLEN)//neg maxlen implies ignore case
 #if ENABLETRACE

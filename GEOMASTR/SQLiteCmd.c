@@ -4256,6 +4256,9 @@ BOOL SLTPrepareStatement(HANDLE SQLITEHandle, LPSTR SQL)
 	LPOPENSQLDATA	SQLPtr = (LPOPENSQLDATA)GlobalLock(SQLITEHandle);
 	LPOPENFILEDATA	FilePtr = (LPOPENFILEDATA)GlobalLock(SQLPtr->OFHandle);
 	LPSQLDATABASE pDB = (LPSQLDATABASE)GlobalLock(FilePtr->FileHandle);
+	char One[2];
+	One[0] = 1;
+	One[1] = 0;
 
 	db = pDB->DBHandle;
 	if (pDB->statement)
@@ -4263,7 +4266,10 @@ BOOL SLTPrepareStatement(HANDLE SQLITEHandle, LPSTR SQL)
 	pDB->statement = NULL;
 	pWhere = malloc(4096);
 	strcpy(pWhere, SQL);
+	REPLAC(pWhere, "\'", One, 4096);
 	ExpandText(pWhere);
+	ReplaceQuoteWithTwoQuotes(pWhere, 4096);
+	REPLAC(pWhere, One, "\'", 4096);
 	if (pDB->hasRowID)
 		strcpy(getRowID, "rowid,");
 	if (!strnicmp(pWhere, "SELECT ", 7))
