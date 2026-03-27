@@ -853,7 +853,7 @@ BOOL AddFileToTransferFile (HWND hWndStatus,HANDLE FidTF,LPSTR FileToAdd,long Ma
 			lRecCMP = CompressBinaryRecord(pRec, pCompressedRec, lRec);
 //		int lUCRec3 = ZLibUncompress(pRec, MaxLength * 2, pCompressedRec,lRec3);
 //		int diff = IDNINT((100.0 * lRecFI) / lRec);
-		int dclen = DecompressBinaryRecordUnsafe(pRec, pCompressedRec, lRecCMP);
+		//int dclen = DecompressBinaryRecordUnsafe(pRec, pCompressedRec, lRecCMP);
 		BigWrite64 (FidTF,(HPSTR)&lRecCMP,4,-1);
     	BigWrite64 (FidTF,(HPSTR)pCompressedRec,lRecCMP,-1);       
     	if (hWndStatus)
