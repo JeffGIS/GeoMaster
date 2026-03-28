@@ -219,3 +219,4 @@ $RECYCLE.BIN/
 /GEOMASTR/.vs/geomastr/v18/DocumentLayout.backup.json
 /GEOMASTR/.vs/geomastr/v18/DocumentLayout.json
 /GEOMASTR/.vs/geomastr/v18/fileList.bin
+*.db
