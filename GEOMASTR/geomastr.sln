@@ -1,11 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.14.36623.8 d17.14
+# Visual Studio Version 18
+VisualStudioVersion = 18.4.11612.150 stable
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "geomastr", "geomastr.vcxproj", "{1B60D38A-19E2-4C09-BE1B-70138EF8338F}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ExDgnDump", "ExDgnDump.vcxproj", "{F6CFAC30-DE58-4360-926A-CA86A8BE4F9E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,22 +33,6 @@ Global
 		{1B60D38A-19E2-4C09-BE1B-70138EF8338F}.xponly|Win32.Build.0 = xponly|Win32
 		{1B60D38A-19E2-4C09-BE1B-70138EF8338F}.xponly|x64.ActiveCfg = xponly|x64
 		{1B60D38A-19E2-4C09-BE1B-70138EF8338F}.xponly|x64.Build.0 = xponly|x64
-		{F6CFAC30-DE58-4360-926A-CA86A8BE4F9E}.Debug|Win32.ActiveCfg = Release|Win32
-		{F6CFAC30-DE58-4360-926A-CA86A8BE4F9E}.Debug|Win32.Build.0 = Release|Win32
-		{F6CFAC30-DE58-4360-926A-CA86A8BE4F9E}.Debug|x64.ActiveCfg = Release|Win32
-		{F6CFAC30-DE58-4360-926A-CA86A8BE4F9E}.Debug|x64.Build.0 = Release|Win32
-		{F6CFAC30-DE58-4360-926A-CA86A8BE4F9E}.NVServer|Win32.ActiveCfg = Release|Win32
-		{F6CFAC30-DE58-4360-926A-CA86A8BE4F9E}.NVServer|Win32.Build.0 = Release|Win32
-		{F6CFAC30-DE58-4360-926A-CA86A8BE4F9E}.NVServer|x64.ActiveCfg = Release|Win32
-		{F6CFAC30-DE58-4360-926A-CA86A8BE4F9E}.NVServer|x64.Build.0 = Release|Win32
-		{F6CFAC30-DE58-4360-926A-CA86A8BE4F9E}.Release|Win32.ActiveCfg = Release|Win32
-		{F6CFAC30-DE58-4360-926A-CA86A8BE4F9E}.Release|Win32.Build.0 = Release|Win32
-		{F6CFAC30-DE58-4360-926A-CA86A8BE4F9E}.Release|x64.ActiveCfg = Release|Win32
-		{F6CFAC30-DE58-4360-926A-CA86A8BE4F9E}.Release|x64.Build.0 = Release|Win32
-		{F6CFAC30-DE58-4360-926A-CA86A8BE4F9E}.xponly|Win32.ActiveCfg = Release|Win32
-		{F6CFAC30-DE58-4360-926A-CA86A8BE4F9E}.xponly|Win32.Build.0 = Release|Win32
-		{F6CFAC30-DE58-4360-926A-CA86A8BE4F9E}.xponly|x64.ActiveCfg = Release|Win32
-		{F6CFAC30-DE58-4360-926A-CA86A8BE4F9E}.xponly|x64.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
