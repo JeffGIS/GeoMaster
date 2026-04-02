@@ -1934,15 +1934,37 @@ GSSiExitProg (1350);
 			goto Rtnl;
 		}
 
-		case 862: //$URLTOMEM(URL,VARNAME) or $URLTOMEM(FREE,VARNAME) or $URLTOMEM(GETVAL,HANDLE,VARNAME,searchstr)
+		case 862: //$URLTOMEM(URL,VARNAME) or $URLTOMEM(FREE,VARNAME) or $URLTOMEM(GETVAL,HANDLE,VARNAME,searchstr,maxlen)
 		{
-			nArgs = GetFunArgs(Args, Arg, 4, &hMem, pBrkPt, bpOffset, bpLen);
+			nArgs = GetFunArgs(Args, Arg, 5, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 2)
 				goto RtnFalse;
 			HANDLE hFile;
 			LPSTR pTempFile = malloc(300);
 			LPSTR pMem;
 			if (!stricmp(Arg[1], "GETVAL"))
+			{
+				hFile = (HANDLE)atol(Arg[2]);
+				LPSTR pMem = GlobalLock(hFile);
+				if (!pMem)
+					goto RtnFalse;
+				LPSTR pLoc = strstr(pMem, Arg[4]);
+				if (pLoc)
+				{
+					pLoc += strlen(Arg[4]);
+					int memlen = min(atoi(Arg[5]), strlen(pLoc));
+					char saveChar = pLoc[memlen];
+					pLoc[memlen] = 0;
+					SetGlobalValue4(Arg[3], pLoc, TRUE, 0, 0, 0);
+					pLoc[memlen] = saveChar;
+					rtn = TRUE;
+				}
+				else
+					rtn = FALSE;
+				GlobalUnlock(hFile);
+				goto Rtnrtn;
+			}
+			if (!stricmp(Arg[1], "VALUE"))
 			{
 				hFile = (HANDLE)atol(Arg[2]);
 				LPSTR pMem = GlobalLock(hFile);

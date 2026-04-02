@@ -10,7 +10,7 @@
 
 static int numWindows;
 static HWND windows[4096];
-static char SubDef[1024] = { 0 };
+static char SubDef[1024*8] = { 0 };
 static char	MonthAbv[12][4]={"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
 static short	nSetVals=0;
 static UINT	lSetVals=0;
@@ -5787,9 +5787,10 @@ GotCloseFilehSQL:
 		{
 			nArgs = GetFunArgs(Args, Arg, 1, &hMem, pBrkPt, bpOffset, bpLen);
 			*OutLoc = 0;
-			LPSTR sub = malloc(4096);
+			LPSTR sub = malloc(1024*8);
 			strcpy(sub, SubDef);
 			ExpandText(sub);
+			strcpy(OutLoc, sub);
 			free(sub);
 			goto Rtnl;
 		}
