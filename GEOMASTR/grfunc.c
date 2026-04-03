@@ -521,6 +521,7 @@ GSSiExitProg (1338);
 						}
 					}
 				}
+				UnlockCursor();
 				setDoPaint( TRUE);
 				DisableHalt = FALSE;    
 				SetContinueProcessing ( TRUE); 
@@ -598,7 +599,6 @@ void ResetFunStack (BOOL All)
     
 	CancelWindowZoom();
     DisableMarginPan=FALSE;	
-    UnlockCursor ();  
     EnlargeScreen (0,0);
     SetGlobalValue("%P","");	 
 	if (CurView && CurView->FunStackHandle)

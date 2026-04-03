@@ -7919,6 +7919,7 @@ void EscapeFunction (BOOL DoHalt)
 	if (DoHalt)
 	{
 		ResetFunStack (TRUE);
+		UnlockCursor();
 		HaltMapDisplay (TRUE,TRUE);
 	}
     CloseSymDict();  

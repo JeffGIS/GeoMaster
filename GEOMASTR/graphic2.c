@@ -358,7 +358,7 @@ BOOL ProcessPassiveFunctions (HWND hWnd,UINT Message, WPARAM wParam,LPARAM lPara
     if (Message == WM_MOUSEMOVE && CursorIsLocked)
     {   
     	if (GetFocus() == hWndMain)   
-    	SetViewport (LockedCursorVP+1000);
+    		SetViewport (LockedCursorVP+1000);
         if (CurViewActive())
         {   
 		    CursorPoint = BasePtToScreenPt (&CurrentPoint);
@@ -370,7 +370,8 @@ BOOL ProcessPassiveFunctions (HWND hWnd,UINT Message, WPARAM wParam,LPARAM lPara
 	            GetCursorPos (&CurrentPos); 
 	            if (CurrentPos.x != CursorPoint.x ||
 	            	CurrentPos.y != CursorPoint.y) 
-			    	SetCursorPosGM (CursorPoint.x,CursorPoint.y,0); 
+			    	SetCursorPosGM (CursorPoint.x,CursorPoint.y,0);
+				DisplayCursorCoordinate(hWnd, Message, wParam, lParam);
 			}
 		}
 		goto Exit;
@@ -832,6 +833,8 @@ GSSiExitProg (114);
 }                   
     SaveView = CurView;
     CursorPoint = POINTStoPOINT(MAKEPOINTS(lParam));
+	if (CursorIsLocked)
+		CursorPoint = BasePtToWinPt(&CurrentPoint);
 	iview = *pNumViewports;
     while (iview--)
     {

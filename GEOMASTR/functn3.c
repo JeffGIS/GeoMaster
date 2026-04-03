@@ -1454,6 +1454,7 @@ GotCloseFilehSQL:
 			if (nArgs)
 				SetCurView ( SetVPFromName (Arg[1],&Err));  
     		ResetFunStack (atob(Arg[2]));
+			UnlockCursor();
 			if (nArgs && CurView->StartupFunction)
 	    	{                               
 		       	AddLBUTTON = TRUE;
