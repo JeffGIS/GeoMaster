@@ -65,6 +65,7 @@
 #define     MAX_GMD_INDEXES     16 
 #define     MAX_GMD_INDEX_FIELDS    8   
 #define		MAX_MACRO_STACK 64
+#define     MAX_MACRO_SUBS  16
 #define		MAX_BREAKPOINTS	16
 #define		MAX_CMDMESSAGE USHRT_MAX
 

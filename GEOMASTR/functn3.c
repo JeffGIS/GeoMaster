@@ -5780,19 +5780,34 @@ GotCloseFilehSQL:
 		{
 			nArgs = GetFunArgs(Args, Arg, -2, &hMem, pBrkPt, bpOffset, bpLen);
 			*OutLoc = 0;
+			strcpy(MacroSubName[CurrentMacro][NumMacroSubs[CurrentMacro]], Arg[1]);
+			MacroSubDef[CurrentMacro][NumMacroSubs[CurrentMacro]] = GSSiGlobAlloc(GAIDNO 2058, GMEM_MOVEABLE, strlen(Arg[2]) + 32);
+			LPSTR SubDef = GlobalLock(MacroSubDef[CurrentMacro][NumMacroSubs[CurrentMacro]]);
 			strcpy(SubDef, Arg[2]);
+			GlobalUnlock(MacroSubDef[CurrentMacro][NumMacroSubs[CurrentMacro]]);
+			NumMacroSubs[CurrentMacro]++;
 			goto Rtnl;
 		}
 		case 660: // $RUNSUB(subname)
 		{
 			nArgs = GetFunArgs(Args, Arg, 1, &hMem, pBrkPt, bpOffset, bpLen);
 			*OutLoc = 0;
-			LPSTR sub = malloc(1024*8);
-			strcpy(sub, SubDef);
-			ExpandText(sub);
-			strcpy(OutLoc, sub);
-			free(sub);
-			goto Rtnl;
+			for (int i = 0; i < NumMacroSubs[CurrentMacro]; i++)
+			{
+				if (!stricmp(Arg[1], MacroSubName[CurrentMacro][i]))
+				{
+					LPSTR SubDef = GlobalLock(MacroSubDef[CurrentMacro][i]);
+					int len = strlen(SubDef);
+					LPSTR sub = malloc(len * 4);
+					strcpy(sub, SubDef);
+					GlobalUnlock(MacroSubDef[CurrentMacro][i]);
+					ExpandText(sub);
+					strcpy(OutLoc, sub);
+					free(sub);
+					goto Rtnl;
+				}
+			}
+			goto RtnFalse;
 		}
 		case 661: //$ENDSIN(VAL,SEARCHVAL)
 		{

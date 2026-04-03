@@ -7181,7 +7181,8 @@ GSSiExitProg (558);
 				if (l>0) _fmemmove(NewText,InText,(size_t) l);
 				OutLoc = NewText + l;
 			}
-			ltoa (nLoops,OutLoc,10);
+			*OutLoc = 0;
+			//ltoa (nLoops,OutLoc,10);
 			OutLoc = _fstrchr (OutLoc,0);
 		}
 		else if (!_fstrncmp (InLoc,"IF(",3))

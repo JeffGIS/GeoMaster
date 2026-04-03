@@ -1001,6 +1001,11 @@ Exit:
     //CloseMacroFiles (ThisMacro);   
     InGRFCmd = InGRFCmd;
 	DestroyStatusWindow (CurrentMacro);
+	for (int i = 0; i < NumMacroSubs[CurrentMacro]; i++)
+	{
+		GSSiGlobFree(&MacroSubDef[CurrentMacro][i]);
+	}
+	NumMacroSubs[CurrentMacro] = 0;
 	DestroyVarSpace(MacroVarSpace[CurrentMacro]);
     CurrentMacro--;
 	SetVarSpace(VARSPACE_LOCAL, MacroVarSpace[CurrentMacro]);
