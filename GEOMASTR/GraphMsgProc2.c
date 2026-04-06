@@ -5406,10 +5406,9 @@ BOOL FAR PASCAL LOADXFERFILEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, L
 		case IDOK:
 		{
 			LONGLONG	NextFileLoc = 0, loc, FileLength, length8, EndOfFile, LenToRead;
-			int MaxLength;
+			int MaxLength, NextFileLoc4;
 			short	Version;
 			int	len;
-			int    nSelected = SendDlgItemMessage(hWndDlg, IDC_XFERFILELISTS, LB_GETCURSEL, 0, 0);
 			char	SelectedFile[MAX_PATH];
 			char	subStringFrom[MAX_PATH] = { 0 }, subStringTo[MAX_PATH] = { 0 };
 
@@ -5417,9 +5416,8 @@ BOOL FAR PASCAL LOADXFERFILEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, L
 			EnableWindow(GetDlgItem(hWndDlg, IDCANCEL), FALSE);
 			EnableWindow(GetDlgItem(hWndDlg, ID_ALTLOAD), FALSE);
 			EnableWindow(GetDlgItem(hWndDlg, IDC_SETXFERFILE), FALSE);
-			if (nSelected >= 0)
-				SendDlgItemMessage(hWndDlg, IDC_XFERFILELISTS, LB_GETTEXT, nSelected, (DWORD)SelectedFile);
-
+			HANDLE hFiles = 0;
+			int nSelected = GetLBSelectedItems(hWndDlg, IDC_XFERFILELISTS, &hFiles);
 			GetDlgItemText(hWndDlg, IDM_SUBSTRINGFROM, subStringFrom, MAX_PATH);
 			GetDlgItemText(hWndDlg, IDM_SUBSTRINGTO, subStringTo, MAX_PATH);
 			FidTF = OpenFileGM(TransferFileName, 0, OF_READ);
@@ -5468,7 +5466,37 @@ BOOL FAR PASCAL LOADXFERFILEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, L
 				BigRead64(FidTF, (HPSTR)File, len);
 				if (marker != 32449)
 					BigRead64(FidTF, (HPSTR)&NextFileLoc, 8);
-				if (nSelected >= 0 && stricmp(File, SelectedFile))
+				else
+				{
+					int pieceLen;
+					LONGLONG curLoc = GSSillseek64(FidTF, 0, SEEK_CUR);
+					NextFileLoc = curLoc;
+					BigRead64(FidTF, (HPSTR)&pieceLen, 4);
+					while (pieceLen > 0)
+					{
+						LONGLONG pieceLen64 = pieceLen;
+						GSSillseek64(FidTF, pieceLen64, SEEK_CUR);
+						BigRead64(FidTF, (HPSTR)&pieceLen, 4);
+					}
+					NextFileLoc = GSSillseek64(FidTF, 0, SEEK_CUR);
+					GSSillseek64(FidTF, curLoc,SEEK_SET);
+				}
+				BOOL skip = TRUE;
+				if (nSelected)
+				{
+					LPINT pSel = GlobalLock(hFiles);
+					for (int i = 0; i < nSelected; i++)
+					{
+						SendDlgItemMessage(hWndDlg, IDC_XFERFILELISTS, LB_GETTEXT, *pSel++, (DWORD)SelectedFile);
+						if (!stricmp(File, SelectedFile))
+							skip = FALSE;
+					}
+					GlobalUnlock(hFiles);
+				}
+				else
+					skip = FALSE;
+
+				if (skip)
 					continue;
 				if (*subStringFrom && *subStringTo)
 					REPLAC(File, subStringFrom,subStringTo, MAX_PATH);
@@ -5505,6 +5533,7 @@ BOOL FAR PASCAL LOADXFERFILEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, L
 				}
 				PctBox(GetDlgItem(hWndDlg, IDC_STATUS), FileLength, GSSillseek64(FidTF, 0, 1), 0);
 			}
+			GSSiGlobFree(&hFiles);
 			Processing = FALSE;
 			GSSiClose64(&FidTF);
 			if (!ContinueProcessing)
