@@ -9095,17 +9095,17 @@ GSSiExitProg (1051);
 			case 1:
 				SetDlgItemInt (hWndDlg,IDC_DEGLONG,abs(Deg),TRUE); 
 				SetDlgItemInt (hWndDlg,IDC_MINLONG,Min,TRUE);
-				sprintf (str,"%4.1f",Sec);
+				sprintf (str,"%6.3f",Sec);
 				SetDlgItemText (hWndDlg,IDC_SECLONG,str); 
 				break;
 			case 2:
 				SetDlgItemInt (hWndDlg,IDC_DEGLONG,abs(Deg),TRUE); 
-				sprintf (str,"%6.3f",DMin);
+				sprintf (str,"%7.4f",DMin);
 				SetDlgItemText (hWndDlg,IDC_MINLONG,str);
 				SetDlgItemText (hWndDlg,IDC_SECLONG,"0"); 
 				break; 
 			case 3:
-				sprintf (str,"%8.5f",fabs(Point.x));
+				sprintf (str,"%9.6f",fabs(Point.x));
 				SetDlgItemText (hWndDlg,IDC_DEGLONG,str);
 				SetDlgItemText (hWndDlg,IDC_SECLONG,"0"); 
 				SetDlgItemText (hWndDlg,IDC_MINLONG,"0"); 
@@ -9119,17 +9119,17 @@ GSSiExitProg (1051);
 			case 1:
 				SetDlgItemInt (hWndDlg,IDC_DEGLAT,Deg,TRUE); 
 				SetDlgItemInt (hWndDlg,IDC_MINLAT,Min,TRUE);
-				sprintf (str,"%4.1f",Sec);
+				sprintf (str,"%6.3f",Sec);
 				SetDlgItemText (hWndDlg,IDC_SECLAT,str); 
 				break;
 			case 2:
 				SetDlgItemInt (hWndDlg,IDC_DEGLAT,Deg,TRUE); 
-				sprintf (str,"%6.3f",DMin);
+				sprintf (str,"%7.4f",DMin);
 				SetDlgItemText (hWndDlg,IDC_MINLAT,str);
 				SetDlgItemText (hWndDlg,IDC_SECLAT,"0"); 
 				break; 
 			case 3:
-				sprintf (str,"%8.5f",Point.y);
+				sprintf (str,"%9.6f",Point.y);
 				SetDlgItemText (hWndDlg,IDC_DEGLAT,str);
 				SetDlgItemText (hWndDlg,IDC_SECLAT,"0"); 
 				SetDlgItemText (hWndDlg,IDC_MINLAT,"0"); 
