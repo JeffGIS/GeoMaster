@@ -4528,7 +4528,10 @@ BOOL PickPolyInAreaD(short Type, HPDPOINT lpDpoints, long nPnts, int PolyID, LPD
 	BOOL	rtn=TRUE;  
 	double	Area=0,Perim=0, AZ=0, BPAZ,EPAZ;  
 	short	Type2=GF_POLYLINE;
-	
+	static double totLength = 0;
+
+	if (PolyID <= 1)
+		totLength = 0;
 	if (pAZ)
 		AZ = *pAZ;   
 	if (Type == 6) //dummy delete
@@ -4603,6 +4606,8 @@ Exit:
 			GlobalUnlock(hPolyPartLen);
 
 		}
+		totLength += Perim;
+
 		PickList[0].PPAZ = AZ;
 		PickList[0].HiPrecis = 1;
 		PickList[0].ViewID = CurView->ID;
@@ -4615,7 +4620,7 @@ Exit:
 		PickList[0].MSLink = CurMSLink;
 		PickList[0].Desc = CurrentDesc;  
 		PickList[0].PolyID = PolyID;
-		PickList[0].Length = Perim;
+		PickList[0].Length = totLength;
 		PickList[0].Blocked = ItemIsBlocked;
 		if (Type == 6 || ItemIsDeleted)
 		{
