@@ -4620,6 +4620,7 @@ Exit:
 		PickList[0].MSLink = CurMSLink;
 		PickList[0].Desc = CurrentDesc;  
 		PickList[0].PolyID = PolyID;
+		PickList[0].NumPoly = nPoly;
 		PickList[0].Length = totLength;
 		PickList[0].Blocked = ItemIsBlocked;
 		if (Type == 6 || ItemIsDeleted)

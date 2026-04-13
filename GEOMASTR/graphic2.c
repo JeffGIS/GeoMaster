@@ -2777,7 +2777,13 @@ GSSiExitProg (138);
 			if (pHighlightData->PD.Type == 4)
 			{
 				pPrevHighlightData->PD.HasText = 1;
-				BT_PUT (hHighlight,(LPSTR)&Refno,(LPSTR)pPrevHighlightData); 
+				BT_PUT(hHighlight, (LPSTR)&Refno, (LPSTR)pPrevHighlightData);
+			}
+			else if (pHighlightData->PD.Type == 2 && pPrevHighlightData->PD.PolyID != pHighlightData->PD.PolyID)
+			{
+				BT_PUT(hHighlight, (LPSTR)&Refno, (LPSTR)pHighlightData);
+				TotHLTLength += (pHighlightData->PD.Length - pPrevHighlightData->PD.Length);
+				TotHLTPoints += pHighlightData->PD.NumPoints;
 			}
 		}
 		else if (pPrevHighlightData->PD.IsDeleted) 

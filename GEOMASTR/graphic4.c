@@ -4895,7 +4895,7 @@ GSSiExitProg (707);
 #if ENABLETRACE
 GSSiExitProg (707);
 #endif
-return (PickPolyInAreaD(1, lpPoints, nPnts, PolyID, pAZ, pSize, 0, 0, 0, 0));
+return (PickPolyInAreaD(1, lpPoints, nPnts, PolyID, pAZ, pSize, nPoly, 0, 0, 0));
 }
 	
 	if (pInLength)
