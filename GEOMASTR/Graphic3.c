@@ -1397,16 +1397,8 @@ void SetGoogleMapDimensions(LPVIEWPORT pVP)
 	double w = RECTWIDTH(&pVP->DrawRect), h = RECTHEIGHT(&pVP->DrawRect);
 	if (w && h)
 	{
-		if (w > h)
-		{
-			GoogleMapWidth = 640;
-			GoogleMapHeight = IDNINT((640 * h) / w);
-		}
-		else
-		{
-			GoogleMapHeight = 640;
-			GoogleMapWidth = IDNINT((640 * w) / h);
-		}
+		GoogleMapWidth = w;
+		GoogleMapHeight = h;
 	}
 	return;
 }
@@ -1418,7 +1410,7 @@ static double SetToGoogleScale(double Scale)
 	double GoogleScales[22];
 	int width, height;
 
-	CurView->UseGoogleZooms = SetUseGoogleZooms();
+	CurView->UseGoogleZooms = TRUE;// SetUseGoogleZooms();
 	if (!CurView->UseGoogleZooms)
 		return Scale;
 
