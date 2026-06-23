@@ -2709,7 +2709,7 @@ GSSiExitProg (440);
 			if (NumSavedPickList > 0)
 				_fmemmove (PickList,pPickList,NumSavedPickList*sizeof(PICKDATA)); 
 			GSSiGlobUlFree (&hSavedPickList); 
-		    DisplayPickedItems (0,NumPicked,TRUE,0,0,FALSE);  
+		    DisplayPickedItems (0,NumPicked,TRUE,0,0,FALSE,FALSE);  
 								    
 		    break;  
 		case 2: //first display of config 

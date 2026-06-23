@@ -4181,7 +4181,7 @@ GSSiExitProg (452);
 #endif
 }
 
-BOOL DisplayPickedItems (HWND hWnd,int NumPickedIn,BOOL UseMenus, LPSTR Cmd,LPSTR File,BOOL SavePickList)
+BOOL DisplayPickedItems (HWND hWnd,int NumPickedIn,BOOL UseMenus, LPSTR Cmd,LPSTR File,BOOL SavePickList,BOOL ProcessParmsOnly)
 #if ENABLETRACE
 {GSSiEnterProg (908);
 #endif
@@ -4193,8 +4193,7 @@ BOOL DisplayPickedItems (HWND hWnd,int NumPickedIn,BOOL UseMenus, LPSTR Cmd,LPST
     LPSTR	lpDesc, lpSymbol,lpAction;     
 	HMENU	Menus[MAXPICKITEMS + 3] = { 0 }, PickMenu;
     long	loc;
-    BOOL	TopOnlyOpt, SingleOpt, DescTAGOpt;
-    UINT	CmdID; 
+     UINT	CmdID; 
     POINT	position; 
     int		irec, imenu=1,NumAction, TotAction,SingleItem,SingleRec;  
     LPVIEWPORT	lpV, SaveVP=CurView; 
@@ -4204,32 +4203,57 @@ BOOL DisplayPickedItems (HWND hWnd,int NumPickedIn,BOOL UseMenus, LPSTR Cmd,LPST
 	BOOL	WantThisItem, HaveCancel=FALSE;   
 	int		i;
     
+	if (ProcessParmsOnly)
+	{
+		if (!NumPicked)
+		{
+#if ENABLETRACE
+			GSSiExitProg(908);
+#endif
+			return rtn;
+		}
+	}
+	else
+		ii = 0;
     if (!SavePickList)
     	nSavePickList = 0;
 
-    if (!NumPicked)
-{
-#if ENABLETRACE
-GSSiExitProg (908);
-#endif
-    	return rtn;
-}
-	if (NumPicked < 1 || NumPicked > MAXPICKITEMS)
+	if (!ProcessParmsOnly)
 	{
-		char Mess[64];
-		itoa (NumPicked,Mess,10);
-		MessageBox (0,"Invalid pick item in DisplayPickedItems",Mess,MB_ICONEXCLAMATION);
-{
+		if (!NumPicked)
+		{
 #if ENABLETRACE
-GSSiExitProg (908);
+			GSSiExitProg(908);
 #endif
-    	return rtn;
-}
+			return rtn;
+		}
+		if (NumPicked < 1 || NumPicked > MAXPICKITEMS)
+		{
+			char Mess[64];
+			itoa(NumPicked, Mess, 10);
+			MessageBox(0, "Invalid pick item in DisplayPickedItems", Mess, MB_ICONEXCLAMATION);
+			{
+#if ENABLETRACE
+				GSSiExitProg(908);
+#endif
+				return rtn;
+			}
+		}
 	}
 	GetGlobalCVal ("[%DPIMacro]",DPIMacro,"");
     if (File)
 		FidPM = GSSiOpenFile (File,&OFStruct,OF_READ);  
-    else
+	else if (ProcessParmsOnly)
+	{
+		lpV = GetVP(PickList[NumPicked - 1].ViewID);
+		FidPM = HFILE_ERROR;
+		if (lpV)
+		{
+			GetPMName(lpV->PickMacroFile, PMFile);
+			FidPM = GSSiOpenFile(PMFile, &OFStruct, OF_READ);
+		}
+	}
+	else
     { 
 		SetConfig (PickList[NumPicked-1].ConfigID);
 	    lpV=GetVP (PickList[NumPicked-1].ViewID);  
@@ -4267,7 +4291,20 @@ GSSiExitProg (908);
 	DescTAGOpt = (PMstr[1]=='Y');
 	if (NumPickedIn < 0)
 		DescTAGOpt = FALSE;
-	SingleOpt = (PMstr[2]=='Y');    
+	SingleOpt = (PMstr[2]=='Y');
+	AlwaysPickOpt = (PMstr[3] == 'Y');
+	if (ProcessParmsOnly)
+	{
+		GSSiClose2(&FidPM);
+		GSSiGlobUlFree(&hStr);
+		GSSiGlobUlFree(&hNames);
+		{
+#if ENABLETRACE
+			GSSiExitProg(908);
+#endif
+			return rtn;
+		}
+	}
 	loc = GSSillseek (FidPM,0,1);
     fgetstring (PMstr,1020,FidPM);
 	while (PMstr[0]<'!')
@@ -4332,19 +4369,23 @@ GSSiExitProg (908);
 		}
 	    GSSillseek (FidPM,loc,0); 
 	    NumAction=0;
-	    if (DescTAGOpt)                                          
-	    {   
-	    	if (!_fstricmp (PickList[item].Prefix,"%VIEWPORT"))
-	    		_fstrcpy (txt,"Viewport Options");
-	    	else if (!_fstricmp (PickList[item].Prefix,"%DISTDSP"))
+		if (DescTAGOpt)
+		{
+			if (!_fstricmp(PickList[item].Prefix, "%VIEWPORT"))
+				_fstrcpy(txt, "Viewport Options");
+			else if (!_fstricmp(PickList[item].Prefix, "%DISTDSP"))
 			{
-				if (!stricmp (PickList[item].UDI,"Line"))
-	    			sprintf (txt,"Dimension Line Options");
+				if (!stricmp(PickList[item].UDI, "Line"))
+					sprintf(txt, "Dimension Line Options");
 				else
-	    			sprintf (txt,"Dimension Area Options");
+					sprintf(txt, "Dimension Area Options");
 			}
-	    	else if (!_fstricmp (PickList[item].Prefix,"%DTM"))
-	    		sprintf (txt,"Surface Options for %s",PickList[item].UDI);
+			else if (!_fstricmp(PickList[item].Prefix, "%DTM"))
+				sprintf(txt, "Surface Options for %s", PickList[item].UDI);
+			else if (!_fstricmp(PickList[item].Prefix, "%ALWAYSPICK"))
+			{
+				sprintf(txt, AlwaysPickText, PickList[item].UDI);
+			}
 			else if (*DPIMacro)
 			{
 				sprintf (txt,"$MACRO(%s,%s,%s,%s)",DPIMacro,pNames,PickList[item].Prefix,PickList[item].UDI); 
@@ -4362,8 +4403,12 @@ GSSiExitProg (908);
 Top:
 	    while (fgetstring (PMstr,1020,FidPM))
 	    {   
-	    	if (!_fstrnicmp (PMstr,"INCLUDE ",8))
-	    	{ 
+			if (!_fstrnicmp(PMstr, "-%ALWAYSPICK", 11))
+			{
+				ii = 1;
+			}
+			if (!_fstrnicmp(PMstr, "INCLUDE ", 8))
+			{
 	    		_fstrcpy (pIncludePath,&PMstr[8]);
 	    		ExpandText (pIncludePath);
 	    		if (*pIncludePath)

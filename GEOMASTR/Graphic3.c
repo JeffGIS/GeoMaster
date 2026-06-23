@@ -1357,20 +1357,19 @@ BOOL ZoomToPointAndScaleOnlyIfDifferent (DPOINT MidPointW,double Scale,BOOL Imed
 int GetNearestZoomForSCale(double scale, double *gTileScale)
 {
 	int iZoom;
-	int nearZoom;
-	double minDiff, diff;
-	double nearScale, testScale;
-	nearScale = gTileScale[1];
-	minDiff = fabs(scale - nearScale);
-	for (int izoom = 1; izoom <= MAXGZOOMS; izoom++)
+	int nearZoom = MAXGZOOMS;
+	
+	for (int izoom = MAXGZOOMS-1; izoom > 1; izoom--)
 	{
-		testScale = gTileScale[izoom];
-		diff = fabs(scale - testScale);
-		if (diff < minDiff)
+		if (scale >= gTileScale[izoom] && scale <= gTileScale[izoom - 1])
 		{
-			nearScale = testScale;
-			minDiff = diff;
-			nearZoom = izoom;
+			double diff1 = fabs(scale - gTileScale[izoom]);
+			double diff2 = fabs(scale - gTileScale[izoom - 1]);
+			if (diff1 < diff2)
+				nearZoom = izoom;
+			else
+				nearZoom = izoom - 1;
+			break;
 		}
 	}
 	return nearZoom;

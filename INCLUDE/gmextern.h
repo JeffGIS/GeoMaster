@@ -1893,6 +1893,8 @@ extern BOOL		allowCachedSymbols;
 extern int		SMTP_PORT;
 extern int		DNS_PORT;
 extern BOOL		wantSetUDIValue;
+extern char		AlwaysPickText[80];
+extern BOOL	TopOnlyOpt, SingleOpt, DescTAGOpt, AlwaysPickOpt;
 
 extern	int		ii;
 

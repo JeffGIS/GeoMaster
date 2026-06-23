@@ -1624,7 +1624,7 @@ void NewMap(void);
 //void SetLBFunction(int Fun);
 BOOL HaltMapDisplay(BOOL ClearCFGStack,BOOL saveScreen);
 void ShowPickedItem (HWND hWnd, int Item);
-BOOL DisplayPickedItems (HWND hWnd,int NumPicked,BOOL UseMenu, LPSTR Cmd,LPSTR File,BOOL SavePickList);
+BOOL DisplayPickedItems (HWND hWnd,int NumPicked,BOOL UseMenu, LPSTR Cmd,LPSTR File,BOOL SavePickList,BOOL ProcessParmsOnly);
 void GetItemTAG (int item,LPSTR TAG, LPSTR Symbol, LPLONG Refno);
 void GetItemLoc (short item,LPLONG Segment,LPWORD Offset);
 void SetPickSame (LPVIEWPORT CurView);

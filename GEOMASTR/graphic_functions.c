@@ -1068,7 +1068,7 @@ BOOL ShowItem (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 	    PickItems (hWnd,BasePoint);
         ClientToScreen (CurView->hWnd,(LPPOINT)&MousePoint);
 	    SetCursorPosGM (MousePoint.x,MousePoint.y,0);
-	    DisplayPickedItems (hWnd,NumPicked,TRUE,0,0,TRUE);
+	    DisplayPickedItems (hWnd,NumPicked,TRUE,0,0,TRUE,FALSE);
 	    DynDlgOn(TRUE);
 		ShowDynWindows ();
 		setDoPaint( TRUE);
@@ -1890,7 +1890,7 @@ Next:
 				_fmemmove (&PickList[0],pCmd,sizeof(PICKDATA));
 				GSSiGlobUlFree (&hLastCmd);   
 				NumPicked = 1;
-				DisplayPickedItems (hWnd,-1,TRUE,0,0,FALSE);
+				DisplayPickedItems (hWnd,-1,TRUE,0,0,FALSE,FALSE);
 			}
 			break;
 		}
@@ -2022,15 +2022,27 @@ LButUp:
 					CurView->DisableZoomMacro = SaveDisableZoomMacro;
 					SelectVisList (TRUE);
 				}
-			    _fmemset (&PickList[NumPicked],0,sizeof(PICKDATA));
-				PickList[NumPicked].Desc = -1; 
+				_fmemset(&PickList[NumPicked], 0, sizeof(PICKDATA));
+				PickList[NumPicked].Desc = -1;
 				PickList[NumPicked].Refno = LONG_MAX;
 				PickList[NumPicked].OffDist = FLT_MAX;
 				PickList[NumPicked].ViewID = CurView->ID;
 				PickList[NumPicked].ConfigID = CurrentConfig;
 				PickList[NumPicked].FileNum = -1;
 				PickList[NumPicked].PickedPoint = BasePoint;
-				_fstrcpy (PickList[NumPicked++].Prefix,"%VIEWPORT");   
+				_fstrcpy(PickList[NumPicked++].Prefix, "%VIEWPORT");
+				if (AlwaysPickOpt)
+				{
+					_fmemset(&PickList[NumPicked], 0, sizeof(PICKDATA));
+					PickList[NumPicked].Desc = -1;
+					PickList[NumPicked].Refno = LONG_MAX;
+					PickList[NumPicked].OffDist = FLT_MAX;
+					PickList[NumPicked].ViewID = CurView->ID;
+					PickList[NumPicked].ConfigID = CurrentConfig;
+					PickList[NumPicked].FileNum = -1;
+					PickList[NumPicked].PickedPoint = BasePoint;
+					_fstrcpy(PickList[NumPicked++].Prefix, "%ALWAYSPICK");
+				}
 				StopAtFirstInPickMacro = FALSE;
 				MaxPick = SaveMaxPick;
 			} 
@@ -2062,7 +2074,8 @@ LButUp:
 		    		RestoreScreen2 (CurView->hDC, hLastHLT,0,FALSE);
 		    		DestroySavedScreen (&hLastHLT,0);
 		    	}
-			    if (DisplayPickedItems (hwnd,NumPicked,ShowMenu,pCmd,0,TRUE))
+				DisplayPickedItems(hwnd, NumPicked, ShowMenu, pCmd, 0, TRUE, TRUE);
+			    if (DisplayPickedItems (hwnd,NumPicked,ShowMenu,pCmd,0,TRUE,FALSE))
 			    {   
 			    	if (ShowMenu)
 			    		NumPicked = 1;
@@ -2224,8 +2237,9 @@ DoCmd:
 					_fstrcpy (CurView->PickMacroFile,pNext);
 			   		CurrentPrompt = PRMT_YTBMESS2;
 			        SetPrompt (CurrentPrompt,TRUE);
-				    DisplayPickedItems (CurView->hWnd,LastItem,TRUE,0,pNext,TRUE);  
-				    CurView = pSaveVP;
+					DisplayPickedItems(CurView->hWnd, LastItem, TRUE, 0, pNext, TRUE, TRUE);
+					DisplayPickedItems(CurView->hWnd, LastItem, TRUE, 0, pNext, TRUE, FALSE);
+					CurView = pSaveVP;
 				    _fstrcpy (CurView->PickMacroFile,pSavePM);
 				    GSSiGlobUlFree (&hSavePM); 
 				}  
@@ -2933,7 +2947,7 @@ NextPickItem:
 	   				CurrentPrompt = PRMT_AUTOPICK2;
        			SetPrompt (CurrentPrompt,TRUE);
 	    	}
-		    else if (DisplayPickedItems (0,NumPicked,FALSE,pCmd,0,TRUE))
+		    else if (DisplayPickedItems (0,NumPicked,FALSE,pCmd,0,TRUE,FALSE))
 		    { 
 			    if (GetGlobalCVal ("[%ZOOMSELECTIONTEXT]",pTxt,""))
 			    {   

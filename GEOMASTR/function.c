@@ -13,6 +13,7 @@ static UINT	lSetVals=0;
 static char	CurrentDialogType[16];
 static char	DOW[7][10]={"SUNDAY","MONDAY","TUESDAY","WEDNESDAY","THURSDAY","FRIDAY","SATURDAY"};
 static HIGHLIGHTDATA	HighlightData;
+static HANDLE hSaveVis = 0;
 
 		struct tm      * sunrise (double lat, double lon, int year, int month, int day);
 void DrawAlphaBlend (HWND hWnd, HDC hdcwnd);
@@ -1534,7 +1535,7 @@ TryDDEInitAgain:
 		case 321: // $VIS(SymbolName or #SymbolNumber or LAYER:layername or LAYERSYMBOLS or themename.thm,0 or 1 or 2(default)2 toggles;3 returns current vis) 
 			PickVis = FALSE;
 			Pickability = FALSE;
-SetVis: 
+		SetVis:		idesc = 0;
 		{	
 			BOOL	IsPar;
 			short	Parent, iopt;
@@ -1570,7 +1571,33 @@ SetVis:
 				Arg[1]++;
 				idesc = atoi (Arg[1]);  
 			} 
-			else if (!_fstricmp (Arg[1],"CONTROL"))
+			else if (!_fstricmp(Arg[1], "SAVE"))
+			{
+				if ((!CurView->pPickList1 && !CurView->pPickListManual) || CurView->PickSame)
+					hSaveVis = (HANDLE) - 1;
+				else
+				{
+					hSaveVis = GSSiGlobAlloc(GAIDNO 814, GMEM_MOVEABLE,sizeof(VISLIST) + 4);
+					LPSTR pSaveVis = GlobalLock(hSaveVis);
+					memcpy(pSaveVis, CurView->CurPick, sizeof(VISLIST));
+					GlobalUnlock(hSaveVis);
+				}
+			}
+			else if (!_fstricmp(Arg[1], "RESTORE"))
+			{
+				if (Pickability && hSaveVis)
+				{
+					if (hSaveVis == (HANDLE) -1)
+						SetPickSame(CurView);
+					else
+					{
+						LPSTR pSaveVis = GlobalLock(hSaveVis);
+						memcpy(CurView->CurPick, pSaveVis, sizeof(VISLIST));
+						GSSiGlobUlFree(&hSaveVis);
+					}
+				}
+			}
+			else if (!_fstricmp(Arg[1], "CONTROL"))
 			{
 				Rect = atorect (Arg[3],&Err);
 				if (Err)

@@ -1759,6 +1759,9 @@ BOOL	allowCachedSymbols = TRUE;
 int		SMTP_PORT = 25;
 int		DNS_PORT = 53;
 BOOL	wantSetUDIValue = TRUE;
+char	AlwaysPickText[80] = { 0 };
+BOOL	TopOnlyOpt = 0, SingleOpt = 0, DescTAGOpt = 0, AlwaysPickOpt = 0;
+
 int		ii;
 
 

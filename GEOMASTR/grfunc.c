@@ -1405,20 +1405,21 @@ UINT ProcessGraphicsFunction4 (short Function,
 	    	 break;
 	    case GF_PICK_IMAGE:
 	    	 return (PickImage (hWnd,Message,wParam,lParam));
-	    	 break;  
+	    	 break;
+		case GF_PAN_ZOOM_TARGET:
+		case GF_ONEPICK:
+			DisplayPickedItems(hWnd, NumPicked,0,0, 0, TRUE, TRUE);
 		case GF_AUTO_IDENTIFY:
 			ii = 1;
 		case GF_TOOLBAR:
 	    case GF_RUN_CLASS_MACRO:
 		case GF_AUTOPICK: 
 		case GF_AUTOPICK_NOZOOM:
-		case GF_ONEPICK:
 		case GF_RUN_COORDDISPLAY_MACRO:
 		case GF_RUN_DISTDISPLAY_MACRO:
 		case GF_RUN_LEGEND_MACRO: 
 		case GF_SHOW_DIFFERENCE:
-	    case GF_PAN_ZOOM_TARGET:
-	    	 return (PanZoomTarget (hWnd,Message,wParam,lParam,Function)); 
+			return (PanZoomTarget (hWnd,Message,wParam,lParam,Function));
 	    	 break;
 	    case GF_THEME_ACTIVATE:
 	    	 return (ThemeActivate (hWnd,Message,wParam,lParam)); 

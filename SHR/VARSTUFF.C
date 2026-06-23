@@ -3742,7 +3742,11 @@ GSSiExitProg (532);
 			strncpy(HouseBufSave,Value,sizeof(HouseBufSave)-1);
 			break;
 		case 426:
-			strncpy(StreetBufSave,Value,sizeof(StreetBufSave)-1);
+			strncpy(StreetBufSave, Value, sizeof(StreetBufSave) - 1);
+			break;
+		case 427:
+			strncpy(AlwaysPickText, Value, sizeof(AlwaysPickText) - 1);
+			AlwaysPickOpt = TRUE;
 			break;
 		default:
 			break;
@@ -4188,6 +4192,7 @@ void CreateInternalGlobals (void)
 	AllocateTypeVar("%STARTUPBOUNDS", 424, FALSE);
 	AllocateTypeVar("%HOUSEBUF", 425, FALSE);
 	AllocateTypeVar("%STREETBUF", 426, FALSE);
+	AllocateTypeVar("%ALWAYSPICKTEXT", 427, FALSE);
 
 //	AllocateTypeVar("%DL",191,FALSE);
 	
@@ -5498,6 +5503,9 @@ GSSiExitProg (533);
 			break;
 		case 426:
 			strcpy(OutStr, StreetBufSave);
+			break;
+		case 427:
+			strcpy(OutStr,AlwaysPickText);
 			break;
 
 

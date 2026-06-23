@@ -6310,6 +6310,7 @@ SetVis2:   	SendDlgItemMessage (hWndDlg,AUTO_VIS,BM_SETCHECK,TRUE,0L);
             case MANUAL_VIS:
 				 if (Pickability)
 				 {
+					 CurView->PickSame = FALSE;
 				 	if (!CurView->pPickList1)
 				 	{
 				      	CopyVisListToPickList ();  
@@ -6342,6 +6343,7 @@ SetVis2:   	SendDlgItemMessage (hWndDlg,AUTO_VIS,BM_SETCHECK,TRUE,0L);
             case AUTO_VIS:
 				 if (Pickability)
 				 {
+					 CurView->PickSame = FALSE;
 				 	if (!CurView->pPickList1)
 				      	CopyVisListToPickList ();
 				    else

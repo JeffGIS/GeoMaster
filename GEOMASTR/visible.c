@@ -1202,6 +1202,7 @@ void SetPickSame (LPVIEWPORT CurView)
      }
      CurView->pPickListManual = NULL;
      CurView->pPickList1=NULL;   
+	 CurView->PickSame = TRUE;
      SelectVisList (FALSE);
      return;
 }
