@@ -266,6 +266,8 @@ typedef OFSTRUCT *LPOFSTRUCT;
 #define		POLY_DATAFILE		21
 #define		PN_DATAFILE			22
 #define		SLT_DATAFILE		23
+#define		MACRO_DATAFILE		24
+
 
 #define MAXTEXTLINE	USHRT_MAX*4
 

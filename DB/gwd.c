@@ -2114,7 +2114,7 @@ HANDLE OpenGWDatabase (LPSTR InName, short Mode)
 	}
 	else
 		goto Return0;
-	if (stricmp (lpDot,".gmd") && stricmp (lpDot,".dtm"))
+	if (stricmp (lpDot,".gmd") && stricmp(lpDot, ".dtm") && stricmp(lpDot, ".gmm"))
 		goto Return0;
 Open:
     if (Mode == BT_READ)
@@ -8648,19 +8648,24 @@ BOOL CreateGWDDatabase (LPSTR InName,int Version,BOOL Compress,int NumFields,int
 	char	Name[260];
 	BOOL	DoClose;
 	HANDLE	hDB;
+	int		type = UMIFS_DATAFILE;
 
 	memset (&GWDHead,0,sizeof(GWDHEADER));
 
 	DBoundsInit (&GWDHead.FileBounds);
     _fstrcpy (Name,InName);
     _fstrlwr (Name);
-    if (!StringEndsWith (Name,".gmd"))
-{
+	if (StringEndsWith(Name, ".gmm"))
+	{
+		type = MACRO_DATAFILE;
+	}
+	else if (!StringEndsWith(Name, ".gmd"))
+	{
 #if ENABLETRACE
 GSSiExitProg (653);
 #endif
     	return FALSE;
-}
+	}
     if ((FidData = GSSiOpenFile (Name,&OFStruct,OF_CREATE))==HFILE_ERROR)
 {
 #if ENABLETRACE
@@ -8906,6 +8911,60 @@ GSSiExitProg (653);
 		 GSSiRemove (Name);
 	 }
 	 hDB = OpenGWDatabase (InName,BT_WRITE);
+	 if (hDB && type == MACRO_DATAFILE)
+	 {
+		 char MacroName[MAX_PATH];
+		 strcpy(MacroName, InName);
+		 LPSTR pDot = strstr (MacroName,".gmm");
+
+		 strcpy(pDot, "_gmm.txt");
+		 HFILE FidMacro = GSSiOpenFile(MacroName, &OFStruct, OF_CREATE);
+		 lpGWDHead = (LPGWDHEADER)GlobalLock(hDB);
+		 HANDLE	hstr = GSSiGlobAlloc(GAIDNO 1516, GMEM_MOVEABLE, 4096);
+		 LPSTR	pstr = GlobalLock(hstr);
+		 *pstr = 0;
+
+		 sprintf(_fstrchr(pstr, 0), "[~RTN]=0;\n");
+		 sprintf(_fstrchr(pstr, 0), "[~OPTION]=[%%ARG(1)];\n");
+		 pFldInfo = lpGWDHead->pFldInfo;
+		 for (i = 0; i < lpGWDHead->NumIndexFields[0]; i++)
+		 {
+			 sprintf(_fstrchr(pstr,0),"[~%s]=[%%ARG(%i)];\n",pFldInfo->Name,i+2);
+			 pFldInfo++;
+		 }
+		 sprintf(_fstrchr(pstr, 0), "IF([~OPTION]==OPEN)\n{\n};\n");
+		 sprintf(_fstrchr(pstr, 0), "IF([~OPTION]==CLOSE)\n{\n};\n");
+		 sprintf(_fstrchr(pstr, 0), "IF([~OPTION]==FETCH)\n{\n");
+		 int n = lpGWDHead->NumFields - lpGWDHead->NumIndexFields[0];
+		 LPGWFLDINFO pFldInfo2 = pFldInfo;
+		 for (i = 0; i < n; i++)
+		 {
+			 if (!i)
+				 sprintf(_fstrchr(pstr, 0), "[~%s]", strupr(pFldInfo->Name));
+			 else
+				 sprintf(_fstrchr(pstr, 0), ";[~%s]", _strupr(pFldInfo->Name));
+			 pFldInfo++;
+		 }
+		 sprintf(_fstrchr(pstr, 0), ");");
+		 pFldInfo = pFldInfo2;
+		 pFldInfo++;
+		 sprintf(_fstrchr(pstr, 0), "\t$RETURN(");
+		 for (i = 0; i < n; i++)
+		 {
+			 if (!i)
+				 sprintf(_fstrchr(pstr, 0), "[~%s]", strupr(pFldInfo->Name));
+			 else
+				 sprintf(_fstrchr(pstr, 0), ";[~%s]", _strupr(pFldInfo->Name));
+			 pFldInfo++;
+		 }
+		 sprintf(_fstrchr(pstr, 0), ");");
+		 sprintf(_fstrchr(pstr, 0), "\n};\n");
+		 sprintf(_fstrchr(pstr, 0), "$RETURN([~RTN]);");
+		 fputstring(pstr, FidMacro);
+		 GSSiGlobUlFree(&hstr);
+		 GlobalUnlock(hDB);
+		 GSSiClose2(&FidMacro);
+	 }
 	 CloseGWDatabase (hDB);
 {
 #if ENABLETRACE
