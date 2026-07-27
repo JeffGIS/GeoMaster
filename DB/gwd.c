@@ -5792,7 +5792,7 @@ GSSiExitProg (645);
         return (lpFinfo);
 }
     }
-    if (FieldType == UMIFS_DATAFILE || FieldType == ORA_DATAFILE || FieldType == PN_DATAFILE)
+    if (FieldType == UMIFS_DATAFILE || FieldType == MACRO_DATAFILE || FieldType == ORA_DATAFILE || FieldType == PN_DATAFILE)
     {
         lpGWDHead = (LPGWDHEADER)GlobalLock (TBLHandle);
         if (icount >= lpGWDHead->NumFields)
@@ -8918,6 +8918,17 @@ GSSiExitProg (653);
 		 LPSTR pDot = strstr (MacroName,".gmm");
 
 		 strcpy(pDot, "_gmm.txt");
+		 if (ExistFile(MacroName))
+		 {
+			 char BackupName[MAX_PATH];
+			 strcpy(BackupName, MacroName);
+			 LPSTR pDot = strchr(BackupName, '.');
+			 time_t systime;
+			 time(&systime);
+			 sprintf(pDot, "_%lli.txt", systime);
+			 GSSirenamefile(MacroName, BackupName);
+		 }
+
 		 HFILE FidMacro = GSSiOpenFile(MacroName, &OFStruct, OF_CREATE);
 		 lpGWDHead = (LPGWDHEADER)GlobalLock(hDB);
 		 HANDLE	hstr = GSSiGlobAlloc(GAIDNO 1516, GMEM_MOVEABLE, 4096);
@@ -8940,14 +8951,13 @@ GSSiExitProg (653);
 		 for (i = 0; i < n; i++)
 		 {
 			 if (!i)
-				 sprintf(_fstrchr(pstr, 0), "[~%s]", strupr(pFldInfo->Name));
+				 sprintf(_fstrchr(pstr, 0), "\t[~%s]=-999", strupr(pFldInfo->Name));
 			 else
-				 sprintf(_fstrchr(pstr, 0), ";[~%s]", _strupr(pFldInfo->Name));
+				 sprintf(_fstrchr(pstr, 0), ";\n\t[~%s]=-999", _strupr(pFldInfo->Name));
 			 pFldInfo++;
 		 }
-		 sprintf(_fstrchr(pstr, 0), ");");
+		 sprintf(_fstrchr(pstr, 0), ");\n\n# Insert retrieval code here\n\n");
 		 pFldInfo = pFldInfo2;
-		 pFldInfo++;
 		 sprintf(_fstrchr(pstr, 0), "\t$RETURN(");
 		 for (i = 0; i < n; i++)
 		 {

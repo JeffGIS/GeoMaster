@@ -947,7 +947,11 @@ GSSiExitProg (520);
     	if (_fstrstr (Name,"INFOBOXES.GMD"))
     		CreateInfoBoxGMD (Name);
     }
-    else if (_fstrstr(Name,".ORA"))
+	else if (_fstrstr(Name, ".GMM"))
+	{
+		Type = MACRO_DATAFILE;
+	}
+	else if (_fstrstr(Name,".ORA"))
     {   
     	pDot = _fstrrchr (Name,'.');
     	_fstrcpy (pDot,".GMD");
@@ -1002,7 +1006,8 @@ GSSiExitProg (520);
 			FileHandle = NULL;
 			break;
 			
-
+		case MACRO_DATAFILE:
+		ii = 1;
 	    case PN_DATAFILE:
 		case UMIFS_DATAFILE:
 		case ORA_DATAFILE:
@@ -1293,7 +1298,7 @@ GMTEXT_ERROR:
 
 		strcpy (path,Name);
 		ExpandText (path);
-		if (Type == UMIFS_DATAFILE || Type == ORA_DATAFILE || Type == DTM_DATAFILE || Type == GMCENSUS_DATAFILE || Type == SHAPE_DATAFILE || Type == IMAGE_DATAFILE)
+		if (Type == UMIFS_DATAFILE || Type == MACRO_DATAFILE || Type == ORA_DATAFILE || Type == DTM_DATAFILE || Type == GMCENSUS_DATAFILE || Type == SHAPE_DATAFILE || Type == IMAGE_DATAFILE)
 			_fullpath (FilePtr->fullpath,path,_MAX_PATH);  
 		else
 			_fstrcpy (FilePtr->fullpath,path); 
@@ -1554,7 +1559,7 @@ void ProcessFileSQL (LPOPENSQLDATA SQLPtr,LPOPENFILEDATA FilePtr,LPSTR SQLIN)
     	SQLField++; 
     	*pEnd++ = ']';
     }
-    if (FilePtr->Type == UMIFS_DATAFILE || FilePtr->Type == ORA_DATAFILE || FilePtr->Type == GMCENSUS_DATAFILE || FilePtr->Type == GMTEXT_DATAFILE) 
+    if (FilePtr->Type == UMIFS_DATAFILE || FilePtr->Type == MACRO_DATAFILE || FilePtr->Type == ORA_DATAFILE || FilePtr->Type == GMCENSUS_DATAFILE || FilePtr->Type == GMTEXT_DATAFILE)
     {   
 		LPLOGICPSTATEMENT	pStatement;
 		LPHANDLE			phStatement; 
@@ -8444,6 +8449,8 @@ NextTextRec:
 		}
     	break;
 		
+		case MACRO_DATAFILE:
+			ii = 1;
 		case GMCENSUS_DATAFILE:   
 		case ORA_DATAFILE:
 		case UMIFS_DATAFILE:
@@ -8545,8 +8552,15 @@ NextTextRec:
 					}                
 					else
 						cond = BT_ANY;
-					SQLPtr->st = BT_FIND (hBT,lpGWDHead->pKeys[SQLPtr->IndexToUse],BT_FIRST,cond, (LPSTR)&SQLPtr->Offset);
-					SetReadSecIndex(hBT,FALSE);
+					if (FilePtr->Type == MACRO_DATAFILE)
+					{
+						ii = 1;
+					}
+					else
+					{
+						SQLPtr->st = BT_FIND(hBT, lpGWDHead->pKeys[SQLPtr->IndexToUse], BT_FIRST, cond, (LPSTR)&SQLPtr->Offset);
+						SetReadSecIndex(hBT, FALSE);
+					}
 					SQLPtr->lastreadtime = NextVarTime ();
 					GSSiGlobUlFree (&hMem);
 				}
@@ -9756,6 +9770,8 @@ int GetValFromOpenFiles (LPSTR VarName,LPSTR Value,int maxlval)
 			}
 				break;
 
+			case MACRO_DATAFILE:
+				ii = 1;
 			case PN_DATAFILE:
 			case GMCENSUS_DATAFILE:
 			case ORA_DATAFILE:

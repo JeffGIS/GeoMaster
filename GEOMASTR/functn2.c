@@ -1964,16 +1964,6 @@ GSSiExitProg (1350);
 				GlobalUnlock(hFile);
 				goto Rtnrtn;
 			}
-			if (!stricmp(Arg[1], "VALUE"))
-			{
-				hFile = (HANDLE)atol(Arg[2]);
-				LPSTR pMem = GlobalLock(hFile);
-				if (!pMem)
-					goto RtnFalse;
-				LPSTR pLoc = strstr(pMem, Arg[4]);
-				GlobalUnlock(hFile);
-				goto RtnTrue;
-			}
 			if (!stricmp(Arg[1], "FREE"))
 			{
 				sprintf(pTempFile, "[%s]", Arg[2]);
