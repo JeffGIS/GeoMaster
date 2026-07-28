@@ -9268,3 +9268,26 @@ BOOL FILEFunctions(int nArgs, LPSTR *Arg, LPSTR OutLoc)
 	}
 	return rtn;
 }
+
+HANDLE GetGMMMacroPath(LPSTR fullPath)
+{
+	HANDLE hPath = GSSiGlobAlloc(GAIDNO 2059, GMEM_MOVEABLE, MAX_PATH);
+	LPSTR pPath = GlobalLock(hPath);
+
+	strcpy(pPath, fullPath);
+	_fstrupr (pPath);
+	LPSTR pDot = strstr(pPath, ".GMM");
+	if (pDot)
+	{
+		strcpy(pDot, "_GMM.txt");
+		if (PathFileExists(pPath))
+		{
+			GlobalUnlock(hPath);
+		}
+		else
+			GSSiGlobUlFree(&hPath);
+	}
+	else
+		GSSiGlobUlFree(&hPath);
+	return hPath;
+};

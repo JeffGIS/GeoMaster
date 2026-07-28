@@ -1538,7 +1538,7 @@ void ProcessFileSQL (LPOPENSQLDATA SQLPtr,LPOPENFILEDATA FilePtr,LPSTR SQLIN)
     } 
     else
 	    _fstrcpy (SQLPtr->SQL,str);  
-    if (FilePtr->Type == GMTEXT_DATAFILE || FilePtr->Type == ORA_DATAFILE || FilePtr->Type == UMIFS_DATAFILE || FilePtr->Type == GMCENSUS_DATAFILE)
+    if (FilePtr->Type == GMTEXT_DATAFILE || FilePtr->Type == MACRO_DATAFILE || FilePtr->Type == ORA_DATAFILE || FilePtr->Type == UMIFS_DATAFILE || FilePtr->Type == GMCENSUS_DATAFILE)
     {   
     	_fstrcpy (str,SQLPtr->SQL);
     	ConvertSQLToLogicP (SQLPtr->SQL,str); 
@@ -1866,6 +1866,7 @@ GSSiExitProg (524);
 		}
 	    case PN_DATAFILE:
 		case UMIFS_DATAFILE:
+		case MACRO_DATAFILE:
 		case ORA_DATAFILE:
 			CloseGWDatabase (FilePtr->FileHandle);
  			break;
@@ -8554,7 +8555,27 @@ NextTextRec:
 						cond = BT_ANY;
 					if (FilePtr->Type == MACRO_DATAFILE)
 					{
-						ii = 1;
+						SQLPtr->st = 1;
+						HANDLE hMacroPath = GetGMMMacroPath(FilePtr->fullpath);
+						LPSTR pMacroPath = GlobalLock(hMacroPath);
+						HANDLE hCommand = GSSiGlobAlloc(GAIDNO 2060, GMEM_MOVEABLE, 4096*8);
+						LPSTR pCommand = GlobalLock(hCommand);
+						sprintf(pCommand, "$MACRO(%s,OPEN,%s);", pMacroPath, lpGWDHead->pKeys[SQLPtr->IndexToUse]);
+						ExpandText(pCommand);
+						if (*pCommand == '1')
+						{
+							SQLPtr->st = 0;
+							sprintf(pCommand, "$MACRO(%s,FETCH,%s);", pMacroPath, lpGWDHead->pKeys[SQLPtr->IndexToUse]);
+							ExpandText(pCommand);
+							if (*pCommand == '1')
+							{
+								SQLPtr->st = 0;
+							}
+							sprintf(pCommand, "$MACRO(%s,CLOSE,%s);", pMacroPath, lpGWDHead->pKeys[SQLPtr->IndexToUse]);
+							ExpandText(pCommand);
+						}
+						GSSiGlobUlFree(&hCommand);
+						GSSiGlobUlFree(&hMacroPath);
 					}
 					else
 					{
