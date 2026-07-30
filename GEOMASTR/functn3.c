@@ -5757,7 +5757,7 @@ GotCloseFilehSQL:
 			}
 			goto Rtnl;
 		}
-		case 657: // $REMOVE(text,chartoremove) removes all special characters if 2nd arg 0
+		case 657: // $REMOVE(text,chartoremove) removes all special characters and tabs if 2nd arg 0
 		{
 			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 

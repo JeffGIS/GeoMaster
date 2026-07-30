@@ -8558,24 +8558,30 @@ NextTextRec:
 						SQLPtr->st = 1;
 						HANDLE hMacroPath = GetGMMMacroPath(FilePtr->fullpath);
 						LPSTR pMacroPath = GlobalLock(hMacroPath);
-						HANDLE hCommand = GSSiGlobAlloc(GAIDNO 2060, GMEM_MOVEABLE, 4096*8);
+						HANDLE hCommand = GSSiGlobAlloc(GAIDNO 2060, GPTR, 4096*8);
 						LPSTR pCommand = GlobalLock(hCommand);
 						sprintf(pCommand, "$MACRO(%s,OPEN,%s);", pMacroPath, lpGWDHead->pKeys[SQLPtr->IndexToUse]);
 						ExpandText(pCommand);
 						if (*pCommand == '1')
 						{
 							SQLPtr->st = 0;
+							FilePtr->BufferHandle = GSSiGlobAlloc(GAIDNO 2061, GPTR, 4096 * 8);
+							LPSTR pResults = GlobalLock(FilePtr->BufferHandle);
 							sprintf(pCommand, "$MACRO(%s,FETCH,%s);", pMacroPath, lpGWDHead->pKeys[SQLPtr->IndexToUse]);
 							ExpandText(pCommand);
 							if (*pCommand == '1')
 							{
 								SQLPtr->st = 0;
+								int len  = strlen(pCommand);
+								memmove(pResults, pCommand, len);
+								pResults[len] = 0;
 							}
+							GlobalUnlock(FilePtr->BufferHandle);
 							sprintf(pCommand, "$MACRO(%s,CLOSE,%s);", pMacroPath, lpGWDHead->pKeys[SQLPtr->IndexToUse]);
 							ExpandText(pCommand);
 						}
-						GSSiGlobUlFree(&hCommand);
 						GSSiGlobUlFree(&hMacroPath);
+						GSSiGlobUlFree(&hCommand);
 					}
 					else
 					{
@@ -9851,7 +9857,50 @@ int GetValFromOpenFiles (LPSTR VarName,LPSTR Value,int maxlval)
 				}
 				if (lpGWDHead->Version > 1000)
 					goto Found;
-				if (!SQLPtr->st)
+				if (FilePtr->Type == MACRO_DATAFILE)
+				{
+					if (SQLPtr->st)
+						goto NotFound;
+					lpGWFldInfo = lpGWDHead->pFldInfo + ifield;
+					LPSTR pValue = GetGMMField(FilePtr,ifield);
+					switch (lpGWFldInfo->Type)
+					{
+					default:
+					case BT_RIGHT_CHAR:
+					case BT_CHAR:
+					{
+						int	ln = min(maxlval - 1, lpGWFldInfo->Len);
+
+						memmove(Value, pValue, ln);
+						ep = &Value[ln];
+						*ep = '\0';
+					}
+					//Truncate (Value);
+					break;
+
+					case BT_INTEGER:
+					{
+						LPSTR pValue2 = RemoveDollarAndComma(pValue);
+						long IVal = atol(pValue2);
+						ltoa(IVal, Value, 10);
+						free(pValue2);
+					}
+						break;
+
+					case BT_REAL:
+					{
+						LPSTR pValue2 = RemoveDollarAndComma(pValue);
+						double RVal = atof(pValue2);
+						ftoa(Value, RVal);
+						free(pValue2);
+					}
+						break;
+					}
+					free(pValue);
+					GlobalUnlock(FilePtr->FileHandle);
+					goto GotData;
+				}
+				else if (!SQLPtr->st)
 					FillGWDData(lpGWDHead, SQLPtr->Offset);
 				else
 				{

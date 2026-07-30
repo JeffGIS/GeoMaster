@@ -8964,7 +8964,7 @@ GSSiExitProg (653);
 			 if (!i)
 				 sprintf(_fstrchr(pstr, 0), "[~%s]", strupr(pFldInfo->Name));
 			 else
-				 sprintf(_fstrchr(pstr, 0), ";[~%s]", _strupr(pFldInfo->Name));
+				 sprintf(_fstrchr(pstr, 0), "$CHR(1)[~%s]", _strupr(pFldInfo->Name));
 			 pFldInfo++;
 		 }
 		 sprintf(_fstrchr(pstr, 0), ");");
@@ -9291,3 +9291,35 @@ HANDLE GetGMMMacroPath(LPSTR fullPath)
 		GSSiGlobUlFree(&hPath);
 	return hPath;
 };
+
+LPSTR GetGMMField(LPOPENFILEDATA FilePtr,int iField)
+{
+	int lenField = 0;
+	char delimitChr = 1;
+	LPSTR pStartField;
+	if (FilePtr->BufferHandle)
+	{
+		LPSTR pData = GlobalLock(FilePtr->BufferHandle);
+		int fieldID = 0;
+		LPSTR pLoc = pData;
+		while (*pLoc++)
+		{
+			if (*pLoc == delimitChr)
+			{
+				if (fieldID++ == iField)
+				{
+					pStartField = ++pLoc;
+					while (*pLoc && *pLoc++ != delimitChr)
+						lenField++;
+					goto Found;
+				}
+			}
+		}
+		Found: GlobalUnlock(FilePtr->BufferHandle);
+	}
+	LPSTR pValue = malloc(lenField+2);
+	if (lenField)
+		strncpy(pValue, pStartField, lenField);
+	pValue[lenField] = 0;
+	return pValue;
+}

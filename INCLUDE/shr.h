@@ -230,6 +230,7 @@ long ldread (LPSTR str, int nbytes);
 void RWRITE (double RVAL, int NDP, LPSTR OutLoc);
 void RWRITEZ (double RVAL, int NDP, int len,LPSTR OutLoc); 
 short Strip(LPSTR str, char chr);
+LPSTR RemoveDollarAndComma(LPSTR pValue);
 LPSTR ReplaceChar (LPSTR str, char from, char to);
 LPSTR RemoveChars(LPSTR str, LPSTR chars);
 BOOL DoubleQuotes(LPCSTR instr, LPSTR outstr);

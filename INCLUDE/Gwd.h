@@ -47,6 +47,7 @@ BOOL GMDCopyRecord (LPSTR File,LPSTR FromKeyString,LPSTR ToKeyString);
 int DeleteGMDRecords (LPSTR File,LPSTR SQLLikeString); 
 BOOL GMDFunctions (int nArgs,LPSTR *Arg,LPSTR OutLoc);
 HANDLE GetGMMMacroPath(LPSTR fullpath);
+LPSTR GetGMMField(LPOPENFILEDATA FilePtr, int ifield);
 BOOL FILEFunctions(int nArgs, LPSTR *Arg, LPSTR OutLoc);
 BOOL GMDReorg(LPSTR Name, int IndexToReorgOn, BOOL Compress, BOOL Verify, HWND hWnd, LPSTR AddFieldDefs);
 BOOL GMDUpdateCheckPointLog (LPSTR FileName);

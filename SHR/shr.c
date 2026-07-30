@@ -3926,6 +3926,21 @@ GSSiExitProg (231);
 }
 #endif
 }  
+
+LPSTR RemoveDollarAndComma(LPSTR pValue)
+{
+	int len = strlen(pValue);
+	LPSTR pOutValue = malloc(len + 2);
+	int outLen = 0;
+	while (*pValue)
+	{
+		if (*pValue != '$' && *pValue != ',')
+			pOutValue[outLen++] = *pValue;
+		pValue++;
+	}
+	pOutValue[outLen] = 0;
+	return pOutValue;
+}
 BOOL DoubleQuotes(LPCSTR instr, LPSTR outstr)
 {
 	BOOL rtn = FALSE;
