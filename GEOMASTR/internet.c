@@ -76,8 +76,9 @@ HANDLE FTPOpen (LPCSTR lpszServerName,LPCSTR lpszUsername,LPCSTR lpszPassword,LP
 		nServerPort = port;
 	if (passive)
 		dwFlags = INTERNET_FLAG_PASSIVE;
-	hInternet = InternetOpen ("GeoMaster",INTERNET_OPEN_TYPE_DIRECT,NULL,NULL,0);
-
+	//hInternet = InternetOpen("GeoMaster", INTERNET_OPEN_TYPE_DIRECT, NULL, NULL, 0);
+	hInternet = InternetOpen("GeoMaster", INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
+	
 	if (hInternet)
 	{
 

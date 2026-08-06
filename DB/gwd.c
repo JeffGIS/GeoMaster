@@ -8956,9 +8956,9 @@ GSSiExitProg (653);
 				 sprintf(_fstrchr(pstr, 0), ";\n\t[~%s]=-999", _strupr(pFldInfo->Name));
 			 pFldInfo++;
 		 }
-		 sprintf(_fstrchr(pstr, 0), ");\n\n# Insert retrieval code here\n\n\n# End retrieval code");
-		 pFldInfo = pFldInfo2;
-		 sprintf(_fstrchr(pstr, 0), "\t$RETURN(");
+		 sprintf(_fstrchr(pstr, 0), ");\n\n# Insert retrieval code here\n\n");
+		 pFldInfo = lpGWDHead->pFldInfo;
+		 sprintf(_fstrchr(pstr, 0), "\t$RETURN(1$CHR(1)");
 		 for (i = 0; i < n; i++)
 		 {
 			 if (!i)
