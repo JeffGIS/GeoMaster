@@ -333,6 +333,7 @@ int	GetFunctionID7 (LPSTR str)
 			if (!_fstrnicmp(str, "INTCHOP", 7)) return 789;
 			if (!_fstrnicmp(str, "SYSTIME", 7)) return 790;
 			if (!_fstrnicmp(str, "WEATHER", 7)) return 791;
+			if (!_fstrnicmp(str, "ISALPHA", 7)) return 792;
 
 			return 0;
 }

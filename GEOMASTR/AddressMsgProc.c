@@ -330,16 +330,24 @@ short DisplayStreetsPID (HWND hDlg,LONG HouseMin, LONG HouseMax, short OddEven, 
     int	   TabStops[3]={500,600,700};
     char     AddText[256];
     long    ihouse, lhouse=1000000, range=HouseMax-HouseMin, MunicNum;
-    char    DisplayAdd[256], str[128], LastStreet[64]; 
+    char    DisplayAdd[256], str[128], LastStreet[64], trueName[64]; 
     LPGWDHEADER lpGWDHeadPID;   
     double  rval;
     MSG		msg;
 
-    ch = 0;          
+
     /* clear the address menu */
+    ch = 0;
+
     SendDlgItemMessage (addMatchWnd,addMatchList,LB_RESETCONTENT,0,0);
     if (nchar<1)
     	return 0;    
+
+    STNDSN_INIT(FALSE);
+    STNDST(InName, nchar, STDNAMv, NRONAMv, NMONLYv,
+        SANSCHv, NANDCHv, NCMPNMv, ORIGNMv, SANSCPv, SANSCSv, 0, 0, 0, 0);
+    int StreetNum = GetStreetNumFromName(STDNAMv, 2, BT_FIRST, trueName);
+
     LastStreet[0]='\0';
     lpGWDHeadPID = (LPGWDHEADER) GlobalLock (hPIDAddDB); 
     _fmemset (lpGWDHeadPID->pKeys[PIDAddIndex],0,lpGWDHeadPID->lKeys[PIDAddIndex]);
@@ -3443,6 +3451,7 @@ BOOL FAR PASCAL ADDRESSPIDMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPA
 		addMatchList = IDM_STREET_MENU;
 		addMatchWnd = hWndDlg;
 		cwCenter(hWndDlg, 0);
+        SendDlgItemMessage(hWndDlg, IDC_TRYHARDER, BM_SETCHECK, TRUE, 0L);
          /* initialize working variables                                */
          SendDlgItemMessage (hWndDlg,IDM_STREET_MENU,LB_SETTABSTOPS,2,(LPARAM)&TabStops);
 #if WIN32
@@ -3603,6 +3612,7 @@ Close:
                  switch (HIWORD(wParam))
                  {  case EN_CHANGE:
            Display:     
+                        SendDlgItemMessage(hWndDlg, IDM_STREET_MENU, LB_RESETCONTENT, 0, 0);
                         AddTol = GetDlgItemInt(hWndDlg,IDC_ADD_TOL,&Error,FALSE);
                         if (!Error)
                         {

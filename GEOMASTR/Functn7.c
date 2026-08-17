@@ -2624,8 +2624,19 @@ int	GetFunctionValue7(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, 
 			}
 			goto Rtnrtn;
 	}
-
-		default:
+	case 792:  //$ISALPHA(returns 1 if all alpha)
+	{
+		nArgs = GetFunArgs(Args, Arg, 7, &hMem, pBrkPt, bpOffset, bpLen);
+		LPSTR pChar = Arg[1];
+		while (*pChar)
+		{
+			if (!isalpha(*pChar))
+				goto RtnFalse;
+			pChar++;
+		}
+		goto RtnTrue;
+	}
+	default:
 			goto Rtn0;
 	}
 Rtnrtn:
