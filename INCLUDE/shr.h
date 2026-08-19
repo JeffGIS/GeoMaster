@@ -675,6 +675,7 @@ LPSTR AddCommas (LPSTR VCBuff);
 double DecDegFromDMS (LPSTR DMS,LPBOOL pErr);
 BOOL GetDMS (double DecDegrees,LPSHORT Deg,LPSHORT Min,LPDOUBLE Sec);
 LPSTR ValueConv (double Value, short ValConv,double RoundTo,BOOL Commas); 
+LPSTR DollarConv(double Value, int RoundTo, BOOL Commas);
 HANDLE  BMPFromPCX (LPSTR ImageFile);  
 HANDLE  BMPFromEXT (LPSTR ImageFile); 
 BOOL SetDIBMonoColors(HDIB32 hDib,LPLONG Colors); 

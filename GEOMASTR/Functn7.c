@@ -2636,6 +2636,16 @@ int	GetFunctionValue7(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, 
 		}
 		goto RtnTrue;
 	}
+	case 793:  //$DOLLARS(val,round,commas)
+	{
+		nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
+		double val = atof(Arg[1]);
+		int round = atoi(Arg[2]);
+		BOOL commas = atob(Arg[3]);
+		LPSTR dVal = DollarConv(val, round, commas);
+		strcpy(OutLoc, dVal);
+		goto Rtnl;
+	}
 	default:
 			goto Rtn0;
 	}

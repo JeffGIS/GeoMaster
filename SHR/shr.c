@@ -3647,37 +3647,72 @@ GSSiExitProg (220);
 #endif
 }
 
-LPSTR ValueConv (double Value, short ValConv,double RoundTo, BOOL Commas)
+LPSTR ValueConv(double Value, short ValConv, double RoundTo, BOOL Commas)
 #if ENABLETRACE
-{GSSiEnterProg (224);
-#endif
-{   static char VCBuff[32];
-    char        fmt[32];
-    LPSTR   p1, p2, bp, pDot;
-    short       n, ndp;  
-    double  rndp;
-    
-    if (RoundTo <= 0) RoundTo = 1; 
-    Value = Round (Value,RoundTo);
-    if (RoundTo<1)
-    {
-        rndp = log10(RoundTo); 
-        ndp = abs((short)IDNINT(rndp)); 
-        sprintf (fmt,"%%.%if",ndp);
-        sprintf (VCBuff,fmt,Value);
-    }
-    else
-        sprintf (VCBuff,"%.0f",Value); 
-    if (Commas)
-    	AddCommas (VCBuff);
 {
-#if ENABLETRACE
-GSSiExitProg (224);
+	GSSiEnterProg(224);
 #endif
-    return (VCBuff);  
-}
+	{
+		static char VCBuff[32];
+		char        fmt[32];
+		LPSTR   p1, p2, bp, pDot;
+		short       n, ndp;
+		double  rndp;
+
+		if (RoundTo <= 0) RoundTo = 1;
+		Value = Round(Value, RoundTo);
+		if (RoundTo < 1)
+		{
+			rndp = log10(RoundTo);
+			ndp = abs((short)IDNINT(rndp));
+			sprintf(fmt, "%%.%if", ndp);
+			sprintf(VCBuff, fmt, Value);
+		}
+		else
+			sprintf(VCBuff, "%.0f", Value);
+		if (Commas)
+			AddCommas(VCBuff);
+		{
 #if ENABLETRACE
+			GSSiExitProg(224);
+#endif
+			return (VCBuff);
+		}
+#if ENABLETRACE
+	}
+#endif
 }
+
+
+LPSTR DollarConv(double Value, int RoundTo, BOOL Commas) 
+#if ENABLETRACE
+{
+	GSSiEnterProg(224);
+#endif
+	{
+		static char VCBuff[32];
+		char        fmt[32];
+		short       n, ndp;
+		double  rndp;
+
+		if (RoundTo > 0)
+		{
+			Value = Round(Value, RoundTo);
+			sprintf(&VCBuff[1], "%.0f", Value);
+		}
+		else
+			sprintf(&VCBuff[1], "%.2f", Value);
+		if (Commas)
+			AddCommas(&VCBuff[1]);
+		VCBuff[0] = '$';
+		{
+#if ENABLETRACE
+			GSSiExitProg(224);
+#endif
+			return (VCBuff);
+		}
+#if ENABLETRACE
+	}
 #endif
 }
 
