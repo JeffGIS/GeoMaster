@@ -111,3 +111,4 @@
 #define MAX_SMALL_MESSAGE	255
 
 #define MAX_VARNAME_LEN	61
+#define MAX_GMMFILES    32

@@ -8556,28 +8556,31 @@ NextTextRec:
 					if (FilePtr->Type == MACRO_DATAFILE)
 					{
 						SQLPtr->st = 1;
+						int GMMFileID = GetGMMFileID(FilePtr);
+						char GMMFileIDc[16];
+						sprintf(GMMFileIDc, "GMMVar%i", GMMFileID);
 						HANDLE hMacroPath = GetGMMMacroPath(FilePtr->fullpath);
 						LPSTR pMacroPath = GlobalLock(hMacroPath);
 						HANDLE hCommand = GSSiGlobAlloc(GAIDNO 2060, GPTR, 4096*8);
 						LPSTR pCommand = GlobalLock(hCommand);
-						sprintf(pCommand, "$MACRO(%s,OPEN,%s);", pMacroPath, lpGWDHead->pKeys[SQLPtr->IndexToUse]);
+						sprintf(pCommand, "$MACRO(%s,OPEN,%s,%s);", pMacroPath, lpGWDHead->pKeys[SQLPtr->IndexToUse], GMMFileIDc);
 						ExpandText(pCommand);
 						if (*pCommand == '1')
 						{
 							SQLPtr->st = 0;
-							FilePtr->BufferHandle = GSSiGlobAlloc(GAIDNO 2061, GPTR, 4096 * 8);
-							LPSTR pResults = GlobalLock(FilePtr->BufferHandle);
-							sprintf(pCommand, "$MACRO(%s,FETCH,%s);", pMacroPath, lpGWDHead->pKeys[SQLPtr->IndexToUse]);
+							sprintf(pCommand, "$MACRO(%s,FETCH,%s,%s);", pMacroPath, lpGWDHead->pKeys[SQLPtr->IndexToUse], GMMFileIDc);
 							ExpandText(pCommand);
 							if (*pCommand == '1')
 							{
 								SQLPtr->st = 0;
 								int len  = strlen(pCommand);
+								FilePtr->BufferHandle = GSSiGlobAlloc(GAIDNO 2061, GPTR, len+4);
+								LPSTR pResults = GlobalLock(FilePtr->BufferHandle);
 								memmove(pResults, pCommand, len);
 								pResults[len] = 0;
+								GlobalUnlock(FilePtr->BufferHandle);
 							}
-							GlobalUnlock(FilePtr->BufferHandle);
-							sprintf(pCommand, "$MACRO(%s,CLOSE,%s);", pMacroPath, lpGWDHead->pKeys[SQLPtr->IndexToUse]);
+							sprintf(pCommand, "$MACRO(%s,CLOSE,%s,%s);", pMacroPath, lpGWDHead->pKeys[SQLPtr->IndexToUse], GMMFileIDc);
 							ExpandText(pCommand);
 						}
 						GSSiGlobUlFree(&hMacroPath);
@@ -11352,4 +11355,21 @@ int SetTimeRangeBeg(int time)
 	TimeRangeBeg = max(MinTimeRangeBeg, time);
 	ClearSecondsInSample();
 	return TimeRangeBeg;
+}
+
+int GetGMMFileID(LPOPENFILEDATA filePtr)
+{
+	int rtn = 0;
+
+	for (int i = 0; i < numGMMFiles; i++)
+	{
+		if (!stricmp(filePtr->fullpath, GMMFileList[i]))
+		{
+			rtn = i + 1;
+			return rtn;
+		}
+	}
+	strcpy(GMMFileList[numGMMFiles], filePtr->fullpath);
+	numGMMFiles++;
+	return numGMMFiles;
 }

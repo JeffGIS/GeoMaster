@@ -1985,6 +1985,7 @@ GSSiExitProg (1350);
 				pMem[fileLen] = 0;
 				GlobalUnlock(hFile);
 				GSSiClose2(&fid);
+				GSSiRemove(pTempFile);
 				sprintf(pTempFile, "[%s]=%i", Arg[2], (long)hFile);
 				ProcessText(pTempFile);
 				free(pTempFile);
