@@ -8555,36 +8555,53 @@ NextTextRec:
 						cond = BT_ANY;
 					if (FilePtr->Type == MACRO_DATAFILE)
 					{
+						HANDLE hOutput = 0;
 						SQLPtr->st = 1;
 						int GMMFileID = GetGMMFileID(FilePtr);
 						char GMMFileIDc[16];
 						sprintf(GMMFileIDc, "GMMVar%i", GMMFileID);
-						HANDLE hMacroPath = GetGMMMacroPath(FilePtr->fullpath);
-						LPSTR pMacroPath = GlobalLock(hMacroPath);
-						HANDLE hCommand = GSSiGlobAlloc(GAIDNO 2060, GPTR, 4096*8);
-						LPSTR pCommand = GlobalLock(hCommand);
-						sprintf(pCommand, "$MACRO(%s,OPEN,%s,%s);", pMacroPath, lpGWDHead->pKeys[SQLPtr->IndexToUse], GMMFileIDc);
-						ExpandText(pCommand);
-						if (*pCommand == '1')
+						if (hOutput = GetGMMOutput(GMMFileID, lpGWDHead->pKeys[SQLPtr->IndexToUse], lpGWDHead->lKeys[SQLPtr->IndexToUse]))
 						{
 							SQLPtr->st = 0;
-							sprintf(pCommand, "$MACRO(%s,FETCH,%s,%s);", pMacroPath, lpGWDHead->pKeys[SQLPtr->IndexToUse], GMMFileIDc);
+							LPSTR pCommand = GlobalLock(hOutput);
+							int len = strlen(pCommand);
+							FilePtr->BufferHandle = GSSiGlobAlloc(GAIDNO 2061, GPTR, len + 4);
+							LPSTR pResults = GlobalLock(FilePtr->BufferHandle);
+							memmove(pResults, pCommand, len);
+							pResults[len] = 0;
+							GlobalUnlock(FilePtr->BufferHandle);
+							GSSiGlobUlFree(&hOutput);
+						}
+						else
+						{
+							HANDLE hMacroPath = GetGMMMacroPath(FilePtr->fullpath);
+							LPSTR pMacroPath = GlobalLock(hMacroPath);
+							HANDLE hCommand = GSSiGlobAlloc(GAIDNO 2060, GPTR, 4096 * 8);
+							LPSTR pCommand = GlobalLock(hCommand);
+							sprintf(pCommand, "$MACRO(%s,OPEN,%s,%s);", pMacroPath, lpGWDHead->pKeys[SQLPtr->IndexToUse], GMMFileIDc);
 							ExpandText(pCommand);
 							if (*pCommand == '1')
 							{
 								SQLPtr->st = 0;
-								int len  = strlen(pCommand);
-								FilePtr->BufferHandle = GSSiGlobAlloc(GAIDNO 2061, GPTR, len+4);
-								LPSTR pResults = GlobalLock(FilePtr->BufferHandle);
-								memmove(pResults, pCommand, len);
-								pResults[len] = 0;
-								GlobalUnlock(FilePtr->BufferHandle);
+								sprintf(pCommand, "$MACRO(%s,FETCH,%s,%s);", pMacroPath, lpGWDHead->pKeys[SQLPtr->IndexToUse], GMMFileIDc);
+								ExpandText(pCommand);
+								if (*pCommand == '1')
+								{
+									SQLPtr->st = 0;
+									int len = strlen(pCommand);
+									SaveGMMOutput(GMMFileID, lpGWDHead->pKeys[SQLPtr->IndexToUse], lpGWDHead->lKeys[SQLPtr->IndexToUse],pCommand,len);
+									FilePtr->BufferHandle = GSSiGlobAlloc(GAIDNO 2061, GPTR, len + 4);
+									LPSTR pResults = GlobalLock(FilePtr->BufferHandle);
+									memmove(pResults, pCommand, len);
+									pResults[len] = 0;
+									GlobalUnlock(FilePtr->BufferHandle);
+								}
+								sprintf(pCommand, "$MACRO(%s,CLOSE,%s,%s);", pMacroPath, lpGWDHead->pKeys[SQLPtr->IndexToUse], GMMFileIDc);
+								ExpandText(pCommand);
 							}
-							sprintf(pCommand, "$MACRO(%s,CLOSE,%s,%s);", pMacroPath, lpGWDHead->pKeys[SQLPtr->IndexToUse], GMMFileIDc);
-							ExpandText(pCommand);
+							GSSiGlobUlFree(&hMacroPath);
+							GSSiGlobUlFree(&hCommand);
 						}
-						GSSiGlobUlFree(&hMacroPath);
-						GSSiGlobUlFree(&hCommand);
 					}
 					else
 					{
@@ -11357,19 +11374,3 @@ int SetTimeRangeBeg(int time)
 	return TimeRangeBeg;
 }
 
-int GetGMMFileID(LPOPENFILEDATA filePtr)
-{
-	int rtn = 0;
-
-	for (int i = 0; i < numGMMFiles; i++)
-	{
-		if (!stricmp(filePtr->fullpath, GMMFileList[i]))
-		{
-			rtn = i + 1;
-			return rtn;
-		}
-	}
-	strcpy(GMMFileList[numGMMFiles], filePtr->fullpath);
-	numGMMFiles++;
-	return numGMMFiles;
-}

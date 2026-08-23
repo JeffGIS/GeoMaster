@@ -9237,7 +9237,7 @@ BOOL FILEFunctions(int nArgs, LPSTR *Arg, LPSTR OutLoc)
 				BigRead(fid, bytes, 1);
 				GSSillseek(fid, 0, 0);
 				BigWrite(fid, bytes, 1, -1);
-				GSSiClose2 (&fid);
+				GSSiClose2(&fid);
 				CloseAllRequestedFiles(FALSE);
 				rtn = TRUE;
 			}
@@ -9275,7 +9275,7 @@ HANDLE GetGMMMacroPath(LPSTR fullPath)
 	LPSTR pPath = GlobalLock(hPath);
 
 	strcpy(pPath, fullPath);
-	_fstrupr (pPath);
+	_fstrupr(pPath);
 	LPSTR pDot = strstr(pPath, ".GMM");
 	if (pDot)
 	{
@@ -9292,7 +9292,7 @@ HANDLE GetGMMMacroPath(LPSTR fullPath)
 	return hPath;
 };
 
-LPSTR GetGMMField(LPOPENFILEDATA FilePtr,int iField)
+LPSTR GetGMMField(LPOPENFILEDATA FilePtr, int iField)
 {
 	int lenField = 0;
 	char delimitChr = 1;
@@ -9315,11 +9315,59 @@ LPSTR GetGMMField(LPOPENFILEDATA FilePtr,int iField)
 				}
 			}
 		}
-		Found: GlobalUnlock(FilePtr->BufferHandle);
+	Found: GlobalUnlock(FilePtr->BufferHandle);
 	}
-	LPSTR pValue = malloc(lenField+2);
+	LPSTR pValue = malloc(lenField + 2);
 	if (lenField)
 		strncpy(pValue, pStartField, lenField);
 	pValue[lenField] = 0;
 	return pValue;
+}
+
+HANDLE GetGMMOutput(int GMMFileID, LPSTR pKey, int lKey)
+{
+	HANDLE hRtn = 0;
+
+	return hRtn;
+}
+
+void SaveGMMOutput(int GMMFileID, LPSTR pKey, int lKey, LPSTR pOutput, int lenOutput)
+{
+	int lenOutput2 = lenOutput + lenOutput % 2;
+	int lKey2 = lKey + lKey % 2;
+	LPINT pTotLen, pKeyLen, pOutputLen;
+	int memLen = 0;
+	if (hGMMFiles[GMMFileID] == 0)
+	{
+		memLen = sizeof(int) + sizeof(int) + lKey2 + sizeof(int) + lenOutput2 + 4;
+		hGMMFiles[GMMFileID] = 	GSSiGlobAlloc(GAIDNO 1, GMEM_MOVEABLE, memLen);
+		pTotLen = GlobalLock(hGMMFiles[GMMFileID]);
+		*pTotLen = memLen;
+		pKeyLen = pTotLen;
+		pKeyLen++;
+		*pKeyLen = lKey;
+	}
+	else
+	{
+		hGMMFiles[GMMFileID] = GSSiGlobalReAlloc(0, hGMMFiles[GMMFileID],memLen, GMEM_MOVEABLE);
+	}
+	return;
+}
+
+int GetGMMFileID(LPOPENFILEDATA filePtr)
+{
+	int rtn = 0;
+
+	for (int i = 0; i < numGMMFiles; i++)
+	{
+		if (!stricmp(filePtr->fullpath, GMMFileList[i]))
+		{
+			rtn = i + 1;
+			return rtn;
+		}
+	}
+	strcpy(GMMFileList[numGMMFiles], filePtr->fullpath);
+	hGMMFiles[numGMMFiles] = 0;
+	numGMMFiles++;
+	return numGMMFiles;
 }
