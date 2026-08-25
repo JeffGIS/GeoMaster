@@ -9324,33 +9324,91 @@ LPSTR GetGMMField(LPOPENFILEDATA FilePtr, int iField)
 	return pValue;
 }
 
-HANDLE GetGMMOutput(int GMMFileID, LPSTR pKey, int lKey)
+HANDLE GetGMMOutput(int GMMFileID, LPSTR pWantKey, int lKey)
 {
 	HANDLE hRtn = 0;
 
+	GMMFileID--;
+	if (hGMMFiles[GMMFileID])
+	{
+		LPINT pTotLen, pKeyLen, pOutputLen;
+		int memLen = 0;
+		LPSTR pKey = 0;
+		LPSTR pData = 0;
+		pTotLen = GlobalLock(hGMMFiles[GMMFileID]);
+		memLen = *pTotLen;
+		LPSTR pEndData = (LPSTR)pTotLen;
+		pEndData += memLen;
+		pKeyLen = pTotLen + 1;
+		int lKey = *pKeyLen;
+		int lKey2 = lKey + lKey % 2;
+		pKey = (LPSTR)(pKeyLen + 1);
+		while ((LPSTR)pData < pEndData)
+		{
+			LPINT pLenData = (LPINT)(pKey + lKey2);
+			int lenData = *pLenData;
+			int lenData2 = lenData + lenData % 2;
+			pData = (LPSTR)(pLenData + 1);
+			if (*pKeyLen == lKey && !memcmp(pKey, pWantKey, lKey))
+			{
+				hRtn = GSSiGlobAlloc(GAIDNO 2059, GMEM_MOVEABLE, lenData2 + 4);
+				LPSTR pOutPutData = GlobalLock(hRtn);
+				memcpy(pOutPutData, pData, lenData);
+				pOutPutData[lenData] = 0;
+				GlobalUnlock(hRtn);
+				break;
+			}
+			pData += lenData2;
+			pKey = pData;
+		}
+		GlobalUnlock(hGMMFiles[GMMFileID]);
+	}
 	return hRtn;
 }
 
-void SaveGMMOutput(int GMMFileID, LPSTR pKey, int lKey, LPSTR pOutput, int lenOutput)
+void SaveGMMOutput(int GMMFileID, LPSTR Key, int lKey, LPSTR Data, int lenData)
 {
-	int lenOutput2 = lenOutput + lenOutput % 2;
+	GMMFileID--;
+	int lenData2 = lenData + lenData % 2;
+	int lenStoredData = 0;
+	LPINT pLenStoredData = 0;
 	int lKey2 = lKey + lKey % 2;
 	LPINT pTotLen, pKeyLen, pOutputLen;
 	int memLen = 0;
+	LPSTR pKey = 0;
+	LPSTR pData = 0;
 	if (hGMMFiles[GMMFileID] == 0)
 	{
-		memLen = sizeof(int) + sizeof(int) + lKey2 + sizeof(int) + lenOutput2 + 4;
-		hGMMFiles[GMMFileID] = 	GSSiGlobAlloc(GAIDNO 1, GMEM_MOVEABLE, memLen);
+		memLen = sizeof(int) + sizeof(int) + lKey2 + sizeof(int) + lenData2;
+		hGMMFiles[GMMFileID] = 	GSSiGlobAlloc(GAIDNO 1, GMEM_MOVEABLE, memLen+4);
 		pTotLen = GlobalLock(hGMMFiles[GMMFileID]);
-		*pTotLen = memLen;
+		*pTotLen++ = memLen;
 		pKeyLen = pTotLen;
-		pKeyLen++;
-		*pKeyLen = lKey;
+		*pKeyLen++ = lKey;
+		pKey = (LPSTR)pKeyLen;
+		memcpy(pKey, Key, lKey);
+		pLenStoredData = (LPINT)(pKey + lKey2);
+		*pLenStoredData = lenData;
+		pData = (LPSTR)(pLenStoredData + 1);
+		memcpy(pData, Data, lenData);
 	}
 	else
 	{
-		hGMMFiles[GMMFileID] = GSSiGlobalReAlloc(0, hGMMFiles[GMMFileID],memLen, GMEM_MOVEABLE);
+		pTotLen = GlobalLock(hGMMFiles[GMMFileID]);
+		memLen = *pTotLen + lKey2 + sizeof(int) + lenData2;
+		GlobalUnlock (hGMMFiles[GMMFileID]);
+		hGMMFiles[GMMFileID] = GSSiGlobalReAlloc(0, hGMMFiles[GMMFileID],memLen+4, GMEM_MOVEABLE);
+		pTotLen = GlobalLock(hGMMFiles[GMMFileID]);
+		pKey = (LPSTR)pTotLen;
+		pKey += *pTotLen;
+		*pTotLen = memLen;
+		memcpy(pKey, Key, lKey);
+		pLenStoredData = (LPINT)(pKey + lKey2);
+		*pLenStoredData = lenData;
+		pData = (LPSTR)(pLenStoredData + 1);
+		memcpy(pData, Data, lenData);
 	}
+	GlobalUnlock(hGMMFiles[GMMFileID]);
 	return;
 }
 
@@ -9370,4 +9428,13 @@ int GetGMMFileID(LPOPENFILEDATA filePtr)
 	hGMMFiles[numGMMFiles] = 0;
 	numGMMFiles++;
 	return numGMMFiles;
+}
+
+void FreeGMMFiles (void)
+{
+	for (int i = 0; i < numGMMFiles; i++)
+	{
+		GSSiGlobFree(&hGMMFiles[i]);
+	}
+
 }

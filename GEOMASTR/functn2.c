@@ -1944,7 +1944,9 @@ GSSiExitProg (1350);
 			LPSTR pMem;
 			if (!stricmp(Arg[1], "GETVAL"))
 			{
-				hFile = (HANDLE)atol(Arg[2]);
+				sprintf(pTempFile, "[%s]", Arg[2]);
+				ExpandText(pTempFile);
+				hFile = (HANDLE)atol(pTempFile);
 				LPSTR pMem = GlobalLock(hFile);
 				if (!pMem)
 					goto RtnFalse;

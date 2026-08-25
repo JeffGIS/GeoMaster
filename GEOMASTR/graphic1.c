@@ -393,6 +393,8 @@ void QuitGraphics()
 	char	str[256],ExitMessage[256];
 	short	i; 
 	
+	FreeGMMFiles();
+
 	ProcessText("[%FILEUSAGEFILE2]=");
 	ProcessText("[%EXITCMD]");
 	GSSiSetCursor((HCURSOR)-1);

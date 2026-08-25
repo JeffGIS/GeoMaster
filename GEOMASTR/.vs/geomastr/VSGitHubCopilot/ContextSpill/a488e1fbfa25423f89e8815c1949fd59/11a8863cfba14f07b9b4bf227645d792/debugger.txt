@@ -1,0 +1,976 @@
+﻿## PROCESSES
+Currently debugging:
+- GeoMaster34n.exe (PID: 14956)
+
+## EXCEPTION
+Exception Type: The variable 'pOutputLen' is being used without being initialized.
+Exception Message: Run-Time Check Failure #3 - The variable 'pOutputLen' is being used without being initialized.
+Piece of code that has the exception:
+```c C:\GSSi\source\repos\geomaster2019\DB\gwd.c
+9327: HANDLE GetGMMOutput(int GMMFileID, LPSTR pKey, int lKey)
+9328: {
+9329: 	HANDLE hRtn = 0;
+9330: 
+9331: 	GMMFileID--;
+9332: 	if (hGMMFiles[GMMFileID])
+9333: 	{
+9334: 		LPINT pTotLen, pKeyLen, pOutputLen;
+9335: 		int memLen = 0;
+9336: 		LPSTR pKey2 = 0;
+9337: 		LPSTR pData = 0;
+9338: 		pTotLen = GlobalLock(hGMMFiles[GMMFileID]);
+9339: 		memLen = *pTotLen;
+9340: 		pKeyLen = pTotLen + 1;
+9341: 		pKey2 = (LPSTR)pKeyLen + 1;
+9342: 		pData = pKey2 + *pKeyLen + *pKeyLen % 2;
+9343: 		while ((LPSTR)pData < (LPSTR)pTotLen + memLen)
+9344: 		{
+9345: 			if (*pKeyLen == lKey && !memcmp(pKey, pKey2, lKey))
+9346: 			{
+9347: 				hRtn = GSSiGlobAlloc(GAIDNO 2059, GMEM_MOVEABLE, *pOutputLen);
+9348: 				memcpy(GlobalLock(hRtn), pData, *pOutputLen);
+9349: 				GlobalUnlock(hRtn);
+9350: 				break;
+9351: 			}
+9352: 			pOutputLen = (LPINT)(pData + *pOutputLen + *pOutputLen % 2);
+9353: 			pKeyLen = pOutputLen + 1;
+9354: 			pKey2 = (LPSTR)pKeyLen + 1;
+9355: 			pData = pKey2 + *pKeyLen + *pKeyLen % 2;
+9356: 		}
+9357: 		GlobalUnlock(hGMMFiles[GMMFileID]);
+9358: 	}
+9359: 	return hRtn;
+9360: }
+```
+Exception is on line 9352
+The callstack context, if included, corresponds to the thread where this exception occurred. There is no need to identify this thread by other means.
+The top most frame in the callstack context should correspond to the place the exception message was thrown from. Code may or may not have been provided for it but can be requested.
+
+## CALLSTACK
+Thread ID: 25696
+[1] GeoMaster34n.exe!GetGMMOutput
+This is the current user focused stack frame. The provided locals context corresponds to this stack frame, but you may evaluate expressions and retrieve code for any frame.
+Code for the stack frame:
+```c DB\gwd.c
+9327: HANDLE GetGMMOutput(int GMMFileID, LPSTR pKey, int lKey)
+9328: {
+9329: 	HANDLE hRtn = 0;
+9330: 
+9331: 	GMMFileID--;
+9332: 	if (hGMMFiles[GMMFileID])
+9333: 	{
+9334: 		LPINT pTotLen, pKeyLen, pOutputLen;
+9335: 		int memLen = 0;
+9336: 		LPSTR pKey2 = 0;
+9337: 		LPSTR pData = 0;
+9338: 		pTotLen = GlobalLock(hGMMFiles[GMMFileID]);
+9339: 		memLen = *pTotLen;
+9340: 		pKeyLen = pTotLen + 1;
+9341: 		pKey2 = (LPSTR)pKeyLen + 1;
+9342: 		pData = pKey2 + *pKeyLen + *pKeyLen % 2;
+9343: 		while ((LPSTR)pData < (LPSTR)pTotLen + memLen)
+9344: 		{
+9345: 			if (*pKeyLen == lKey && !memcmp(pKey, pKey2, lKey))
+9346: 			{
+9347: 				hRtn = GSSiGlobAlloc(GAIDNO 2059, GMEM_MOVEABLE, *pOutputLen);
+9348: 				memcpy(GlobalLock(hRtn), pData, *pOutputLen);
+9349: 				GlobalUnlock(hRtn);
+9350: 				break;
+9351: 			}
+9352: 			pOutputLen = (LPINT)(pData + *pOutputLen + *pOutputLen % 2);
+9353: 			pKeyLen = pOutputLen + 1;
+9354: 			pKey2 = (LPSTR)pKeyLen + 1;
+9355: 			pData = pKey2 + *pKeyLen + *pKeyLen % 2;
+9356: 		}
+9357: 		GlobalUnlock(hGMMFiles[GMMFileID]);
+9358: 	}
+9359: 	return hRtn;
+9360: }
+```
+Current statement: line 9352
+[2] GeoMaster34n.exe!FetchDBRec
+Code for the stack frame:
+``` SHR\VARSTUFF.C
+8548: 		    				}
+8549: 		    			}
+8550: 						GWDFormKey(lpGWDHead,SQLPtr->IndexToUse,TRUE,0,0);
+8551: 						if (SQLPtr->IndexToUse && cond == BT_EQ) 
+8552: 							SetReadSecIndex(hBT,TRUE); 
+8553: 					}                
+8554: 					else
+8555: 						cond = BT_ANY;
+8556: 					if (FilePtr->Type == MACRO_DATAFILE)
+8557: 					{
+8558: 						HANDLE hOutput = 0;
+8559: 						SQLPtr->st = 1;
+8560: 						int GMMFileID = GetGMMFileID(FilePtr);
+8561: 						char GMMFileIDc[16];
+8562: 						sprintf(GMMFileIDc, "GMMVar%i", GMMFileID);
+8563: 						if (hOutput = GetGMMOutput(GMMFileID, lpGWDHead->pKeys[SQLPtr->IndexToUse], lpGWDHead->lKeys[SQLPtr->IndexToUse]))
+```
+Current statement: line 8563
+[3] GeoMaster34n.exe!GetValFromOpenFiles
+Code for the stack frame:
+``` SHR\VARSTUFF.C
+9836: 				}
+9837: 
+9838: 				if (NeedRead(SQLPtr))
+9839: 				{
+9840: 					if (lpGWDHead->Version > 1000)
+9841: 					{
+9842: 						SQLPtr->lastreadtime = NextVarTime();
+9843: 						if (!LoadInternalGMD(lpGWDHead, InternalRefno))
+9844: 						{
+9845: 							GlobalUnlock(FilePtr->FileHandle);
+9846: 							goto NotFound;
+9847: 						}
+9848: 						st = 0;
+9849: 						goto Found;
+9850: 					}
+9851: 					if (!FetchDBRec(SQLPtr->myhandle))
+```
+Current statement: line 9851
+[4] GeoMaster34n.exe!GetVal
+Code for the stack frame:
+``` SHR\VARSTUFF.C
+7985: 		VP->NumLinkedVars++;
+7986: /*		if (!stricmp(VP->Name, "COUNTY"))
+7987: 		{
+7988: 			countyVar = hGlobal;
+7989: 			countyLinkedVar = LinkToVar;
+7990: 		}*/
+7991: 		GlobalUnlock (hGlobal);
+7992: 		GlobalUnlock (LinkToVar);
+7993: {
+7994: #if ENABLETRACE
+7995: GSSiExitProg (570);
+7996: #endif
+7997: 		return 0; 
+7998: }
+7999: 	}
+8000: 	if ((l=GetValFromOpenFiles (VarName,OutStr,MAXVARLEN))>=0)
+```
+Current statement: line 8000
+[5] GeoMaster34n.exe!ExpandTextDB2
+Code for the stack frame:
+``` SHR\VARSTUFF.C
+7096: 			else
+7097: 			{
+7098: 				LPSTR il;
+7099: 
+7100: 				l = EndBrack - InLoc - 1; 
+7101: 				InLoc++;
+7102: 				_fmemmove(OutLoc,InLoc,(size_t) l);
+7103: 				il = InLoc;
+7104: 				InLoc = ++EndBrack;
+7105: 				loc = OutLoc + l;
+7106: 				*loc = '\0';
+7107: 				if (pBrkPt)
+7108: 					loc = ExpandTextDB(OutLoc, pBrkPt, bpOffset + (int)(il - startLoc), bpLen);
+7109: 				else
+7110: 					loc = ExpandText(OutLoc);
+7111: 			    l = GetVal(OutLoc,OutLoc);
+```
+Current statement: line 7111
+[6] GeoMaster34n.exe!ExpandTextDB
+Code for the stack frame:
+``` SHR\VARSTUFF.C
+6893: LPSTR ExpandTextDB(LPSTR InText, LPBREAKPOINT pBrkPt, int bpOffset, int bpLen)
+6894: {
+6895: 	BOOL inRawInput = FALSE;
+6896: 	LPSTR pPos;
+6897: 	LPSTR pBeg = InText;
+6898: 	LPSTR pEnd = strchr(pBeg, rawInputChar);
+6899: 	if (!pEnd || !rawInputChar)
+6900: 		return ExpandTextDB2(InText, pBrkPt, bpOffset, bpLen);
+6901: 
+6902: //	int lIn = strlen(InText);
+6903: //	HANDLE hInput = GSSiGlobAlloc(GAIDNO 0, GMEM_MOVEABLE, l + 2);
+6904: //	LPSTR  pInput = GlobalLock(hInput);
+6905: 	HANDLE hMem = GSSiGlobAlloc(GAIDNO 1977, GMEM_MOVEABLE, USHRT_MAX);
+6906: 	
+6907: 	nRaw = 0;
+6908: 	LPSTR pMem = GlobalLock(hMem);
+6909: 	
+6910: 	*pEnd++ = 0;
+6911: 	strcpy(pMem, pBeg);
+6912: 	pPos = strchr(pMem, 0);
+6913: 	pBeg = pEnd;
+6914: 	inRawInput = TRUE;
+6915: 	while (*pBeg)
+6916: 	{
+6917: 		if (rawInputChar)
+6918: 			pEnd = strchr(pBeg, rawInputChar);
+6919: 		else
+6920: 			pEnd = 0;
+6921: 		if (!pEnd)
+6922: 			pEnd = strchr(pBeg, 0);
+6923: 		else
+6924: 			*pEnd++ = 0;
+6925: 		if (inRawInput)
+6926: 		{
+6927: 			LPSTR pRaw;
+6928: 			int l = pEnd - pBeg;
+6929: 			hMemRaw[nRaw] = GSSiGlobAlloc(GAIDNO 1978, GMEM_MOVEABLE, l + 2);
+6930: 			pRaw = GlobalLock(hMemRaw[nRaw]);
+6931: 			strcpy(pRaw, pBeg);
+6932: 			GlobalUnlock(hMemRaw[nRaw]);
+6933: 			sprintf(pPos, "$RAW(#%i)", nRaw++);
+6934: 		}
+6935: 		else
+6936: 			strcpy(pPos, pBeg);
+6937: 		pPos = strchr(pPos, 0);
+6938: 		inRawInput = !inRawInput;
+6939: 		pBeg = pEnd;
+6940: 	}
+6941: 	ExpandTextDB2(pMem, pBrkPt, bpOffset, bpLen);
+6942: 	for (int i = 0; i < nRaw; i++)
+6943: 	{
+6944: 		GSSiGlobFree(&hMemRaw[i]);
+6945: 	}
+6946: 	strcpy(InText, pMem);
+6947: 	GSSiGlobUlFree(&hMem);
+6948: 	return InText;
+6949: }
+```
+Current statement: line 6900
+[7] GeoMaster34n.exe!ExpandText
+Code for the stack frame:
+``` SHR\VARSTUFF.C
+7479: LPSTR ExpandText(LPSTR InText)
+7480: {
+7481: 	LPSTR rtn = ExpandTextDB(InText, 0, 0, 0);
+7482: 
+7483: 	return rtn;
+7484: }
+```
+Current statement: line 7481
+[8] GeoMaster34n.exe!DisplayReport
+Code for the stack frame:
+``` GEOMASTR\report.C
+585: BOOL DisplayReport (HDC hDC, HANDLE hReport, RECT InRect,LPRECT pClipRect,double Factor, long Refno,LPRECT pSizeRect, BOOL FitToWindow)
+586: {
+587: 	LPREPORT	pReport=(LPREPORT)GlobalLock (hReport);
+588: 	int			irow, itab, MaxRowLen=0, RowHeight, ReportWidth, x, y,xj,yj=0,w,lt, Margin=0,ifont;  
+589: 	LPSTR		pRow, Tabloc, StartTab, EndTab, pFirstRow, Tabstr;
+590: 	LPLONG		startrow, pRows;
+591: 	char		tabstr[16], FontStr[32];  
+592: 	SIZE		txSize;
+593: 	HFONT		OldFont;   
+594: 	BOOL		NullLine;
+595: 	int			hinc, winc; 
+596: 	HRGN		hRgn;
+597: 	HANDLE		hStr;
+598: 	LPSTR		str; 
+599: 	short		i;
+600: 	double		f=0;
+601: 	int			xmid;
+602: 	long		ShadowColor;
+603: 	RECT		Rect = InRect;
+604: 
+605: 	if (!pSizeRect)
+606: 	{
+607: 		Rect.right /= pReport->NumCols;
+608: 	}
+609: 	HaltReport = FALSE;                   
+610: 	if (!pReport)
+611: 		return FALSE;
+612: 	if (!pSizeRect)
+613: 		f = (double)pReport->Just / 1000;
+614: 	xmid  = Rect.left + abs(Rect.right - Rect.left)/pReport->NumCols * f;
+615: 	pReport->hDC = hDC;
+616: 	pReport->Rect = Rect;
+617: 	if (pReport->Type == 2)
+618: 	{
+619: 		GlobalUnlock (hReport);
+620: 		return (DisplayReport2 (hDC,hReport,Rect,Factor,TRUE,pSizeRect));
+621: 	}
+622: 	GlobalUnlock (hReport);
+623: 	if (!OpenReportFiles (hReport))
+624: 		return FALSE;    
+625: 	if (pSizeRect)
+626: 	{
+627: 		pReport->WantSize = TRUE;
+628: 		RectInit (&pReport->SizeRect); 
+629: 		pReport->maxLineHeaderWidth = 0;
+630: 	}
+631: 	else
+632: 		pReport->WantSize = FALSE;
+633:  
+634:     SaveDC (hDC);
+635: 	hStr = GSSiGlobAlloc(GAIDNO 731,GMEM_MOVEABLE,4096);
+636: 	str = GlobalLock (hStr);
+637: 	SetDisplayMode (hDC, GF_TEXTMODE);    
+638: 	if (pClipRect)
+639: 		SelectClipRgn (hDC,0);
+640: 	pReport = (LPREPORT)GlobalLock (hReport);
+641: 	if (pSizeRect)
+642: 	{
+643: 		hinc = (abs(Rect.bottom-Rect.top)*pReport->Height*Factor)/2;
+644: 		winc = (abs(Rect.right-Rect.left)*pReport->Width*Factor)/2;
+645: 		Rect.top += hinc;
+646: 		Rect.left += winc;
+647: 		Rect.bottom -= hinc;
+648: 		Rect.right -= winc;  
+649: 		pReport->Rect = Rect; 
+650: 	}
+651: 	if (!pSizeRect)
+652: 		Margin = min (IDNINT(pReport->Margin * abs(Rect.bottom-Rect.top)), 
+653: 					  IDNINT(pReport->Margin * abs(Rect.right-Rect.left))); 
+654: 	for (i=0;i< pReport->NumTabs;i++)
+655: 		if (pSizeRect)
+656: 			pReport->TabLen[i] = 0;
+657: 		else
+658: 			pReport->TabLen[i] = pReport->Just;//-((long)Rect.right - (long)Rect.left -Margin*2) * f;
+659: 	CreateReportFonts(pReport,Factor);
+660: 	_fstrcpy (FontStr,"[%FONT]=0;");
+661: 	ExpandText (FontStr); 
+662:     OldFont = SelectObject(hDC, GetStockObject(SYSTEM_FONT));
+663:     SelectObject (hDC,OldFont); 
+664: 	SetTextColor (CurView->hDC,0);
+665:     if (pReport->hRows)
+666:     {
+667: 		pRows = (LPLONG)GlobalLock (pReport->hRows); 
+668: 		pFirstRow = (LPSTR) (pRows + pReport->NumRows); 
+669: 		if (Printing)
+670: 		{
+671: 			hRgn = 0;
+672: 			SelectClipRgn(hDC, hRgn);
+673: 		}
+674: 		else if (pClipRect)
+675: 		{
+676: 			RECT ClipRect = *pClipRect;
+677: 			hRgn = CreateRectRgn (ClipRect.left,ClipRect.top,ClipRect.right,ClipRect.bottom);
+678: 			SelectClipRgn(hDC, hRgn);
+679: 			GSSiDeleteObject(&hRgn);
+680: 		}
+681: 	//SelectClipRgn (hDC,0);//tempdebug
+682: 		y = Rect.top + Margin;	
+683: 		int colLen = Rect.right - Rect.left - Margin * 2;
+684: 		int icol = 0;
+685: 		int splitRow = -2;
+686: 		int topY = y;
+687: 		if (pReport->NumCols > 1)
+688: 		{
+689: 			splitRow = pReport->NumRows / pReport->NumCols;
+690: 		}
+691: 		if (*pReport->Title && !pSizeRect)
+692: 		{
+693: 			char title[256];
+694: 			LPSTR pTitle = title;
+695: 			strcpy(title, pReport->Title);
+696: 			ifont = 1;
+697: 			ShadowColor = -1;
+698: 			SetTextColor(CurView->hDC, pReport->FontColor[ifont - 1]);
+699: 			if (pReport->FontShadow[ifont - 1])
+700: 				ShadowColor = pReport->FontShadowColor[ifont - 1];
+701: 			SelectObject(hDC, pReport->hFonts[ifont - 1]);
+702: 			do
+703: 			{
+704: 				LPSTR pNewLine = strchr(pTitle,'\r');
+705: 				if (pNewLine)
+706: 					*pNewLine++ = 0;
+707: 				GetTextExtentPoint32(hDC, pTitle, _fstrlen(pTitle), &txSize);
+708: 				pReport->x = InRect.left + (InRect.right - InRect.left) / 2 - txSize.cx / 2;
+709: 				pReport->y = y;
+710: 				ReportTextOut(pReport, pTitle, ShadowColor);
+711: 				y += txSize.cy;
+712: 				pTitle = pNewLine;
+713: 			} while (pTitle);
+714: 			topY = y;
+715: 		}
+716: 		for (irow = 0;irow<pReport->NumRows;irow++)
+717: 		{ 
+718: 			if (irow == splitRow)
+719: 			{
+720: 				splitRow += pReport->NumRows / pReport->NumCols;
+721: 				icol++;
+722: 				y = topY;
+723: 			}
+724: 			x = Rect.left + Margin + icol * colLen;
+725: 			startrow = pRows;
+726: 			startrow += irow;  
+727: 			RowHeight = 0;
+728: 			pRow = pFirstRow + *startrow; 
+729: 			StartTab = pRow; 
+730: 			Tabloc = _fstrstr (StartTab,"$TAB(");
+731: 			if (Tabloc)
+732: 				*Tabloc = '\0';
+733: 			itab = 0;
+734: 			tabstr[0]='\0';
+735: 			_fstrcpy (str,StartTab);
+736: 			while (Tabloc)
+737: 			{   
+738: 				ExpandText (str);
+739: 				Truncate (str); 
+740: 				if (!str[0]) 
+741: 				{
+742: 					NullLine = TRUE;
+743: 					_fstrcpy (str," "); 
+744: 				}
+745: 				else
+746: 					NullLine = FALSE;
+747: 				_fstrcpy (FontStr,"[%FONT]");
+748: 				ExpandText (FontStr);
+749: 				ifont = atoi (FontStr); 
+750: 				ShadowColor = -1;
+751: 				if (ifont)
+752: 				{
+753: 					SetTextColor (CurView->hDC,pReport->FontColor[ifont-1]);
+754: 					if (pReport->FontShadow[ifont-1])
+755: 						ShadowColor = pReport->FontShadowColor[ifont-1];
+756: 					SelectObject (hDC,pReport->hFonts[ifont-1]);
+757: 				}
+758: 				else
+759: 				{
+760: 					SelectObject (hDC,OldFont);
+761: 					SetTextColor (CurView->hDC,0);
+762: 				}
+763: 				Tabstr = (LPSTR)(Tabloc+5);
+764: 	            EndTab = _fstrchr (Tabstr,')');
+765: 	            if (EndTab)
+766: 	            {
+767: 	            	*EndTab = '\0';
+768: 	            	_fstrcpy (tabstr,Tabstr);
+769: 	            	*EndTab = ')';
+770: 					GetTextExtentPoint32 (hDC,tabstr,_fstrlen(tabstr),&txSize);
+771: 					lt = txSize.cx;
+772: 					xj = abs(pReport->TabLen[itab]) - lt;   
+773: 					pReport->x = x+xj;
+774: 					pReport->y = y+yj;
+775: 					ReportTextOut (pReport,tabstr,ShadowColor);
+776: 				//	TextOut (hDC,x+xj,y+yj,tabstr,_fstrlen(tabstr));
+777: 				}
+778: 				else
+779: 					lt=0;
+780: 				GetTextExtentPoint32 (hDC,str,_fstrlen(str),&txSize);
+781: 				pReport->maxLineHeaderWidth = max(txSize.cx, pReport->maxLineHeaderWidth);
+782: 	            RowHeight = max (RowHeight,txSize.cy); 
+783: 				_fstrcpy (FontStr,"[%JUST]");
+784: 				ExpandText (FontStr);
+785: //				w = Factor*pReport->TabLen[itab]*DeviceToScreenFactor()-lt;
+786: 				w = abs(pReport->TabLen[itab])-lt;
+787: 				if (FontStr[0]=='C') 
+788: 				{
+789: 					if (pSizeRect)
+790: 						xj = 0;
+791: 					else
+792: 						xj = (w - txSize.cx) / 2;
+793: 				}
+794: 				else if (FontStr[0]=='R') 
+795: 					xj = w - txSize.cx;
+796: 				else 
+797: 					xj = 0;
+798: 				if (!NullLine)
+799: 				{
+800: 					pReport->x = x+xj;
+801: 					pReport->y = y+yj;
+802: 					ReportTextOut (pReport,str,ShadowColor);
+803: 					// TextOut (hDC,x+xj,y+yj,str,_fstrlen(str)); 
+804: 				}
+805: 	            *Tabloc = '$';
+806: 	            if (EndTab)
+807: 	            {
+808: 	            	StartTab = EndTab+1;            
+809: 					Tabloc = _fstrstr (StartTab,"$TAB(");
+810: 					if (Tabloc)
+811: 						*Tabloc = '\0';
+812: 					_fstrcpy (str,StartTab);
+813: 				}
+814: 	            else 
+815: 	            {
+816: 	            	str[0]='\0';
+817: 	            	Tabloc = 0; 
+818: 	            } 
+819: //	            x += Factor*pReport->TabLen[itab]*DeviceToScreenFactor();
+820: 	            x += abs(pReport->TabLen[itab]);
+821: 	            itab++;
+822: 			}
+823: 			ExpandText (str); 
+824: 			Truncate (str);
+825: 			if (!str[0]) 
+826: 			{
+827: 				NullLine = TRUE;
+828: 				_fstrcpy (str," "); 
+829: 			}
+830: 			else
+831: 				NullLine = FALSE;
+832: 			_fstrcpy (FontStr,"[%FONT]");
+833: 			ExpandText (FontStr);
+834: 			ifont = atoi (FontStr); 
+835: 			ShadowColor = -1;
+836: 			if (ifont)
+837: 			{
+838: 				SetTextColor (CurView->hDC,pReport->FontColor[ifont-1]);
+839: 				if (pReport->FontShadow[ifont-1])
+840: 					ShadowColor = pReport->FontShadowColor[ifont-1];
+841: 				SelectObject (hDC,pReport->hFonts[ifont-1]);
+842: 			}
+843: 			else
+844: 			{
+845: 			    SelectObject (hDC,OldFont);
+846: 				SetTextColor (CurView->hDC,0);
+847: 			}
+848: 			GetTextExtentPoint32 (hDC,str,_fstrlen(str),&txSize);
+849: 	        RowHeight = max (RowHeight,txSize.cy); 
+850: 	        lt = txSize.cx;
+851: 			_fstrcpy (FontStr,"[%JUST]");
+852: 			ExpandText (FontStr);
+853: 			if (itab)
+854: 				//w = Factor*pReport->TabLen[itab]*DeviceToScreenFactor();
+855: 				w = abs(pReport->TabLen[itab]);
+856: 			else if (!pSizeRect)
+857: 				w = (Rect.right - Rect.left) - Margin * 2;
+858: 			else
+859: 				w = 0;
+860: 			if (FontStr[0]=='C') 
+861: 			{
+862: 				if (pSizeRect)
+863: 					xj = 0;
+864: 				else
+865: 					xj = (w - lt) / 2;
+866: 			}
+867: 			else if (FontStr[0]=='R') 
+868: 				xj = w - lt;
+869: 			else
+870: 				xj = 0;
+871: 			if (!NullLine)
+872: 			{
+873: 				pReport->x = x+xj;
+874: 				pReport->y = y+yj;
+875: 				ReportTextOut (pReport,str,ShadowColor);
+876: 				// TextOut (hDC,x+xj,y+yj,str,_fstrlen(str)); 
+877: 			}
+878: 			y += RowHeight;
+879: 		}
+880: 		GlobalUnlock (pReport->hRows); 
+881: 	}  
+882:     SelectObject (hDC,OldFont);
+883:     DestroyReportFonts(pReport);
+884: 	CloseReportFiles (hReport); 
+885: 	if (pSizeRect)
+886: 	{
+887: //		FactorRect (&pReport->SizeRect,Factor);
+888: 		if (pReport->NumCols > 1)
+889: 		{
+890: 
+891: 		}
+892: 		w = max (xmid - pReport->SizeRect.left,pReport->SizeRect.right - xmid) / pReport->NumCols;
+893: 		if (!FitToWindow && w > RECTWIDTH(pClipRect) / 2)
+894: 			w = RECTWIDTH(pClipRect) / 2;
+895: 		if (*pReport->JustC == 'C')
+896: 		{
+897: 			pReport->SizeRect.left = xmid - w;
+898: 			pReport->SizeRect.right = xmid + w;
+899: 			pReport->Just = ((pReport->SizeRect.right - pReport->SizeRect.left)/pReport->NumCols) / 2;
+900: 		}
+901: 		else if (*pReport->JustC == 'c')
+902: 		{
+903: 			pReport->SizeRect.left = xmid - w;
+904: 			pReport->SizeRect.right = xmid + w;
+905: 			pReport->Just = pReport->maxLineHeaderWidth;
+906: 		}
+907: 		else
+908: 			pReport->Just = xmid - pReport->SizeRect.left;
+909: 		*pSizeRect = pReport->SizeRect; 
+910: 		Margin = min (IDNINT(pReport->Margin * (pReport->SizeRect.bottom-pReport->SizeRect.top)), 
+911: 						  IDNINT(pReport->Margin * (pReport->SizeRect.right-pReport->SizeRect.left)));
+912: 		InflateRect (pSizeRect,Margin,Margin);
+913: 	}
+914: 	
+915: 	GlobalUnlock (hReport);  
+916: 	GSSiGlobUlFree (&hStr); 
+917: 	RestoreDC (hDC,-1);
+918: 	return TRUE;
+919: }
+```
+Current statement: line 823
+[9] GeoMaster34n.exe!ResetTAGBox
+Code for the stack frame:
+```c GEOMASTR\Infobox.c
+404: BOOL ResetTAGBox (HDC hDC,short From)
+405: {   DWORD	TextExt;
+406: 	int		TextWidth;
+407: 	HFONT	OldFont, TagFont;
+408: 	LPSTR	lpText, lpReport, lpEndReport;
+409: 	int		iLogPixsY, MaxTextWidth=0, BorderAdjust=0;
+410: 	float	Pct; 
+411: 	POINT	ScreenPoint; 
+412: 	RECT	ReportRect;
+413: 	LPOPENFILEDATA	FilePtr;
+414: 	LPOPENSQLDATA	SQLPtr;
+415: 	LPFIELDINFO	lpFieldInfo; 
+416: 	HANDLE		SaveHandle;
+417: 	RECT	Rect;   
+418: 	HANDLE	hMEM=GSSiGlobAlloc(GAIDNO 381,GMEM_MOVEABLE,1024+1024+4096+256);
+419: 	LPSTR	ExpLine, Line, ExpandArea, ReportName,str;
+420: 	BOOL	rtn=TRUE;
+421: 	double	Factor, IBFactor;
+422: 	SIZE	txSize;
+423: 	
+424: 	SaveDC (hDC);
+425: 	Line = GlobalLock (hMEM);
+426: 	if (TAGBox.ViewportID > 0 && !VPIsActive (TAGBox.ViewportID))
+427: 		goto Exit;
+428: 	ExpLine = Line + 1024;
+429: 	ExpandArea = ExpLine + 1024;  
+430: 	ReportName = ExpandArea + 4096;
+431: 	str = ReportName + 128;
+432: 	
+433: 	InInfoBox=TRUE;	
+434: 	if ((TAGBox.CoordStyle == 1 || TAGBox.CoordStyle == 1) && TAGBox.PLstyle && From > 1)
+435: 	{
+436: 		TAGBox.TAGPointScr = TAGPtToWinPt (TAGBox.TAGPoint);
+437: 		if (!PtInRect (&CurView->ScreenRect,TAGBox.TAGPointScr))
+438: 		{
+439: 			rtn = FALSE;
+440: 			goto Exit;
+441: 		}
+442: 		CurrentPoint = TAGBox.TAGPoint;
+443: 	}
+444: 	if (TAGBox.CoordStyle == 2) 
+445: 		Rect = MainRect;
+446: 	else if (TAGBox.CoordStyle == 3) 
+447: 		Rect = MainRect;
+448: 	else
+449:         Rect = CurView->Rect;
+450:     
+451:     if (InExpandIB)
+452: 	    ShrinkFactor = 100.0;
+453:     else
+454: 	    ShrinkFactor = 1.0;
+455:     
+456:     TAGBox.hTAGDB=0;
+457:     if (TAGBox.DataFile[0])
+458:     {   
+459:     	if (_fstrstr (TAGBox.DataFile,"PICKDATA.GMD"))
+460:     	{   
+461:     		short SaveMaxPick = MaxPick;
+462: 
+463: 			UseUserPickAp =FALSE;
+464: 			SystemPickAp = 0;	
+465: 			MaxPick=1;  
+466:             PickItems (CurView->hWnd,TAGBox.TAGPoint);  
+467: 			UseUserPickAp =TRUE;  
+468: 			MaxPick = SaveMaxPick;
+469:         }    
+470: 		OpenDataFile (TAGBox.DataFile,TAGBox.SQL,BT_READ,&TAGBox.hTAGDB);
+471: 	}
+472:     
+473: 	CurrentRefno=TAGBox.Refno;
+474: 	ltoa (CurrentRefno,str,10);
+475: 	SetGlobalValue ("%INT_REFNO",str); 
+476: 	SetGlobalValue ("%PREFIX",TAGBox.Prefix);
+477: 	SetUDIValue (TAGBox.Prefix,TAGBox.UDI); 
+478: 	strncpy0 (CurrentPrefix,TAGBox.Prefix,MAX_PREFIX_LEN);
+479: 	strncpy0 (CurrentUDI,TAGBox.UDI,MAX_UDI_LEN);
+480: 	_fstrcpy (ExpandArea,TAGBox.text);
+481: 	if (strnicmp (ExpandArea,"$REPORT(",8))
+482: 		ExpandText (ExpandArea);
+483:     if (TAGBox.Flags.ExpandText && From == 1)
+484:     {   
+485:     	_fstrncpy (TAGBox.text,ExpandArea,sizeof(TAGBox.text));
+486:        	CloseDataFile(TRUE,&TAGBox.hTAGDB); 
+487:        	*TAGBox.DataFile = 0;
+488: 		TAGBox.Flags.ExpandText = FALSE;
+489: 	}
+490: 	SetDisplayMode (hDC, GF_SCREENMODE);
+491:     /*iLogPixsY = GetDeviceCaps(hDC, LOGPIXELSY);
+492:     TAGBox.LogFont.lfHeight = -1 * (iLogPixsY * TAGBox.TXheight / 72); */
+493:     if (TAGBox.Factor)  
+494:     	Factor = TAGBox.Factor;
+495:     else
+496:     	Factor = 1;  
+497:     if ((IBFactor = GetGlobalDVal2 ("[%INFOBOXFACTOR]",1)) != 1)
+498:     	TAGBox.bmWidthD = TAGBox.bmHeightD = 0;
+499:     Factor *= IBFactor;
+500:     if (TAGBox.TXheight > 0 || Printing)
+501:     	TAGBox.LogFont.lfHeight = -labs(IDNINT(TAGFontHtToPixels (TAGBox.TXheight*Factor,TAGBox.CoordStyle)));
+502:     else
+503: 		TAGBox.TXheight = fabs (PixelsToTAGFontHt(&TAGBox.LogFont,TAGBox.CoordStyle));
+504: 	TAGBox.LogFont.lfOrientation = TAGBox.LogFont.lfEscapement;
+505:     TagFont = CreateFontIndirect((LPLOGFONT)&TAGBox.LogFont);
+506:     OldFont = SelectObject(hDC, TagFont);
+507:     lpText = ExpandArea;
+508:     TAGBox.bmWidth = TAGBox.bmHeight =0;  
+509:     if (!TAGBox.Flags.UseOrigSize)
+510:     while (NextLine (&lpText,Line,0))
+511:     {    
+512: 	    if (_fstrnicmp(Line,"$REPORT(",8))
+513: 		{
+514:     		_fstrcpy(ExpLine,Line);
+515:     		ExpandText (ExpLine);
+516: 			Truncate(ExpLine);
+517: 			if (!ExpLine[0])
+518: 			{
+519:         		ExpLine[0]=' ';
+520:         		ExpLine[1]='\0';
+521: 			}
+522: 		}
+523: 	    if (!_fstrnicmp(Line,"$REPORT(",8))
+524: 	    {   
+525: 	    	if (!TAGBox.hReport)
+526: 	    	{   
+527: 	    		lpReport = Line + 8;
+528: 	    		lpEndReport = _fstrchr(lpReport,')');
+529: 	    		if (lpEndReport)
+530: 	    		{                                                    
+531: 	    			*lpEndReport = '\0';
+532: 		    		_fstrcpy (ReportName,lpReport); 
+533: 		    		*lpEndReport = ')';
+534: 					TAGBox.hReport = LoadReport (ReportName); 
+535: 					if (!TAGBox.hReport)
+536: 					{
+537: 						 MessageBox(GetFocus(),ReportName,
+538: 										"Unable to open report file",MB_OK|MB_ICONEXCLAMATION);
+539: 						goto Exit;
+540: 					}
+541: 				}
+542: 			} 
+543: 			DisplayReport (hDC,TAGBox.hReport,Rect,&Rect, Factor*DeviceToScreenFactor(), TAGBox.Refno,&ReportRect,FALSE);  
+544: //			ReportRect = SizeReport (hDC,TAGBox.hReport,TAGBox.rect,TRUE);
+545: 			TAGBox.bmWidth = max (TAGBox.bmWidth,ReportRect.right - ReportRect.left + 1);
+546: 			TAGBox.bmHeight += ReportRect.bottom - ReportRect.top + 1;
+547: 	    }
+548: 	    else if (!_fstrnicmp(Line,"$BITMAP(",8) || !_fstrnicmp(Line, "$IMAGE(", 7))
+549: 	    {   
+550: 			int ioffset = 8;
+551: 			if (!_fstrnicmp(Line, "$IMAGE(", 7))
+552: 				ioffset = 7;
+553: 			int	height,width,nLines=0; 
+554: 			LPSTR	lpComma;
+555: 			double	factor;
+556: 			LPSTR	pPar;
+557: 	
+558: 		 	lpReport = Line+ioffset;
+559: 			lpEndReport = MatchLev (lpReport,')');
+560: 			if (lpEndReport)
+561: 			{                                                    
+562: 				*lpEndReport = 0;
+563: 				if ((lpComma=MatchLev (lpReport,',')))
+564: 				{
+565: 					*lpComma++=0;
+566: 					nLines = atoi (lpComma);
+567: 				}
+568: 	    		_fstrcpy (ExpLine,(LPSTR)(Line+ioffset));
+569: 	    		*lpEndReport = ')';
+570: 				ExpandText (ExpLine);
+571: 				if ((pPar=strrchr (ExpLine,'(')))
+572: 				{
+573: 					float	fwidth, fheight;
+574: 
+575: 					*pPar++=0;
+576: 					lpComma = strchr (pPar,',');
+577: 					*lpComma = 0;
+578: 					fwidth = atof (pPar);
+579: 					fheight = atof (lpComma+1);
+580: 					height = fheight / CurView->BaseUnitsPerPixel;
+581: 					width  = fwidth / CurView->BaseUnitsPerPixel;
+582: 				}
+583: 				else
+584: 				{
+585: 					if (!GetDIBDimensions(ExpLine,&height,&width))
+586: 						goto TextOut;
+587: 					height *= DeviceToScreenFactor();
+588: 					width  *= DeviceToScreenFactor();
+589: 				}
+590: 				height *= Factor;
+591: 				width  *= Factor;
+592: 				if (nLines)
+593: 				{   
+594: 					factor = (double)width / height;
+595: 					height = abs (TAGBox.LogFont.lfHeight) * nLines;
+596: 					width = factor * height;
+597: 				}
+598: 				TAGBox.bmWidth = max(TAGBox.bmWidth,width);
+599: 				TAGBox.bmHeight += height;
+600: 				TAGBox.bmHeight += abs(TAGBox.LogFont.lfHeight)/3;  
+601: 			}
+602: 	    }
+603: 	    else
+604: 	    {
+605: 	TextOut:
+606: 			GetTextExtentPoint32 (hDC,ExpLine,_fstrlen(ExpLine),&txSize);
+607: 			MaxTextWidth = max (MaxTextWidth,txSize.cx);
+608: 			TAGBox.bmHeight += txSize.cy;  
+609: 		}
+610: 	} 
+611: 	Pct = (float)TAGBox.Margin/100.0 + (float) TAGBox.BorderStyle/350.0;
+612: 	if (TAGBox.BorderStyle == 4)
+613: 		Pct += (float) TAGBox.BorderStyle/350.0; 
+614: 	TAGBox.incx = max(MaxTextWidth,TAGBox.bmWidth) * Pct;
+615: 	TAGBox.incy = TAGBox.bmHeight * Pct;
+616: 	MaxTextWidth += 2 * TAGBox.incx;
+617: 	TAGBox.bmWidth = max(MaxTextWidth,TAGBox.bmWidth+TAGBox.incx * 2);
+618: 	TAGBox.bmHeight += TAGBox.incy * 2;  
+619: 	if (TAGBox.BorderStyle==4)
+620: 	{
+621: 		double	width = (3)*DeviceToScreenFactor()*ShrinkFactor;
+622: 		int inc = width + BorderAdjust + TAGBox.incx;
+623: 		TAGBox.bmWidth += inc * 2;
+624: 		TAGBox.bmHeight += inc * 2;  
+625: 	}
+626: 	if (TAGBox.bmWidthD > 0 /*&& TAGBox.Flags.FixedSize*/)
+627: 	{   double	NewWidth;
+628: 		NewWidth = TAGBox.bmWidthD * (Rect.right - Rect.left);  
+629: 		if (NewWidth < TAGBox.bmWidth || InExpandIB)
+630: 			ShrinkFactor = min (ShrinkFactor,NewWidth/(double)TAGBox.bmWidth);
+631: 		else
+632: 			TAGBox.bmWidth = NewWidth;
+633: 	}
+634: 	else if (TAGBox.CoordStyle == 1)
+635: 		TAGBox.bmWidthD = (double)TAGBox.bmWidth / (Rect.right - Rect.left);
+636: 	if ((TAGBox.bmHeightD > 0/* && TAGBox.Flags.FixedSize*/) || InExpandIB)
+637: 	{	double NewHeight;
+638: 	
+639: 	    NewHeight = TAGBox.bmHeightD * (Rect.bottom - Rect.top);
+640: 	    if (NewHeight < TAGBox.bmHeight || InExpandIB)
+641: 			ShrinkFactor = min (ShrinkFactor,NewHeight/(double)TAGBox.bmHeight);
+642: 		else
+643: 			TAGBox.bmHeight = NewHeight;
+644: 	}
+645: 	else if (TAGBox.CoordStyle == 1)
+646: 		TAGBox.bmHeightD = (double)TAGBox.bmHeight / (Rect.bottom - Rect.top);
+647: 	if (TAGBox.BorderStyle==4)
+648: 		BorderAdjust = ShrinkFactor * DeviceToScreenFactor();
+649: 	TAGBox.bmHeight += 2 * BorderAdjust;  
+650: 	TAGBox.bmWidth  += 2 * BorderAdjust;
+651: 	TAGBox.bmHeight = IDNINT (TAGBox.bmHeight * ShrinkFactor);  
+652: 	TAGBox.bmWidth = IDNINT (TAGBox.bmWidth * ShrinkFactor);
+653: 	TAGBox.incx *= ShrinkFactor;
+654: 	TAGBox.incy *= ShrinkFactor;
+655:     SelectObject(hDC, OldFont);
+656:     DeleteObject(TagFont);
+657: 	TAGBox.before=0;
+658: 	TAGBox.after=0;
+659: 	ScreenPoint = TAGPtToWinPt (TAGBox.center);
+660: 	if (TAGBox.CoordStyle == IB_COORD_TYPE_WINDOW || TAGBox.CoordStyle == IB_COORD_TYPE_YELLOWTB)
+661: 		TAGBox.TAGPointScr = TAGPtToWinPt (TAGBox.TAGPoint);
+662: 	else
+663: 		TAGBox.TAGPointScr = BasePtToWinPt (&TAGBox.TAGPoint);
+664: 	//TAGBox.TAGPointScr = BasePtToWinPt (&TAGBox.TAGPoint); 
+665:     if (TAGBox.Flags.UseOrigSize)
+666:     {
+667:     	TAGBox.bmWidth = TAGBox.rect.right - TAGBox.rect.left + 1;
+668:     	TAGBox.bmHeight = TAGBox.rect.bottom - TAGBox.rect.top + 1;
+669:     }  
+670: 	else
+671: 	{
+672: 		TAGBox.rect.left = max (0,ScreenPoint.x - TAGBox.bmWidth/2);
+673: 		TAGBox.rect.right = TAGBox.rect.left + TAGBox.bmWidth;
+674: 		TAGBox.rect.top = max (0,ScreenPoint.y - TAGBox.bmHeight/2);
+675: 		TAGBox.rect.bottom = TAGBox.rect.top + TAGBox.bmHeight; 
+676: 	}
+677: 	if (TAGBox.hTAGDB)
+678: 	{
+679:     	CloseDataFile(TRUE,&TAGBox.hTAGDB);
+680:     }  
+681: Exit:
+682: 	RestoreDC (hDC,-1);
+683: 	GSSiGlobUlFree (&hMEM);
+684:     InInfoBox=FALSE;
+685: 	return rtn;
+686: }
+```
+Current statement: line 543
+[10] GeoMaster34n.exe!CreateTAGBoxFromFile
+Code for the stack frame:
+```c GEOMASTR\Infobox.c
+265: BOOL CreateTAGBoxFromFile (HDC hDC,DPOINT BasePoint,LPSTR File,int item,double MoveFactor)
+266: {
+267:     BOOL	nRc; 
+268:     
+269:     if (!LoadInfoBox (File,&TAGBox))
+270:     	return FALSE; 
+271:     if (item == -2)
+272:     	TAGBox.Flags.UseOrigSize = TRUE;
+273: 	TAGBox.ViewportID = CurView->ID;
+274:     TAGBox.BlowUpBounds = BlowUpRec.FromBounds;
+275:     if (TAGBox.Flags.UseOrigSize)
+276:     {
+277:     	TAGBox.rect = BlowUpRec.ToWinRect;
+278:     	TAGBox.bmWidth = TAGBox.rect.right - TAGBox.rect.left + 1;
+279:     	TAGBox.bmHeight = TAGBox.rect.bottom - TAGBox.rect.top + 1;
+280:     	BasePoint = MinMaxMidPointD (&TAGBox.BlowUpBounds);
+281:     }  
+282:     TAGBox.TAGPoint = TAGBox.center = BasePoint; 
+283:     TAGBox.TXheight = -fabs(TAGBox.TXheight);
+284: 	if (!CreateTAGBox (hDC,BasePoint,item))
+285: 		return FALSE;
+286: 	if (MoveFactor)
+287: 	{
+288: 		double	MoveDistScreen = min (TAGBox.bmWidth,TAGBox.bmHeight) * MoveFactor;
+289: 		DPOINT	VPMidPoint = RectMidD (&CurView->ScreenRect);
+290: 		DPOINT	TAGMidPointScreen = BasePtToScreenPtD (&BasePoint);
+291: 		double	AZ = getazd (&TAGMidPointScreen,&VPMidPoint);
+292: 		DPOINT	MidPointScreen;
+293: 		double	MinDiff=1000;
+294: 		int		i, mini=0;
+295: 		double	UseAZ[4]={HALFPI/2,3*HALFPI/2,5*HALFPI/2,7*HALFPI/2};
+296: 
+297: 		MinDiff = fabs (AZ - UseAZ[0]);
+298: 		for (i=1;i<4;i++)
+299: 		{
+300: 			double d = fabs (AZ - UseAZ[i]);
+301: 
+302: 			if (d < MinDiff)
+303: 			{
+304: 				MinDiff = d;
+305: 				mini = i;
+306: 			}
+307: 		}
+308: 		MidPointScreen = dnewpt (TAGMidPointScreen,UseAZ[mini],MoveDistScreen);
+309: 		TAGBox.center = ScreenPtDToBasePt (MidPointScreen);
+310: 	}
+311: 	if (TAGBox.Flags.AutoEdit)
+312: 	{
+313: 		DLGPROC lpfnTAGEDITMsgProc;
+314: 						
+315: 		setDoPaint( FALSE);
+316: 		lpfnTAGEDITMsgProc = MakeProcInstance((DLGPROC)TAGEDITMsgProc, hInst);
+317: 		nRc = DialogBox(hInst, (LPSTR)"TAGEDIT", hWndMain, lpfnTAGEDITMsgProc);
+318: 		FreeProcInstance(lpfnTAGEDITMsgProc);
+319: 	} 
+320: 	else
+321: 		nRc = 1;
+322:   	if (nRc)
+323:   	{
+324: 		 SetDisplayMode (CurView->hDC, GF_MAPMODE);
+325: 		 if (!ResetTAGBox (hDC,2))
+326: 		 	return FALSE;
+327: 		 if (TAGBox.Flags.AutoMove) 
+328: 		 {
+329:        	 	DrawTAG(CurView->hWnd, hDC,2,FALSE);  
+330: 		 	DoSave=TRUE;  
+331: 		 	TBNum = 0;
+332: 	        PostMessage(hWndMain, GSSI_ADDGF, GF_MOVE_TAG, CurView->ID); 
+333: 	     }
+334:        	 else
+335:        	 {  
+336:        	 	BOOL	SaveDDC = DoDisplayConfigs;
+337: 			DoDisplayConfigs = TRUE;
+338:         	SaveTAG(0);
+339:        	 	DrawTAG(CurView->hWnd, hDC,FALSE,FALSE);
+340: 			SaveFullWindowBitmap (hWndMain);
+341:        	 	DoDisplayConfigs = SaveDDC;
+342: 		 } 
+343: 		 return TRUE; 
+344: 	}
+345: 	return FALSE;
+346: }
+```
+Current statement: line 325
+........18 more stack frames omitted.
+
+## LOCALS
+Variable: 'GMMFileID' of type 'int' has value: 0
+Variable: 'hRtn' of type 'void *' has value: 0x00000000
+Variable: 'lKey' of type 'int' has value: 13
+Variable: 'memLen' of type 'int' has value: 204
+Variable: 'pData' of type 'char *' is a complex object with child properties and has value: 0x0391581b "VAL1\x11302824410155\x1PATRICIA R KENDALL\x1PATRICIA R KENDALL\x15144 30TH AVE SO\x1MPLS MN   55417\x1\x1RESIDENTIAL\x1\x1$141,000\x1$208,100\x1$349,100\x1\t$5,172.54\x1HOMESTEAD\x1$15,131...
+Variable: 'pKey' of type 'char *' is a complex object with child properties and has value: 0x01de2a78 "1302824410155"
+Variable: 'pKey2' of type 'char *' is a complex object with child properties and has value: 0x0391580d ""
+Variable: 'pKeyLen' of type 'int *' is a complex object with child properties and has value: 0x0391580c {13}
+Variable: 'pOutputLen' of type 'int *' is a complex object with child properties and has value: 0xcccccccc {???}
+Variable: 'pTotLen' of type 'int *' is a complex object with child properties and has value: 0x03915808 {204}
+

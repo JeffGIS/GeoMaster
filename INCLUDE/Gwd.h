@@ -98,3 +98,5 @@ int GridFromPoint (LPGWDHEADER lpGWDHead,LPDPOINT pPoint);
 long GetGMDRecordOffset(long record, BOOL UseBounds);
 BOOL ValidateGMDIndexes(LPSTR FilePath, int wantIndex, BOOL displayAfterEachIndex);
 int GetGMMFileID(LPOPENFILEDATA filePtr);
+void FreeGMMFiles(void);
+
