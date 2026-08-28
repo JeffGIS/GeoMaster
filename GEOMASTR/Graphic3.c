@@ -1409,7 +1409,7 @@ static double SetToGoogleScale(double Scale)
 	double GoogleScales[22];
 	int width, height;
 
-	CurView->UseGoogleZooms = TRUE;// SetUseGoogleZooms();
+	CurView->UseGoogleZooms = SetUseGoogleZooms();
 	if (!CurView->UseGoogleZooms)
 		return Scale;
 
