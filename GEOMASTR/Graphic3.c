@@ -1388,7 +1388,7 @@ static BOOL SetUseGoogleZooms(void)
 				return forceZoomToGoogle;
 		}
 	}
-	return FALSE;
+	return TRUE;//FALSE;
 }
 
 void SetGoogleMapDimensions(LPVIEWPORT pVP)
