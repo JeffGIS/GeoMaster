@@ -1396,8 +1396,8 @@ void SetGoogleMapDimensions(LPVIEWPORT pVP)
 	double w = RECTWIDTH(&pVP->DrawRect), h = RECTHEIGHT(&pVP->DrawRect);
 	if (w && h)
 	{
-		GoogleMapWidth = w;
-		GoogleMapHeight = h;
+		GoogleMapWidth = min (GoogleScale * 640,w);
+		GoogleMapHeight = min(GoogleScale * 640, h);
 	}
 	return;
 }

@@ -3064,7 +3064,21 @@ void AdjustBoundsAndDrawRectToRotation (void)
 		return;
 	CloseTRANS2(&CurView->hTranScreenToVP);
 	CloseTRANS2 (&CurView->hTranVPToScreen);
-	CurView->DrawRect = CurView->ScreenRect;
+	if (CurView->UseGoogleZooms)
+	{
+		int size = GoogleScale * 640;
+		int w = min(RECTWIDTH(&CurView->Rect), size);
+		int h = min(RECTHEIGHT(&CurView->Rect), size);
+		CurView->DrawRect.left = CurView->Rect.left + (RECTWIDTH(&CurView->Rect) - w) / 2;
+		CurView->DrawRect.top = CurView->Rect.top + (RECTHEIGHT(&CurView->Rect) - h) / 2;
+		CurView->DrawRect.right = CurView->DrawRect.left + w;
+		CurView->DrawRect.bottom = CurView->DrawRect.top + h;
+		//CurView->DrawRect = PctRect(CurView->Rect, -(max(0, CurView->Margin)/*+max(0,CurView->BorderPct)*/));
+		if (CurView->BorderPct >= 0)
+			InflateRect(&CurView->DrawRect, -1, -1);
+	}
+	else
+		CurView->DrawRect = CurView->ScreenRect;
 
 	Point  = RectMid (&CurView->ScreenRect);
 	Point1 = PointToDPoint (Point);
