@@ -3754,6 +3754,9 @@ GSSiExitProg (532);
 			strncpy(AlwaysPickText, Value, sizeof(AlwaysPickText) - 1);
 			AlwaysPickOpt = TRUE;
 			break;
+		case 428:
+			strncpy(openFileSearchString, Value, sizeof(openFileSearchString) - 1);
+			break;
 		default:
 			break;
 	}
@@ -4199,6 +4202,7 @@ void CreateInternalGlobals (void)
 	AllocateTypeVar("%HOUSEBUF", 425, FALSE);
 	AllocateTypeVar("%STREETBUF", 426, FALSE);
 	AllocateTypeVar("%ALWAYSPICKTEXT", 427, FALSE);
+	AllocateTypeVar("%OPENFILESEARCHSTRING", 428, FALSE);
 
 //	AllocateTypeVar("%DL",191,FALSE);
 	
@@ -5512,6 +5516,9 @@ GSSiExitProg (533);
 			break;
 		case 427:
 			strcpy(OutStr,AlwaysPickText);
+			break;
+		case 428:
+			strcpy(OutStr, openFileSearchString);
 			break;
 
 

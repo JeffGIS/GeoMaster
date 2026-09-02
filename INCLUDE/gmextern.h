@@ -1571,6 +1571,7 @@ extern char			HLTGraphicsFile[MAX_PATH];
 extern HANDLE			hSelectItemsArgs;
 extern HANDLE			hOpenFileSyms;
 extern HANDLE			hOpenFileSymNames;
+extern char			openFileSearchString[64];
 extern BOOL			StopCDPrompts;
 extern BOOL			ReReference;
 extern short			NumRandomColors;

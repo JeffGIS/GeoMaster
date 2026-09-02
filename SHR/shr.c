@@ -9405,6 +9405,15 @@ HFILE GSSiOpenFile (LPSTR InName,LPOFSTRUCTGM pOFStruct,UINT Mode)
 		strcpy (Name,InName);  
     pOFStruct->nErrCode = 0;                                  
     ExpandText (Name); 
+	if (*openFileSearchString)
+	{
+		char upName[MAX_PATH + 4];
+		strncpy(upName, Name,MAX_PATH);
+		strupr(upName);
+		LPSTR pLoc = strstr(upName, openFileSearchString);
+		if (pLoc)
+			GSSiMessageBox(1,Name,"Open file", MB_OK, 0);
+	}
 //if in test mode and a file of the same name exists in the test directory use it instead
 	ConvertToTestName (Name,Mode);
 	if (!InOpenFile && (strstr(Name,".txt") || strstr(Name,".TXT")) && !strstr (Name,"System Message")&& !strstr (Name,"SYSTEM MESSAGE"))

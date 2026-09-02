@@ -130,6 +130,8 @@ short GSSiMessageBox (int from,LPSTR Mess,LPSTR Title,UINT icon,LPSTR Position)
 	LPSTR	pMess = GlobalLock (hMem);
 	LPSTR	pTitle = pMess + 2048;
 	
+	if (from > 0)
+		ii = 1;
 	HaveBlockingWindow = TRUE;
 	setDoPaint( FALSE);
 	if (Mess)

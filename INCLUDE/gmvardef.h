@@ -1450,6 +1450,7 @@ HANDLE	hVALUELIST;
 short	ConvertLayer=-1;
 HANDLE	hOpenFileSyms=0;
 HANDLE	hOpenFileSymNames=0;
+char	openFileSearchString[64] = { 0 };
 RECT	MaskRect;
 DPOINT	CurRP;
 BOOL	HaveLastTriangle=FALSE;
