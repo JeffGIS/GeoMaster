@@ -1086,14 +1086,16 @@ BOOL LoadGFFile (HWND hWndDlg,LPSTR InFile,short opt,BOOL FloatingTB)
 	BOOL	SaveIgnoreFileOpenError=IgnoreFileOpenError;
 	BOOL	SkipThisEntry,HaveFirstLine=FALSE;
 	char	BMPath[MAX_PATH];
+	char	gfFile[MAX_PATH];
 	int		iButton=0;
+	BOOL	haveBar = FALSE;
 	
 	switch (opt)
 	{
 		case 3:
 		case 4:
 		case 5://toolbar redisplay
-			strcpy (lpStr,InFile);
+			strcpy (gfFile,InFile);
 		break;
 		case 2:
 		{
@@ -1101,17 +1103,17 @@ BOOL LoadGFFile (HWND hWndDlg,LPSTR InFile,short opt,BOOL FloatingTB)
 				MaxClass = CurTheme->NumDesiredClass;   
 			_fmemset (CurTheme->ClassCount,0,sizeof(CurTheme->ClassCount));   
 			_fmemset (CurTheme->ClassBM,0,sizeof(CurTheme->ClassBM));  
-			GetGFFile (lpStr,CurTheme->SQL,opt); 
+			GetGFFile (gfFile,CurTheme->SQL,opt);
 		}
 		break;
 		case 6://just process settings at top of file
 		case 1:
-			GetGFFile (lpStr,CurView->FunctionFile,0); 
+			GetGFFile (gfFile,CurView->FunctionFile,0);
 	}
-	_fstrlwr (lpStr);
+	_fstrlwr (gfFile);
 Open: 
 	IgnoreFileOpenError = TRUE;
-	Fid = GSSiOpenFile (lpStr,0,OF_READ);
+	Fid = GSSiOpenFile (gfFile,0,OF_READ);
 	IgnoreFileOpenError = SaveIgnoreFileOpenError;
 	if (Fid==HFILE_ERROR)
 	{   
@@ -1119,10 +1121,10 @@ Open:
 		{   
 			LPSTR	pFunDir, NewName=lpStr + 256;
 			First = FALSE;
-			if ((pFunDir=_fstrstr (lpStr,"\\fundir\\")))
+			if ((pFunDir=_fstrstr (gfFile,"\\fundir\\")))
 			{   
 				sprintf (NewName,"[%%DL]%s",(pFunDir+1));
-				_fstrcpy (lpStr,NewName);
+				_fstrcpy (gfFile,NewName);
 				goto Open;
 			}
 		}
@@ -1135,10 +1137,10 @@ GSSiExitProg (1347);
 		return (FALSE);
 }
 	}
-	AddToMacroStack(6, 0, lpStr, 0, 0);
+	AddToMacroStack(6, 0, gfFile, 0, 0);
 	if (opt == 3)
 	{
-		_splitpath (lpStr,0,0,Title,0);
+		_splitpath (gfFile,0,0,Title,0);
 		SetGlobalValue("[%MENUTITLE]", Title);
 	}
 	CurLoc = 0;
@@ -1151,8 +1153,10 @@ GSSiExitProg (1347);
 		memmove (&bmPath[1],&idBmp,sizeof(UINT));
 		//AddButtonToToolbar (hWndDlg,bmPath,"",-1,&iButton);
 	}
+	int lineNo = 0;
 	while (fgetstring (lpStr,4090,Fid))
 	{   
+		lineNo++;
 		if (!CurLoc && opt == 2)
 		{   
 			SetGlobalValue ("%ICONLIB",""); 
@@ -1168,6 +1172,15 @@ GSSiExitProg (1347);
 		lpBar = _fstrchr(lpStr,'|');
 		if (!lpBar)
 		{
+			if (haveBar)
+			{
+				if (strlen(lpStr))
+				{
+					char mess[MAX_PATH + 32];
+					sprintf(mess, "Error in file %s at line %i", gfFile, lineNo);
+					GSSiMessageBox(1, mess, "Bad Function File", MB_ICONEXCLAMATION, "");
+				}
+			}
 			SaveTheme = CurTheme;
 			SaveVP = CurView;
 			ExpandText(lpStr);
@@ -1191,6 +1204,8 @@ GSSiExitProg (1347);
 		}
 		else if (opt == 6)
 			break;
+		else
+			haveBar = TRUE;
 		SkipThisEntry=FALSE;
 		if (!_fstrncmp (lpStr,"IF(",3))
 		{

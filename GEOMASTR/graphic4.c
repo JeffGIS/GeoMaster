@@ -5041,10 +5041,12 @@ Add:
 	}
 	else
 		FromPoint = ToPoint = *lpPointsIn;
-	PickListAdd (FileNum,SubFile,FileInIndex,ItemSeg,CurrentRefno,CurrentDesc,PolyID,
+	int iadded = PickListAdd (FileNum,SubFile,FileInIndex,ItemSeg,CurrentRefno,CurrentDesc,PolyID,
 				   Type,PCT,OffDist,AZ,TotDistW,CurrentItem,CurElement,
 				   BeginPoint,EndPoint,PickedPoint,NearPoint,mini,fabs(Area),&Rect,
 				   BeginPointFile, EndPointFile,PickedPointFile,nPnts,NULL_ELEV,&FromPoint,&ToPoint);
+	if (!iadded)
+		rtn = FALSE;
 Exit:
 {
 #if ENABLETRACE

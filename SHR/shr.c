@@ -9412,7 +9412,10 @@ HFILE GSSiOpenFile (LPSTR InName,LPOFSTRUCTGM pOFStruct,UINT Mode)
 		strupr(upName);
 		LPSTR pLoc = strstr(upName, openFileSearchString);
 		if (pLoc)
-			GSSiMessageBox(1,Name,"Open file", MB_OK, 0);
+		{
+			GSSiMessageBox(1, Name, "Open file", MB_OK, 0);
+			ii = 1;
+		}
 	}
 //if in test mode and a file of the same name exists in the test directory use it instead
 	ConvertToTestName (Name,Mode);
