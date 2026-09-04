@@ -16,6 +16,89 @@ static  Init=FALSE;
 static	BOOL FirstCvtCoordErr = TRUE;        
 static 	HANDLE	hTranRotation=0;//not being used
 
+#define TILE_SIZE 256
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
+// Structure to hold 2D pixel coordinates
+typedef struct {
+    double x;
+    double y;
+} PixelCoord;
+
+// Converts Lat/Lon to world coordinates (at zoom level 0)
+PixelCoord latLonToWorld(double lat, double lon) {
+    PixelCoord world;
+
+    // X mapping: longitude map linearly from -180 to 180 to 0 to 256
+    world.x = TILE_SIZE * (lon + 180.0) / 360.0;
+
+    // Y mapping: latitude mapping using the Mercator projection formula
+    double sinLat = sin(lat * M_PI / 180.0);
+    // Clip sinLat to avoid log(0) or log(infinity) at the poles
+    if (sinLat > 0.9999) sinLat = 0.9999;
+    if (sinLat < -0.9999) sinLat = -0.9999;
+
+    world.y = TILE_SIZE * (0.5 - log((1.0 + sinLat) / (1.0 - sinLat)) / (4.0 * M_PI));
+
+    return world;
+}
+
+// Computes the pixel coordinates relative to the Static Map's center
+// mapWidth and mapHeight are the dimensions of your static map image (e.g., 640x480)
+PixelCoord getStaticMapPixel(double targetLat, double targetLon,
+    double centerLat, double centerLon,
+    int zoom, int mapWidth, int mapHeight) {
+
+    // 1. Get world coordinates (zoom 0) for target and center
+    PixelCoord targetWorld = latLonToWorld(targetLat, targetLon);
+    PixelCoord centerWorld = latLonToWorld(centerLat, centerLon);
+
+    // 2. Scale up to the actual zoom level (each zoom level doubles the size)
+    double scale = (double)(1 << zoom);
+
+    // 3. Find pixel delta from the center of the map
+    double deltaX = (targetWorld.x - centerWorld.x) * scale;
+    double deltaY = (targetWorld.y - centerWorld.y) * scale;
+
+    // 4. Map relative to the top-left corner of the image
+    PixelCoord result;
+    result.x = (mapWidth / 2.0) + deltaX;
+    result.y = (mapHeight / 2.0) + deltaY;
+
+    return result;
+}
+
+int testLLToGoogleStatic() {
+    // Example: Map centered on New York City
+    double centerLat = 40.7128;
+    double centerLon = -74.0060;
+    int zoom = 12;
+    int width = 640;
+    int height = 480;
+
+    // Target point to find on the image (e.g., Central Park)
+    double targetLat = 40.7851;
+    double targetLon = -73.9682;
+
+    PixelCoord px = getStaticMapPixel(targetLat, targetLon, centerLat, centerLon, zoom, width, height);
+
+    printf("The pixel coordinates on the %dx%d image are:\n", width, height);
+    printf("X: %.2f px (from left)\n", px.x);
+    printf("Y: %.2f px (from top)\n", px.y);
+
+    // Check if the point actually falls inside the visible map boundaries
+    if (px.x >= 0 && px.x <= width && px.y >= 0 && px.y <= height) {
+        printf("Status: Inside map bounds\n");
+    }
+    else {
+        printf("Status: Outside map bounds\n");
+    }
+
+    return 0;
+}
+
 void SetVPRotation (double AZ)
 {   
 	float	RSQMIN;

@@ -4663,6 +4663,15 @@ LPOINT DPointToFilePointL (LPDPOINT pDPoint,HANDLE hTran)
 	OutPoint = DPointToLPoint (&NewPoint);
 	return OutPoint;
 }
+
+LLPOINT DPointToLLPoint(DPOINT Point)
+{
+	LLPOINT llpt;
+
+	llpt.lat = Point.y;
+	llpt.lon = Point.x;
+	return llpt;
+}
  
 LPOINT DPointToLPoint (LPDPOINT pPoint)
 #if ENABLETRACE

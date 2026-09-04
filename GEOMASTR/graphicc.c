@@ -4144,7 +4144,8 @@ BOOL GetGoogleMapFile(int type)
 {
 	BOOL rtn = FALSE;
 	char cmd[1024];
-	DPOINT centerLL = MinMaxMidPointD (&CurView->WBounds);
+	DPOINT centerPoint = MinMaxMidPointD (&CurView->WBounds);
+	LLPOINT centerLL;
 	BOOL sameImage;
 	int pixelx, pixely;
 	char mapType[16]="roadmap";
@@ -4162,9 +4163,10 @@ BOOL GetGoogleMapFile(int type)
 		strcpy(mapType, "hybrid");
 		break;
 	}
-	ConvertCoord(&centerLL, 1, 2);
+	ConvertCoord(&centerPoint, 1, 2);
+	centerLL = DPointToLLPoint (centerPoint);
 	sprintf(cmd, "https://maps.googleapis.com/maps/api/staticmap?size=%ix%i&center=%f@,%f&sensor=false&zoom=%i&scale=%i&maptype=%s&key=%s", 
-		GoogleMapWidth, GoogleMapHeight, centerLL.y, centerLL.x, GoogleZoom, GoogleScale, mapType, GOOGLE_SERVER_KEY);
+		GoogleMapWidth, GoogleMapHeight, centerLL.lat, centerLL.lon, GoogleZoom, GoogleScale, mapType, GOOGLE_SERVER_KEY);
 	ExpandText(cmd);
 	if (!*CurView->CurrentGoogleImage)
 	{
@@ -4179,7 +4181,7 @@ BOOL GetGoogleMapFile(int type)
 		CurView->CurrentGoogleScale = -1;
 	}
 	sameImage = (GoogleZoom == CurView->CurrentGoogleZoom && GoogleScale == CurView->CurrentGoogleScale && type == CurView->CurrentGoogleMapType);
-	LatLongToPixelXY(centerLL.y, centerLL.x, GoogleZoom, &pixelx, &pixely);
+	LatLongToPixelXY(centerLL.lat, centerLL.lon, GoogleZoom, &pixelx, &pixely);
 	if (sameImage)
 	{
 		sameImage = (pixelx == CurView->CurrentGoogleCenter.x && pixely == CurView->CurrentGoogleCenter.y);
@@ -4201,11 +4203,15 @@ BOOL GetGoogleMapFile(int type)
 		DestroyWindow(hMess);
 		if (CurView)
 		{
+			ii = sizeof(CurView->GrowSpace);
 			CurView->CurrentGoogleZoom = GoogleZoom;
 			CurView->CurrentGoogleScale = GoogleScale;
 			CurView->CurrentGoogleMapType = type;
 			CurView->CurrentGoogleCenter.x = pixelx;
 			CurView->CurrentGoogleCenter.y = pixely;
+			CurView->GoogleMapWidth = GoogleMapWidth;
+			CurView->GoogleMapHeight = GoogleMapHeight;
+			CurView->GoogleMapCenterLL = centerLL;
 		}
 	}
 	else
