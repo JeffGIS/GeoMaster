@@ -3011,6 +3011,10 @@ TryDDEInitAgain:
 			}
 			else if (!_fstricmp(Arg[1],"ITEM"))
 			{   
+				short	UsePickList = -1;
+
+				if (atob(Arg[6]))
+					UsePickList = -101;
 				if (!stricmp (Arg[2],"PICKED"))
 					NumPicked = 1;
 				else
@@ -3025,7 +3029,8 @@ TryDDEInitAgain:
 						Refno = atol (Arg[2]); 
 						Arg[2] = 0;
 					}
-					if (!PickByRefno (Refno,Arg[2],lpColon,-1))
+					SetCurView(SetVPFromName(Arg[6], &Err));
+					if (!PickByRefno (Refno,Arg[2],lpColon, UsePickList))
 						goto RtnFalse;
 				}
 	            {   

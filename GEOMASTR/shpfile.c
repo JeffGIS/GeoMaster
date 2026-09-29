@@ -2181,7 +2181,7 @@ DoPoly:
 					ConvertCoord(&pPoints[i],0,1);
 				GlobalUnlock (hPoints); 
 			}
-			if (Display && nPoly > 1 && !BoundsInBounds (&CurrentSHPRecBounds,&CurView->WBounds,0))
+			if ((!Pick && !PickingByRefno && Display) && nPoly > 1 && !BoundsInBounds (&CurrentSHPRecBounds,&CurView->WBounds,0))
 			{
 				int	nPolyNew = 0, nPointsNew=0;
 				HANDLE	hPolyPartLenNew = GSSiGlobAlloc(GAIDNO 1783,GMEM_MOVEABLE,sizeof(int)*(nPoly+1));
