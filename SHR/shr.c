@@ -10072,6 +10072,23 @@ void RemoveCharacters(LPSTR str, LPSTR charstoremove)
 				pLoc++;
 		}
 	}
+	else
+	{
+		int lenout = 0;
+		LPSTR pStrOrig = str;
+		LPSTR pStr = malloc(strlen(str) + 4);
+		while (*str)
+		{
+			if (*str != *charstoremove)
+			{
+				pStr[lenout++] = *str;
+			}
+			str++;
+		}
+		pStr[lenout] = 0;
+		strcpy(pStrOrig, pStr);
+		free(pStr);
+	}
 	return;
 }
 

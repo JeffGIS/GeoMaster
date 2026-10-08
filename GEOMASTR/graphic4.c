@@ -5520,6 +5520,8 @@ void DestroySavedPolys (void)
 	    {
 	    	pSavedPolys = (LPSAVEPOLY)GlobalLock (hSavedPolys);
 	    	pSavedPolys += CurSavedPoly; 
+			if (hSavePoly == pSavedPolys->hSavePoly)
+				hSavePoly = 0;
 	    	GSSiGlobFree (&pSavedPolys->hSavePoly); 
 			GSSiGlobFree (&pSavedPolys->hSavePolyParts); 
 			GSSiGlobFree (&pSavedPolys->hSavePolyElev);

@@ -31023,6 +31023,7 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPA
 //							if (hSavePoly)
 //								GlobalUnlock(hSavePoly);
 							DestroySavedPolys();
+							GSSiGlobFree(&hSavePoly);
 						 }
                          else
                          	goto NextHlt;
